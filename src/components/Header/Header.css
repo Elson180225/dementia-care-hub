@@ -160,6 +160,13 @@
         background 0.2s ease;
     }
 
+    .nav-menu-trigger {
+    border: 0;
+    background: transparent;
+    cursor: pointer;
+    font-family: inherit;
+    }
+
     .nav-link:hover {
     color: #087b78;
     border-bottom-color: #f5a800;
@@ -318,6 +325,7 @@
     /*Accessibility */
 
     .nav-link:focus-visible,
+    .nav-menu-trigger:focus-visible,
     .support-btn:focus-visible,
     .brand:focus-visible,
     .top-actions button:focus-visible,

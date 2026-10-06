@@ -87,7 +87,7 @@ const menuItems = [
 
   {
     label: "Learn & Events",
-    path: "/learn-events",
+    menuOnly: true,
     children: [
       {
         label: "Dementia Education",
@@ -235,16 +235,22 @@ function Header() {
                   onMouseEnter={() => setOpenMenu(item.label)}
                   onMouseLeave={() => setOpenMenu(null)}
                 >
-                  <Link
-                    to={item.path}
-                    className="nav-link"
-                  >
-                    {item.label}
-
-                    <span aria-hidden="true">
-                      ⌄
-                    </span>
-                  </Link>
+                  {item.menuOnly ? (
+                    <button
+                      type="button"
+                      className="nav-link nav-menu-trigger"
+                      onClick={() => setOpenMenu(openMenu === item.label ? null : item.label)}
+                      onFocus={() => setOpenMenu(item.label)}
+                      aria-expanded={openMenu === item.label}
+                      aria-haspopup="true"
+                    >
+                      {item.label}<span aria-hidden="true">⌄</span>
+                    </button>
+                  ) : (
+                    <Link to={item.path} className="nav-link">
+                      {item.label}<span aria-hidden="true">⌄</span>
+                    </Link>
+                  )}
 
                   {openMenu === item.label && (
                     <div className="dropdown-menu">
@@ -308,12 +314,7 @@ function Header() {
                   </summary>
 
                   <div className="mobile-submenu">
-                    <Link
-                      to={item.path}
-                      onClick={closeMobileMenu}
-                    >
-                      Overview
-                    </Link>
+                    {!item.menuOnly && <Link to={item.path} onClick={closeMobileMenu}>Overview</Link>}
 
                     {item.children.map((child) => (
                       <Link

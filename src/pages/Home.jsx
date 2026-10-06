@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 
 import "./Home.css";
 
-import heroArtwork from "../assets/alzheimers-hero.jpg";
+import HeroSlideshow from "../components/HeroSlideshow/HeroSlideshow";
 import understandDementia from "../assets/understand-dementia.jpg";
 import healthcareSupport from "../assets/healthcare-support.jpg";
 import learningEvents from "../assets/learning-events.jpg";
@@ -19,6 +19,8 @@ function Home() {
       ========================== */}
 
       <section className="hero-section">
+        <HeroSlideshow />
+
         <div className="section-container hero-layout">
           <div className="hero-copy">
             <span className="hero-eyebrow">
@@ -63,13 +65,6 @@ function Home() {
                 </Link>
               </div>
             </div>
-          </div>
-
-          <div className="hero-artwork">
-            <img
-              src={heroArtwork}
-              alt="Rotary Hope Care Alzheimer's Care artwork"
-            />
           </div>
         </div>
 
