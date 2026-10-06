@@ -1,0 +1,79 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  min-height: 100%;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+button,
+a {
+  -webkit-tap-highlight-color: transparent;
+}
+
+a {
+  color: inherit;
+}
+
+img {
+  max-width: 100%;
+  display: block;
+}
+
+.page {
+  min-height: 65vh;
+  padding: 72px 0;
+}
+
+.page-container {
+  width: min(90%, 1200px);
+  margin: 0 auto;
+}
+
+.page h1 {
+  max-width: 850px;
+  margin: 0 0 24px;
+
+  font-size: clamp(2rem, 5vw, 4rem);
+  line-height: 1.1;
+}
+
+.eyebrow {
+  margin-bottom: 14px;
+
+  font-size: 0.95rem;
+  font-weight: 700;
+
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+
+  color: #087b78;
+}
+
+.page-intro {
+  max-width: 720px;
+
+  font-size: 1.2rem;
+  line-height: 1.7;
+
+  color: #496466;
+}
+
+:focus-visible {
+  outline: 3px solid #155e75;
+  outline-offset: 4px;
+}

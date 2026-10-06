@@ -1,0 +1,288 @@
+/* =========================
+   HERO SLIDESHOW — FULL-BLEED BACKGROUND
+========================= */
+
+.hero-slideshow {
+  position: absolute;
+
+  inset: 0;
+
+  width: 100%;
+  height: 100%;
+
+  z-index: 1;
+
+  overflow: hidden;
+
+  outline: none;
+}
+
+.hero-slideshow:focus-visible {
+  outline: 3px solid var(--gold);
+  outline-offset: -3px;
+}
+
+/* =========================
+   SLIDES TRACK
+========================= */
+
+.hero-slideshow-track {
+  position: relative;
+
+  width: 100%;
+  height: 100%;
+}
+
+.hero-slide {
+  position: absolute;
+  inset: 0;
+
+  opacity: 0;
+
+  transition: opacity 1.2s ease-in-out;
+
+  pointer-events: none;
+}
+
+.hero-slide-active {
+  opacity: 1;
+
+  pointer-events: auto;
+}
+
+.hero-slide img {
+  width: 100%;
+  height: 100%;
+
+  object-fit: cover;
+
+  transform: scale(1.03);
+
+  transition: transform 6s ease-out;
+}
+
+.hero-slide-active img {
+  transform: scale(1.12);
+}
+
+/* =========================
+   READABILITY OVERLAY
+   Darker on the left where text sits,
+   fading to transparent on the right.
+   Plus a bottom gradient for dots/labels.
+========================= */
+
+.hero-slide-overlay {
+  position: absolute;
+  inset: 0;
+
+  background:
+    linear-gradient(
+      to right,
+      rgba(20, 10, 30, 0.72) 0%,
+      rgba(20, 10, 30, 0.5) 35%,
+      rgba(20, 10, 30, 0.25) 60%,
+      rgba(20, 10, 30, 0.1) 100%
+    ),
+    linear-gradient(
+      to top,
+      rgba(0, 0, 0, 0.45) 0%,
+      rgba(0, 0, 0, 0) 35%
+    );
+
+  pointer-events: none;
+
+  z-index: 1;
+}
+
+.hero-slide-label {
+  position: absolute;
+
+  right: 28px;
+  bottom: 24px;
+
+  color: #fff;
+
+  font-size: 15px;
+  font-weight: 700;
+
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.6);
+
+  opacity: 0;
+  transform: translateY(8px);
+
+  transition:
+    opacity 0.6s ease 0.4s,
+    transform 0.6s ease 0.4s;
+
+  z-index: 2;
+}
+
+.hero-slide-active .hero-slide-label {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* =========================
+   ARROWS
+========================= */
+
+.hero-slideshow-arrow {
+  position: absolute;
+  top: 50%;
+
+  transform: translateY(-50%);
+
+  width: 46px;
+  height: 46px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border: none;
+  border-radius: 50%;
+
+  background: rgba(255, 255, 255, 0.16);
+  backdrop-filter: blur(6px);
+
+  color: #fff;
+
+  font-size: 28px;
+  line-height: 1;
+
+  cursor: pointer;
+
+  opacity: 0;
+
+  transition:
+    opacity 0.3s ease,
+    background 0.3s ease,
+    transform 0.2s ease;
+
+  z-index: 6;
+}
+
+.hero-slideshow:hover .hero-slideshow-arrow,
+.hero-slideshow:focus-within .hero-slideshow-arrow {
+  opacity: 1;
+}
+
+.hero-slideshow-arrow:hover {
+  background: rgba(255, 255, 255, 0.3);
+
+  transform: translateY(-50%) scale(1.08);
+}
+
+.hero-slideshow-arrow-prev {
+  left: 16px;
+}
+
+.hero-slideshow-arrow-next {
+  right: 16px;
+}
+
+/* =========================
+   DOTS
+========================= */
+
+.hero-slideshow-dots {
+  position: absolute;
+
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+
+  display: flex;
+  gap: 9px;
+
+  z-index: 6;
+}
+
+.hero-slideshow-dot {
+  width: 10px;
+  height: 10px;
+
+  padding: 0;
+
+  border: none;
+  border-radius: 50%;
+
+  background: rgba(255, 255, 255, 0.4);
+
+  cursor: pointer;
+
+  transition:
+    background 0.3s ease,
+    transform 0.3s ease,
+    width 0.3s ease;
+}
+
+.hero-slideshow-dot:hover {
+  background: rgba(255, 255, 255, 0.7);
+
+  transform: scale(1.2);
+}
+
+.hero-slideshow-dot-active {
+  width: 28px;
+
+  border-radius: 5px;
+
+  background: var(--gold);
+}
+
+/* =========================
+   RESPONSIVE
+========================= */
+
+@media (max-width: 768px) {
+  .hero-slide-overlay {
+    background:
+      linear-gradient(
+        to right,
+        rgba(20, 10, 30, 0.78) 0%,
+        rgba(20, 10, 30, 0.55) 50%,
+        rgba(20, 10, 30, 0.3) 100%
+      ),
+      linear-gradient(
+        to top,
+        rgba(0, 0, 0, 0.5) 0%,
+        rgba(0, 0, 0, 0) 35%
+      );
+  }
+
+  .hero-slideshow-arrow {
+    width: 38px;
+    height: 38px;
+
+    font-size: 24px;
+  }
+
+  .hero-slide-label {
+    font-size: 12px;
+
+    right: 16px;
+    bottom: 48px;
+  }
+}
+
+@media (max-width: 480px) {
+  .hero-slideshow-arrow {
+    width: 34px;
+    height: 34px;
+
+    font-size: 22px;
+  }
+
+  .hero-slideshow-arrow-prev {
+    left: 8px;
+  }
+
+  .hero-slideshow-arrow-next {
+    right: 8px;
+  }
+}
