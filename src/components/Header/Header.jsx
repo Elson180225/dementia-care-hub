@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
 import rotaryLogo from "../../assets/rotary-logo.jpeg";
@@ -138,6 +138,26 @@ function Header() {
   const [searchOpen, setSearchOpen] = useState(false);
   const [languageOpen, setLanguageOpen] = useState(false);
 
+  const [showHeader, setShowHeader] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > 120) {
+        setShowHeader(true);
+      } else {
+        setShowHeader(false);
+      }
+    };
+
+    handleScroll();
+
+    window.addEventListener("scroll", handleScroll);
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, []);
+
   const closeMobileMenu = () => {
     setMobileOpen(false);
     setOpenMenu(null);
@@ -145,7 +165,11 @@ function Header() {
 
   return (
     <>
-      <header className="site-header">
+      <header
+        className={`site-header ${
+          showHeader ? "site-header-visible" : "site-header-hidden"
+        }`}
+      >
         {/* TOP BAR */}
         <div className="top-bar">
           <div className="header-container top-bar-inner">
@@ -197,7 +221,6 @@ function Header() {
         {/* MAIN HEADER */}
         <div className="main-header">
           <div className="header-container main-header-inner">
-            {/* BRAND */}
             <Link
               to="/"
               className="brand"
@@ -215,7 +238,6 @@ function Header() {
               </div>
             </Link>
 
-            {/* DESKTOP NAV */}
             <nav
               className="desktop-nav"
               aria-label="Main navigation"
@@ -239,16 +261,27 @@ function Header() {
                     <button
                       type="button"
                       className="nav-link nav-menu-trigger"
-                      onClick={() => setOpenMenu(openMenu === item.label ? null : item.label)}
+                      onClick={() =>
+                        setOpenMenu(
+                          openMenu === item.label
+                            ? null
+                            : item.label
+                        )
+                      }
                       onFocus={() => setOpenMenu(item.label)}
                       aria-expanded={openMenu === item.label}
                       aria-haspopup="true"
                     >
-                      {item.label}<span aria-hidden="true">⌄</span>
+                      {item.label}
+                      <span aria-hidden="true">⌄</span>
                     </button>
                   ) : (
-                    <Link to={item.path} className="nav-link">
-                      {item.label}<span aria-hidden="true">⌄</span>
+                    <Link
+                      to={item.path}
+                      className="nav-link"
+                    >
+                      {item.label}
+                      <span aria-hidden="true">⌄</span>
                     </Link>
                   )}
 
@@ -273,7 +306,6 @@ function Header() {
               ))}
             </nav>
 
-            {/* GET SUPPORT */}
             <Link
               to="/find-help"
               className="support-btn"
@@ -282,7 +314,6 @@ function Header() {
               Get Support
             </Link>
 
-            {/* MOBILE BUTTON */}
             <button
               type="button"
               className="mobile-menu-btn"
@@ -294,7 +325,6 @@ function Header() {
             </button>
           </div>
 
-          {/* MOBILE NAV */}
           {mobileOpen && (
             <nav
               className="mobile-nav"
@@ -309,12 +339,17 @@ function Header() {
 
               {menuItems.map((item) => (
                 <details key={item.label}>
-                  <summary>
-                    {item.label}
-                  </summary>
+                  <summary>{item.label}</summary>
 
                   <div className="mobile-submenu">
-                    {!item.menuOnly && <Link to={item.path} onClick={closeMobileMenu}>Overview</Link>}
+                    {!item.menuOnly && (
+                      <Link
+                        to={item.path}
+                        onClick={closeMobileMenu}
+                      >
+                        Overview
+                      </Link>
+                    )}
 
                     {item.children.map((child) => (
                       <Link
@@ -341,7 +376,6 @@ function Header() {
         </div>
       </header>
 
-      {/* SEARCH OVERLAY */}
       <SearchOverlay
         isOpen={searchOpen}
         onClose={() => setSearchOpen(false)}

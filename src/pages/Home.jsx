@@ -3,552 +3,272 @@ import { Link } from "react-router-dom";
 import "./Home.css";
 
 import HeroSlideshow from "../components/HeroSlideshow/HeroSlideshow";
-import understandDementia from "../assets/understand-dementia.jpg";
-import healthcareSupport from "../assets/healthcare-support.jpg";
-import learningEvents from "../assets/learning-events.jpg";
-import caregiverSupport from "../assets/caregiver-support.jpg";
-
 import FadeIn from "../components/FadeIn/FadeIn";
-import FAQ from "../components/FAQ/FAQ";
+import Statistics from "../components/Statistics/Statistics";
 
 function Home() {
   return (
     <main className="home-page">
-      {/* =========================
-          HERO
-      ========================== */}
+      {/* =====================================================
+          ROW 1 — HERO
+      ====================================================== */}
 
       <section className="hero-section">
-        <HeroSlideshow />
+  <HeroSlideshow />
 
-        <div className="section-container hero-layout">
-          <div className="hero-copy">
-            <span className="hero-eyebrow">
-              Rotary Hope Care
-            </span>
+  <div className="section-container hero-layout">
+    <div className="hero-copy">
+      <span className="hero-eyebrow">
+        Alzheimer&apos;s Care Project by RCBC
+      </span>
 
-            <h1>
-              Supporting people, families and caregivers through dementia care.
-            </h1>
+      <h1>
+        Dementia Care Connect
+      </h1>
 
-            <p>
-              Clear information, trusted resources and community support for
-              people living with dementia and Alzheimer&apos;s disease.
-            </p>
+      <div className="hero-phase-line">
+        <span>Phase 2</span>
+        <span className="hero-phase-dot">•</span>
+        <span>Go Digital</span>
+      </div>
 
-            <div className="hero-actions">
-              <Link
-                to="/find-help"
-                className="hero-btn hero-btn-primary"
-              >
-                Find Support
-              </Link>
+      <p className="hero-project-theme">
+        Understanding the Missing Pieces
+      </p>
 
-              <Link
-                to="/understand-dementia"
-                className="hero-btn hero-btn-secondary"
-              >
-                Understand Dementia
-              </Link>
-            </div>
+      <p className="hero-description">
+        Find clear information, practical support and learning
+        resources for people living with dementia, families,
+        caregivers and the wider community.
+      </p>
 
-            <div className="hero-help-line">
-              <span className="hero-help-dot" />
+      <div className="hero-actions">
+        <a
+          href="#visitor-pathways"
+          className="hero-btn hero-btn-primary"
+        >
+          Find Your Path
+        </a>
 
-              <div>
-                <strong>
-                  Concerned about memory or behaviour changes?
-                </strong>
+        <Link
+          to="/learn-events/dementia-education"
+          className="hero-btn hero-btn-secondary"
+        >
+          Understand Dementia
+        </Link>
+      </div>
 
-                <Link to="/understand-dementia/medical-advice">
-                  Start here →
-                </Link>
-              </div>
-            </div>
-          </div>
+      <div className="hero-help-line">
+        <span className="hero-help-dot" />
+
+        <div>
+          <strong>
+            Not sure where to begin?
+          </strong>
+
+          <a href="#visitor-pathways">
+            Tell us what brings you here →
+          </a>
         </div>
+      </div>
+    </div>
+  </div>
+</section>
 
-        <div className="scroll-indicator">
-          <span>Scroll to explore</span>
-          <span className="scroll-line" />
-        </div>
-      </section>
+      {/* =====================================================
+          ROW 2 — WHAT BRINGS YOU HERE?
+      ====================================================== */}
 
-      {/* =========================
-          UNDERSTAND DEMENTIA
-      ========================== */}
-
-      <section className="dementia-section">
-        <div className="section-container dementia-layout">
-          <FadeIn>
-            <div className="dementia-image">
-              <img
-                src={understandDementia}
-                alt="Older adult receiving support from family"
-              />
-            </div>
-          </FadeIn>
-
-          <FadeIn delay={120}>
-            <div className="dementia-copy">
-              <span className="section-label">
-                Understand Dementia
-              </span>
-
-              <h2>
-                What is dementia and Alzheimer&apos;s disease?
-              </h2>
-
-              <p>
-                Dementia is a general term used to describe conditions that
-                affect memory, thinking, behaviour and everyday functioning.
-                Alzheimer&apos;s disease is the most common cause of dementia.
-              </p>
-
-              <p>
-                Understanding the signs and changes can help people, families
-                and caregivers know when to seek advice and where to find
-                appropriate support.
-              </p>
-
-              <Link
-                to="/understand-dementia"
-                className="text-link"
-              >
-                Learn more
-                <span>→</span>
-              </Link>
-            </div>
-          </FadeIn>
-        </div>
-      </section>
-
-      {/* =========================
-          QUICK RESOURCES
-      ========================== */}
-
-      <section className="finder-section">
+      <section
+        className="visitor-pathways-section"
+        id="visitor-pathways"
+      >
         <div className="section-container">
           <FadeIn>
-            <div className="section-heading finder-heading">
-              <span className="section-label">
-                Quick Resource Finder
+            <div className="home-heading centred-heading">
+              <span className="home-section-number">
+                02
+              </span>
+
+              <span className="home-section-label">
+                What Brings You Here?
               </span>
 
               <h2>
-                What are you looking for today?
+                Tell us what you need.
               </h2>
 
               <p>
-                Choose a category to quickly find useful information,
-                resources and available support.
+                Choose the pathway that best describes why
+                you are visiting Dementia Care Connect.
               </p>
             </div>
           </FadeIn>
 
-          <div className="finder-grid">
+          <div className="visitor-pathways-grid">
             <FadeIn delay={0}>
               <Link
-                to="/find-help/healthcare-resources"
-                className="finder-card"
+                to="/learn-events/dementia-education"
+                className="visitor-card visitor-card-purple"
               >
-                <div className="finder-icon">+</div>
+                <div className="visitor-card-header">
+                  <span className="visitor-card-number">
+                    01
+                  </span>
+
+                  <span className="visitor-card-arrow">
+                    ↗
+                  </span>
+                </div>
+
+                <div className="visitor-card-icon">
+                  ?
+                </div>
 
                 <h3>
-                  Healthcare Resources
+                  I want to understand
                 </h3>
 
                 <p>
-                  Find doctors, mental health professionals and healthcare
-                  organisations that may provide support.
+                  Dementia, Alzheimer&apos;s, signs,
+                  when to be concerned, and Healthy &
+                  Active Living to support brain health,
+                  wellbeing and dementia risk reduction.
                 </p>
 
-                <span className="finder-link">
-                  Explore resources →
+                <span className="visitor-card-link">
+                  Understanding Dementia
+                  <span>→</span>
                 </span>
               </Link>
             </FadeIn>
 
             <FadeIn delay={100}>
               <Link
-                to="/caregiver-support"
-                className="finder-card"
+                to="/find-help"
+                className="visitor-card visitor-card-green"
               >
-                <div className="finder-icon">♡</div>
+                <div className="visitor-card-header">
+                  <span className="visitor-card-number">
+                    02
+                  </span>
+
+                  <span className="visitor-card-arrow">
+                    ↗
+                  </span>
+                </div>
+
+                <div className="visitor-card-icon">
+                  +
+                </div>
 
                 <h3>
-                  Caregiver Support
+                  I need help & support
                 </h3>
 
                 <p>
-                  Practical information and support for caregivers, families
-                  and people caring for someone with dementia.
+                  Next steps if concerned about changes
+                  or after a diagnosis; assessment and
+                  healthcare pathways; support services;
+                  government and financial resources;
+                  practical resources; and planning ahead.
                 </p>
 
-                <span className="finder-link">
-                  View support →
+                <span className="visitor-card-link">
+                  Find Help & Support
+                  <span>→</span>
                 </span>
               </Link>
             </FadeIn>
 
             <FadeIn delay={200}>
               <Link
-                to="/find-help/financial-resources"
-                className="finder-card"
+                to="/caregiver-support"
+                className="visitor-card visitor-card-gold"
               >
-                <div className="finder-icon">$</div>
+                <div className="visitor-card-header">
+                  <span className="visitor-card-number">
+                    03
+                  </span>
+
+                  <span className="visitor-card-arrow">
+                    ↗
+                  </span>
+                </div>
+
+                <div className="visitor-card-icon">
+                  ♡
+                </div>
 
                 <h3>
-                  Financial Resources
+                  I am caring for someone
                 </h3>
 
                 <p>
-                  Explore organisations and available financial resources that
-                  may assist individuals and families.
+                  Caregiver guidance, caregiver training,
+                  support groups and relevant caregiver
+                  support resources.
                 </p>
 
-                <span className="finder-link">
-                  Find resources →
+                <span className="visitor-card-link">
+                  Caregiver Support
+                  <span>→</span>
                 </span>
               </Link>
             </FadeIn>
 
             <FadeIn delay={300}>
               <Link
-                to="/find-help/equipment-resources"
-                className="finder-card"
+                to="/learn-events"
+                className="visitor-card visitor-card-blue"
               >
-                <div className="finder-icon">⌂</div>
+                <div className="visitor-card-header">
+                  <span className="visitor-card-number">
+                    04
+                  </span>
 
-                <h3>
-                  Equipment & Daily Living
-                </h3>
-
-                <p>
-                  Discover practical equipment and resources that may support
-                  safety and everyday living.
-                </p>
-
-                <span className="finder-link">
-                  Explore options →
-                </span>
-              </Link>
-            </FadeIn>
-          </div>
-        </div>
-      </section>
-
-      {/* =========================
-          HEALTHCARE FEATURE
-      ========================== */}
-
-      <section className="healthcare-feature">
-        <div className="section-container healthcare-layout">
-          <FadeIn>
-            <div className="healthcare-copy">
-              <span className="section-label">
-                Find Help
-              </span>
-
-              <h2>
-                Finding the right support can make a difference.
-              </h2>
-
-              <p>
-                Access information about healthcare professionals, mental
-                health support, partner institutions and community resources
-                for people living with dementia and their caregivers.
-              </p>
-
-              <Link
-                to="/find-help"
-                className="primary-button"
-              >
-                Explore Support Resources
-              </Link>
-            </div>
-          </FadeIn>
-
-          <FadeIn delay={120}>
-            <div className="healthcare-image">
-              <img
-                src={healthcareSupport}
-                alt="Healthcare professional speaking with older adult and family"
-              />
-            </div>
-          </FadeIn>
-        </div>
-      </section>
-
-      {/* =========================
-          EVENTS
-      ========================== */}
-
-      <section className="events-section">
-        <div className="section-container">
-          <FadeIn>
-            <div className="events-heading">
-              <div>
-                <span className="section-label">
-                  Learn & Events
-                </span>
-
-                <h2>
-                  Upcoming Certified Trainer Events
-                </h2>
-              </div>
-
-              <Link
-                to="/learn-events/events"
-                className="events-view-all"
-              >
-                View all events →
-              </Link>
-            </div>
-          </FadeIn>
-
-          <div className="events-layout">
-            <FadeIn>
-              <div className="events-image">
-                <img
-                  src={learningEvents}
-                  alt="Community dementia education and training event"
-                />
-              </div>
-            </FadeIn>
-
-            <FadeIn delay={120}>
-              <div className="events-list">
-                <div className="event-item">
-                  <div className="event-date">
-                    <strong>15</strong>
-                    <span>Oct</span>
-                  </div>
-
-                  <div className="event-info">
-                    <span className="event-type">
-                      Workshop
-                    </span>
-
-                    <h3>
-                      Dementia Awareness Workshop
-                    </h3>
-
-                    <p>
-                      Bintulu • English
-                    </p>
-
-                    <Link to="/learn-events/events">
-                      Learn more →
-                    </Link>
-                  </div>
+                  <span className="visitor-card-arrow">
+                    ↗
+                  </span>
                 </div>
 
-                <div className="event-item">
-                  <div className="event-date">
-                    <strong>28</strong>
-                    <span>Oct</span>
-                  </div>
-
-                  <div className="event-info">
-                    <span className="event-type">
-                      Training
-                    </span>
-
-                    <h3>
-                      Supporting Families & Caregivers
-                    </h3>
-
-                    <p>
-                      Kuching • Bahasa Melayu
-                    </p>
-
-                    <Link to="/learn-events/events">
-                      Learn more →
-                    </Link>
-                  </div>
+                <div className="visitor-card-icon">
+                  ▶
                 </div>
-              </div>
-            </FadeIn>
-          </div>
-        </div>
-      </section>
 
-      {/* =========================
-          CAREGIVER
-      ========================== */}
-
-      <section className="caregiver-section">
-        <div className="section-container">
-          <FadeIn>
-            <div className="caregiver-wrapper">
-              <img
-                src={caregiverSupport}
-                alt="Caregiver supporting an older adult"
-              />
-
-              <div className="caregiver-overlay" />
-
-              <div className="caregiver-copy">
-                <span className="section-label section-label-light">
-                  Caregiver Support
-                </span>
-
-                <h2>
-                  Supporting someone you care about can feel overwhelming.
-                </h2>
+                <h3>
+                  I want to learn or participate
+                </h3>
 
                 <p>
-                  Find practical guidance, wellbeing resources and useful
-                  information to support both caregivers and families.
+                  Training, webinars, events,
+                  learning resources and ways to
+                  participate.
                 </p>
 
-                <Link
-                  to="/caregiver-support"
-                  className="caregiver-button"
-                >
-                  Explore Caregiver Support
-                </Link>
-              </div>
-            </div>
+                <span className="visitor-card-link">
+                  Education & Events
+                  <span>→</span>
+                </span>
+              </Link>
+            </FadeIn>
+          </div>
+
+          <FadeIn delay={350}>
+            <p className="pathways-note">
+              Not sure which pathway is right for you?
+              Start with the option that best matches
+              what you need today.
+            </p>
           </FadeIn>
         </div>
       </section>
 
-      {/* =========================
-          WHO CAN HELP
-      ========================== */}
+      {/* =====================================================
+          ROW 3 — STATISTICS
+      ====================================================== */}
 
-      <section className="who-section">
-        <div className="section-container">
-          <FadeIn>
-            <div className="section-heading who-heading">
-              <span className="section-label">
-                Support Network
-              </span>
-
-              <h2>
-                Who can help?
-              </h2>
-
-              <p>
-                Dementia support often involves families, healthcare
-                professionals and community organisations working together.
-              </p>
-            </div>
-          </FadeIn>
-
-          <div className="who-grid">
-            <FadeIn delay={0}>
-              <div className="who-card">
-                <span className="who-number">
-                  01
-                </span>
-
-                <h3>
-                  Healthcare Professionals
-                </h3>
-
-                <p>
-                  Doctors, specialists and mental health professionals can
-                  provide assessment, advice and ongoing healthcare support.
-                </p>
-              </div>
-            </FadeIn>
-
-            <FadeIn delay={120}>
-              <div className="who-card">
-                <span className="who-number">
-                  02
-                </span>
-
-                <h3>
-                  Caregivers & Families
-                </h3>
-
-                <p>
-                  Families and caregivers play an important role in daily
-                  support, communication and maintaining quality of life.
-                </p>
-              </div>
-            </FadeIn>
-
-            <FadeIn delay={240}>
-              <div className="who-card">
-                <span className="who-number">
-                  03
-                </span>
-
-                <h3>
-                  Support Organisations
-                </h3>
-
-                <p>
-                  Community organisations and partner institutions may offer
-                  education, resources and additional support services.
-                </p>
-              </div>
-            </FadeIn>
-          </div>
-
-          <div className="who-action">
-            <Link
-              to="/find-help"
-              className="primary-button"
-            >
-              Find Available Support
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* =========================
-          FAQ
-      ========================== */}
-
-      <FAQ />
-
-      {/* =========================
-          FINAL CTA
-      ========================== */}
-
-      <section className="final-cta">
-        <FadeIn>
-          <div className="section-container final-cta-layout">
-            <div>
-              <span className="section-label">
-                Need More Help?
-              </span>
-
-              <h2>
-                Still not sure where to start?
-              </h2>
-
-              <p>
-                Explore available resources or contact the project team for
-                guidance on where to find the most relevant information and
-                support.
-              </p>
-            </div>
-
-            <div className="final-cta-actions">
-              <Link
-                to="/about/contact"
-                className="final-primary"
-              >
-                Contact Us
-              </Link>
-
-              <Link
-                to="/find-help"
-                className="final-secondary"
-              >
-                Find Help
-              </Link>
-            </div>
-          </div>
-        </FadeIn>
-      </section>
+      <Statistics />
     </main>
   );
 }
