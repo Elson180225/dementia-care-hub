@@ -180,10 +180,29 @@ function Header() {
             <div className="top-actions">
               <button
                 type="button"
+                className="animated-search-button"
                 onClick={() => setSearchOpen(true)}
                 aria-label="Search website"
               >
-                Search
+                <span className="animated-search-icon" aria-hidden="true">
+                  <svg
+                    viewBox="0 0 24 24"
+                    width="22"
+                    height="22"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <circle cx="11" cy="11" r="7" />
+                    <line x1="16.5" y1="16.5" x2="21" y2="21" />
+                  </svg>
+                </span>
+
+                <span className="animated-search-text">
+                  Search
+                </span>
               </button>
 
               <div className="language-wrapper">
