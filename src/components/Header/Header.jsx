@@ -8,9 +8,14 @@ import SearchOverlay from "../Search/SearchOverlay";
 import "./Header.css";
 
 const menuItems = [
+  /* =========================================================
+     UNDERSTAND DEMENTIA
+  ========================================================= */
+
   {
     label: "Understand Dementia",
     path: "/understand-dementia",
+
     children: [
       {
         label: "What is Dementia?",
@@ -39,32 +44,50 @@ const menuItems = [
     ],
   },
 
+  /* =========================================================
+     FIND HELP & SUPPORT
+  ========================================================= */
+
   {
-    label: "Find Help",
+    label: "Find Help & Support",
     path: "/find-help",
+
     children: [
       {
-        label: "Healthcare Resources",
-        path: "/find-help/healthcare-resources",
+        label: "Start From Where You Are",
+        path: "/find-help",
       },
       {
-        label: "Financial Resources",
-        path: "/find-help/financial-resources",
+        label: "Assessment & Healthcare",
+        path: "/find-help/assessment-healthcare",
       },
       {
-        label: "Equipment & Daily Living",
-        path: "/find-help/equipment-resources",
+        label: "Support Services Directory",
+        path: "/find-help/support-services",
       },
       {
-        label: "Services Near You",
-        path: "/find-help/services",
+        label: "Government & Financial Resources",
+        path: "/find-help/government-financial",
+      },
+      {
+        label: "Equipment & Practical Resources",
+        path: "/find-help/equipment-practical",
+      },
+      {
+        label: "Resource Finder",
+        path: "/find-help/resource-finder",
       },
     ],
   },
 
+  /* =========================================================
+     CAREGIVER SUPPORT
+  ========================================================= */
+
   {
     label: "Caregiver Support",
     path: "/caregiver-support",
+
     children: [
       {
         label: "Supporting Someone with Dementia",
@@ -85,9 +108,14 @@ const menuItems = [
     ],
   },
 
+  /* =========================================================
+     LEARN & EVENTS
+  ========================================================= */
+
   {
     label: "Learn & Events",
     menuOnly: true,
+
     children: [
       {
         label: "Dementia Education",
@@ -108,9 +136,14 @@ const menuItems = [
     ],
   },
 
+  /* =========================================================
+     ABOUT US
+  ========================================================= */
+
   {
     label: "About Us",
     path: "/about",
+
     children: [
       {
         label: "About the Project",
@@ -134,11 +167,18 @@ const menuItems = [
 
 function Header() {
   const [openMenu, setOpenMenu] = useState(null);
+
   const [mobileOpen, setMobileOpen] = useState(false);
+
   const [searchOpen, setSearchOpen] = useState(false);
+
   const [languageOpen, setLanguageOpen] = useState(false);
 
   const [showHeader, setShowHeader] = useState(false);
+
+  /* =========================================================
+     SHOW HEADER AFTER USER SCROLLS
+  ========================================================= */
 
   useEffect(() => {
     const handleScroll = () => {
@@ -158,6 +198,10 @@ function Header() {
     };
   }, []);
 
+  /* =========================================================
+     CLOSE MOBILE MENU
+  ========================================================= */
+
   const closeMobileMenu = () => {
     setMobileOpen(false);
     setOpenMenu(null);
@@ -167,10 +211,15 @@ function Header() {
     <>
       <header
         className={`site-header ${
-          showHeader ? "site-header-visible" : "site-header-hidden"
+          showHeader
+            ? "site-header-visible"
+            : "site-header-hidden"
         }`}
       >
-        {/* TOP BAR */}
+        {/* ===================================================
+            TOP BAR
+        =================================================== */}
+
         <div className="top-bar">
           <div className="header-container top-bar-inner">
             <span>
@@ -178,13 +227,18 @@ function Header() {
             </span>
 
             <div className="top-actions">
+              {/* SEARCH */}
+
               <button
                 type="button"
                 className="animated-search-button"
                 onClick={() => setSearchOpen(true)}
                 aria-label="Search website"
               >
-                <span className="animated-search-icon" aria-hidden="true">
+                <span
+                  className="animated-search-icon"
+                  aria-hidden="true"
+                >
                   <svg
                     viewBox="0 0 24 24"
                     width="22"
@@ -195,8 +249,18 @@ function Header() {
                     strokeLinecap="round"
                     strokeLinejoin="round"
                   >
-                    <circle cx="11" cy="11" r="7" />
-                    <line x1="16.5" y1="16.5" x2="21" y2="21" />
+                    <circle
+                      cx="11"
+                      cy="11"
+                      r="7"
+                    />
+
+                    <line
+                      x1="16.5"
+                      y1="16.5"
+                      x2="21"
+                      y2="21"
+                    />
                   </svg>
                 </span>
 
@@ -205,10 +269,14 @@ function Header() {
                 </span>
               </button>
 
+              {/* LANGUAGE */}
+
               <div className="language-wrapper">
                 <button
                   type="button"
-                  onClick={() => setLanguageOpen(!languageOpen)}
+                  onClick={() =>
+                    setLanguageOpen(!languageOpen)
+                  }
                   aria-expanded={languageOpen}
                   aria-label="Select language"
                 >
@@ -219,14 +287,18 @@ function Header() {
                   <div className="language-menu">
                     <button
                       type="button"
-                      onClick={() => setLanguageOpen(false)}
+                      onClick={() =>
+                        setLanguageOpen(false)
+                      }
                     >
                       English
                     </button>
 
                     <button
                       type="button"
-                      onClick={() => setLanguageOpen(false)}
+                      onClick={() =>
+                        setLanguageOpen(false)
+                      }
                     >
                       Bahasa Melayu
                     </button>
@@ -237,9 +309,14 @@ function Header() {
           </div>
         </div>
 
-        {/* MAIN HEADER */}
+        {/* ===================================================
+            MAIN HEADER
+        =================================================== */}
+
         <div className="main-header">
           <div className="header-container main-header-inner">
+            {/* BRAND */}
+
             <Link
               to="/"
               className="brand"
@@ -252,10 +329,19 @@ function Header() {
               />
 
               <div className="brand-text">
-                <strong>Dementia Care Hub</strong>
-                <span>Support • Learn • Connect</span>
+                <strong>
+                  Dementia Care Hub
+                </strong>
+
+                <span>
+                  Support • Learn • Connect
+                </span>
               </div>
             </Link>
+
+            {/* =================================================
+                DESKTOP NAVIGATION
+            ================================================= */}
 
             <nav
               className="desktop-nav"
@@ -264,7 +350,9 @@ function Header() {
               <Link
                 to="/"
                 className="nav-link"
-                onClick={() => setOpenMenu(null)}
+                onClick={() =>
+                  setOpenMenu(null)
+                }
               >
                 Home
               </Link>
@@ -273,8 +361,12 @@ function Header() {
                 <div
                   className="nav-item"
                   key={item.label}
-                  onMouseEnter={() => setOpenMenu(item.label)}
-                  onMouseLeave={() => setOpenMenu(null)}
+                  onMouseEnter={() =>
+                    setOpenMenu(item.label)
+                  }
+                  onMouseLeave={() =>
+                    setOpenMenu(null)
+                  }
                 >
                   {item.menuOnly ? (
                     <button
@@ -287,12 +379,19 @@ function Header() {
                             : item.label
                         )
                       }
-                      onFocus={() => setOpenMenu(item.label)}
-                      aria-expanded={openMenu === item.label}
+                      onFocus={() =>
+                        setOpenMenu(item.label)
+                      }
+                      aria-expanded={
+                        openMenu === item.label
+                      }
                       aria-haspopup="true"
                     >
                       {item.label}
-                      <span aria-hidden="true">⌄</span>
+
+                      <span aria-hidden="true">
+                        ⌄
+                      </span>
                     </button>
                   ) : (
                     <Link
@@ -300,30 +399,43 @@ function Header() {
                       className="nav-link"
                     >
                       {item.label}
-                      <span aria-hidden="true">⌄</span>
+
+                      <span aria-hidden="true">
+                        ⌄
+                      </span>
                     </Link>
                   )}
 
+                  {/* DROPDOWN */}
+
                   {openMenu === item.label && (
                     <div className="dropdown-menu">
-                      <h3>{item.label}</h3>
+                      <h3>
+                        {item.label}
+                      </h3>
 
                       <div className="dropdown-grid">
-                        {item.children.map((child) => (
-                          <Link
-                            key={child.path}
-                            to={child.path}
-                            onClick={() => setOpenMenu(null)}
-                          >
-                            {child.label}
-                          </Link>
-                        ))}
+                        {item.children.map(
+                          (child) => (
+                            <Link
+                              key={child.path}
+                              to={child.path}
+                              onClick={() =>
+                                setOpenMenu(null)
+                              }
+                            >
+                              {child.label}
+                            </Link>
+                          )
+                        )}
                       </div>
                     </div>
                   )}
                 </div>
               ))}
             </nav>
+
+            {/* GET SUPPORT */}
 
             <Link
               to="/find-help"
@@ -333,16 +445,24 @@ function Header() {
               Get Support
             </Link>
 
+            {/* MOBILE MENU BUTTON */}
+
             <button
               type="button"
               className="mobile-menu-btn"
-              onClick={() => setMobileOpen(!mobileOpen)}
+              onClick={() =>
+                setMobileOpen(!mobileOpen)
+              }
               aria-label="Open navigation menu"
               aria-expanded={mobileOpen}
             >
               {mobileOpen ? "×" : "☰"}
             </button>
           </div>
+
+          {/* =================================================
+              MOBILE NAVIGATION
+          ================================================= */}
 
           {mobileOpen && (
             <nav
@@ -358,7 +478,9 @@ function Header() {
 
               {menuItems.map((item) => (
                 <details key={item.label}>
-                  <summary>{item.label}</summary>
+                  <summary>
+                    {item.label}
+                  </summary>
 
                   <div className="mobile-submenu">
                     {!item.menuOnly && (
@@ -370,15 +492,19 @@ function Header() {
                       </Link>
                     )}
 
-                    {item.children.map((child) => (
-                      <Link
-                        key={child.path}
-                        to={child.path}
-                        onClick={closeMobileMenu}
-                      >
-                        {child.label}
-                      </Link>
-                    ))}
+                    {item.children.map(
+                      (child) => (
+                        <Link
+                          key={child.path}
+                          to={child.path}
+                          onClick={
+                            closeMobileMenu
+                          }
+                        >
+                          {child.label}
+                        </Link>
+                      )
+                    )}
                   </div>
                 </details>
               ))}
@@ -395,9 +521,15 @@ function Header() {
         </div>
       </header>
 
+      {/* =====================================================
+          SEARCH OVERLAY
+      ====================================================== */}
+
       <SearchOverlay
         isOpen={searchOpen}
-        onClose={() => setSearchOpen(false)}
+        onClose={() =>
+          setSearchOpen(false)
+        }
       />
     </>
   );

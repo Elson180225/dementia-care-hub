@@ -1,0 +1,571 @@
+:root {
+  --fh-purple: #5d2f91;
+  --fh-purple-dark: #45206d;
+  --fh-purple-soft: #f5effa;
+
+  --fh-sage: #edf5ef;
+  --fh-gold: #f7a81b;
+  --fh-gold-soft: #fff5dc;
+
+  --fh-text: #28242b;
+  --fh-soft: #6a646d;
+
+  --fh-white: #ffffff;
+  --fh-border: #e6dfe8;
+}
+
+/* PAGE */
+
+.find-help-page {
+  width: 100%;
+
+  background: #ffffff;
+
+  color: var(--fh-text);
+}
+
+.find-help-container {
+  width: min(90%, 1240px);
+
+  margin: 0 auto;
+}
+
+/* HERO */
+
+.find-help-hero {
+  padding: 120px 0 95px;
+
+  background:
+    linear-gradient(
+      135deg,
+      #45206d 0%,
+      #5d2f91 100%
+    );
+
+  color: #ffffff;
+}
+
+.find-help-kicker {
+  display: inline-block;
+
+  margin-bottom: 16px;
+
+  color: #ffd66f;
+
+  font-size: 14px;
+  font-weight: 800;
+
+  letter-spacing: 0.12em;
+
+  text-transform: uppercase;
+}
+
+.find-help-hero h1 {
+  max-width: 760px;
+
+  margin: 0;
+
+  font-family:
+    Georgia,
+    "Times New Roman",
+    serif;
+
+  font-size:
+    clamp(52px, 6vw, 82px);
+
+  line-height: 1;
+
+  letter-spacing: -0.04em;
+}
+
+.find-help-hero p {
+  max-width: 720px;
+
+  margin: 26px 0 0;
+
+  color:
+    rgba(255, 255, 255, 0.9);
+
+  font-size: 20px;
+
+  line-height: 1.75;
+}
+
+/* HEADING */
+
+.find-help-heading {
+  max-width: 760px;
+
+  margin-bottom: 55px;
+}
+
+.find-help-heading > span {
+  display: inline-block;
+
+  margin-bottom: 11px;
+
+  color: var(--fh-purple);
+
+  font-size: 13px;
+  font-weight: 800;
+
+  letter-spacing: 0.1em;
+
+  text-transform: uppercase;
+}
+
+.find-help-heading h2 {
+  margin: 0;
+
+  font-family:
+    Georgia,
+    "Times New Roman",
+    serif;
+
+  font-size:
+    clamp(38px, 4vw, 58px);
+
+  line-height: 1.1;
+}
+
+.find-help-heading p {
+  max-width: 650px;
+
+  margin: 18px 0 0;
+
+  color: var(--fh-soft);
+
+  font-size: 18px;
+
+  line-height: 1.7;
+}
+
+.compact-heading {
+  margin-bottom: 40px;
+}
+
+/* PATHWAYS */
+
+.find-help-pathways {
+  padding: 110px 0;
+
+  background:
+    linear-gradient(
+      180deg,
+      #ffffff 0%,
+      #faf8fc 100%
+    );
+}
+
+.find-help-card-grid {
+  display: grid;
+
+  grid-template-columns:
+    repeat(3, minmax(0, 1fr));
+
+  gap: 22px;
+
+  align-items: stretch;
+}
+
+.find-help-card {
+  position: relative;
+
+  min-height: 470px;
+
+  padding: 32px;
+
+  display: flex;
+
+  flex-direction: column;
+
+  overflow: hidden;
+
+  border:
+    1px solid rgba(78, 60, 86, 0.08);
+
+  border-radius: 24px;
+
+  color: var(--fh-text);
+
+  text-decoration: none;
+
+  box-shadow:
+    0 10px 30px rgba(45, 32, 51, 0.04);
+
+  transition:
+    transform 0.3s ease,
+    box-shadow 0.3s ease;
+}
+
+.find-help-card:hover {
+  transform: translateY(-7px);
+
+  box-shadow:
+    0 22px 50px rgba(45, 32, 51, 0.1);
+}
+
+.find-help-card-purple {
+  background:
+    linear-gradient(
+      145deg,
+      #f6f0fa,
+      #ebe1f4
+    );
+}
+
+.find-help-card-sage {
+  background:
+    linear-gradient(
+      145deg,
+      #f0f7f2,
+      #e3efe6
+    );
+}
+
+.find-help-card-gold {
+  background:
+    linear-gradient(
+      145deg,
+      #fffaf0,
+      #fff0cf
+    );
+}
+
+.find-help-card-top {
+  display: flex;
+
+  justify-content: space-between;
+
+  align-items: center;
+}
+
+.find-help-card-number {
+  color: var(--fh-purple);
+
+  font-size: 13px;
+
+  font-weight: 800;
+
+  letter-spacing: 0.09em;
+}
+
+.find-help-card-arrow {
+  width: 42px;
+  height: 42px;
+
+  display: grid;
+
+  place-items: center;
+
+  border-radius: 50%;
+
+  background:
+    rgba(255, 255, 255, 0.65);
+
+  color: var(--fh-purple);
+
+  font-size: 20px;
+}
+
+.find-help-card-icon {
+  width: 58px;
+  height: 58px;
+
+  margin-top: 28px;
+
+  display: grid;
+
+  place-items: center;
+
+  border-radius: 17px;
+
+  background:
+    rgba(255, 255, 255, 0.7);
+
+  color: var(--fh-purple);
+
+  font-size: 25px;
+
+  font-weight: 800;
+}
+
+.find-help-card h3 {
+  margin: 24px 0 12px;
+
+  font-family:
+    Georgia,
+    "Times New Roman",
+    serif;
+
+  font-size: 29px;
+
+  line-height: 1.16;
+}
+
+.find-help-card > p {
+  margin: 0;
+
+  color: var(--fh-soft);
+
+  font-size: 16px;
+
+  line-height: 1.68;
+}
+
+.find-help-card-link {
+  margin-top: auto;
+
+  padding-top: 28px;
+
+  color: var(--fh-purple);
+
+  font-weight: 800;
+}
+
+/* DIAGNOSIS LINKS */
+
+.diagnosis-links {
+  margin-top: 24px;
+
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 8px;
+}
+
+.diagnosis-links a {
+  padding: 9px 12px;
+
+  border-radius: 8px;
+
+  background:
+    rgba(255, 255, 255, 0.56);
+
+  color: var(--fh-purple-dark);
+
+  text-decoration: none;
+
+  font-size: 13px;
+
+  font-weight: 700;
+
+  transition:
+    background 0.2s ease,
+    transform 0.2s ease;
+}
+
+.diagnosis-links a:hover {
+  background: #ffffff;
+
+  transform: translateX(4px);
+}
+
+/* DETAILED AREAS */
+
+.find-help-areas {
+  padding: 110px 0;
+
+  background: #f8f6f1;
+}
+
+.find-help-area-grid {
+  display: grid;
+
+  grid-template-columns:
+    repeat(2, minmax(0, 1fr));
+
+  gap: 18px;
+}
+
+.find-help-area-grid a {
+  min-height: 230px;
+
+  padding: 30px;
+
+  display: flex;
+
+  flex-direction: column;
+
+  border-radius: 18px;
+
+  background: #ffffff;
+
+  border:
+    1px solid #ece6dd;
+
+  color: var(--fh-text);
+
+  text-decoration: none;
+
+  transition:
+    transform 0.25s ease,
+    box-shadow 0.25s ease;
+}
+
+.find-help-area-grid a:hover {
+  transform: translateY(-5px);
+
+  box-shadow:
+    0 15px 35px rgba(55, 43, 39, 0.07);
+}
+
+.find-help-area-grid a > span {
+  color: var(--fh-purple);
+
+  font-size: 12px;
+
+  font-weight: 800;
+}
+
+.find-help-area-grid h3 {
+  margin: 24px 0 10px;
+
+  font-family:
+    Georgia,
+    "Times New Roman",
+    serif;
+
+  font-size: 26px;
+}
+
+.find-help-area-grid p {
+  margin: 0;
+
+  color: var(--fh-soft);
+
+  font-size: 16px;
+
+  line-height: 1.65;
+}
+
+/* SERVICE BOUNDARY */
+
+.find-help-boundary {
+  padding: 90px 0;
+
+  background: #ffffff;
+}
+
+.find-help-boundary-box {
+  padding: 38px;
+
+  display: grid;
+
+  grid-template-columns:
+    auto 1fr;
+
+  gap: 24px;
+
+  border-radius: 20px;
+
+  background: #fff8e9;
+
+  border:
+    1px solid #f4dfaf;
+}
+
+.boundary-icon {
+  width: 52px;
+  height: 52px;
+
+  display: grid;
+
+  place-items: center;
+
+  border-radius: 50%;
+
+  background: var(--fh-gold);
+
+  color: #38270c;
+
+  font-size: 24px;
+
+  font-family:
+    Georgia,
+    "Times New Roman",
+    serif;
+
+  font-weight: 700;
+}
+
+.find-help-boundary-box span {
+  display: block;
+
+  margin-bottom: 5px;
+
+  color: var(--fh-purple);
+
+  font-size: 12px;
+
+  font-weight: 800;
+
+  letter-spacing: 0.08em;
+
+  text-transform: uppercase;
+}
+
+.find-help-boundary-box h2 {
+  margin: 0;
+
+  font-family:
+    Georgia,
+    "Times New Roman",
+    serif;
+
+  font-size: 30px;
+}
+
+.find-help-boundary-box p {
+  max-width: 900px;
+
+  margin: 12px 0 0;
+
+  color: var(--fh-soft);
+
+  line-height: 1.7;
+}
+
+/* TABLET */
+
+@media (max-width: 1000px) {
+  .find-help-card-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .find-help-card {
+    min-height: auto;
+  }
+}
+
+/* MOBILE */
+
+@media (max-width: 700px) {
+  .find-help-hero {
+    padding: 90px 0 70px;
+  }
+
+  .find-help-hero h1 {
+    font-size: 48px;
+  }
+
+  .find-help-pathways,
+  .find-help-areas {
+    padding: 80px 0;
+  }
+
+  .find-help-area-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .find-help-boundary {
+    padding: 70px 0;
+  }
+
+  .find-help-boundary-box {
+    grid-template-columns: 1fr;
+
+    padding: 28px;
+  }
+}
