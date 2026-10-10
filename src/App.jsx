@@ -12,6 +12,7 @@ import ScrollToTop from "./components/ScrollToTop/ScrollToTop";
 import Home from "./pages/Home";
 import LearnEvents from "./pages/LearnEvents";
 import NotFound from "./pages/NotFound";
+import Contact from "./pages/Contact";
 
 /* FIND HELP & SUPPORT */
 import FindHelp from "./pages/find-help/FindHelp";
@@ -27,6 +28,8 @@ function App() {
       <Header />
 
       <Routes>
+        <Route path="/about/contact" element={<Contact />} />
+        <Route path="/contact" element={<Navigate to="/about/contact" replace />} />
         {/* =========================
             HOME
         ========================== */}

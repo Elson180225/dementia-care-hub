@@ -4,6 +4,8 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
+    "server": "node --env-file-if-exists=.env server/index.js",
+    "test": "node --test",
     "dev": "vite",
     "build": "vite build",
     "lint": "oxlint",
