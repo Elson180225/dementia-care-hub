@@ -117,6 +117,15 @@ function App() {
         />
 
         {/* =========================
+            About the Project
+        ========================== */}
+
+        <Route
+          path="/about"
+          element={<AboutProject />}
+        />
+
+        {/* =========================
             NOT FOUND
         ========================== */}
 
@@ -125,18 +134,12 @@ function App() {
           element={<NotFound />}
         />
       </Routes>
-      
-        {/* =========================
-            About the Project
-        ========================== */}
 
-        <Route
-          path="/about"
-          element={<AboutProject />}
-        />
+  
       <Footer />
 
       <ScrollToTop />
+      
     </BrowserRouter>
   );
 }
