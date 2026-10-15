@@ -13,6 +13,7 @@ import Home from "./pages/Home";
 import LearnEvents from "./pages/LearnEvents";
 import NotFound from "./pages/NotFound";
 import Contact from "./pages/Contact";
+import AboutProject from "./pages/AboutProject";
 
 /* FIND HELP & SUPPORT */
 import FindHelp from "./pages/find-help/FindHelp";
@@ -116,6 +117,15 @@ function App() {
         />
 
         {/* =========================
+            About the Project
+        ========================== */}
+
+        <Route
+          path="/about"
+          element={<AboutProject />}
+        />
+
+        {/* =========================
             NOT FOUND
         ========================== */}
 
@@ -125,9 +135,11 @@ function App() {
         />
       </Routes>
 
+  
       <Footer />
 
       <ScrollToTop />
+      
     </BrowserRouter>
   );
 }
