@@ -13,6 +13,7 @@ import Home from "./pages/Home";
 import LearnEvents from "./pages/LearnEvents";
 import NotFound from "./pages/NotFound";
 import Contact from "./pages/Contact";
+import AboutProject from "./pages/AboutProject";
 
 /* FIND HELP & SUPPORT */
 import FindHelp from "./pages/find-help/FindHelp";
@@ -124,7 +125,15 @@ function App() {
           element={<NotFound />}
         />
       </Routes>
+      
+        {/* =========================
+            About the Project
+        ========================== */}
 
+        <Route
+          path="/about"
+          element={<AboutProject />}
+        />
       <Footer />
 
       <ScrollToTop />

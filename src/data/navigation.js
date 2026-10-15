@@ -121,4 +121,15 @@ export const navigation = [
     },
     ],
 },
+
+{
+    label:"About the Project",
+    path: "/about",
+    children: [
+         { label: "Project Overview", path: "/about#overview" },
+         { label: "Our Journey", path: "/about#journey" },
+         { label: "Project Advisors", path: "/about#advisors" },
+         { label: "Acknowledgements", path: "/about#acknowledgements" },
+    ],
+},
 ];
