@@ -81,20 +81,24 @@ export const navigation = [
     path: "/learn-events",
     children: [
     {
-        label: "Dementia Education",
-        path: "/learn-events/dementia-education",
+        label: "Online Education",
+        path: "/learn-events/online-education",
     },
     {
-        label: "Training Resources",
-        path: "/learn-events/training-resources",
+        label: "Physical Education",
+        path: "/learn-events/physical-education",
     },
     {
-        label: "Webinars",
-        path: "/learn-events/webinars",
-    },
-    {
-        label: "Certified Trainer Events",
+        label: "Events",
         path: "/learn-events/events",
+    },
+    {
+        label: "Certified Trainers",
+        path: "/learn-events/certified-trainers",
+    },
+    {
+        label: "Upcoming Calendar",
+        path: "/learn-events/upcoming-calendar",
     },
     ],
 },
