@@ -24,6 +24,15 @@ import GovernmentFinancial from "./pages/find-help/GovernmentFinancial";
 import EquipmentPractical from "./pages/find-help/EquipmentPractical";
 import ResourceFinder from "./pages/find-help/ResourceFinder";
 
+/* Trainer Portal */
+import TrainerProvider from "./trainer-portal/TrainerContext";
+import TrainerLayout from "./trainer-portal/TrainerLayout";
+import TrainerDashboard from "./trainer-portal/pages/Dashboard";
+import MyProfile from "./trainer-portal/pages/MyProfile";
+import TrainerActivities from "./trainer-portal/pages/Activities";
+import Conducted from "./trainer-portal/pages/Conducted";
+import Hours from "./trainer-portal/pages/Hours";
+
 function App() {
   return (
     <LanguageProvider>
@@ -175,6 +184,25 @@ function App() {
           path="/about"
           element={<AboutProject />}
         />
+
+        {/* =========================
+            TRAINER PORTAL
+        ========================== */}
+
+        <Route
+          path="/trainer-portal"
+          element={
+            <TrainerProvider>
+              <TrainerLayout />
+            </TrainerProvider>
+          }
+        >
+          <Route index element={<TrainerDashboard />} />
+          <Route path="profile" element={<MyProfile />} />
+          <Route path="activities" element={<TrainerActivities />} />
+          <Route path="conducted" element={<Conducted />} />
+          <Route path="hours" element={<Hours />} />
+        </Route>
 
         {/* =========================
             NOT FOUND
