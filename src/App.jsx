@@ -14,6 +14,7 @@ import LearnEvents from "./pages/LearnEvents";
 import NotFound from "./pages/NotFound";
 import Contact from "./pages/Contact";
 import AboutProject from "./pages/AboutProject";
+import UnderstandDementia from "./pages/UnderstandDementia";
 
 /* FIND HELP & SUPPORT */
 import FindHelp from "./pages/find-help/FindHelp";
@@ -25,6 +26,7 @@ import ResourceFinder from "./pages/find-help/ResourceFinder";
 
 function App() {
   return (
+    <LanguageProvider>
     <BrowserRouter>
       <Header />
 
@@ -40,6 +42,17 @@ function App() {
           element={<Home />}
         />
 
+
+        {/* =========================
+            UNDERSTANDING DEMENTIA
+        ========================== */}
+        <Route path="/understand-dementia" element={<UnderstandDementia />} />
+        <Route path="/understand-dementia/what-is-dementia" element={<Navigate to="/understand-dementia#overview" replace />} />
+        <Route path="/understand-dementia/alzheimers" element={<Navigate to="/understand-dementia#overview" replace />} />
+        <Route path="/understand-dementia/signs-and-changes" element={<Navigate to="/understand-dementia#early-signs" replace />} />
+        <Route path="/understand-dementia/why-changes-matter" element={<Navigate to="/understand-dementia#early-signs" replace />} />
+        <Route path="/understand-dementia/medical-advice" element={<Navigate to="/understand-dementia#early-signs" replace />} />
+        <Route path="/understand-dementia/healthy-ageing" element={<Navigate to="/understand-dementia#healthy-living" replace />} />
 
         {/* =========================
             FIND HELP & SUPPORT
@@ -179,6 +192,7 @@ function App() {
       <ScrollToTop />
       
     </BrowserRouter>
+    </LanguageProvider>
   );
 }
 
