@@ -35,7 +35,6 @@ import Hours from "./trainer-portal/pages/Hours";
 
 function App() {
   return (
-    <LanguageProvider>
     <BrowserRouter>
       <Header />
 
@@ -220,7 +219,6 @@ function App() {
       <ScrollToTop />
       
     </BrowserRouter>
-    </LanguageProvider>
   );
 }
 
