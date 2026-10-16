@@ -15,6 +15,7 @@ import NotFound from "./pages/NotFound";
 import Contact from "./pages/Contact";
 import UnderstandDementia from "./pages/UnderstandDementia";
 import { LanguageProvider } from "./i18n";
+import AboutProject from "./pages/AboutProject";
 
 /* FIND HELP & SUPPORT */
 import FindHelp from "./pages/find-help/FindHelp";
@@ -41,6 +42,7 @@ function App() {
           path="/"
           element={<Home />}
         />
+
 
         {/* =========================
             UNDERSTANDING DEMENTIA
@@ -95,7 +97,7 @@ function App() {
           path="/learn-events"
           element={
             <Navigate
-              to="/learn-events/dementia-education"
+              to="/learn-events/online-education"
               replace
             />
           }
@@ -104,21 +106,44 @@ function App() {
         <Route
           path="/learn-events/dementia-education"
           element={
-            <LearnEvents module="education" />
+            <Navigate
+              to="/learn-events/online-education"
+              replace
+            />
           }
         />
 
         <Route
           path="/learn-events/training-resources"
           element={
-            <LearnEvents module="training" />
+            <Navigate
+              to="/learn-events/physical-education"
+              replace
+            />
           }
         />
 
         <Route
           path="/learn-events/webinars"
           element={
-            <LearnEvents module="webinars" />
+            <Navigate
+              to="/learn-events/online-education"
+              replace
+            />
+          }
+        />
+
+        <Route
+          path="/learn-events/online-education"
+          element={
+            <LearnEvents module="online-education" />
+          }
+        />
+
+        <Route
+          path="/learn-events/physical-education"
+          element={
+            <LearnEvents module="physical-education" />
           }
         />
 
@@ -127,6 +152,29 @@ function App() {
           element={
             <LearnEvents module="events" />
           }
+        />
+
+        <Route
+          path="/learn-events/certified-trainers"
+          element={
+            <LearnEvents module="certified-trainers" />
+          }
+        />
+
+        <Route
+          path="/learn-events/upcoming-calendar"
+          element={
+            <LearnEvents module="upcoming-calendar" />
+          }
+        />
+
+        {/* =========================
+            About the Project
+        ========================== */}
+
+        <Route
+          path="/about"
+          element={<AboutProject />}
         />
 
         {/* =========================
@@ -139,9 +187,11 @@ function App() {
         />
       </Routes>
 
+  
       <Footer />
 
       <ScrollToTop />
+      
     </BrowserRouter>
     </LanguageProvider>
   );
