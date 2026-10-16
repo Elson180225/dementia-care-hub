@@ -13,6 +13,8 @@ import Home from "./pages/Home";
 import LearnEvents from "./pages/LearnEvents";
 import NotFound from "./pages/NotFound";
 import Contact from "./pages/Contact";
+import UnderstandDementia from "./pages/UnderstandDementia";
+import { LanguageProvider } from "./i18n";
 import AboutProject from "./pages/AboutProject";
 import UnderstandDementia from "./pages/UnderstandDementia";
 
