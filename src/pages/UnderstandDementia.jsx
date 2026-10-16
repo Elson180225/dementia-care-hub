@@ -1,11 +1,9 @@
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { useLanguage, useModuleTranslations } from "../i18n";
 import "./UnderstandDementia.css";
 
 function UnderstandDementia() {
   const t = useModuleTranslations("understandingDementia");
-  const { language, setLanguage, languages } = useLanguage();
   const [answers, setAnswers] = useState({});
   const [showResult, setShowResult] = useState(false);
   const answeredCount = Object.keys(answers).length;
@@ -22,13 +20,7 @@ function UnderstandDementia() {
   };
 
   return (
-    <main className="understand-page" lang={language}>
-      <div className="understand-language-bar understand-container">
-        <label htmlFor="understand-language">{t.language}</label>
-        <select id="understand-language" value={language} onChange={(event) => setLanguage(event.target.value)}>
-          {Object.entries(languages).map(([code, locale]) => <option key={code} value={code}>{locale.label}</option>)}
-        </select>
-      </div>
+    <main className="understand-page"}>
       <section className="understand-hero">
         <div className="understand-container understand-hero-grid">
           <div>
