@@ -7,3 +7,14 @@
 .understand-language-bar label{font-size:.9rem;font-weight:600;color:#314b41}
 .understand-language-bar select{font:inherit;padding:.55rem .75rem;border:1px solid #cbd9d1;border-radius:.5rem;background:#fff;color:#20382f;min-width:9rem}
 .understand-language-bar select:focus-visible{outline:3px solid #8bc5ad;outline-offset:2px}
+
+.understand-info-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+.understand-info-card{display:block;width:100%;text-align:left;font:inherit;cursor:pointer;appearance:none;transition:transform .2s ease,box-shadow .2s ease,border-color .2s ease}
+.understand-info-card:hover{transform:translateY(-5px);box-shadow:0 16px 32px #1d4c3f22;border-color:#8db9a7}
+.understand-info-card:focus-visible{outline:3px solid #b36b2c;outline-offset:4px}
+.understand-info-card.featured{border-color:#24584d}
+.understand-overview-detail{margin-top:22px;padding:24px 28px;border:1px solid #dbe6df;border-left:5px solid #287564;border-radius:12px;background:#f5f8f5}
+.understand-overview-detail h3{margin:0 0 8px;font-size:1.25rem;color:#203b35}
+.understand-overview-detail p{margin:0;color:#52675f;line-height:1.8}
+@media(max-width:700px){.understand-info-grid{grid-template-columns:1fr}}
+@media(prefers-reduced-motion:reduce){.understand-info-card{transition:none}.understand-info-card:hover{transform:none}}
