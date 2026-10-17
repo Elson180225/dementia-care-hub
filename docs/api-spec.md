@@ -1,3 +1,5 @@
+> Current implementation: see [Admin Dashboard setup and API-backed workflows](admin-dashboard.md). This initial specification predates the implemented portal.
+
 
 # Dementia Care Hub — Initial REST API Specification
 

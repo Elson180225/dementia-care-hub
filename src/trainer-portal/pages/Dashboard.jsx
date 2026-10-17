@@ -1,40 +1,48 @@
-import { Link } from "react-router-dom";
+﻿import { Link } from "react-router-dom";
 import { useTrainer } from "../TrainerContext";
-import { fmtDate, pendingCount, yearSummary } from "../selectors";
-import { STATUS_LABEL } from "../constants";
-import { StatusChip } from "../ui";
-
+import { Badge } from "../../shared/RecordFields";
 export default function Dashboard() {
   const { state } = useTrainer();
-  const { profile, activities } = state;
-  const year = new Date().getFullYear();
-  const summary = yearSummary(activities, year);
-  const upcoming = activities.filter(
-    (a) => a.status === "approved" && a.completion.status === "none" && new Date(a.date) >= new Date()
-  );
-
+  const current = state.annual.find((r) => r.year === new Date().getFullYear());
+  const counts = [
+    ["Profile status", state.profile.status],
+    [
+      "Pending review",
+      state.activities.filter(
+        (a) => a.status === "submitted" || a.completion_status === "submitted",
+      ).length + (state.profile.status === "submitted" ? 1 : 0),
+    ],
+    ["Verified activities", current?.activities_conducted || 0],
+    ["Verified hours", current?.verified_hours || 0],
+    ["Participant reach", current?.participants_reached || 0],
+  ];
   return (
     <>
-      <h1>Dashboard</h1>
-      <div className="tp-stats">
-        <div className="tp-stat"><span>Profile status</span><StatusChip status={profile.status} labels={STATUS_LABEL} /></div>
-        <div className="tp-stat"><span>Pending Admin review</span><strong>{pendingCount(profile, activities)}</strong></div>
-        <div className="tp-stat"><span>Conducted in {year}</span><strong>{summary.conducted}</strong></div>
-        <div className="tp-stat"><span>Verified hours</span><strong>{summary.hours}</strong></div>
-        <div className="tp-stat"><span>Participants reached</span><strong>{summary.participants}</strong></div>
+      <h2>Your contribution at a glance</h2>
+      <div className="ad-cards">
+        {counts.map(([label, value]) => (
+          <div className="ad-card" key={label}>
+            <p>{label}</p>
+            <h2>{value}</h2>
+          </div>
+        ))}
       </div>
-
-      <section className="tp-card">
-        <h2>Upcoming approved activities</h2>
-        {upcoming.length === 0 ? (
-          <p>No upcoming approved activities. <Link to="/trainer-portal/activities">Submit a workshop or seminar</Link>.</p>
-        ) : (
-          <ul className="tp-list">
-            {upcoming.map((a) => (
-              <li key={a.id}><strong>{a.title}</strong> – {fmtDate(a.date)} ({a.mode})</li>
-            ))}
-          </ul>
-        )}
+      <section className="ad-card">
+        <h3>Upcoming approved activities</h3>
+        {state.activities
+          .filter(
+            (a) =>
+              a.status === "approved" && new Date(a.starts_at) > new Date(),
+          )
+          .map((a) => (
+            <p key={a.id}>
+              {a.title} · {new Date(a.starts_at).toLocaleString("en-MY")}{" "}
+              <Badge>{a.lifecycle}</Badge>
+            </p>
+          ))}
+        <Link to="/trainer-portal/activities">
+          Manage workshops & seminars →
+        </Link>
       </section>
     </>
   );

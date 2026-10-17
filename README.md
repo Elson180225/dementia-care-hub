@@ -19,3 +19,11 @@ If you are developing a production application, we recommend using TypeScript wi
 # dementia-care-hub
 A digital platform design to support dementia patients, caregivers, and families
 >>>>>>> 73492009b16fbad79e6668124fc0a232642eed76
+
+## Admin Dashboard and database-backed Trainer Portal
+
+See [the setup, demo credentials and walkthrough](docs/admin-dashboard.md).
+
+With PostgreSQL configured in `.env`: `npm run db:migrate`, `npm run db:seed`, then `npm run dev:full`.
+For a standalone persistent local demo: `npm run demo`.
+Open `/admin/login` for RCBC Admin, or `/login` for Trainer sign-in and access requests.

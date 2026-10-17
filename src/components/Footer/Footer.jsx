@@ -7,13 +7,9 @@ function Footer() {
       <div className="footer-container">
         <div className="footer-top">
           <div className="footer-brand">
-            <span className="footer-eyebrow">
-              Rotary Hope Care
-            </span>
+            <span className="footer-eyebrow">Rotary Hope Care</span>
 
-            <h2>
-              Alzheimer&apos;s Care
-            </h2>
+            <h2>Alzheimer&apos;s Care</h2>
 
             <p>
               Clear information, practical resources and community support for
@@ -24,41 +20,25 @@ function Footer() {
           <div className="footer-links-group">
             <h3>Explore</h3>
 
-            <Link to="/understand-dementia">
-              Understand Dementia
-            </Link>
+            <Link to="/understand-dementia">Understand Dementia</Link>
 
-            <Link to="/find-help">
-              Find Help
-            </Link>
+            <Link to="/find-help">Find Help</Link>
 
-            <Link to="/caregiver-support">
-              Caregiver Support
-            </Link>
+            <Link to="/caregiver-support">Caregiver Support</Link>
 
-            <Link to="/learn-events">
-              Learn & Events
-            </Link>
+            <Link to="/learn-events">Learn & Events</Link>
           </div>
 
           <div className="footer-links-group">
             <h3>About</h3>
 
-            <Link to="/about">
-              About Us
-            </Link>
+            <Link to="/about">About Us</Link>
 
-            <Link to="/about/contact">
-              Contact Us
-            </Link>
+            <Link to="/about/contact">Contact Us</Link>
 
-            <Link to="/about/locations">
-              Where to Find Us
-            </Link>
+            <Link to="/about/locations">Where to Find Us</Link>
 
-            <Link to="/about/support">
-              Support the Project
-            </Link>
+            <Link to="/about/support">Support the Project</Link>
           </div>
 
           <div className="footer-contact">
@@ -69,10 +49,7 @@ function Footer() {
               and we&apos;ll help direct you to the appropriate information.
             </p>
 
-            <Link
-              to="/about/contact"
-              className="footer-contact-button"
-            >
+            <Link to="/about/contact" className="footer-contact-button">
               Contact Us
             </Link>
           </div>
@@ -82,26 +59,33 @@ function Footer() {
 
         <div className="footer-bottom">
           <div>
-            <strong>
-              Rotary Club of Bintulu Central
-            </strong>
+            <strong>Rotary Club of Bintulu Central</strong>
 
-            <span>
-              Hope Care • Alzheimer&apos;s Care
-            </span>
+            <span>Hope Care • Alzheimer&apos;s Care</span>
           </div>
 
           <div className="footer-bottom-links">
-            <button type="button">
-              English
-            </button>
+            <button type="button">English</button>
 
-            <span>
-              © {new Date().getFullYear()} Rotary Hope Care
-            </span>
+            <span>© {new Date().getFullYear()} Rotary Hope Care</span>
           </div>
         </div>
       </div>
+      <nav
+        aria-label="Project access"
+        style={{
+          display: "flex",
+          gap: "24px",
+          justifyContent: "center",
+          flexWrap: "wrap",
+          padding: "20px",
+        }}
+      >
+        <a href="/get-updated">Get Updated</a>
+        <a href="/trainer-portal">Trainer Portal</a>
+        <a href="/admin/login">Admin Access</a>
+        <a href="/certificate-verification">Verify Certificate</a>
+      </nav>
     </footer>
   );
 }

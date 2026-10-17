@@ -1,71 +1,120 @@
-import { useState } from "react";
+﻿import { useState } from "react";
 import { useTrainer } from "../TrainerContext";
-import { LANGUAGES, STATUS_LABEL } from "../constants";
-import { Field, StatusChip } from "../ui";
-
+import { profileFields } from "../../../shared/records";
+import {
+  Fields,
+  valuesFor,
+  payloadFor,
+  Upload,
+  AssetLink,
+  Badge,
+} from "../../shared/RecordFields";
+import { put } from "../../shared/api";
 export default function MyProfile() {
-  const { state, dispatch } = useTrainer();
-  const { profile } = state;
-  const [values, setValues] = useState({
-    city: profile.city, language: profile.language, shortProfile: profile.shortProfile,
-    qualifications: profile.qualifications, experience: profile.experience,
-  });
-  const [message, setMessage] = useState("");
-  const locked = profile.status === "submitted";
-
-  const change = (e) => { setValues({ ...values, [e.target.name]: e.target.value }); setMessage(""); };
-
-  function submit(e) {
-    e.preventDefault();
-    if (!values.city.trim() || !values.shortProfile.trim()) {
-      setMessage("Please fill in your city and a short profile.");
-      return;
-    }
-    dispatch({ type: "PROFILE_SUBMIT", values });
-    setMessage("Your profile update was sent to RCBC Admin for review.");
-  }
-
+  const { state, refresh } = useTrainer();
+  const p = state.profile;
+  const [values, setValues] = useState(() => valuesFor(profileFields, p)),
+    [documents, setDocuments] = useState(
+      state.documents.map((d) => d.asset_id),
+    ),
+    [error, setError] = useState(""),
+    [busy, setBusy] = useState(false),
+    [message, setMessage] = useState("");
+  const locked = p.status === "submitted";
   return (
-    <>
-      <h1>My Profile</h1>
-      <p>This is the same record shown publicly under Certified Trainers once Admin approves it.</p>
-      <p><StatusChip status={profile.status} labels={STATUS_LABEL} /></p>
-      {profile.status === "returned" && profile.adminComment && (
-        <p className="tp-note">Admin comment: {profile.adminComment}</p>
+    <section className="ad-card">
+      <h2>My Profile</h2>
+      <p>
+        This same profile appears in the Certified Trainer directory after
+        approval.
+      </p>
+      <Badge>{p.status}</Badge>
+      <p>
+        Name: {p.name} · Certification: {p.certified_status} · Reference:{" "}
+        {p.certificate_reference || "Not assigned"}
+      </p>
+      {p.admin_comment && (
+        <p className="ad-error">Admin comment: {p.admin_comment}</p>
       )}
-
-      <section className="tp-card">
-        <h2>Verified by RCBC (cannot be edited)</h2>
-        <dl className="tp-dl">
-          <dt>Name</dt><dd>{profile.name}</dd>
-          <dt>Status</dt><dd>{profile.certifiedStatus}</dd>
-          <dt>Certificate reference no.</dt><dd>{profile.certificateRef}</dd>
-        </dl>
-      </section>
-
-      <form className="tp-card" onSubmit={submit} noValidate>
-        <h2>Details you can update</h2>
-        <Field id="city" label="City / Location">
-          <input id="city" name="city" value={values.city} onChange={change} disabled={locked} />
-        </Field>
-        <Field id="language" label="Language">
-          <select id="language" name="language" value={values.language} onChange={change} disabled={locked}>
-            {LANGUAGES.map((l) => <option key={l}>{l}</option>)}
-          </select>
-        </Field>
-        <Field id="shortProfile" label="Short profile / background">
-          <textarea id="shortProfile" name="shortProfile" rows="4" value={values.shortProfile} onChange={change} disabled={locked} />
-        </Field>
-        <Field id="qualifications" label="Qualifications">
-          <textarea id="qualifications" name="qualifications" rows="3" value={values.qualifications} onChange={change} disabled={locked} />
-        </Field>
-        <Field id="experience" label="Relevant experience">
-          <textarea id="experience" name="experience" rows="3" value={values.experience} onChange={change} disabled={locked} />
-        </Field>
-        <p className="tp-dev">Profile photo and supporting documents will be added when file upload is built on the server.</p>
-        <button className="tp-btn" disabled={locked}>Submit for Admin review</button>
-        <p role="status" aria-live="polite">{locked ? "Awaiting Admin review." : message}</p>
+      <form
+        onSubmit={async (e) => {
+          e.preventDefault();
+          setBusy(true);
+          setError("");
+          try {
+            await put("/trainer/profile", {
+              ...payloadFor(profileFields, values),
+              document_ids: documents,
+            });
+            await refresh();
+            setMessage("Profile submitted for Admin review.");
+          } catch (err) {
+            setError(err.message);
+          } finally {
+            setBusy(false);
+          }
+        }}
+      >
+        <Fields
+          fields={profileFields.filter((f) => f.key !== "photo_asset_id")}
+          values={values}
+          disabled={locked}
+          onChange={(k, v) => setValues((s) => ({ ...s, [k]: v }))}
+        />
+        {values.photo_asset_id && (
+          <p>
+            <AssetLink id={values.photo_asset_id}>
+              Current profile photo
+            </AssetLink>
+          </p>
+        )}
+        {!locked && (
+          <>
+            <Upload
+              label="Upload profile photo"
+              onUploaded={(f) =>
+                setValues((s) => ({ ...s, photo_asset_id: f.id }))
+              }
+            />
+            <Upload
+              label="Upload private supporting document"
+              onUploaded={(f) => setDocuments((d) => [...d, f.id])}
+            />
+          </>
+        )}
+        {documents.map((id) => (
+          <p key={id}>
+            <AssetLink id={id}>
+              {state.assets.find((f) => f.id === id)?.original_filename ||
+                "Supporting document"}
+            </AssetLink>
+            {!locked && (
+              <button
+                type="button"
+                className="ad-secondary"
+                onClick={() =>
+                  setDocuments((all) => all.filter((d) => d !== id))
+                }
+              >
+                Remove
+              </button>
+            )}
+          </p>
+        ))}
+        {error && (
+          <p role="alert" className="ad-error">
+            {error}
+          </p>
+        )}
+        {message && (
+          <p role="status" className="ad-success">
+            {message}
+          </p>
+        )}
+        <button disabled={locked || busy}>
+          {locked ? "Awaiting Admin review" : "Submit for Admin review"}
+        </button>
       </form>
-    </>
+    </section>
   );
 }

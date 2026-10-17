@@ -1,24 +1,7 @@
-import { NavLink, Outlet } from "react-router-dom";
+﻿import { NavLink, Outlet, Navigate } from "react-router-dom";
+import { useAuth } from "../auth/AuthContext";
 import { useTrainer } from "./TrainerContext";
-import "./TrainerPortal.css";
-
-function SignIn() {
-  const { dispatch } = useTrainer();
-  return (
-    <section className="tp-card">
-      <h1>Certified Trainer Portal</h1>
-      <p>For verified Certified Trainers only. Access is given after RCBC verifies your identity and certificate.</p>
-      <p className="tp-dev">
-        Development placeholder: this button gives no real security. The real sign-in
-        (SCRUM-68) will be checked on the server.
-      </p>
-      <button className="tp-btn" onClick={() => dispatch({ type: "SIGN_IN" })}>
-        Continue as sample trainer
-      </button>
-    </section>
-  );
-}
-
+import "../admin/Admin.css";
 const links = [
   ["/trainer-portal", "Dashboard", true],
   ["/trainer-portal/profile", "My Profile"],
@@ -26,30 +9,53 @@ const links = [
   ["/trainer-portal/conducted", "Conducted"],
   ["/trainer-portal/hours", "Contribution & Hours"],
 ];
-
 export default function TrainerLayout() {
-  const { state, dispatch } = useTrainer();
-
-  if (!state.session) {
-    return <main className="tp-page"><div className="tp-container"><SignIn /></div></main>;
-  }
-
+  const auth = useAuth(),
+    { state, loading, error, refresh } = useTrainer();
+  if (auth.loading) return <main className="ad-page">Checking session…</main>;
+  if (!auth.user) return <Navigate to="/login" replace />;
+  if (auth.user.role === "admin") return <Navigate to="/admin" replace />;
   return (
-    <main className="tp-page">
-      <div className="tp-container">
-        <header className="tp-head">
-          <p>Signed in as <strong>{state.profile.name}</strong></p>
-          <button className="tp-btn tp-btn-ghost" onClick={() => dispatch({ type: "SIGN_OUT" })}>
-            Sign out
-          </button>
-        </header>
-        <nav className="tp-nav" aria-label="Trainer Portal">
-          {links.map(([to, label, end]) => (
-            <NavLink key={to} to={to} end={end}>{label}</NavLink>
-          ))}
-        </nav>
-        <Outlet />
+    <main className="ad-page">
+      <div className="ad-heading">
+        <div>
+          <span className="ad-eyebrow">CERTIFIED TRAINER PORTAL</span>
+          <h1>Welcome, {auth.user.name}</h1>
+        </div>
+        <button
+          className="ad-secondary"
+          onClick={() => auth.logout().catch((e) => alert(e.message))}
+        >
+          Log out
+        </button>
       </div>
+      <nav className="ad-actions" aria-label="Trainer Portal">
+        {links.map(([to, label, end]) => (
+          <NavLink
+            style={({ isActive }) => ({
+              fontWeight: isActive ? 700 : 400,
+              padding: "9px 12px",
+              borderBottom: isActive
+                ? "2px solid #51277d"
+                : "2px solid transparent",
+            })}
+            key={to}
+            to={to}
+            end={end}
+          >
+            {label}
+          </NavLink>
+        ))}
+      </nav>
+      {error ? (
+        <p className="ad-error" role="alert">
+          {error} <button onClick={refresh}>Retry</button>
+        </p>
+      ) : loading || !state.profile ? (
+        <p role="status">Loading your records…</p>
+      ) : (
+        <Outlet />
+      )}
     </main>
   );
 }
