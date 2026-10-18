@@ -33,191 +33,199 @@ import TrainerActivities from "./trainer-portal/pages/Activities";
 import Conducted from "./trainer-portal/pages/Conducted";
 import Hours from "./trainer-portal/pages/Hours";
 
+/* Admin Dashboard */
+import AdminLayout from "./admin/AdminLayout";
+import AdminOverview from "./admin/pages/Overview";
+import ReviewQueue from "./admin/pages/ReviewQueue";
+import Contribution from "./admin/pages/Contribution";
+
+
 function App() {
   return (
     <BrowserRouter>
       <Header />
+      <TrainerProvider>
 
-      <Routes>
-        <Route path="/about/contact" element={<Contact />} />
-        <Route path="/contact" element={<Navigate to="/about/contact" replace />} />
-        {/* =========================
-            HOME
-        ========================== */}
+        <Routes>
+          <Route path="/about/contact" element={<Contact />} />
+          <Route path="/contact" element={<Navigate to="/about/contact" replace />} />
+          {/* =========================
+              HOME
+          ========================== */}
 
-        <Route
-          path="/"
-          element={<Home />}
-        />
+          <Route
+            path="/"
+            element={<Home />}
+          />
 
 
-        {/* =========================
-            UNDERSTANDING DEMENTIA
-        ========================== */}
-        <Route path="/understand-dementia" element={<UnderstandDementia />} />
-        <Route path="/understand-dementia/what-is-dementia" element={<Navigate to="/understand-dementia#overview" replace />} />
-        <Route path="/understand-dementia/alzheimers" element={<Navigate to="/understand-dementia#overview" replace />} />
-        <Route path="/understand-dementia/signs-and-changes" element={<Navigate to="/understand-dementia#early-signs" replace />} />
-        <Route path="/understand-dementia/why-changes-matter" element={<Navigate to="/understand-dementia#early-signs" replace />} />
-        <Route path="/understand-dementia/medical-advice" element={<Navigate to="/understand-dementia#early-signs" replace />} />
-        <Route path="/understand-dementia/healthy-ageing" element={<Navigate to="/understand-dementia#healthy-living" replace />} />
+          {/* =========================
+              UNDERSTANDING DEMENTIA
+          ========================== */}
+          <Route path="/understand-dementia" element={<UnderstandDementia />} />
+          <Route path="/understand-dementia/what-is-dementia" element={<Navigate to="/understand-dementia#overview" replace />} />
+          <Route path="/understand-dementia/alzheimers" element={<Navigate to="/understand-dementia#overview" replace />} />
+          <Route path="/understand-dementia/signs-and-changes" element={<Navigate to="/understand-dementia#early-signs" replace />} />
+          <Route path="/understand-dementia/why-changes-matter" element={<Navigate to="/understand-dementia#early-signs" replace />} />
+          <Route path="/understand-dementia/medical-advice" element={<Navigate to="/understand-dementia#early-signs" replace />} />
+          <Route path="/understand-dementia/healthy-ageing" element={<Navigate to="/understand-dementia#healthy-living" replace />} />
 
-        {/* =========================
-            FIND HELP & SUPPORT
-        ========================== */}
+          {/* =========================
+              FIND HELP & SUPPORT
+          ========================== */}
 
-        <Route
-          path="/find-help"
-          element={<FindHelp />}
-        />
+          <Route
+            path="/find-help"
+            element={<FindHelp />}
+          />
 
-        <Route
-          path="/find-help/assessment-healthcare"
-          element={<AssessmentHealthcare />}
-        />
+          <Route
+            path="/find-help/assessment-healthcare"
+            element={<AssessmentHealthcare />}
+          />
 
-        <Route
-          path="/find-help/support-services"
-          element={<SupportServices />}
-        />
+          <Route
+            path="/find-help/support-services"
+            element={<SupportServices />}
+          />
 
-        <Route
-          path="/find-help/government-financial"
-          element={<GovernmentFinancial />}
-        />
+          <Route
+            path="/find-help/government-financial"
+            element={<GovernmentFinancial />}
+          />
 
-        <Route
-          path="/find-help/equipment-practical"
-          element={<EquipmentPractical />}
-        />
+          <Route
+            path="/find-help/equipment-practical"
+            element={<EquipmentPractical />}
+          />
 
-        <Route
-          path="/find-help/resource-finder"
-          element={<ResourceFinder />}
-        />
+          <Route
+            path="/find-help/resource-finder"
+            element={<ResourceFinder />}
+          />
 
-        {/* =========================
-            LEARN & EVENTS
-        ========================== */}
+          {/* =========================
+              LEARN & EVENTS
+          ========================== */}
 
-        <Route
-          path="/learn-events"
-          element={
-            <Navigate
-              to="/learn-events/online-education"
-              replace
-            />
-          }
-        />
+          <Route
+            path="/learn-events"
+            element={
+              <Navigate
+                to="/learn-events/online-education"
+                replace
+              />
+            }
+          />
 
-        <Route
-          path="/learn-events/dementia-education"
-          element={
-            <Navigate
-              to="/learn-events/online-education"
-              replace
-            />
-          }
-        />
+          <Route
+            path="/learn-events/dementia-education"
+            element={
+              <Navigate
+                to="/learn-events/online-education"
+                replace
+              />
+            }
+          />
 
-        <Route
-          path="/learn-events/training-resources"
-          element={
-            <Navigate
-              to="/learn-events/physical-education"
-              replace
-            />
-          }
-        />
+          <Route
+            path="/learn-events/training-resources"
+            element={
+              <Navigate
+                to="/learn-events/physical-education"
+                replace
+              />
+            }
+          />
 
-        <Route
-          path="/learn-events/webinars"
-          element={
-            <Navigate
-              to="/learn-events/online-education"
-              replace
-            />
-          }
-        />
+          <Route
+            path="/learn-events/webinars"
+            element={
+              <Navigate
+                to="/learn-events/online-education"
+                replace
+              />
+            }
+          />
 
-        <Route
-          path="/learn-events/online-education"
-          element={
-            <LearnEvents module="online-education" />
-          }
-        />
+          <Route
+            path="/learn-events/online-education"
+            element={
+              <LearnEvents module="online-education" />
+            }
+          />
 
-        <Route
-          path="/learn-events/physical-education"
-          element={
-            <LearnEvents module="physical-education" />
-          }
-        />
+          <Route
+            path="/learn-events/physical-education"
+            element={
+              <LearnEvents module="physical-education" />
+            }
+          />
 
-        <Route
-          path="/learn-events/events"
-          element={
-            <LearnEvents module="events" />
-          }
-        />
+          <Route
+            path="/learn-events/events"
+            element={
+              <LearnEvents module="events" />
+            }
+          />
 
-        <Route
-          path="/learn-events/certified-trainers"
-          element={
-            <LearnEvents module="certified-trainers" />
-          }
-        />
+          <Route
+            path="/learn-events/certified-trainers"
+            element={
+              <LearnEvents module="certified-trainers" />
+            }
+          />
 
-        <Route
-          path="/learn-events/upcoming-calendar"
-          element={
-            <LearnEvents module="upcoming-calendar" />
-          }
-        />
+          <Route
+            path="/learn-events/upcoming-calendar"
+            element={
+              <LearnEvents module="upcoming-calendar" />
+            }
+          />
 
-        {/* =========================
-            About the Project
-        ========================== */}
+          {/* =========================
+              About the Project
+          ========================== */}
 
-        <Route
-          path="/about"
-          element={<AboutProject />}
-        />
+          <Route
+            path="/about"
+            element={<AboutProject />}
+          />
 
-        {/* =========================
-            TRAINER PORTAL
-        ========================== */}
+          {/* =========================
+              TRAINER PORTAL
+          ========================== */}
 
-        <Route
-          path="/trainer-portal"
-          element={
-            <TrainerProvider>
-              <TrainerLayout />
-            </TrainerProvider>
-          }
-        >
-          <Route index element={<TrainerDashboard />} />
-          <Route path="profile" element={<MyProfile />} />
-          <Route path="activities" element={<TrainerActivities />} />
-          <Route path="conducted" element={<Conducted />} />
-          <Route path="hours" element={<Hours />} />
-        </Route>
+          <Route path="/trainer-portal" element={<TrainerLayout />}>
+            <Route index element={<TrainerDashboard />} />
+            <Route path="profile" element={<MyProfile />} />
+            <Route path="activities" element={<TrainerActivities />} />
+            <Route path="conducted" element={<Conducted />} />
+            <Route path="hours" element={<Hours />} />
+          </Route>
 
-        {/* =========================
-            NOT FOUND
-        ========================== */}
+          {/* =========================
+              ADMIN DASHBOARD
+          ========================== */}
 
-        <Route
-          path="*"
-          element={<NotFound />}
-        />
-      </Routes>
+          <Route path="/admin" element={<AdminLayout />}>
+            <Route index element={<AdminOverview />} />
+            <Route path="review" element={<ReviewQueue />} />
+            <Route path="contribution" element={<Contribution />} />
+          </Route>
 
-  
+          {/* =========================
+              NOT FOUND
+          ========================== */}
+
+          <Route
+            path="*"
+            element={<NotFound />}
+          />
+        </Routes>
+      </TrainerProvider>
       <Footer />
-
       <ScrollToTop />
-      
     </BrowserRouter>
   );
 }
