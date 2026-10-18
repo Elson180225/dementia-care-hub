@@ -87,23 +87,24 @@ const menuItems = [
   {
     label: "Caregiver Support",
     path: "/caregiver-support",
-
     children: [
-      {
-        label: "Supporting Someone with Dementia",
-        path: "/caregiver-support/supporting-someone",
+      { 
+        label: "Caregiver Guidance", 
+        path: "/caregiver-support#guidance" 
+      },
+      { 
+        label: "Caregiver Training", 
+        path: "/caregiver-support#training" 
       },
       {
-        label: "Caregiver Wellbeing",
-        path: "/caregiver-support/wellbeing",
+        label: "Certificate Verification",
+        path: "/caregiver-support#certificate-verification",
       },
-      {
-        label: "Support Resources",
-        path: "/find-help",
+      { label: "Support Groups", 
+        path: "/caregiver-support#support-groups" 
       },
-      {
-        label: "Learning Resources",
-        path: "/learn-events",
+      { label: "Volunteer", 
+        path: "/caregiver-support#volunteer" 
       },
     ],
   },
