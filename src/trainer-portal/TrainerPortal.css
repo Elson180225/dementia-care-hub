@@ -38,3 +38,16 @@
 .tp-table th, .tp-table td { padding: 12px 14px; border-bottom: 1px solid #e6dfe8; text-align: left; }
 .tp-table th { background: #f5effa; }
 .tp-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+.tp-upload { margin: 20px 0; padding: 16px; border: 1px solid #877991; border-radius: 8px; }
+.tp-upload input { max-width: 100%; }
+.tp-upload li { margin: 8px 0; display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+.tp-preview { max-width: 240px; max-height: 240px; object-fit: contain; }
+.tp-managed { margin: 32px auto; color: #28242b; }
+.tp-card pre { max-width: 400px; max-height: 300px; overflow: auto; white-space: pre-wrap; overflow-wrap: anywhere; }
+.tp-page input[type="checkbox"] { width: 24px; height: 24px; min-height: 24px; }
+.tp-field textarea { resize: vertical; }
+.tp-password-row { display: flex; align-items: stretch; gap: 8px; }
+.tp-password-row input { flex: 1; min-width: 0; }
+.tp-password-eye { display: inline-flex; align-items: center; justify-content: center; flex: 0 0 48px; min-height: 48px; border: 1px solid #877991; border-radius: 8px; background: #fff; color: #51277d; cursor: pointer; }
+.tp-password-eye:hover { background: #f5effa; }
+.tp-password-eye:focus-visible { outline: 3px solid #a66b00; outline-offset: 3px; }

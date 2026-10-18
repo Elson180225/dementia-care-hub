@@ -22,7 +22,7 @@ export function pendingCount(profile, activities) {
   );
 }
 
-export function buildQueue({ accessRequests, profile, activities }) {
+export function buildQueue({ accessRequests, profile, profiles = [profile], activities }) {
   const items = [];
 
   accessRequests
@@ -40,16 +40,10 @@ export function buildQueue({ accessRequests, profile, activities }) {
       })
     );
 
-  if (profile.status === "submitted")
-    items.push({
-      key: "profile",
-      target: "profile",
-      id: profile.id,
-      kind: "Trainer profile update",
-      title: profile.name,
-      detail: `${profile.city} · ${profile.language}`,
-      approveLabel: "Approve update",
-    });
+  profiles.filter(p => p.status === "submitted").forEach(p => items.push({
+    key:`profile-${p.id}`, target:"profile", id:p.id, kind:"Trainer profile update", title:p.name,
+    detail:`${p.city} ? ${p.language}`, approveLabel:"Approve update"
+  }));
 
   activities
     .filter((a) => a.status === "submitted")

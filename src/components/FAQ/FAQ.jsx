@@ -1,3 +1,4 @@
+import PublishedRecords from "../PublishedRecords";
 import { useState } from "react";
 import faqs from "../../data/faqs";
 import "./FAQ.css";
@@ -23,6 +24,7 @@ function FAQ() {
           </p>
         </div>
 
+        <PublishedRecords kind="faqs" title="RCBC reviewed FAQs"/>
         <div className="faq-list">
           {faqs.map((faq) => {
             const isOpen = openId === faq.id;

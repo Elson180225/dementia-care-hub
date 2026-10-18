@@ -1,3 +1,4 @@
+import PublishedRecords from "../components/PublishedRecords";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { Link, useLocation } from "react-router-dom";
@@ -38,8 +39,6 @@ import {
   pageInfo,
   sectionOrder,
   pathFor,
-  activities,
-  trainers,
   physicalProgrammes,
   learningResources,
   activityTypes,
@@ -48,6 +47,12 @@ import {
   languages,
 } from "../data/learn-events-data";
 import "./LearnEvents.css";
+
+function usePublicActivities() {
+ const [rows,setRows]=useState([]);
+ useEffect(()=>{let active=true;fetch('/api/activities').then(r=>{if(!r.ok)throw new Error('Activities unavailable');return r.json();}).then(data=>{if(active)setRows(data.map(a=>({...a,date:a.starts_at,registrationLink:a.registration_link,poster:a.poster_url,location:a.venue,registrationDeadline:a.registration_deadline,capacity:a.capacity,trainers:a.trainers || [],status:a.cancelled_at?'cancelled':['completed','verified','archived'].includes(a.status)?'completed':'upcoming'})));}).catch(()=>{});return ()=>{active=false;};},[]);
+ return rows;
+}
 
 /* ---- image resolver ---- */
 const imageMap = {
@@ -663,6 +668,7 @@ function pageItems(items, filters, page) {
    SECTION 1: ONLINE EDUCATION
    ================================================================ */
 function OnlineEducation() {
+  const activities=usePublicActivities();
   const [selected, setSelected] = useState(null);
   const [selectedQa, setSelectedQa] = useState(null);
   const defaultFilters = { query: "", language: "All", timing: "All" };
@@ -1933,7 +1939,7 @@ function FacilitatorProfileModal({ facilitator, activities = [], onClose }) {
 
   if (!facilitator) return null;
 
-  const trainerActivities = activities.filter((a) => a.trainerId === facilitator.id);
+  const trainerActivities = activities.filter((a) => (a.trainerId === facilitator.id || a.trainers?.some(t=>t.trainerId===facilitator.id)));
   const upcomingActs = trainerActivities.filter((a) => a.status === "upcoming");
   const pastActs = trainerActivities.filter((a) => a.status === "completed");
 
@@ -2139,6 +2145,7 @@ function FacilitatorProfileModal({ facilitator, activities = [], onClose }) {
    SECTION 3: EVENTS (Restored & Supercharged with Dialogue, Calendar, News)
    ================================================================ */
 function EventsSection() {
+  const activities=usePublicActivities();
   const [selectedActivity, setSelectedActivity] = useState(null);
   const [lightboxData, setLightboxData] = useState(null);
 
@@ -2296,7 +2303,7 @@ function EventsSection() {
   const filteredEvents = useMemo(() => {
     return activities.filter((ev) => {
       // Must be a community event type (Dialogue, Expo, Forum, Workshop, Public Talk, Other)
-      const isCommunityEvent = ["Dialogue", "Expo", "Forum", "Workshop", "Public Talk", "Other"].includes(ev.type);
+      const isCommunityEvent = ["Dialogue", "Expo", "Forum", "Workshop", "Seminar", "Public Talk", "Other"].includes(ev.type);
       if (!isCommunityEvent) return false;
 
       // Status filter
@@ -2325,7 +2332,7 @@ function EventsSection() {
 
       return true;
     });
-  }, [searchQuery, selectedCity, selectedFormat, selectedLanguage, statusFilter]);
+  }, [activities, searchQuery, selectedCity, selectedFormat, selectedLanguage, statusFilter]);
 
   const hasActiveFilters =
     searchQuery.trim() !== "" ||
@@ -3168,6 +3175,11 @@ function MedicalCarousel({ trainers: carouselTrainers, onSelect, onViewAll }) {
    SECTION 4: CERTIFIED TRAINERS
    ================================================================ */
 function CertifiedTrainers() {
+  const activities=usePublicActivities();
+  const [trainers,setTrainers]=useState([]);
+  const [directoryError,setDirectoryError]=useState("");
+  useEffect(()=>{let alive=true;fetch('/api/trainers').then(r=>{if(!r.ok)throw new Error('Trainer directory unavailable');return r.json();}).then(rows=>{if(alive)setTrainers(rows.map(t=>({...t,category:'certified-trainer',role:'Certified Trainer',institution:'RCBC',certRef:t.certificate_ref,bio:t.short_profile,initials:t.name.split(' ').map(n=>n[0]).join(''),photo:t.photo_url})));}).catch(e=>{if(alive)setDirectoryError(e.message);});return ()=>{alive=false;};},[]);
+
   const [selectedFacilitatorModal, setSelectedFacilitatorModal] = useState(null);
   const [activeCategory, setActiveCategory] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
@@ -3178,10 +3190,10 @@ function CertifiedTrainers() {
   const [activeToolkitModal, setActiveToolkitModal] = useState(null);
   const [trainerLightbox, setTrainerLightbox] = useState(null);
 
-  const clinicalFacilitators = useMemo(() => trainers.filter((t) => t.category === "medical-professional"), []);
-  const advisoryFacilitators = useMemo(() => trainers.filter((t) => t.category === "advisory-support"), []);
+  const clinicalFacilitators = useMemo(() => trainers.filter((t) => t.category === "medical-professional"), [trainers]);
+  const advisoryFacilitators = useMemo(() => trainers.filter((t) => t.category === "advisory-support"), [trainers]);
 
-  const getTrainerActivities = (trainerId) => activities.filter((a) => a.trainerId === trainerId);
+  const getTrainerActivities = (trainerId) => activities.filter((a) => (a.trainerId === trainerId || a.trainers?.some(t=>t.trainerId===trainerId)));
 
   const filteredTrainers = useMemo(() => trainers.filter((t) => {
     if (activeCategory !== "all" && t.category !== activeCategory) return false;
@@ -3192,7 +3204,7 @@ function CertifiedTrainers() {
       if (!text.includes(searchQuery.toLowerCase().trim())) return false;
     }
     return true;
-  }), [activeCategory, trainerCity, trainerLanguage, searchQuery]);
+  }), [trainers, activeCategory, trainerCity, trainerLanguage, searchQuery]);
 
   const scrollToDirectory = (category = "all") => {
     setActiveCategory(category);
@@ -3224,6 +3236,7 @@ function CertifiedTrainers() {
 
   return (
     <main className="module-main certified-trainers-module">
+      {directoryError && <p role="alert">{directoryError}</p>}
 
       {/* ======================================================
           HERO
@@ -3358,11 +3371,11 @@ function CertifiedTrainers() {
                   <article className={`trainer-profile-card ${isAdvisory ? "card-advisory-theme" : ""} ${isOpen ? "is-expanded" : ""}`} key={t.id}>
                     <div className="trainer-card-topbar">
                       <div className="trainer-avatar-wrap" style={{ backgroundColor: t.badgeColor || "#0d716b" }}>
-                        <span className="trainer-avatar-letter">{t.initials || t.name.charAt(0)}</span>
-                        <span className="trainer-verified-check" title="ADFM Verified">✓</span>
+                        {t.photo ? <img src={t.photo} alt={t.name} style={{width:"100%",height:"100%",objectFit:"cover",borderRadius:"50%"}}/> : <span className="trainer-avatar-letter">{t.initials || t.name.charAt(0)}</span>}
+                        <span className="trainer-verified-check" title="RCBC Verified">✓</span>
                       </div>
                       <div className="trainer-primary-info">
-                        <span className={`trainer-category-chip ${isAdvisory ? "chip-advisory" : "chip-clinical"}`}>{isAdvisory ? "ADFM QA/QC Advisory Board" : "Clinical Facilitator"}</span>
+                        <span className={`trainer-category-chip ${isAdvisory ? "chip-advisory" : "chip-clinical"}`}>{isAdvisory ? "Advisory Board" : "Certified Trainer"}</span>
                         <h3>{t.name}</h3>
                         <p className="trainer-role-title"><strong>{t.role}</strong> &bull; {t.institution}</p>
                         <span className="trainer-cert-badge">Cert. Ref: {t.certRef}</span>
@@ -3571,6 +3584,13 @@ function CertifiedTrainers() {
 function parseActivityDate(dateStr) {
   if (!dateStr || dateStr === "Past webinar") return new Date(NaN);
   const months = { Jan:0,Feb:1,Mar:2,Apr:3,May:4,Jun:5,Jul:6,Aug:7,Sep:8,Oct:9,Nov:10,Dec:11 };
+  if (/^\d{4}-\d{2}-\d{2}T/.test(dateStr)) {
+    const date=new Date(dateStr);
+    if (Number.isNaN(date.getTime())) return new Date(NaN);
+    const local=date.toLocaleDateString("sv-SE",{timeZone:"Asia/Kuala_Lumpur"});
+    const [y,m,d]=local.split("-").map(Number);
+    return new Date(y,m-1,d);
+  }
   const parts = dateStr.trim().split(" ");
   if (parts.length < 3) return new Date(NaN);
   const day = parseInt(parts[0], 10);
@@ -3610,6 +3630,7 @@ const UC_LEGEND = [
 ];
 
 function UpcomingCalendar() {
+  const activities=usePublicActivities();
   // ---- State ----
   const today = new Date();
   const [viewYear, setViewYear] = useState(today.getFullYear());
@@ -3622,16 +3643,12 @@ function UpcomingCalendar() {
 
   // ---- Merge all dateable events ----
   const allCalendarEvents = useMemo(() => {
-    const merged = [
-      ...activities,
-      ...trainerWebinars,
-      ...plannedTopicsList,
-    ];
+    const merged = activities;
     return merged.filter((a) => {
       if (!a.date || a.date === "Past webinar") return false;
       return !Number.isNaN(parseActivityDate(a.date));
     });
-  }, []);
+  }, [activities]);
 
   // ---- Apply filters ----
   const filteredEvents = useMemo(() => {
@@ -3950,7 +3967,7 @@ function UpcomingCalendar() {
 
                 {/* Action */}
                 <div className="uc-detail-action">
-                  {selectedEvent.status === "completed" ? (
+                  {selectedEvent.status === "cancelled" ? (<span className="uc-action-past">This activity has been cancelled.</span>) : selectedEvent.status === "completed" ? (
                     <span className="uc-action-past">This session has been completed.</span>
                   ) : selectedEvent.registrationLink != null ? (
                     <a
@@ -4015,7 +4032,7 @@ function LearnEvents({ module }) {
       </section>
 
       {/* ---- Section content ---- */}
-      {module === "online-education" && <OnlineEducation />}
+      {module === "online-education" && <><PublishedRecords kind="learning_resources" title="Approved learning resources"/><OnlineEducation /></>}
       {module === "physical-education" && <PhysicalEducation />}
       {module === "events" && <EventsSection />}
       {module === "certified-trainers" && <CertifiedTrainers />}

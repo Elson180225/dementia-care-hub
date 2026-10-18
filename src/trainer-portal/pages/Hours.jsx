@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useTrainer } from "../TrainerContext";
 import { COMPLETION_LABEL } from "../constants";
 import { yearSummary } from "../selectors";
@@ -5,16 +6,17 @@ import { StatusChip } from "../ui";
 
 export default function Hours() {
   const { state } = useTrainer();
-  const year = new Date().getFullYear();
+  const [year,setYear] = useState(new Date().getFullYear());
   const summary = yearSummary(state.activities, year);
   const rows = state.activities
-    .filter((a) => a.completion.status !== "none")
+    .filter((a) => a.completion.status !== "none" && new Date(a.date).getFullYear()===year)
     .sort((a, b) => b.date.localeCompare(a.date));
 
   return (
     <>
       <h1>Contribution & Training Hours</h1>
       <p>Hours come from your completed activity records after Admin verification. You do not need to enter them again.</p>
+      <label className="tp-field">Reporting year<select value={year} onChange={e=>setYear(Number(e.target.value))}>{[...new Set([new Date().getFullYear(),...state.activities.map(a=>new Date(a.date).getFullYear())])].sort((a,b)=>b-a).map(y=><option key={y}>{y}</option>)}</select></label>
       <div className="tp-stats">
         <div className="tp-stat"><span>Conducted in {year}</span><strong>{summary.conducted}</strong></div>
         <div className="tp-stat"><span>Verified hours</span><strong>{summary.hours}</strong></div>

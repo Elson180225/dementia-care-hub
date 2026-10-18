@@ -35,10 +35,11 @@ export default function Contribution() {
     return acc;
   }, {});
 
+  const trainerRows=rows.flatMap(a=>(a.trainers || []).map(t=>({...a,trainerId:t.trainerId,trainerName:state.profiles.find(p=>p.id===t.trainerId)?.name || t.trainerId,role:t.role})));
   function exportCsv() {
     const head = ["Year", "Trainer", "Activity", "Role", "Hours", "Participants"];
-    const body = rows.map((a) => [
-      new Date(a.date).getFullYear(), state.profile.name, a.title, a.role,
+    const body = trainerRows.map((a) => [
+      new Date(a.date).getFullYear(), a.trainerName, a.title, a.role,
       a.completion.hours, a.completion.participants,
     ]);
     download("trainer-contribution.csv", toCsv([head, ...body]));
@@ -70,10 +71,10 @@ export default function Contribution() {
           <caption className="tp-sr">Verified records</caption>
           <thead><tr><th>Year</th><th>Trainer</th><th>Activity</th><th>Role</th><th>Hours</th><th>Participants</th></tr></thead>
           <tbody>
-            {rows.map((a) => (
-              <tr key={a.id}>
+            {trainerRows.map((a) => (
+              <tr key={`${a.id}-${a.trainerId}`}>
                 <td>{new Date(a.date).getFullYear()}</td>
-                <td>{state.profile.name}</td>
+                <td>{a.trainerName}</td>
                 <td>{a.title}</td>
                 <td>{a.role}</td>
                 <td>{a.completion.hours}</td>

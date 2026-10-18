@@ -1,9 +1,20 @@
 
 import { createServer } from 'node:http';
 import { enquiryHandler } from './enquiries.js';
+import { authHandler } from './auth.js';
+import { portalHandler } from './portal.js';
+import { pool } from './db.js';
+import { filesHandler } from './uploads.js';
+import { managementHandler } from './management.js';
+import { publicRecordsHandler } from './public-records.js';
+import { createHash } from 'node:crypto';
 
 const port = Number(process.env.API_PORT || 3001);
-const handleEnquiry = enquiryHandler();
+const handleEnquiry = enquiryHandler({persist:async data=>{
+ const {id,name,email,type,message}=data;
+ const fingerprint=createHash('sha256').update(JSON.stringify({name,email,type,message})).digest('hex');
+ await pool.query('INSERT INTO enquiries(id,fingerprint,name,email,type,message) VALUES($1,$2,$3,$4,$5,$6) ON CONFLICT DO NOTHING',[id,fingerprint,name,email,type,message]);
+}});
 
 function sendJson(res, status, data) {
   res.writeHead(status, {
@@ -15,7 +26,16 @@ function sendJson(res, status, data) {
 }
 
 const server = createServer(async (req, res) => {
+ try {
   const url = new URL(req.url, `http://${req.headers.host || 'localhost'}`);
+  if(url.pathname==='/api/uploads' || url.pathname.startsWith('/api/files/')) return await filesHandler(req,res,url,sendJson);
+  if(url.pathname.startsWith('/api/admin/')) return await managementHandler(req,res,url,sendJson);
+  if(url.pathname.startsWith('/api/public/')) return await publicRecordsHandler(req,res,url,sendJson);
+  if(url.pathname.startsWith('/api/auth/')) return await authHandler(req,res,url.pathname,sendJson);
+  if(url.pathname.startsWith('/api/portal') || url.pathname==='/api/trainers' || url.pathname==='/api/activities') return await portalHandler(req,res,url,sendJson);
+  if(url.pathname==='/api/health/database') {
+   await pool.query('SELECT 1'); return sendJson(res,200,{status:'OK',database:'PostgreSQL'});
+  }
 
   // Check whether the backend is running
   if (url.pathname === '/api/health' && req.method === 'GET') {
@@ -51,6 +71,11 @@ const server = createServer(async (req, res) => {
   return sendJson(res, 404, {
     error: 'API endpoint not found',
   });
+ } catch(error) {
+  const status=error.status || (error.code==='23505'?409: error.code?.startsWith('23') || error.code?.startsWith('22')?400:500);
+  if(status===500) console.error('API failure:',error.code || error.name);
+  return sendJson(res,status,{error:status===500?'Database service unavailable':error.code==='23505'?'This record already exists':error.message});
+ }
 });
 
 server.listen(port, '127.0.0.1', () => {

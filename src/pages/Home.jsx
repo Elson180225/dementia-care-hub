@@ -1,3 +1,4 @@
+import PublishedRecords from "../components/PublishedRecords";
 import { Link } from "react-router-dom";
 
 import "./Home.css";
@@ -9,6 +10,7 @@ import Statistics from "../components/Statistics/Statistics";
 function Home() {
   return (
     <main className="home-page">
+      <PublishedRecords kind="content_pages" slug="home" title="Project updates"/>
       {/* =====================================================
           ROW 1 — HERO
       ====================================================== */}

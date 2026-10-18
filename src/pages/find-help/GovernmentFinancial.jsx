@@ -1,3 +1,4 @@
+import PublishedRecords from "../../components/PublishedRecords";
 import { useMemo, useState } from "react";
 
 import governmentResources from "../../data/governmentResources";
@@ -46,6 +47,7 @@ function GovernmentFinancial() {
 
   return (
     <main className="government-page">
+      <PublishedRecords kind="organisations" category="financial" title="Published directory records" />
       {/* =====================================================
           HERO
       ====================================================== */}
