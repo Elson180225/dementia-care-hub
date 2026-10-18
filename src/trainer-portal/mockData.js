@@ -41,3 +41,16 @@ export const sampleActivities = [
     completion: { status: "none" },
   },
 ];
+
+export const sampleAccessRequests = [
+  {
+    id: "r-1",
+    name: "Sample Applicant",
+    email: "applicant@example.com",
+    city: "Sibu",
+    certificateRef: "To be checked by Admin",
+    status: "submitted",
+    adminComment: "",
+    requestedAt: "2026-10-12",
+  },
+];

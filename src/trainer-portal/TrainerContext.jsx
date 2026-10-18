@@ -1,11 +1,31 @@
 import { createContext, useContext, useMemo, useReducer } from "react";
-import { sampleActivities, sampleProfile } from "./mockData";
+import { sampleAccessRequests, sampleActivities, sampleProfile } from "./mockData";
 
 const TrainerContext = createContext(null);
-const initial = { session: null, profile: sampleProfile, activities: sampleActivities };
+
+const initial = {
+  session: null,
+  adminSession: null,
+  profile: sampleProfile,
+  activities: sampleActivities,
+  accessRequests: sampleAccessRequests,
+  history: [],
+};
 
 function patchActivity(state, id, fn) {
   return { ...state, activities: state.activities.map((a) => (a.id === id ? fn(a) : a)) };
+}
+
+function logEntry(state, entity, entityLabel, decision, comment) {
+  return [
+    {
+      id: crypto.randomUUID(),
+      at: new Date().toISOString(),
+      by: "RCBC Admin",
+      entity, entityLabel, decision, comment,
+    },
+    ...state.history,
+  ];
 }
 
 function reducer(state, action) {
@@ -14,8 +34,14 @@ function reducer(state, action) {
       return { ...state, session: { id: state.profile.id } };
     case "SIGN_OUT":
       return { ...state, session: null };
+    case "ADMIN_SIGN_IN":
+      return { ...state, adminSession: { name: "RCBC Admin" } };
+    case "ADMIN_SIGN_OUT":
+      return { ...state, adminSession: null };
+
     case "PROFILE_SUBMIT":
       return { ...state, profile: { ...state.profile, ...action.values, status: "submitted", adminComment: "" } };
+
     case "ACTIVITY_SAVE": {
       const exists = state.activities.some((a) => a.id === action.activity.id);
       if (exists) return patchActivity(state, action.activity.id, (a) => ({ ...a, ...action.activity }));
@@ -37,22 +63,53 @@ function reducer(state, action) {
       return patchActivity(state, action.id, (a) => ({
         ...a, completion: { ...a.completion, status: "submitted", adminComment: "" },
       }));
-    // Used by the Admin Dashboard later; remove when the server does this.
+
+    // Admin decision: approved | returned | rejected. Every decision is logged.
     case "ADMIN_REVIEW": {
       const { target, id, decision, comment = "" } = action;
+
+      if (target === "access") {
+        const req = state.accessRequests.find((r) => r.id === id);
+        return {
+          ...state,
+          accessRequests: state.accessRequests.map((r) =>
+            r.id === id ? { ...r, status: decision, adminComment: comment } : r
+          ),
+          history: logEntry(state, "Access request", req?.name ?? "", decision, comment),
+        };
+      }
+
       if (target === "profile")
-        return { ...state, profile: { ...state.profile, status: decision, adminComment: comment } };
+        return {
+          ...state,
+          profile: { ...state.profile, status: decision, adminComment: comment },
+          history: logEntry(state, "Trainer profile", state.profile.name, decision, comment),
+        };
+
+      const act = state.activities.find((a) => a.id === id);
+
       if (target === "activity")
-        return patchActivity(state, id, (a) => ({ ...a, status: decision, adminComment: comment }));
-      return patchActivity(state, id, (a) => ({
-        ...a,
-        completion: {
-          ...a.completion,
-          status: decision === "approved" ? "verified" : "returned",
-          adminComment: comment,
-        },
-      }));
+        return {
+          ...patchActivity(state, id, (a) => ({ ...a, status: decision, adminComment: comment })),
+          history: logEntry(state, "Workshop / Seminar", act?.title ?? "", decision, comment),
+        };
+
+      return {
+        ...patchActivity(state, id, (a) => ({
+          ...a,
+          completion: {
+            ...a.completion,
+            status: decision === "approved" ? "verified" : "returned",
+            adminComment: comment,
+          },
+        })),
+        history: logEntry(
+          state, "Completed activity record", act?.title ?? "",
+          decision === "approved" ? "verified" : decision, comment
+        ),
+      };
     }
+
     default:
       return state;
   }
