@@ -53,28 +53,32 @@ export const navigation = [
     ],
 },
 
-{
+  {
     label: "Caregiver Support",
     path: "/caregiver-support",
     children: [
-    {
-        label: "Supporting Someone with Dementia",
-        path: "/caregiver-support/supporting-someone",
-    },
-    {
-        label: "Caregiver Wellbeing",
-        path: "/caregiver-support/wellbeing",
-    },
-    {
-        label: "Support Resources",
-        path: "/find-help",
-    },
-    {
-        label: "Learning Resources",
-        path: "/learn-events",
-    },
+      { 
+        label: "Caregiver Guidance", 
+        path: "/caregiver-support#guidance" 
+      },
+      { 
+        label: "Caregiver Training", 
+        ath: "/caregiver-support#training" 
+      },
+      {
+        label: "Certificate Verification",
+        path: "/caregiver-support#certificate-verification",
+      },
+      { 
+        label: "Support Groups", 
+        path: "/caregiver-support#support-groups" 
+      },
+      { 
+        label: "Volunteer", 
+        path: "/caregiver-support#volunteer" 
+      },
     ],
-},
+  },
 
 {
     label: "Learn & Events",
