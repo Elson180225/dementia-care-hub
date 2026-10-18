@@ -53,30 +53,30 @@ export const navigation = [
     ],
 },
 
-  {
+{
     label: "Caregiver Support",
     path: "/caregiver-support",
     children: [
-      { 
+    { 
         label: "Caregiver Guidance", 
         path: "/caregiver-support#guidance" 
-      },
-      { 
+    },
+    { 
         label: "Caregiver Training", 
         ath: "/caregiver-support#training" 
-      },
-      {
+    },
+    {
         label: "Certificate Verification",
         path: "/caregiver-support#certificate-verification",
-      },
-      { 
+    },
+    { 
         label: "Support Groups", 
         path: "/caregiver-support#support-groups" 
-      },
-      { 
+    },
+    { 
         label: "Volunteer", 
         path: "/caregiver-support#volunteer" 
-      },
+    },
     ],
   },
 
