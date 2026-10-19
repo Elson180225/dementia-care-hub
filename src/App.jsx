@@ -40,7 +40,6 @@ import Hours from "./trainer-portal/pages/Hours";
 import AdminLayout from "./admin/AdminLayout";
 import AdminOverview from "./admin/pages/Overview";
 import ReviewQueue from "./admin/pages/ReviewQueue";
-import AdminActivities from "./admin/pages/Activities";
 import Records from "./admin/pages/Records";
 import Users from "./admin/pages/Users";
 import Contribution from "./admin/pages/Contribution";

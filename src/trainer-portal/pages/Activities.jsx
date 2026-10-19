@@ -33,6 +33,20 @@ export default function Activities({admin=false}) {
   useEffect(()=>{fetch('/api/portal/trainers').then(r=>r.json()).then(setAvailableTrainers).catch(()=>{});},[]);
   const [assigned,setAssigned]=useState([]);
 
+  const [cancelling,setCancelling]=useState(null); // { id, reason, error }
+
+  const review = (id, decision, comment = "") =>
+    dispatch({ type: "ADMIN_REVIEW", target: "activity", id, decision, comment });
+
+  async function confirmCancel() {
+    const reason = cancelling.reason.trim();
+    if (!reason) {
+      setCancelling({ ...cancelling, error: "Please give a short reason. It is shown on the public listing." });
+      return;
+    }
+    if (await review(cancelling.id, "cancelled", reason)) setCancelling(null);
+  }
+
   const open = (a) => {
     setErrors({});
     setAssigned(a?.trainers || (admin?[]:[{trainerId:state.session?.id,role:"Trainer"}]));
@@ -105,7 +119,7 @@ export default function Activities({admin=false}) {
   return (
     <>
       <h1>{admin?"Events and workshops":"Workshop & Seminar"}</h1>
-      <p>{admin?"Create and maintain project activities. Submit and approve the record before publishing it from the review queue.":"Submit your own activities. RCBC Admin reviews them before they appear in Education & Events."}</p>
+      <p>{admin?"Create and maintain project activities. Submitted activities are approved in the Review queue, then published here.":"Submit your own activities. RCBC Admin reviews them before they appear in Education & Events."}</p>
       <button className="tp-btn" onClick={() => open(null)}>{admin?"New project activity":"New workshop / seminar"}</button>
       <ul className="tp-cards">
         {state.activities.map((a) => (
@@ -117,6 +131,38 @@ export default function Activities({admin=false}) {
             {a.status === "returned" && a.adminComment && <p className="tp-note">Admin comment: {a.adminComment}</p>}
             {(!a.cancelledAt && (admin?["draft","returned","approved","published"].includes(a.status):["draft","returned"].includes(a.status) && a.created_by===state.session?.id)) && (
               <button className="tp-btn tp-btn-ghost" onClick={() => open(a)}>Edit</button>
+            )}
+                        {admin && (
+              <div className="tp-actions">
+                {a.status === "approved" && !a.cancelledAt && (
+                  <button className="tp-btn" onClick={() => review(a.id, "published")}>Publish</button>
+                )}
+                {a.status === "published" && !a.cancelledAt && (
+                  <button className="tp-btn tp-btn-ghost" onClick={() => review(a.id, "unpublished")}>Unpublish</button>
+                )}
+                {["approved", "published"].includes(a.status) && !a.cancelledAt && cancelling?.id !== a.id && (
+                  <button className="tp-btn tp-btn-ghost" onClick={() => setCancelling({ id: a.id, reason: "", error: "" })}>
+                    Cancel activity
+                  </button>
+                )}
+                {(a.status === "verified" || (a.cancelledAt && a.status !== "archived")) && (
+                  <button className="tp-btn tp-btn-ghost" onClick={() => review(a.id, "archived")}>Archive</button>
+                )}
+              </div>
+            )}
+            {cancelling?.id === a.id && (
+              <div>
+                <Field id={`cancel-${a.id}`} label="Reason for cancelling" error={cancelling.error}>
+                  <textarea id={`cancel-${a.id}`} rows="2" value={cancelling.reason}
+                    onChange={(e) => setCancelling({ ...cancelling, reason: e.target.value, error: "" })}
+                    aria-invalid={Boolean(cancelling.error)}
+                    aria-describedby={describe(`cancel-${a.id}`, cancelling.error)} />
+                </Field>
+                <div className="tp-actions">
+                  <button className="tp-btn" onClick={confirmCancel}>Confirm cancellation</button>
+                  <button className="tp-btn tp-btn-ghost" onClick={() => setCancelling(null)}>Keep activity</button>
+                </div>
+              </div>
             )}
           </li>
         ))}

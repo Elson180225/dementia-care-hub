@@ -13,7 +13,7 @@ const links = [
 
 export default function TrainerLayout() {
   const { state, dispatch, loading } = useTrainer();
-  if (loading) return <p role="status">Loading account?</p>;
+  if (loading) return <p role="status">Loading account...</p>;
 
   if (!state.session) {
     return <main className="tp-page"><div className="tp-container"><AccountForm role="trainer" /></div></main>;
