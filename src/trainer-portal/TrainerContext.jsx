@@ -8,6 +8,7 @@ import {
   useState,
 } from "react";
 import { watchIdleSession } from "./idleSession";
+import { normalizePortalState } from './portalState';
 
 const DEV_PREVIEW =
   import.meta.env.DEV &&
@@ -82,7 +83,7 @@ export default function TrainerProvider({ children }) {
     }
 
     const { user } = await api("/api/auth/me");
-    setState(user ? await api("/api/portal") : empty);
+    setState(user ? normalizePortalState(await api("/api/portal"),empty) : empty);
   }, []);    
 
   const signedInId =
