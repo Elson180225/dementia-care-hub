@@ -22,7 +22,29 @@ export default function ReviewQueue() {
   const { state, dispatch } = useTrainer();
   const queue = buildQueue(state);
   const [comments, setComments] = useState({});
+  const [refs, setRefs] = useState({});
   const [errors, setErrors] = useState({});
+
+  const refFor = (item) =>
+    refs[item.key] ?? (item.claimedRef === "Not provided" ? "" : item.claimedRef ?? "");
+
+  async function decide(item, decision) {
+    const comment = (comments[item.key] ?? "").trim();
+    if (decision !== "approved" && !comment) {
+      setErrors((e) => ({ ...e, [item.key]: "Please add a short comment so the trainer knows why." }));
+      return;
+    }
+    const certificateRef = refFor(item).trim();
+    if (item.target === "access" && decision === "approved" && !certificateRef) {
+      setErrors((e) => ({ ...e, [item.key]: "Enter the official certificate reference before approving." }));
+      return;
+    }
+    setErrors((e) => ({ ...e, [item.key]: "" }));
+    await dispatch({
+      type: "ADMIN_REVIEW", target: item.target, id: item.id, decision, comment,
+      ...(item.target === "access" ? { certificateRef } : {}),
+    });
+  }
 
   function decide(item, decision) {
     const comment = (comments[item.key] ?? "").trim();
@@ -50,12 +72,24 @@ export default function ReviewQueue() {
             <p className="tp-dev">{item.kind}</p>
             <h2>{item.title}</h2>
             <p>{item.detail}</p>
-            <Field
-              id={`c-${item.key}`}
-              label="Comment (needed when returning or rejecting)"
-              error={errors[item.key]}
-            >
-              <textarea
+            {item.target === "access" && (
+                <Field
+                    id={`ref-${item.key}`}
+                    label="Official certificate reference (checked against RCBC records)"
+                >
+                    <input
+                        id={`ref-${item.key}`}
+                        value={refFor(item)}
+                        onChange={(e) => setRefs({ ...refs, [item.key]: e.target.value })}
+                    />
+                </Field>
+                )}
+                <Field
+                    id={`c-${item.key}`}
+                    label="Comment (needed when returning or rejecting)"
+                    error={errors[item.key]}
+                >
+                <textarea
                 id={`c-${item.key}`}
                 rows="2"
                 value={comments[item.key] ?? ""}

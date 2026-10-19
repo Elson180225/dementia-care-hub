@@ -97,7 +97,7 @@ export default function TrainerProvider({ children }) {
 }, [refresh]);
 
   useEffect(() => {
-    if (!signedInId) return;
+    if (DEV_PREVIEW || !signedInId) return;
 
     return watchIdleSession({
       target: document,
@@ -115,7 +115,7 @@ export default function TrainerProvider({ children }) {
   }, [signedInId]);
 
   useEffect(() => {
-    if (!signedInId) return;
+    if (DEV_PREVIEW || !signedInId) return;
 
     const update = () => {
       if (document.visibilityState === "visible") {
