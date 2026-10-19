@@ -1,46 +1,180 @@
-import { useEffect, useState } from 'react';
-import { api } from '../../trainer-portal/TrainerContext';
-import { recordTypes } from '../../../shared/admin-records';
-const localDate=value=>value?new Date(value).toLocaleString('sv-SE',{timeZone:'Asia/Kuala_Lumpur'}).replace(' ','T').slice(0,16):'';
+import { useState } from "react";
+import { useTrainer } from "../../trainer-portal/TrainerContext";
+import { LANGUAGES, RECORD_CATEGORIES, RECORD_STATUS_LABEL } from "../../trainer-portal/constants";
+import { reviewDue } from "../../trainer-portal/selectors";
+import { Field, StatusChip, describe } from "../../trainer-portal/ui";
+
+const blank = {
+  category: RECORD_CATEGORIES[0], title: "", description: "", city: "",
+  language: "All", contact: "", source: "", sourceUrl: "",
+};
+const LANGS = ["All", ...LANGUAGES];
+
+function validate(v) {
+  const e = {};
+  if (!v.title.trim()) e.title = "Please enter a title.";
+  if (!v.description.trim()) e.description = "Please add a short description.";
+  if (v.sourceUrl && !/^https?:\/\//i.test(v.sourceUrl))
+    e.sourceUrl = "The link must start with http:// or https://";
+  return e;
+}
+
+const fmt = (d) => new Date(d).toLocaleDateString("en-MY", { dateStyle: "medium" });
+
 export default function Records() {
- const [kind,setKind]=useState('organisations');const [rows,setRows]=useState([]);const [editing,setEditing]=useState(null);
- const [error,setError]=useState('');const [busy,setBusy]=useState(false);const [search,setSearch]=useState('');const [message,setMessage]=useState('');
- const config=recordTypes[kind];
- async function load(){setRows(await api('/api/admin/records/'+kind));}
- useEffect(()=>{let active=true;api('/api/admin/records/'+kind).then(r=>{if(active)setRows(r);}).catch(e=>{if(active)setError(e.message);});return ()=>{active=false;};},[kind]);
- function open(row={}) {
-  const values={};
-  for(const [name,,type] of config.fields) {
-   const initial=name==='language'?'English':Array.isArray(type)?type[0]:type==='checkbox'?false:type==='array'?[]:'';
-   values[name]=type==='datetime-local'?localDate(row[name]):name==='body'?(row.body?.text || ''):row[name]??initial;
+  const { state, dispatch } = useTrainer();
+  const [category, setCategory] = useState("All");
+  const [view, setView] = useState("live");
+  const [editing, setEditing] = useState(null);
+  const [errors, setErrors] = useState({});
+  const [notice, setNotice] = useState("");
+
+  const list = state.records.filter(
+    (r) =>
+      (category === "All" || r.category === category) &&
+      (view === "live" ? r.status !== "archived" : r.status === view)
+  );
+
+  function open(r) {
+    setErrors({});
+    setNotice("");
+    setEditing(
+      r
+        ? { id: r.id, values: Object.fromEntries(Object.keys(blank).map((k) => [k, r[k] ?? ""])) }
+        : { values: { ...blank } }
+    );
   }
-  setEditing({id:row.id,values});setError('');setMessage('');
- }
- async function save(event) {
-  event.preventDefault();setBusy(true);setError('');
-  try {await api('/api/admin/records/'+kind,editing);await load();setEditing(null);setMessage('Record saved to the database.');}catch(e){setError(e.message);}finally{setBusy(false);}
- }
- async function remove(row) {
-  setBusy(true);setError('');try {await api('/api/admin/records/'+kind,{id:row.id,remove:true});await load();setMessage('Unpublished draft removed.');}catch(e){setError(e.message);}finally{setBusy(false);}
- }
- function exportSubscribers(){
-  const eligible=rows.filter(r=>r.consent_at && !r.unsubscribed_at);const fields=['name','email','city','state','language','consent_at','consent_version'];
-  const esc=x=>'"'+String(x??'').replace(/^[=+@-]/,"' $&").replaceAll('"','""')+'"';
-  const csv=[fields,...eligible.map(r=>fields.map(f=>r[f]))].map(r=>r.map(esc).join(',')).join('\r\n');
-  const link=document.createElement('a');link.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));link.download='opt-in-subscribers.csv';link.click();URL.revokeObjectURL(link.href);
- }
- return <><h1>Content, directory and project records</h1><label className="tp-field">Record type<select value={kind} onChange={e=>{setKind(e.target.value);setEditing(null);setRows([]);setError('');setMessage('');}}>{Object.entries(recordTypes).map(([key,c])=><option key={key} value={key}>{c.label}</option>)}</select></label>
- {error && <p role="alert" className="tp-note">{error}</p>}{message && <p role="status">{message}</p>}
- {editing?<form className="tp-card" onSubmit={save}><h2>{editing.id?'Edit':'Create'} {config.label}</h2>
- {config.fields.map(([name,label,type,required])=>{const value=editing.values[name];const change=v=>setEditing({...editing,values:{...editing.values,[name]:v}});return <label key={name} className="tp-field">{label}{required?' *':''}
- {Array.isArray(type)?<select value={value} onChange={e=>change(e.target.value)}>{type.map(o=><option key={o}>{o}</option>)}</select>:type==='checkbox'?<input type="checkbox" checked={value} onChange={e=>change(e.target.checked)}/>:type==='textarea' || type==='array'?<textarea rows={4} required={required} value={type==='array'?value.join('\n'):value} onChange={e=>change(type==='array'?e.target.value.split('\n'):e.target.value)}/>:<input type={type} required={required} value={value || ''} onChange={e=>change(e.target.value)}/>}</label>;})}
- <div className="tp-actions"><button className="tp-btn" disabled={busy}>Save record</button><button className="tp-btn tp-btn-ghost" type="button" onClick={()=>setEditing(null)}>Cancel</button></div></form>:<>
- <div className="tp-actions">{!config.readonlyCreate && <button className="tp-btn" onClick={()=>open()}>Create {config.label}</button>}{kind==='subscribers' && <button className="tp-btn tp-btn-ghost" onClick={exportSubscribers}>Export opted-in subscribers</button>}</div>
- <label className="tp-field">Search records<input value={search} onChange={e=>setSearch(e.target.value)}/></label>
- <ul className="tp-cards">{rows.filter(r=>JSON.stringify(r).toLowerCase().includes(search.toLowerCase())).map(row=><li className="tp-card" key={row.id}><h2>{row[config.title]}</h2><p>{row.category || row.programme || row.language} {row.review_status || row.status} {row.publication_status}</p>
- {kind==='enquiries' && <><p>{row.email} | {new Date(row.received_at).toLocaleString('en-MY')}</p><p>{row.type}: {row.message}</p></>}
- {kind==='subscribers' && <p>{row.unsubscribed_at?'Unsubscribed':'Opted in'} | Consent: {row.consent_version}</p>}
- <p>{row.source}</p><button className="tp-btn" onClick={()=>open(row)}>View / edit</button>
- {['organisations','learning_resources','faqs','content_pages'].includes(kind) && row.publication_status!=='published' && row.review_status!=='archived' && <button className="tp-btn tp-btn-ghost" disabled={busy} onClick={()=>remove(row)}>Remove unpublished draft</button>}</li>)}</ul>{!rows.length && <p>No records yet.</p>}</>}
- </>;
+
+  const change = (e) =>
+    setEditing({ ...editing, values: { ...editing.values, [e.target.name]: e.target.value } });
+
+  function save() {
+    const found = validate(editing.values);
+    setErrors(found);
+    if (Object.keys(found).length) return;
+    dispatch({ type: "RECORD_SAVE", record: { id: editing.id ?? crypto.randomUUID(), ...editing.values } });
+    setEditing(null);
+  }
+
+  function setStatus(r, status) {
+    if (status === "published" && !r.source.trim()) {
+      setNotice(`“${r.title}” needs a source before it can be published. Edit the record and add one.`);
+      return;
+    }
+    setNotice("");
+    dispatch({ type: "RECORD_STATUS", id: r.id, status });
+  }
+
+  /* ---------- Form ---------- */
+  if (editing) {
+    const v = editing.values;
+    const input = (name, label, props = {}) => (
+      <Field id={name} label={label} error={errors[name]} hint={props.hint}>
+        <input id={name} name={name} value={v[name]} onChange={change}
+          aria-invalid={Boolean(errors[name])}
+          aria-describedby={describe(name, errors[name], props.hint)} {...props} />
+      </Field>
+    );
+    return (
+      <>
+        <h1>{editing.id ? "Edit record" : "New record"}</h1>
+        <form className="tp-card" noValidate onSubmit={(e) => e.preventDefault()}>
+          <Field id="category" label="Category">
+            <select id="category" name="category" value={v.category} onChange={change}>
+              {RECORD_CATEGORIES.map((c) => <option key={c}>{c}</option>)}
+            </select>
+          </Field>
+          {input("title", "Name / title")}
+          <Field id="description" label="Description" error={errors.description}>
+            <textarea id="description" name="description" rows="4" value={v.description} onChange={change}
+              aria-invalid={Boolean(errors.description)}
+              aria-describedby={describe("description", errors.description)} />
+          </Field>
+          {input("city", "City / location")}
+          <Field id="language" label="Language availability">
+            <select id="language" name="language" value={v.language} onChange={change}>
+              {LANGS.map((l) => <option key={l}>{l}</option>)}
+            </select>
+          </Field>
+          {input("contact", "Contact / access information")}
+          {input("source", "Source (who confirmed this information)", {
+            hint: "Needed before the record can be published.",
+          })}
+          {input("sourceUrl", "Source link (optional)", { type: "url", placeholder: "https://" })}
+          <div className="tp-actions">
+            <button type="button" className="tp-btn" onClick={save}>Save</button>
+            <button type="button" className="tp-btn tp-btn-ghost" onClick={() => setEditing(null)}>Cancel</button>
+          </div>
+        </form>
+      </>
+    );
+  }
+
+  /* ---------- List ---------- */
+  return (
+    <>
+      <h1>Directory & content</h1>
+      <p>
+        One place to maintain Find Help & Support, Caregiver Support, Learning Resources and FAQ records.
+        Inclusion does not mean RCBC endorses the provider.
+      </p>
+      <div className="tp-toolbar">
+        <Field id="cat" label="Category">
+          <select id="cat" value={category} onChange={(e) => setCategory(e.target.value)}>
+            <option>All</option>
+            {RECORD_CATEGORIES.map((c) => <option key={c}>{c}</option>)}
+          </select>
+        </Field>
+        <Field id="view" label="Show">
+          <select id="view" value={view} onChange={(e) => setView(e.target.value)}>
+            <option value="live">Draft & published</option>
+            <option value="published">Published</option>
+            <option value="draft">Draft</option>
+            <option value="archived">Archived</option>
+          </select>
+        </Field>
+        <button className="tp-btn" onClick={() => open(null)}>New record</button>
+      </div>
+      {notice && <p className="tp-note" role="alert">{notice}</p>}
+
+      <ul className="tp-cards">
+        {list.map((r) => (
+          <li key={r.id} className="tp-card">
+            <p className="tp-dev">{r.category}</p>
+            <h2>{r.title}</h2>
+            <p>{r.description}</p>
+            <p>{[r.city, r.language, r.contact].filter(Boolean).join(" · ")}</p>
+            <p>
+              Source: {r.source || <em>none yet</em>}
+              {r.sourceUrl && (
+                <> (<a href={r.sourceUrl} target="_blank" rel="noopener noreferrer">link</a>)</>
+              )}
+            </p>
+            <p>
+              Last reviewed: {fmt(r.lastReviewed)}{" "}
+              {r.status !== "archived" && reviewDue(r) && <span className="tp-chip tp-chip-amber">Review due</span>}
+            </p>
+            <p><StatusChip status={r.status} labels={RECORD_STATUS_LABEL} /></p>
+            <div className="tp-actions">
+              <button className="tp-btn tp-btn-ghost" onClick={() => open(r)}>Edit / correct</button>
+              <button className="tp-btn tp-btn-ghost" onClick={() => dispatch({ type: "RECORD_REVIEWED", id: r.id })}>
+                Mark as reviewed
+              </button>
+              {r.status === "draft" && <button className="tp-btn" onClick={() => setStatus(r, "published")}>Publish</button>}
+              {r.status === "published" && (
+                <button className="tp-btn tp-btn-ghost" onClick={() => setStatus(r, "draft")}>Unpublish</button>
+              )}
+              {r.status !== "archived" && (
+                <button className="tp-btn tp-btn-ghost" onClick={() => setStatus(r, "archived")}>Archive</button>
+              )}
+              {r.status === "archived" && (
+                <button className="tp-btn tp-btn-ghost" onClick={() => setStatus(r, "draft")}>Restore as draft</button>
+              )}
+            </div>
+          </li>
+        ))}
+        {list.length === 0 && <li className="tp-card">No records in this view.</li>}
+      </ul>
+    </>
+  );
 }

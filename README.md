@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # React + Vite
 
 This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
@@ -18,4 +17,3 @@ If you are developing a production application, we recommend using TypeScript wi
 =======
 # dementia-care-hub
 A digital platform design to support dementia patients, caregivers, and families
->>>>>>> 73492009b16fbad79e6668124fc0a232642eed76

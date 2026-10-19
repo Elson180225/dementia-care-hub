@@ -75,3 +75,29 @@ export function buildQueue({ accessRequests, profile, profiles = [profile], acti
 
   return items;
 }
+
+// Lifecycle: Draft → Submitted → Approved/Returned → Published → Completed → Verified → Archived
+export function lifecycleStage(a) {
+  if (a.archived) return "archived";
+  if (a.cancelled) return "cancelled";
+  if (a.completion.status === "verified") return "verified";
+  if (a.completion.status === "submitted") return "completed";
+  if (a.status === "approved") return a.published ? "published" : "approved";
+  return a.status; // draft | submitted | returned
+}
+
+// Verified or cancelled records can be archived. RCBC-run activities have no trainer
+// completion step, so they can be archived once their date has passed.
+export const canArchive = (a) =>
+  !a.archived &&
+  (a.cancelled ||
+    a.completion.status === "verified" ||
+    (a.source === "rcbc" && new Date(a.date) < new Date()));
+
+export const today = () => new Date().toISOString().slice(0, 10);
+
+export const reviewDue = (record, days = 365) =>
+  (Date.now() - new Date(record.lastReviewed).getTime()) / 86400000 > days;
+
+// Trainer views show only the trainer's own activities, not RCBC-created ones.
+export const mine = (activities) => activities.filter((a) => a.source !== "rcbc");
