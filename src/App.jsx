@@ -38,10 +38,11 @@ import Hours from "./trainer-portal/pages/Hours";
 
 /* Admin Dashboard */
 import AdminLayout from "./admin/AdminLayout";
-import Records from "./admin/pages/Records";
-import Users from "./admin/pages/Users";
 import AdminOverview from "./admin/pages/Overview";
 import ReviewQueue from "./admin/pages/ReviewQueue";
+import AdminActivities from "./admin/pages/Activities";
+import Records from "./admin/pages/Records";
+import Users from "./admin/pages/Users";
 import Contribution from "./admin/pages/Contribution";
 
 
@@ -276,19 +277,19 @@ function App() {
             <Route path="hours" element={<Hours />} />
           </Route>
 
-          {/* =========================
-              ADMIN DASHBOARD
-          ========================== */}
+{/* =========================
+    ADMIN DASHBOARD
+========================== */}
 
-          <Route path="/admin" element={<AdminLayout />}>
-            <Route index element={<AdminOverview />} />
-            <Route path="review" element={<ReviewQueue />} />
-            <Route path="contribution" element={<Contribution />} />
-            <Route path="activities" element={<TrainerActivities admin />} />
-            <Route path="conducted" element={<Conducted admin />} />
-            <Route path="records" element={<Records />} />
-            <Route path="users" element={<Users />} />
-          </Route>
+<Route path="/admin" element={<AdminLayout />}>
+  <Route index element={<AdminOverview />} />
+  <Route path="review" element={<ReviewQueue />} />
+  <Route path="contribution" element={<Contribution />} />
+  <Route path="activities" element={<TrainerActivities admin />} />
+  <Route path="conducted" element={<Conducted admin />} />
+  <Route path="records" element={<Records />} />
+  <Route path="users" element={<Users />} />
+</Route>
 
           {/* =========================
               NOT FOUND

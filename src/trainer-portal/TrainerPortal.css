@@ -51,3 +51,8 @@
 .tp-password-eye { display: inline-flex; align-items: center; justify-content: center; flex: 0 0 48px; min-height: 48px; border: 1px solid #877991; border-radius: 8px; background: #fff; color: #51277d; cursor: pointer; }
 .tp-password-eye:hover { background: #f5effa; }
 .tp-password-eye:focus-visible { outline: 3px solid #a66b00; outline-offset: 3px; }
+fieldset.tp-field { border: 1px solid #e6dfe8; border-radius: 12px; padding: 16px; margin: 18px 0; }
+fieldset.tp-field legend { font-weight: 700; padding: 0 6px; }
+.tp-actions input, .tp-actions select { flex: 1 1 180px; width: auto; }
+.tp-toolbar { display: flex; gap: 16px; flex-wrap: wrap; align-items: end; margin: 16px 0; }
+.tp-toolbar .tp-field { margin: 0; min-width: 200px; }
