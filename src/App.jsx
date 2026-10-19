@@ -14,6 +14,7 @@ import LearnEvents from "./pages/LearnEvents";
 import NotFound from "./pages/NotFound";
 import Contact from "./pages/Contact";
 import UnderstandDementia from "./pages/UnderstandDementia";
+import CaregiverSupport from "./pages/CaregiverSupport";
 import AboutProject from "./pages/AboutProject";
 
 /* FIND HELP & SUPPORT */
@@ -62,13 +63,75 @@ function App() {
           {/* =========================
               UNDERSTANDING DEMENTIA
           ========================== */}
-          <Route path="/understand-dementia" element={<UnderstandDementia />} />
-          <Route path="/understand-dementia/what-is-dementia" element={<Navigate to="/understand-dementia#overview" replace />} />
-          <Route path="/understand-dementia/alzheimers" element={<Navigate to="/understand-dementia#overview" replace />} />
-          <Route path="/understand-dementia/signs-and-changes" element={<Navigate to="/understand-dementia#early-signs" replace />} />
-          <Route path="/understand-dementia/why-changes-matter" element={<Navigate to="/understand-dementia#early-signs" replace />} />
-          <Route path="/understand-dementia/medical-advice" element={<Navigate to="/understand-dementia#early-signs" replace />} />
-          <Route path="/understand-dementia/healthy-ageing" element={<Navigate to="/understand-dementia#healthy-living" replace />} />
+          <Route 
+            path="/understand-dementia" 
+            element={<UnderstandDementia />} 
+          />
+          <Route 
+            path="/understand-dementia/what-is-dementia" 
+            element={<Navigate to="/understand-dementia#overview" replace />} 
+          />
+          <Route 
+            path="/understand-dementia/alzheimers" 
+            element={<Navigate to="/understand-dementia#overview" replace />} 
+          />
+          <Route 
+            path="/understand-dementia/signs-and-changes" 
+            element={<Navigate to="/understand-dementia#early-signs" replace />}
+          />
+          <Route 
+            path="/understand-dementia/why-changes-matter" 
+            element={<Navigate to="/understand-dementia#early-signs" replace />} 
+          />
+          <Route 
+            path="/understand-dementia/medical-advice" 
+            element={<Navigate to="/understand-dementia#early-signs" replace />} 
+          />
+          <Route 
+            path="/understand-dementia/healthy-ageing" 
+            element={<Navigate to="/understand-dementia#healthy-living" replace />} 
+          />
+
+          {/* =========================
+             CAREGIVER SUPPORT
+          ========================== */}
+          <Route 
+            path="/caregiver-support" 
+            element={<CaregiverSupport />} 
+          />
+          <Route
+            path="/caregiver-support/supporting-someone"
+            element={<Navigate to="/caregiver-support#guidance" replace />}
+          />
+          <Route
+            path="/caregiver-support/wellbeing"
+            element={<Navigate to="/caregiver-support#guidance" replace />}
+          />
+          <Route
+            path="/caregiver-support/guidance"
+            element={<Navigate to="/caregiver-support#guidance" replace />}
+          />
+          <Route
+            path="/caregiver-support/training"
+            element={<Navigate to="/caregiver-support#training" replace />}
+          />
+          <Route
+            path="/caregiver-support/certificate-verification"
+            element={
+              <Navigate
+                to="/caregiver-support#certificate-verification"
+                replace
+              />
+            }
+          />
+          <Route
+            path="/caregiver-support/support-groups"
+            element={<Navigate to="/caregiver-support#support-groups" replace />}
+          />
+          <Route
+            path="/caregiver-support/volunteer"
+            element={<Navigate to="/caregiver-support#volunteer" replace />}
+          />
 
           {/* =========================
               FIND HELP & SUPPORT
