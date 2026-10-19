@@ -1,3 +1,4 @@
+import PublishedRecords from "../../components/PublishedRecords";
 // src/pages/find-help/EquipmentPractical.jsx
 
 import { useEffect, useMemo, useState } from "react";
@@ -169,6 +170,7 @@ function EquipmentPractical() {
 
   return (
     <main className="equipment-page">
+      <PublishedRecords kind="organisations" category="equipment" title="Published directory records" />
       {/* =====================================================
           SPLIT HERO
       ====================================================== */}

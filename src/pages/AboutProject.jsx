@@ -1,3 +1,4 @@
+import PublishedRecords from "../components/PublishedRecords";
 import {
   aboutNav,
   overview,
@@ -38,6 +39,7 @@ function ContributionList({ items }) {
 export default function AboutProject() {
   return (
     <main className="about-page">
+      <PublishedRecords kind="content_pages" slug="about" title="Project updates"/>
       <header className="about-hero">
         <div className="about-container">
           <p className="about-kicker">ABOUT THE PROJECT</p>

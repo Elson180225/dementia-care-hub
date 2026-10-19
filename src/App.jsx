@@ -9,6 +9,7 @@ import Header from "./components/Header/Header";
 import Footer from "./components/Footer/Footer";
 import ScrollToTop from "./components/ScrollToTop/ScrollToTop";
 
+import ProjectServices from "./pages/ProjectServices";
 import Home from "./pages/Home";
 import LearnEvents from "./pages/LearnEvents";
 import NotFound from "./pages/NotFound";
@@ -26,6 +27,7 @@ import EquipmentPractical from "./pages/find-help/EquipmentPractical";
 import ResourceFinder from "./pages/find-help/ResourceFinder";
 
 /* Trainer Portal */
+import AccountForm from "./trainer-portal/AccountForm";
 import TrainerProvider from "./trainer-portal/TrainerContext";
 import TrainerLayout from "./trainer-portal/TrainerLayout";
 import TrainerDashboard from "./trainer-portal/pages/Dashboard";
@@ -36,6 +38,8 @@ import Hours from "./trainer-portal/pages/Hours";
 
 /* Admin Dashboard */
 import AdminLayout from "./admin/AdminLayout";
+import Records from "./admin/pages/Records";
+import Users from "./admin/pages/Users";
 import AdminOverview from "./admin/pages/Overview";
 import ReviewQueue from "./admin/pages/ReviewQueue";
 import Contribution from "./admin/pages/Contribution";
@@ -48,6 +52,11 @@ function App() {
       <TrainerProvider>
 
         <Routes>
+          <Route path="/get-updated" element={<ProjectServices />} />
+          <Route path="/caregiver-support/verify-certificate" element={<ProjectServices certificate />} />
+          <Route path="/trainer-portal/application" element={<main className="tp-page"><div className="tp-container"><AccountForm application /></div></main>} />
+          <Route path="/trainer-portal/signup" element={<main className="tp-page"><div className="tp-container"><AccountForm signup /></div></main>} />
+          <Route path="/admin/signup" element={<main className="tp-page"><div className="tp-container"><AccountForm role="admin" signup /></div></main>} />
           <Route path="/about/contact" element={<Contact />} />
           <Route path="/contact" element={<Navigate to="/about/contact" replace />} />
           {/* =========================
@@ -275,6 +284,10 @@ function App() {
             <Route index element={<AdminOverview />} />
             <Route path="review" element={<ReviewQueue />} />
             <Route path="contribution" element={<Contribution />} />
+            <Route path="activities" element={<TrainerActivities admin />} />
+            <Route path="conducted" element={<Conducted admin />} />
+            <Route path="records" element={<Records />} />
+            <Route path="users" element={<Users />} />
           </Route>
 
           {/* =========================

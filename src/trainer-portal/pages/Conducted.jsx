@@ -1,17 +1,20 @@
+import UploadField from "../UploadField";
 import { useState } from "react";
 import { useTrainer } from "../TrainerContext";
 import { COMPLETION_LABEL } from "../constants";
 import { fmtDate } from "../selectors";
 import { Field, StatusChip, describe } from "../ui";
 
-export default function Conducted() {
+export default function Conducted({admin=false}) {
   const { state, dispatch } = useTrainer();
+  const [uploading,setUploading]=useState(0);
+  const uploadBusy=busy=>setUploading(n=>n+(busy?1:-1));
   const [openId, setOpenId] = useState(null);
   const [values, setValues] = useState({});
   const [errors, setErrors] = useState({});
 
   // Only approved activities can be completed. This is the same record, not a new one.
-  const eligible = state.activities.filter((a) => a.status === "approved");
+  const eligible = state.activities.filter((a) => ["published", "completed", "verified", "archived"].includes(a.status) && !a.cancelledAt && new Date(a.date)<=new Date());
 
   function open(a) {
     setErrors({});
@@ -19,19 +22,19 @@ export default function Conducted() {
     setValues({
       venue: a.completion.venue ?? a.venue,
       participants: a.completion.participants ?? "",
-      hours: a.completion.hours ?? a.plannedHours,
+      hours: a.completion.hours || a.plannedHours,
+      photos: a.completion.photos || [],
     });
   }
 
-  function submit() {
+  async function submit() {
     const e = {};
     if (!String(values.venue).trim()) e.venue = "Please enter the actual venue.";
     if (!(Number(values.participants) >= 0) || values.participants === "") e.participants = "Enter the number of participants.";
     if (!(Number(values.hours) > 0)) e.hours = "Enter actual hours greater than 0.";
     setErrors(e);
     if (Object.keys(e).length) return;
-    dispatch({ type: "COMPLETION_SAVE", id: openId, values });
-    dispatch({ type: "COMPLETION_SUBMIT", id: openId });
+    if(!await dispatch({ type: "COMPLETION_SAVE", id: openId, values })) return;
     setOpenId(null);
   }
 
@@ -50,7 +53,7 @@ export default function Conducted() {
             {a.completion.status === "returned" && a.completion.adminComment && (
               <p className="tp-note">Admin comment: {a.completion.adminComment}</p>
             )}
-            {["none", "draft", "returned"].includes(a.completion.status) && openId !== a.id && (
+            {["none", "draft", "returned"].includes(a.completion.status) && (admin || a.created_by===state.session?.id) && openId !== a.id && (
               <button className="tp-btn tp-btn-ghost" onClick={() => open(a)}>Add activity record</button>
             )}
             {openId === a.id && (
@@ -67,9 +70,9 @@ export default function Conducted() {
                   <input id="hours" name="hours" type="number" min="0" step="0.5" value={values.hours} onChange={change}
                     aria-invalid={Boolean(errors.hours)} aria-describedby={describe("hours", errors.hours)} />
                 </Field>
-                <p className="tp-dev">Activity photos will be added when file upload is built on the server.</p>
+                <UploadField onBusyChange={uploadBusy} label="Activity photos" kind="activity-photo" value={values.photos} onChange={photos=>setValues({...values,photos})} multiple/>
                 <div className="tp-actions">
-                  <button type="button" className="tp-btn" onClick={submit}>Submit for verification</button>
+                  <button type="button" className="tp-btn" disabled={uploading>0} onClick={submit}>Submit for verification</button>
                   <button type="button" className="tp-btn tp-btn-ghost" onClick={() => setOpenId(null)}>Cancel</button>
                 </div>
               </form>

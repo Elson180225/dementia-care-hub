@@ -23,6 +23,8 @@ function Footer() {
 
           <div className="footer-links-group">
             <h3>Explore</h3>
+            <Link to="/get-updated">Get Updated</Link>
+            <Link to="/caregiver-support/verify-certificate">Verify DCS certificate</Link>
 
             <Link to="/understand-dementia">
               Understand Dementia

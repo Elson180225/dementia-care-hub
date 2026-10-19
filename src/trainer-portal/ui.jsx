@@ -1,6 +1,6 @@
 const TONE = {
   draft: "grey", none: "grey", submitted: "blue",
-  approved: "green", verified: "green", returned: "amber",
+  published: "green", completed: "blue", archived: "grey", approved: "green", verified: "green", returned: "amber",
 };
 
 export function StatusChip({ status, labels }) {

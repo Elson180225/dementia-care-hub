@@ -33,11 +33,12 @@ export default function Overview() {
         )}
       </section>
 
+      <section className="tp-card"><h2>Maintenance and follow-up</h2><ul>{state.maintenance?.map(m=><li key={m.kind}>{m.kind}: {m.count}</li>)}</ul><Link to="/admin/records">Open content and records</Link></section>
       <h2>{year} summary</h2>
       <div className="tp-stats">
         <div className="tp-stat"><span>Approved activities</span><strong>{approved}</strong></div>
         <div className="tp-stat"><span>Verified activities</span><strong>{summary.conducted}</strong></div>
-        <div className="tp-stat"><span>Verified contribution hours</span><strong>{summary.hours}</strong></div>
+        <div className="tp-stat"><span>Verified contribution hours</span><strong>{state.contributions.filter(c=>Number(c.year)===year).reduce((sum,c)=>sum+Number(c.hours),0)}</strong></div>
         <div className="tp-stat"><span>Participants reached</span><strong>{summary.participants}</strong></div>
       </div>
     </>

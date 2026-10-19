@@ -1,3 +1,4 @@
+import PublishedRecords from "../../components/PublishedRecords";
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 
@@ -290,6 +291,7 @@ function ResourceFinder() {
 
   return (
     <main className="rf-page">
+      <PublishedRecords kind="organisations" category="" title="Published directory records" />
       {/* =====================================================
           INTRO
       ====================================================== */}

@@ -2,6 +2,10 @@ export const STATUS_LABEL = {
   draft: "Draft",
   submitted: "Submitted – awaiting Admin review",
   approved: "Approved",
+  published: "Published",
+  completed: "Completed",
+  verified: "Verified",
+  archived: "Archived",
   returned: "Returned for amendment",
 };
 

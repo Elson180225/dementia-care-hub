@@ -10,7 +10,7 @@ export default function Dashboard() {
   const year = new Date().getFullYear();
   const summary = yearSummary(activities, year);
   const upcoming = activities.filter(
-    (a) => a.status === "approved" && a.completion.status === "none" && new Date(a.date) >= new Date()
+    (a) => ["approved","published"].includes(a.status) && a.completion.status === "none" && new Date(a.date) >= new Date()
   );
 
   return (

@@ -1,3 +1,4 @@
+import UploadField from "../UploadField";
 import { useState } from "react";
 import { useTrainer } from "../TrainerContext";
 import { LANGUAGES, STATUS_LABEL } from "../constants";
@@ -5,24 +6,28 @@ import { Field, StatusChip } from "../ui";
 
 export default function MyProfile() {
   const { state, dispatch } = useTrainer();
+  const [uploading,setUploading]=useState(0);
+  const uploadBusy=busy=>setUploading(n=>n+(busy?1:-1));
   const { profile } = state;
   const [values, setValues] = useState({
     city: profile.city, language: profile.language, shortProfile: profile.shortProfile,
     qualifications: profile.qualifications, experience: profile.experience,
+    photoUrl: profile.photoUrl || "", supportingDocuments: profile.supportingDocuments || [],
   });
   const [message, setMessage] = useState("");
   const locked = profile.status === "submitted";
 
   const change = (e) => { setValues({ ...values, [e.target.name]: e.target.value }); setMessage(""); };
 
-  function submit(e) {
+  async function submit(e) {
     e.preventDefault();
-    if (!values.city.trim() || !values.shortProfile.trim()) {
+    const draft=e.nativeEvent.submitter?.value==="draft";
+    if (!draft && (!values.city.trim() || !values.shortProfile.trim())) {
       setMessage("Please fill in your city and a short profile.");
       return;
     }
-    dispatch({ type: "PROFILE_SUBMIT", values });
-    setMessage("Your profile update was sent to RCBC Admin for review.");
+    if(!await dispatch({ type: draft?"PROFILE_SAVE":"PROFILE_SUBMIT", values })) return;
+    setMessage(draft?"Draft saved.":"Your profile update was sent to RCBC Admin for review.");
   }
 
   return (
@@ -62,8 +67,10 @@ export default function MyProfile() {
         <Field id="experience" label="Relevant experience">
           <textarea id="experience" name="experience" rows="3" value={values.experience} onChange={change} disabled={locked} />
         </Field>
-        <p className="tp-dev">Profile photo and supporting documents will be added when file upload is built on the server.</p>
-        <button className="tp-btn" disabled={locked}>Submit for Admin review</button>
+        <UploadField onBusyChange={uploadBusy} label="Profile photo" kind="photo" value={values.photoUrl} onChange={photoUrl=>setValues({...values,photoUrl})} disabled={locked}/>
+        <UploadField onBusyChange={uploadBusy} label="Supporting documents (private)" kind="document" value={values.supportingDocuments} onChange={supportingDocuments=>setValues({...values,supportingDocuments})} multiple disabled={locked}/>
+        <button className="tp-btn" disabled={locked || uploading>0}>Submit for Admin review</button>
+        <button className="tp-btn tp-btn-ghost" value="draft" disabled={locked || uploading>0}>Save draft</button>
         <p role="status" aria-live="polite">{locked ? "Awaiting Admin review." : message}</p>
       </form>
     </>

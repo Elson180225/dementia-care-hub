@@ -2,16 +2,17 @@ import { createHash } from 'node:crypto';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { resolve, join } from 'node:path';
 import { validateEnquiry } from '../shared/enquiry.js';
+import { isAllowedOrigin } from './origin.js';
 
-export function enquiryHandler({ inbox = process.env.ENQUIRY_INBOX_DIR, origin = process.env.PUBLIC_ORIGIN } = {}) {
+export function enquiryHandler({ inbox = process.env.ENQUIRY_INBOX_DIR, origin = process.env.PUBLIC_ORIGIN, persist } = {}) {
   const rates = new Map();
   let queue = Promise.resolve();
   return async (req, res) => {
     const reply = (status, data) => { res.writeHead(status, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' }); res.end(JSON.stringify(data)); };
     if (req.url !== '/api/enquiries') return reply(404, { error: 'Not found' });
     if (req.method !== 'POST') return reply(405, { error: 'POST required' });
-    if (req.headers.origin && req.headers.origin !== (origin || `http://${req.headers.host}`)) return reply(403, { error: 'Origin rejected' });
-    if (!inbox) return reply(503, { error: 'Enquiry workflow is not configured' });
+    if (!isAllowedOrigin(req.headers.origin,{PUBLIC_ORIGIN:origin || `http://${req.headers.host}`,ADDITIONAL_PUBLIC_ORIGINS:process.env.ADDITIONAL_PUBLIC_ORIGINS})) return reply(403, { error: 'Origin rejected' });
+    if (!inbox && !persist) return reply(503, { error: 'Enquiry workflow is not configured' });
     if (!req.headers['content-type']?.startsWith('application/json')) return reply(415, { error: 'JSON required' });
     const now = Date.now();
     for (const [key, entry] of rates) if (now - entry.start > 600000) rates.delete(key);
@@ -35,6 +36,7 @@ export function enquiryHandler({ inbox = process.env.ENQUIRY_INBOX_DIR, origin =
       const enquiry = { name: data.name.trim(), email: data.email.trim(), type: data.type, message: data.message.trim() };
       // Serialize writes so simultaneous retries cannot create multiple inbox records.
       const save = async () => {
+        if(persist) return persist({id:data.id,...enquiry});
         const directory = resolve(inbox);
         await mkdir(directory, { recursive: true, mode: 0o700 });
         const fingerprint = createHash('sha256').update(JSON.stringify(enquiry)).digest('hex');

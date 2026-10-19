@@ -1,23 +1,7 @@
+import AccountForm from "./AccountForm";
 import { NavLink, Outlet } from "react-router-dom";
 import { useTrainer } from "./TrainerContext";
 import "./TrainerPortal.css";
-
-function SignIn() {
-  const { dispatch } = useTrainer();
-  return (
-    <section className="tp-card">
-      <h1>Certified Trainer Portal</h1>
-      <p>For verified Certified Trainers only. Access is given after RCBC verifies your identity and certificate.</p>
-      <p className="tp-dev">
-        Development placeholder: this button gives no real security. The real sign-in
-        (SCRUM-68) will be checked on the server.
-      </p>
-      <button className="tp-btn" onClick={() => dispatch({ type: "SIGN_IN" })}>
-        Continue as sample trainer
-      </button>
-    </section>
-  );
-}
 
 const links = [
   ["/trainer-portal", "Dashboard", true],
@@ -28,10 +12,11 @@ const links = [
 ];
 
 export default function TrainerLayout() {
-  const { state, dispatch } = useTrainer();
+  const { state, dispatch, loading } = useTrainer();
+  if (loading) return <p role="status">Loading account?</p>;
 
   if (!state.session) {
-    return <main className="tp-page"><div className="tp-container"><SignIn /></div></main>;
+    return <main className="tp-page"><div className="tp-container"><AccountForm role="trainer" /></div></main>;
   }
 
   return (

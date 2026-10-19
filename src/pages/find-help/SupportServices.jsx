@@ -1,3 +1,4 @@
+import PublishedRecords from "../../components/PublishedRecords";
 import { useMemo, useState } from "react";
 
 import supportServices from "../../data/supportServices";
@@ -75,6 +76,7 @@ function SupportServices() {
 
   return (
     <main className="support-services-page">
+      <PublishedRecords kind="organisations" category="services" title="Published directory records" />
       {/* =====================================================
           HERO
       ====================================================== */}

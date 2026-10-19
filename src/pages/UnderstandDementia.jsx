@@ -1,3 +1,4 @@
+import PublishedRecords from "../components/PublishedRecords";
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import "./UnderstandDementia.css";
@@ -187,6 +188,7 @@ function UnderstandDementia() {
 
   return (
     <main className="understand-page">
+      <PublishedRecords kind="content_pages" slug="understand-dementia" title="Project updates"/>
       <section className="understand-hero">
         <div className="understand-container understand-hero-grid">
           <div>

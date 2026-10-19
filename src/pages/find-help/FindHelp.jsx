@@ -1,3 +1,4 @@
+import PublishedRecords from "../../components/PublishedRecords";
 import { Link } from "react-router-dom";
 
 import "./FindHelp.css";
@@ -5,6 +6,7 @@ import "./FindHelp.css";
 function FindHelp() {
   return (
     <main className="find-help-page">
+      <PublishedRecords kind="organisations" category="" title="Published directory records" />
       {/* HERO */}
 
       <section className="find-help-hero">
