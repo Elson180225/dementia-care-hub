@@ -13,7 +13,7 @@ const menuItems = [
   ========================================================= */
 
   {
-    label: "Understand Dementia",
+    label: "Understanding Dementia",
     path: "/understand-dementia",
 
     children: [
@@ -114,7 +114,7 @@ const menuItems = [
   ========================================================= */
 
   {
-    label: "Learn & Events",
+    label: "Education & Events",
     menuOnly: true,
 
     children: [
@@ -327,7 +327,7 @@ function Header() {
 
               <div className="brand-text">
                 <strong>
-                  Dementia Care Hub
+                  Dementia Care Connect
                 </strong>
 
                 <span>
