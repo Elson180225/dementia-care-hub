@@ -132,7 +132,7 @@ const searchItems = [
     description:
       "Learn more about Rotary Hope Care and the Alzheimer's Care project.",
     path: "/about",
-    category: "About Us",
+    category: "About the Project",
     keywords: "about rotary hope care project",
   },
   {
@@ -140,16 +140,8 @@ const searchItems = [
     description:
       "Contact the project team if you need help finding information.",
     path: "/about/contact",
-    category: "About Us",
+    category: "About the Project",
     keywords: "contact email whatsapp help team",
-  },
-  {
-    title: "Where to Find Us",
-    description:
-      "Find project locations and related information.",
-    path: "/about/locations",
-    category: "About Us",
-    keywords: "location address find us where",
   },
 ];
 

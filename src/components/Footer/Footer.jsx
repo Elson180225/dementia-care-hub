@@ -47,19 +47,15 @@ function Footer() {
             <h3>About</h3>
 
             <Link to="/about">
-              About Us
+              About the Project
             </Link>
 
             <Link to="/about/contact">
               Contact Us
             </Link>
 
-            <Link to="/about/locations">
-              Where to Find Us
-            </Link>
-
             <Link to="/about/support">
-              Support the Project
+              Trainer Portal
             </Link>
           </div>
 
@@ -100,6 +96,10 @@ function Footer() {
 
             <span>
               © {new Date().getFullYear()} Rotary Hope Care
+                {/* Discreet entry for the RCBC project team; not promoted in the main navigation. */}
+                <Link to="/admin" className="footer-admin-link">
+                  Admin access
+                </Link>
             </span>
           </div>
         </div>

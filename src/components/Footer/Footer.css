@@ -199,6 +199,18 @@
   color: #ffd46f;
 }
 
+.footer-bottom-links .footer-admin-link {
+  color: rgba(255, 255, 255, 0.6);
+
+  font-size: 0.85rem;
+
+  text-decoration: none;
+}
+
+.footer-bottom-links .footer-admin-link:hover {
+  color: #ffd46f;
+}
+
 .site-footer a:focus-visible,
 .site-footer button:focus-visible {
   outline: 3px solid #f7a81b;
