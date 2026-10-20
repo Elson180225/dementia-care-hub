@@ -3,6 +3,7 @@ import {
   Navigate,
   Route,
   Routes,
+  useLocation,
 } from "react-router-dom";
 
 import Header from "./components/Header/Header";
@@ -44,11 +45,18 @@ import Records from "./admin/pages/Records";
 import Users from "./admin/pages/Users";
 import Contribution from "./admin/pages/Contribution";
 
+// The Admin Dashboard is a back-office area, so it hides the public site header and footer.
+function PublicOnly({ children }) {
+  const { pathname } = useLocation();
+  return pathname.startsWith("/admin") || pathname.startWith("/trainer-portal") ? null : children;
+}
 
 function App() {
   return (
     <BrowserRouter>
+      <PublicOnly>
       <Header />
+      </PublicOnly>
       <TrainerProvider>
 
         <Routes>
@@ -300,7 +308,9 @@ function App() {
           />
         </Routes>
       </TrainerProvider>
+      <PublicOnly>
       <Footer />
+      </PublicOnly>
       <ScrollToTop />
     </BrowserRouter>
   );
