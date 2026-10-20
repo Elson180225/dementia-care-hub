@@ -3,6 +3,7 @@ import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 
 import healthcareProviders from "../../data/healthcareProviders";
+import { useLanguage } from "../../i18n/LanguageContext";
 
 import "./AssessmentHealthcare.css";
 
@@ -46,6 +47,10 @@ const preparationItems = [
 ];
 
 function AssessmentHealthcare() {
+  const { t } = useLanguage();
+  const ah = t.assessmentHealthcare || {};
+  const currentPrepItems = ah.items || preparationItems;
+
   const [activePathway, setActivePathway] =
     useState("government");
 
@@ -68,7 +73,7 @@ function AssessmentHealthcare() {
 
   const completion = Math.round(
     (checkedItems.length /
-      preparationItems.length) *
+      currentPrepItems.length) *
       100
   );
 
@@ -98,20 +103,15 @@ function AssessmentHealthcare() {
       <section className="assessment-hero">
         <div className="assessment-container">
           <span className="assessment-kicker">
-            Find Help & Support
+            {ah.kicker || "Find Help & Support"}
           </span>
 
           <h1>
-            Assessment
-            <br />
-            & Healthcare
+            {ah.title || "Assessment & Healthcare"}
           </h1>
 
           <p>
-            If you are concerned about changes in
-            memory, thinking or behaviour, this page
-            can help you prepare and understand where
-            to go next.
+            {ah.subtitle || "If you are concerned about changes in memory, thinking or behaviour, this page can help you prepare and understand where to go next."}
           </p>
 
           <div className="assessment-hero-actions">
@@ -119,7 +119,7 @@ function AssessmentHealthcare() {
               href="#prepare"
               className="assessment-primary-button"
             >
-              Start with preparation
+              {ah.prepHeading ? ah.prepHeading.split(" ")[0] + " " + (ah.prepHeading.split(" ")[1] || "") : "Start with preparation"}
               <span>↓</span>
             </a>
 
@@ -127,7 +127,7 @@ function AssessmentHealthcare() {
               to="/learn-events/dementia-education"
               className="assessment-secondary-button"
             >
-              Learn about dementia
+              {t.header?.menu?.whatIsDementia || "Learn about dementia"}
             </Link>
           </div>
         </div>
@@ -142,37 +142,33 @@ function AssessmentHealthcare() {
           <div className="assessment-journey-grid">
             <div>
               <span>01</span>
-              <strong>Prepare</strong>
+              <strong>{ah.journeyTitle1 || "Prepare"}</strong>
               <p>
-                Note the changes you or your family
-                have observed.
+                {ah.journeyDesc1 || "Note the changes you or your family have observed."}
               </p>
             </div>
 
             <div>
               <span>02</span>
-              <strong>Choose a pathway</strong>
+              <strong>{ah.journeyTitle2 || "Choose a pathway"}</strong>
               <p>
-                Understand government and private
-                healthcare options.
+                {ah.journeyDesc2 || "Understand government and private healthcare options."}
               </p>
             </div>
 
             <div>
               <span>03</span>
-              <strong>Find a provider</strong>
+              <strong>{ah.journeyTitle3 || "Find a provider"}</strong>
               <p>
-                Browse hospitals and specialist
-                services in Sarawak.
+                {ah.journeyDesc3 || "Browse hospitals and specialist services in Sarawak."}
               </p>
             </div>
 
             <div>
               <span>04</span>
-              <strong>Continue support</strong>
+              <strong>{ah.journeyTitle4 || "Continue support"}</strong>
               <p>
-                Use other Dementia Care Connect
-                resources after assessment.
+                {ah.journeyDesc4 || "Use other Dementia Care Connect resources after assessment."}
               </p>
             </div>
           </div>
@@ -191,30 +187,25 @@ function AssessmentHealthcare() {
           <div className="assessment-preparation-layout">
             <div className="assessment-preparation-copy">
               <span className="assessment-section-label">
-                Before an assessment
+                {ah.prepKicker || "Before an assessment"}
               </span>
 
               <h2>
-                A little preparation can make the
-                conversation easier.
+                {ah.prepHeading || "A little preparation can make the conversation easier."}
               </h2>
 
               <p>
-                You do not need to diagnose anything
-                yourself. The goal is simply to bring
-                useful information to a healthcare
-                professional.
+                {ah.prepDesc || "You do not need to diagnose anything yourself. The goal is simply to bring useful information to a healthcare professional."}
               </p>
 
               <div className="assessment-progress-box">
                 <div>
                   <strong>
-                    Preparation checklist
+                    {ah.progressText || "Preparation checklist"}
                   </strong>
 
                   <span>
-                    {checkedItems.length} of{" "}
-                    {preparationItems.length}
+                    {checkedItems.length} / {currentPrepItems.length}
                   </span>
                 </div>
 
@@ -228,13 +219,13 @@ function AssessmentHealthcare() {
                 </div>
 
                 <small>
-                  {completion}% complete
+                  {completion}% {ah.completedSuffix || "complete"}
                 </small>
               </div>
             </div>
 
             <div className="assessment-checklist">
-              {preparationItems.map((item) => {
+              {currentPrepItems.map((item) => {
                 const checked =
                   checkedItems.includes(item.id);
 
@@ -280,18 +271,15 @@ function AssessmentHealthcare() {
         <div className="assessment-container">
           <div className="assessment-section-heading">
             <span>
-              Healthcare pathways
+              {ah.pathwaysSectionLabel || "Healthcare pathways"}
             </span>
 
             <h2>
-              Where can you go for an assessment?
+              {ah.pathwaysTitle || "Where can you go for an assessment?"}
             </h2>
 
             <p>
-              The exact pathway can depend on your
-              circumstances. Contact the healthcare
-              provider directly to confirm referral
-              and appointment requirements.
+              {ah.pathwaysDesc || "The exact pathway can depend on your circumstances. Contact the healthcare provider directly to confirm referral and appointment requirements."}
             </p>
           </div>
 
@@ -307,7 +295,7 @@ function AssessmentHealthcare() {
                 setActivePathway("government")
               }
             >
-              Government Healthcare
+              {ah.govtTab || "Government Healthcare"}
             </button>
 
             <button
@@ -321,7 +309,7 @@ function AssessmentHealthcare() {
                 setActivePathway("private")
               }
             >
-              Private Healthcare
+              {ah.privateTab || "Private Healthcare"}
             </button>
           </div>
 
@@ -329,18 +317,15 @@ function AssessmentHealthcare() {
             <div className="assessment-pathway-content">
               <div className="assessment-pathway-intro">
                 <span>
-                  Government pathway
+                  {ah.govtIntroSpan || "Government pathway"}
                 </span>
 
                 <h3>
-                  Start with the public healthcare
-                  system.
+                  {ah.govtIntroTitle || "Start with the public healthcare system."}
                 </h3>
 
                 <p>
-                  The exact process should be
-                  confirmed with the relevant clinic
-                  or hospital before your visit.
+                  {ah.govtIntroText || "The exact process should be confirmed with the relevant clinic or hospital before your visit."}
                 </p>
               </div>
 
@@ -348,11 +333,10 @@ function AssessmentHealthcare() {
                 <div>
                   <span>01</span>
                   <strong>
-                    Contact a government clinic
+                    {ah.govtFlow1Title || "Contact a government clinic"}
                   </strong>
                   <p>
-                    Explain the changes or concerns
-                    that you have noticed.
+                    {ah.govtFlow1Desc || "Explain the changes or concerns that you have noticed."}
                   </p>
                 </div>
 
@@ -363,12 +347,10 @@ function AssessmentHealthcare() {
                 <div>
                   <span>02</span>
                   <strong>
-                    Initial assessment
+                    {ah.govtFlow2Title || "Initial assessment"}
                   </strong>
                   <p>
-                    Healthcare staff may assess the
-                    concern and determine the next
-                    step.
+                    {ah.govtFlow2Desc || "Healthcare staff may assess the concern and determine the next step."}
                   </p>
                 </div>
 
@@ -379,12 +361,10 @@ function AssessmentHealthcare() {
                 <div>
                   <span>03</span>
                   <strong>
-                    Hospital or specialist
+                    {ah.govtFlow3Title || "Hospital or specialist"}
                   </strong>
                   <p>
-                    Referral may be made where
-                    specialist assessment is
-                    appropriate.
+                    {ah.govtFlow3Desc || "Referral may be made where specialist assessment is appropriate."}
                   </p>
                 </div>
 
@@ -395,12 +375,10 @@ function AssessmentHealthcare() {
                 <div>
                   <span>04</span>
                   <strong>
-                    Follow-up
+                    {ah.govtFlow4Title || "Follow-up"}
                   </strong>
                   <p>
-                    Follow-up arrangements depend on
-                    the healthcare provider and
-                    assessment outcome.
+                    {ah.govtFlow4Desc || "Follow-up arrangements depend on the healthcare provider and assessment outcome."}
                   </p>
                 </div>
               </div>
@@ -411,18 +389,15 @@ function AssessmentHealthcare() {
             <div className="assessment-pathway-content">
               <div className="assessment-pathway-intro">
                 <span>
-                  Private pathway
+                  {ah.privateIntroSpan || "Private pathway"}
                 </span>
 
                 <h3>
-                  Contact a private hospital or
-                  relevant specialist.
+                  {ah.privateIntroTitle || "Contact a private hospital or relevant specialist."}
                 </h3>
 
                 <p>
-                  Private providers may have
-                  different appointment, referral and
-                  consultation requirements.
+                  {ah.privateIntroText || "Private providers may have different appointment, referral and consultation requirements."}
                 </p>
               </div>
 
@@ -430,11 +405,10 @@ function AssessmentHealthcare() {
                 <div>
                   <span>01</span>
                   <strong>
-                    Choose a provider
+                    {ah.privateFlow1Title || "Choose a provider"}
                   </strong>
                   <p>
-                    Identify a private hospital or
-                    suitable specialist service.
+                    {ah.privateFlow1Desc || "Identify a private hospital or suitable specialist service."}
                   </p>
                 </div>
 
@@ -445,12 +419,10 @@ function AssessmentHealthcare() {
                 <div>
                   <span>02</span>
                   <strong>
-                    Contact the provider
+                    {ah.privateFlow2Title || "Contact the provider"}
                   </strong>
                   <p>
-                    Ask about available specialists,
-                    referral requirements and
-                    appointment procedures.
+                    {ah.privateFlow2Desc || "Ask about available specialists, referral requirements and appointment procedures."}
                   </p>
                 </div>
 
@@ -461,11 +433,10 @@ function AssessmentHealthcare() {
                 <div>
                   <span>03</span>
                   <strong>
-                    Attend assessment
+                    {ah.privateFlow3Title || "Attend assessment"}
                   </strong>
                   <p>
-                    Bring your prepared notes and
-                    relevant health information.
+                    {ah.privateFlow3Desc || "Bring your prepared notes and relevant health information."}
                   </p>
                 </div>
               </div>
@@ -483,20 +454,16 @@ function AssessmentHealthcare() {
           <div className="assessment-provider-heading">
             <div>
               <span>
-                Healthcare providers
+                {ah.directoryEyebrow || "Healthcare providers"}
               </span>
 
               <h2>
-                Hospitals and specialist services
-                in Sarawak.
+                {ah.directoryTitle || "Hospitals and specialist services in Sarawak."}
               </h2>
             </div>
 
             <p>
-              Use the filters to explore government
-              and private providers. Always contact
-              the provider to confirm current service
-              availability.
+              {ah.directoryDesc || "Use the filters to explore government and private providers. Always contact the provider to confirm current service availability."}
             </p>
           </div>
 
@@ -511,7 +478,7 @@ function AssessmentHealthcare() {
               aria-label="Filter healthcare providers by city"
             >
               <option value="All">
-                All locations
+                {ah.allLocations || "All locations"}
               </option>
 
               <option value="Kuching">
@@ -537,15 +504,15 @@ function AssessmentHealthcare() {
               aria-label="Filter healthcare providers by pathway"
             >
               <option value="All">
-                Government & Private
+                {ah.govtAndPrivate || "Government & Private"}
               </option>
 
               <option value="government">
-                Government
+                {ah.govtOnly || "Government"}
               </option>
 
               <option value="private">
-                Private
+                {ah.privateOnly || "Private"}
               </option>
             </select>
           </div>
@@ -557,8 +524,8 @@ function AssessmentHealthcare() {
 
             <span>
               {filteredProviders.length === 1
-                ? "provider"
-                : "providers"}
+                ? (ah.providerLabel || "provider")
+                : (ah.providersLabel || "providers")}
             </span>
           </div>
 
@@ -590,7 +557,7 @@ function AssessmentHealthcare() {
                   <div className="assessment-provider-info">
                     <div>
                       <span>
-                        Address
+                        {ah.labelAddress || "Address"}
                       </span>
 
                       <strong>
@@ -600,7 +567,7 @@ function AssessmentHealthcare() {
 
                     <div>
                       <span>
-                        Phone
+                        {ah.labelPhone || "Phone"}
                       </span>
 
                       <a
@@ -615,7 +582,7 @@ function AssessmentHealthcare() {
 
                     <div>
                       <span>
-                        Specialist field
+                        {ah.labelSpecialist || "Specialist field"}
                       </span>
 
                       <strong>
@@ -625,7 +592,7 @@ function AssessmentHealthcare() {
 
                     <div>
                       <span>
-                        Email
+                        {ah.labelEmail || "Email"}
                       </span>
 
                       {provider.email ? (
@@ -636,7 +603,7 @@ function AssessmentHealthcare() {
                         </a>
                       ) : (
                         <strong>
-                          Not listed
+                          {ah.notListed || "Not listed"}
                         </strong>
                       )}
                     </div>
@@ -644,7 +611,7 @@ function AssessmentHealthcare() {
 
                   <div className="assessment-services">
                     <span>
-                      Services
+                      {ah.labelServices || "Services"}
                     </span>
 
                     <div>
@@ -661,11 +628,11 @@ function AssessmentHealthcare() {
                   <div className="assessment-provider-footer">
                     <div>
                       <span className="assessment-verified">
-                        ✓ Verified source
+                        {ah.verifiedSource || "✓ Verified source"}
                       </span>
 
                       <small>
-                        Reviewed{" "}
+                        {ah.reviewed || "Reviewed"}{" "}
                         {provider.lastReviewed}
                       </small>
                     </div>
@@ -675,7 +642,7 @@ function AssessmentHealthcare() {
                       target="_blank"
                       rel="noreferrer"
                     >
-                      Official website
+                      {ah.officialWebsite || "Official website"}
                       <span>↗</span>
                     </a>
                   </div>
@@ -693,11 +660,11 @@ function AssessmentHealthcare() {
       <section className="assessment-related">
         <div className="assessment-container">
           <span className="assessment-section-label">
-            Continue from here
+            {ah.relatedKicker || "Continue from here"}
           </span>
 
           <h2>
-            Other support you may need.
+            {ah.relatedTitle || "Other support you may need."}
           </h2>
 
           <div className="assessment-related-grid">
@@ -705,16 +672,15 @@ function AssessmentHealthcare() {
               <span>01</span>
 
               <h3>
-                Support Services Directory
+                {ah.cardSupportServicesTitle || "Support Services Directory"}
               </h3>
 
               <p>
-                Browse community, rehabilitation and
-                other external support services.
+                {ah.cardSupportServicesDesc || "Browse community, rehabilitation and other external support services."}
               </p>
 
               <strong>
-                Explore services →
+                {ah.cardSupportServicesBtn || "Explore services →"}
               </strong>
             </Link>
 
@@ -722,16 +688,15 @@ function AssessmentHealthcare() {
               <span>02</span>
 
               <h3>
-                Government & Financial
+                {ah.cardGovtFinancialTitle || "Government & Financial"}
               </h3>
 
               <p>
-                Find official programmes and
-                financial support information.
+                {ah.cardGovtFinancialDesc || "Find official programmes and financial support information."}
               </p>
 
               <strong>
-                Explore resources →
+                {ah.cardGovtFinancialBtn || "Explore resources →"}
               </strong>
             </Link>
 
@@ -739,16 +704,15 @@ function AssessmentHealthcare() {
               <span>03</span>
 
               <h3>
-                Equipment & Practical Resources
+                {ah.cardEquipmentTitle || "Equipment & Practical Resources"}
               </h3>
 
               <p>
-                Explore everyday aids and assistive
-                technology.
+                {ah.cardEquipmentDesc || "Explore everyday aids and assistive technology."}
               </p>
 
               <strong>
-                Explore equipment →
+                {ah.cardEquipmentBtn || "Explore equipment →"}
               </strong>
             </Link>
 
@@ -756,16 +720,15 @@ function AssessmentHealthcare() {
               <span>04</span>
 
               <h3>
-                Resource Finder
+                {ah.cardResourceFinderTitle || "Resource Finder"}
               </h3>
 
               <p>
-                Not sure what you need? Use the
-                guided Resource Finder.
+                {ah.cardResourceFinderDesc || "Not sure what you need? Use the guided Resource Finder."}
               </p>
 
               <strong>
-                Start finder →
+                {ah.cardResourceFinderBtn || "Start finder →"}
               </strong>
             </Link>
           </div>
@@ -785,16 +748,11 @@ function AssessmentHealthcare() {
 
             <div>
               <strong>
-                Information & Navigation Only
+                {ah.boundaryBoxTitle || "Information & Navigation Only"}
               </strong>
 
               <p>
-                Dementia Care Connect provides
-                information and navigation to
-                external healthcare services. It
-                does not provide diagnosis,
-                appointment booking, medical
-                referral or clinical care.
+                {ah.boundaryBoxText || "Dementia Care Connect provides information and navigation to external healthcare services. It does not provide diagnosis, appointment booking, medical referral or clinical care."}
               </p>
             </div>
           </div>

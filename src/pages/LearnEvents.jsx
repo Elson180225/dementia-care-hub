@@ -2,6 +2,7 @@ import PublishedRecords from "../components/PublishedRecords";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { Link, useLocation } from "react-router-dom";
+import { useLanguage } from "../i18n/LanguageContext";
 
 import educationImage from "../assets/understand-dementia.jpg";
 import trainingImage from "../assets/Group_Photo_2.png";
@@ -36,6 +37,8 @@ import adfmPoster from "../assets/Certified_Trainer_Webinar/ADFM_Certified_Train
 import facilitatorInfo from "../assets/Certified_Trainer_Webinar/Facilitator_Certified_ADFM_Trainer/Facilitator_Information.jpg";
 
 import {
+  activities as defaultActivities,
+  trainers as defaultTrainers,
   pageInfo,
   sectionOrder,
   pathFor,
@@ -49,8 +52,19 @@ import {
 import "./LearnEvents.css";
 
 function usePublicActivities() {
- const [rows,setRows]=useState([]);
- useEffect(()=>{let active=true;fetch('/api/activities').then(r=>{if(!r.ok)throw new Error('Activities unavailable');return r.json();}).then(data=>{if(active)setRows(data.map(a=>({...a,date:a.starts_at,registrationLink:a.registration_link,poster:a.poster_url,location:a.venue,registrationDeadline:a.registration_deadline,capacity:a.capacity,trainers:a.trainers || [],status:a.cancelled_at?'cancelled':['completed','verified','archived'].includes(a.status)?'completed':'upcoming'})));}).catch(()=>{});return ()=>{active=false;};},[]);
+ const [rows,setRows]=useState(defaultActivities);
+ useEffect(()=>{
+   let active=true;
+   fetch('/api/activities')
+     .then(r=>{if(!r.ok)throw new Error('Activities unavailable');return r.json();})
+     .then(data=>{
+       if(active && Array.isArray(data) && data.length > 0) {
+         setRows(data.map(a=>({...a,date:a.starts_at,registrationLink:a.registration_link,poster:a.poster_url,location:a.venue,registrationDeadline:a.registration_deadline,capacity:a.capacity,trainers:a.trainers || [],status:a.cancelled_at?'cancelled':['completed','verified','archived'].includes(a.status)?'completed':'upcoming'})));
+       }
+     })
+     .catch(()=>{});
+   return ()=>{active=false;};
+ },[]);
  return rows;
 }
 
@@ -481,6 +495,8 @@ function QAModal({ resource, onClose }) {
 }
 
 function ArchiveToolbar({ label, filters, onFiltersChange, totalCount, onReset }) {
+  const { t } = useLanguage();
+  const le = t.learnEvents;
   const isFiltered = Boolean(
     filters.query.trim() ||
     filters.language !== "All" ||
@@ -511,7 +527,7 @@ function ArchiveToolbar({ label, filters, onFiltersChange, totalCount, onReset }
           onChange={(event) =>
             onFiltersChange({ ...filters, query: event.target.value })
           }
-          placeholder={`Search ${label.toLowerCase()} by topic or title...`}
+          placeholder={le?.searchPlaceholder || `Search ${label.toLowerCase()} by topic or title...`}
           aria-label={`Search ${label}`}
         />
         {filters.query && (
@@ -535,7 +551,7 @@ function ArchiveToolbar({ label, filters, onFiltersChange, totalCount, onReset }
               onFiltersChange({ ...filters, language: event.target.value })
             }
           >
-            <option value="All">All languages</option>
+            <option value="All">{le?.allLanguages || "All languages"}</option>
             <option value="English">English</option>
             <option value="Bahasa Melayu">Bahasa Melayu</option>
             <option value="中文">中文</option>
@@ -551,9 +567,9 @@ function ArchiveToolbar({ label, filters, onFiltersChange, totalCount, onReset }
                 onFiltersChange({ ...filters, timing: event.target.value })
               }
             >
-              <option value="All">All sessions</option>
-              <option value="Past">Past sessions</option>
-              <option value="Future">Upcoming</option>
+              <option value="All">{le?.all || "All sessions"}</option>
+              <option value="Past">{le?.past || "Past sessions"}</option>
+              <option value="Future">{le?.upcoming || "Upcoming"}</option>
             </select>
           </div>
         )}
@@ -563,14 +579,14 @@ function ArchiveToolbar({ label, filters, onFiltersChange, totalCount, onReset }
             type="button"
             className="archive-reset-btn"
             onClick={onReset}
-            title="Clear active filters"
+            title={le?.clearFilters || "Clear active filters"}
           >
-            Clear filters
+            {le?.clearFilters || "Clear filters"}
           </button>
         )}
 
         <span className="archive-results-badge">
-          {totalCount} {totalCount === 1 ? "item" : "items"}
+          {totalCount} {totalCount === 1 ? (le?.item || "item") : (le?.items || "items")}
         </span>
       </div>
     </div>
@@ -578,6 +594,8 @@ function ArchiveToolbar({ label, filters, onFiltersChange, totalCount, onReset }
 }
 
 function ArchivePagination({ label, page, pageCount, onPageChange }) {
+  const { t } = useLanguage();
+  const le = t.learnEvents;
   if (pageCount <= 1) return null;
 
   return (
@@ -588,10 +606,10 @@ function ArchivePagination({ label, page, pageCount, onPageChange }) {
         disabled={page === 1}
         aria-label={`Previous ${label} page`}
       >
-        ← Previous
+        {le?.previous || "← Previous"}
       </button>
       <span>
-        Page <strong>{page}</strong> of <strong>{pageCount}</strong>
+        {le?.page || "Page"} <strong>{page}</strong> {le?.of || "of"} <strong>{pageCount}</strong>
       </span>
       <button
         type="button"
@@ -599,7 +617,7 @@ function ArchivePagination({ label, page, pageCount, onPageChange }) {
         disabled={page === pageCount}
         aria-label={`Next ${label} page`}
       >
-        Next →
+        {le?.next || "Next →"}
       </button>
     </div>
   );
@@ -668,6 +686,8 @@ function pageItems(items, filters, page) {
    SECTION 1: ONLINE EDUCATION
    ================================================================ */
 function OnlineEducation() {
+  const { t } = useLanguage();
+  const le = t.learnEvents;
   const activities=usePublicActivities();
   const [selected, setSelected] = useState(null);
   const [selectedQa, setSelectedQa] = useState(null);
@@ -697,12 +717,10 @@ function OnlineEducation() {
       <section className="content-section content-section-light">
         <div className="section-container">
           <div className="section-heading-block">
-            <span className="section-label">RCBC annual webinar series</span>
-            <h2>Previous &amp; future public education webinars</h2>
+            <span className="section-label">{le?.rcbcLabel || "RCBC annual webinar series"}</span>
+            <h2>{le?.rcbcTitle || "Previous & future public education webinars"}</h2>
             <p>
-              The annual RCBC webinar brings dementia education to the public.
-              Recordings from previous years are preserved as learning
-              resources.
+              {le?.rcbcDesc || "The annual RCBC webinar brings dementia education to the public. Recordings from previous years are preserved as learning resources."}
             </p>
           </div>
 
@@ -776,11 +794,10 @@ function OnlineEducation() {
       <section className="content-section content-section-cream">
         <div className="section-container">
           <div className="section-heading-block">
-            <span className="section-label">Certified trainer webinars</span>
-            <h2>Education delivered by certified trainers</h2>
+            <span className="section-label">{le?.ctLabel || "Certified trainer webinars"}</span>
+            <h2>{le?.ctTitle || "Education delivered by certified trainers"}</h2>
             <p>
-              Webinars conducted by trainers who have completed the DCS-TTT
-              pathway. Each session connects to the trainer&apos;s profile.
+              {le?.ctDesc || "Webinars conducted by trainers who have completed the DCS-TTT pathway. Each session connects to the trainer's profile."}
             </p>
           </div>
 
@@ -852,11 +869,10 @@ function OnlineEducation() {
           <div className="planned-topics-wrapper">
             <div className="planned-topics-header">
               <div className="planned-topics-title-area">
-                <span className="section-label">Looking ahead</span>
-                <h3 className="planned-topics-title">Upcoming Events &amp; Topics</h3>
+                <span className="section-label">{le?.lookingAhead || "Looking ahead"}</span>
+                <h3 className="planned-topics-title">{le?.upcomingEventsTitle || "Upcoming Events & Topics"}</h3>
                 <p>
-                  Future sessions shaped around the questions that matter most to
-                  families, caregivers, and trainers.
+                  {le?.upcomingEventsDesc || "Future sessions shaped around the questions that matter most to families, caregivers, and trainers."}
                 </p>
               </div>
 
@@ -971,12 +987,10 @@ function OnlineEducation() {
       <section className="content-section content-section-green">
         <div className="section-container">
           <div className="section-heading-block">
-            <span className="section-label">Learning resources</span>
-            <h2>Recordings, videos, Q&amp;A and approved materials</h2>
+            <span className="section-label">{le?.approvedLabel || "Learning resources"}</span>
+            <h2>{le?.approvedTitle || "Recordings, videos, Q&A and approved materials"}</h2>
             <p>
-              Selected educational content from completed activities, preserved
-              as ongoing learning resources. The archive grows as new
-              activities are completed.
+              {le?.approvedDesc || "Selected educational content from completed activities, preserved as ongoing learning resources. The archive grows as new activities are completed."}
             </p>
           </div>
 
@@ -1072,11 +1086,10 @@ function OnlineEducation() {
       <section className="content-section content-section-light qa-archive-section">
         <div className="section-container">
           <div className="section-heading-block">
-            <span className="section-label">Q&amp;A archive</span>
-            <h2>Questions from previous learning sessions</h2>
+            <span className="section-label">{le?.qaLabel || "Q&A archive"}</span>
+            <h2>{le?.qaTitle || "Questions from previous learning sessions"}</h2>
             <p>
-              Browse selected Q&amp;A image sets from past webinars. Open each
-              collection to review the full set of questions and answers.
+              {le?.qaDesc || "Browse selected Q&A image sets from past webinars. Open each collection to review the full set of questions and answers."}
             </p>
           </div>
 
@@ -1153,6 +1166,8 @@ function OnlineEducation() {
    PROGRAM REGISTRATION / APPLICATION / WAITLIST MODAL
    ================================================================ */
 function ProgramModal({ program, onClose }) {
+  const { t } = useLanguage();
+  const le = t.learnEvents;
   const [formData, setFormData] = useState({
     fullName: "",
     email: "",
@@ -1227,7 +1242,7 @@ function ProgramModal({ program, onClose }) {
                 <polyline points="22 4 12 14.01 9 11.01" />
               </svg>
             </div>
-            <h3>Registration Details Received!</h3>
+            <h3>{le?.registrationReceived || "Registration Details Received!"}</h3>
             <p>
               Thank you, <strong>{formData.fullName || "Caregiver / Applicant"}</strong>. Your entry for <strong>{program.title}</strong> has been successfully recorded.
             </p>
@@ -1240,7 +1255,7 @@ function ProgramModal({ program, onClose }) {
                 className="activity-action-btn"
                 onClick={onClose}
               >
-                Close Window
+                {le?.closeWindow || "Close Window"}
               </button>
             </div>
           </div>
@@ -1377,6 +1392,8 @@ function ProgramModal({ program, onClose }) {
    SECTION 2: PHYSICAL EDUCATION (INTERACTIVE 3-TRACK TABBED SHOWCASE)
    ================================================================ */
 function PhysicalEducation() {
+  const { t } = useLanguage();
+  const le = t.learnEvents;
   const [activeTrackId, setActiveTrackId] = useState("dcs-family");
   const [activeModalProgram, setActiveModalProgram] = useState(null);
 
@@ -1401,20 +1418,20 @@ function PhysicalEducation() {
               </svg>
             </div>
             <div className="advice-banner-content">
-              <h3>Need Immediate Care Advice, Respite or Urgent Contingency Help?</h3>
+              <h3>{le?.bannerTitle || "Need Immediate Care Advice, Respite or Urgent Contingency Help?"}</h3>
               <p>
-                Caring for a person living with dementia can be overwhelming. If you need urgent daily advice, temporary care respite, or have an unexpected emergency where you cannot provide care:
+                {le?.bannerDesc || "Caring for a person living with dementia can be overwhelming. If you need urgent daily advice, temporary care respite, or have an unexpected emergency where you cannot provide care:"}
               </p>
               <div className="advice-quick-actions">
                 <a href="https://www.adfm.org.my/foundation/" className="advice-pill">
                   <span className="pill-dot" aria-hidden="true" />
-                  <strong>ADFM Helpline</strong>
+                  <strong>{le?.adfmHelpline || "ADFM Helpline"}</strong>
                 </a>
                 <Link to="/find-help/support-services" className="advice-pill">
-                  Find Respite &amp; Day Care Services →
+                  {le?.findRespite || "Find Respite & Day Care Services →"}
                 </Link>
                 <Link to="/find-help/assessment-healthcare" className="advice-pill">
-                  Diagnostic &amp; Healthcare Assessment →
+                  {le?.diagnosticAssess || "Diagnostic & Healthcare Assessment →"}
                 </Link>
               </div>
             </div>
@@ -1427,10 +1444,10 @@ function PhysicalEducation() {
         <div className="section-container">
           {/* Section Introduction */}
           <div className="section-heading-block dcs-section-header">
-            <span className="section-label">Dementia Care Series (DCS)</span>
-            <h2>Choose Your Learning Pathway</h2>
+            <span className="section-label">{le?.showcaseLabel || "Dementia Care Series (DCS)"}</span>
+            <h2>{le?.showcaseTitle || "Choose Your Learning Pathway"}</h2>
             <p>
-              Select your role category below to view tailored in-person training curriculum, scheduled dates, and registration details.
+              {le?.showcaseDesc || "Select your role category below to view tailored in-person training curriculum, scheduled dates, and registration details."}
             </p>
           </div>
 
@@ -1504,7 +1521,7 @@ function PhysicalEducation() {
                         <path d="M16 3.13a4 4 0 0 1 0 7.75" />
                       </svg>
                     </span>
-                    Who this is designed for
+                    {le?.whoDesignedFor || "Who this is designed for"}
                   </h4>
                   <p className="stage-suitable-text">{activeTrack.suitableFor}</p>
                 </div>
@@ -1518,8 +1535,8 @@ function PhysicalEducation() {
                       </svg>
                     </span>
                     {activeTrack.id === "dcs-ttt"
-                      ? "Accreditation Pathway Milestones"
-                      : "Core Learning Pillars & Competencies"}
+                      ? (le?.accreditationMilestones || "Accreditation Pathway Milestones")
+                      : (le?.corePillars || "Core Learning Pillars & Competencies")}
                   </h4>
 
                   {activeTrack.id === "dcs-ttt" ? (
@@ -1587,7 +1604,7 @@ function PhysicalEducation() {
                         <line x1="8" x2="8" y1="2" y2="6" />
                         <line x1="3" x2="21" y1="10" y2="10" />
                       </svg>
-                      View in Upcoming Calendar
+                      {le?.viewInUpcomingCalendar || "View in Upcoming Calendar"}
                     </Link>
                   )}
 
@@ -1603,7 +1620,7 @@ function PhysicalEducation() {
                         <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
                         <path d="M16 3.13a4 4 0 0 1 0 7.75" />
                       </svg>
-                      View Certified Trainers Directory
+                      {le?.viewCertifiedTrainers || "View Certified Trainers Directory"}
                     </Link>
                   )}
 
@@ -1620,7 +1637,7 @@ function PhysicalEducation() {
                         <line x1="16" y1="13" x2="8" y2="13" />
                         <line x1="16" y1="17" x2="8" y2="17" />
                       </svg>
-                      Curriculum Overview
+                      {le?.curriculumOverview || "Curriculum Overview"}
                     </button>
                   )}
                 </div>
@@ -1630,7 +1647,7 @@ function PhysicalEducation() {
               <div className="stage-col-side">
                 {/* Specifications Card */}
                 <div className="stage-spec-card">
-                  <h4 className="spec-card-title">Programme Details &amp; Schedule</h4>
+                  <h4 className="spec-card-title">{le?.programDetailsSchedule || "Programme Details & Schedule"}</h4>
                   <dl className="stage-spec-list">
                     <div>
                       <dt>
@@ -1638,7 +1655,7 @@ function PhysicalEducation() {
                           <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
                           <circle cx="12" cy="10" r="3" />
                         </svg>
-                        Mode
+                        {le?.modeLabel || "Mode"}
                       </dt>
                       <dd>
                         <span className="stage-mode-pill">{activeTrack.mode}</span>
@@ -1651,7 +1668,7 @@ function PhysicalEducation() {
                           <rect x="2" y="7" width="20" height="14" rx="2" ry="2" />
                           <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" />
                         </svg>
-                        Sessions
+                        {le?.sessionsLabel || "Sessions"}
                       </dt>
                       <dd>{activeTrack.sessions}</dd>
                     </div>
@@ -1663,7 +1680,7 @@ function PhysicalEducation() {
                           <line x1="2" x2="22" y1="12" y2="12" />
                           <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
                         </svg>
-                        Language
+                        {le?.languageLabel || "Language"}
                       </dt>
                       <dd>{activeTrack.language}</dd>
                     </div>
@@ -1674,7 +1691,7 @@ function PhysicalEducation() {
                           <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" />
                           <circle cx="12" cy="10" r="3" />
                         </svg>
-                        Location
+                        {le?.locationLabel || "Location"}
                       </dt>
                       <dd>{activeTrack.location}</dd>
                     </div>
@@ -1687,7 +1704,7 @@ function PhysicalEducation() {
                           <line x1="8" x2="8" y1="2" y2="6" />
                           <line x1="3" x2="21" y1="10" y2="10" />
                         </svg>
-                        Next Scheduled Date &amp; Time
+                        {le?.nextScheduledDateTime || "Next Scheduled Date & Time"}
                       </dt>
                       <dd className="spec-schedule-value">
                         <strong>{activeTrack.schedule.date}</strong>
@@ -1922,6 +1939,8 @@ function ToolkitPreviewModal({ tool, onClose }) {
    Name | Cert Ref No | Location | Language | Bio | Approved Activities
    ================================================================ */
 function FacilitatorProfileModal({ facilitator, activities = [], onClose }) {
+  const { t } = useLanguage();
+  const le = t.learnEvents;
   const dialogRef = useRef(null);
   const [activeTab, setActiveTab] = useState("all"); // 'all' | 'upcoming' | 'completed'
 
@@ -2129,10 +2148,10 @@ function FacilitatorProfileModal({ facilitator, activities = [], onClose }) {
             rel="noreferrer"
             className="primary-button"
           >
-            Request Facilitator for Community Session ↗
+            {le?.requestFacilitator || "Request Facilitator for Community Session ↗"}
           </a>
           <button type="button" className="btn-secondary" onClick={onClose}>
-            Close Profile
+            {le?.closeProfile || "Close Profile"}
           </button>
         </div>
       </div>
@@ -2145,6 +2164,8 @@ function FacilitatorProfileModal({ facilitator, activities = [], onClose }) {
    SECTION 3: EVENTS (Restored & Supercharged with Dialogue, Calendar, News)
    ================================================================ */
 function EventsSection() {
+  const { t } = useLanguage();
+  const le = t.learnEvents;
   const activities=usePublicActivities();
   const [selectedActivity, setSelectedActivity] = useState(null);
   const [lightboxData, setLightboxData] = useState(null);
@@ -2355,16 +2376,16 @@ function EventsSection() {
       <section className="events-subnav-section">
         <div className="section-container">
           <div className="events-subnav-bar">
-            <span className="subnav-label">Jump to Section:</span>
+            <span className="subnav-label">{le?.jumpTo || "Jump to Section:"}</span>
             <div className="subnav-pills">
               <a href="#yearly-calendar" className="subnav-pill">
-                <span className="subnav-icon">📅</span> Yearly Activity Calendar
+                <span className="subnav-icon">📅</span> {le?.yearlyCal || "Yearly Activity Calendar"}
               </a>
               <a href="#community-dialogues" className="subnav-pill">
-                <span className="subnav-icon">🗣️</span> Community Dialogues
+                <span className="subnav-icon">🗣️</span> {le?.communityDial || "Community Dialogues"}
               </a>
               <a href="#event-finder" className="subnav-pill">
-                <span className="subnav-icon">🔍</span> Event Finder &amp; Filters
+                <span className="subnav-icon">🔍</span> {le?.communityEvents || "Event Finder & Filters"}
               </a>
               <a href="#media-coverage" className="subnav-pill">
                 <span className="subnav-icon">📰</span> Press &amp; Media Highlights
@@ -3175,10 +3196,23 @@ function MedicalCarousel({ trainers: carouselTrainers, onSelect, onViewAll }) {
    SECTION 4: CERTIFIED TRAINERS
    ================================================================ */
 function CertifiedTrainers() {
+  const { t: i18nData } = useLanguage();
+  const le = i18nData.learnEvents;
   const activities=usePublicActivities();
-  const [trainers,setTrainers]=useState([]);
+  const [trainers,setTrainers]=useState(defaultTrainers);
   const [directoryError,setDirectoryError]=useState("");
-  useEffect(()=>{let alive=true;fetch('/api/trainers').then(r=>{if(!r.ok)throw new Error('Trainer directory unavailable');return r.json();}).then(rows=>{if(alive)setTrainers(rows.map(t=>({...t,category:'certified-trainer',role:'Certified Trainer',institution:'RCBC',certRef:t.certificate_ref,bio:t.short_profile,initials:t.name.split(' ').map(n=>n[0]).join(''),photo:t.photo_url})));}).catch(e=>{if(alive)setDirectoryError(e.message);});return ()=>{alive=false;};},[]);
+  useEffect(()=>{
+    let alive=true;
+    fetch('/api/trainers')
+      .then(r=>{if(!r.ok)throw new Error('Trainer directory unavailable');return r.json();})
+      .then(rows=>{
+        if(alive && Array.isArray(rows) && rows.length > 0) {
+          setTrainers(rows.map(t=>({...t,category:'certified-trainer',role:'Certified Trainer',institution:'RCBC',certRef:t.certificate_ref,bio:t.short_profile,initials:t.name.split(' ').map(n=>n[0]).join(''),photo:t.photo_url})));
+        }
+      })
+      .catch(e=>{if(alive)setDirectoryError(e.message);});
+    return ()=>{alive=false;};
+  },[]);
 
   const [selectedFacilitatorModal, setSelectedFacilitatorModal] = useState(null);
   const [activeCategory, setActiveCategory] = useState("all");
@@ -3333,27 +3367,27 @@ function CertifiedTrainers() {
           <div className="directory-header-row">
             <div>
               <span className="section-label">Verified Profiles</span>
-              <h2>Trainer Directory &amp; Approved Activities</h2>
+              <h2>{le?.directoryTitle || "Trainer Directory & Approved Activities"}</h2>
             </div>
           </div>
 
           <div className="directory-controls-bar">
             <div className="directory-track-tabs" role="tablist" aria-label="Facilitator Category">
-              <button type="button" className={`track-tab-btn ${activeCategory === "all" ? "is-active" : ""}`} onClick={() => setActiveCategory("all")} role="tab" aria-selected={activeCategory === "all"}>All ({trainers.length})</button>
+              <button type="button" className={`track-tab-btn ${activeCategory === "all" ? "is-active" : ""}`} onClick={() => setActiveCategory("all")} role="tab" aria-selected={activeCategory === "all"}>{le?.all || "All"} ({trainers.length})</button>
               <button type="button" className={`track-tab-btn ${activeCategory === "medical-professional" ? "is-active" : ""}`} onClick={() => setActiveCategory("medical-professional")} role="tab" aria-selected={activeCategory === "medical-professional"}>Clinical ({clinicalFacilitators.length})</button>
               <button type="button" className={`track-tab-btn ${activeCategory === "advisory-support" ? "is-active" : ""}`} onClick={() => setActiveCategory("advisory-support")} role="tab" aria-selected={activeCategory === "advisory-support"}>Advisory ({advisoryFacilitators.length})</button>
             </div>
             <div className="directory-filters-cluster">
               <div className="directory-search-input-wrap">
-                <input type="text" placeholder="Search name, clinic, or role..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} aria-label="Search trainers" />
+                <input type="text" placeholder={le?.searchPlaceholder || "Search name, clinic, or role..."} value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} aria-label="Search trainers" />
                 {searchQuery && <button type="button" className="search-clear-btn" onClick={() => setSearchQuery("")} aria-label="Clear">&times;</button>}
               </div>
               <select value={trainerCity} onChange={(e) => setTrainerCity(e.target.value)} aria-label="Filter by city">
-                <option>All cities</option>
+                <option value="All cities">{le?.allCities || "All cities"}</option>
                 {cities.map((c) => <option key={c} value={c}>{c}</option>)}
               </select>
               <select value={trainerLanguage} onChange={(e) => setTrainerLanguage(e.target.value)} aria-label="Filter by language">
-                <option>All languages</option>
+                <option value="All languages">{le?.allLanguages || "All languages"}</option>
                 {languages.map((l) => <option key={l} value={l}>{l}</option>)}
               </select>
             </div>
@@ -3411,10 +3445,10 @@ function CertifiedTrainers() {
                       </div>
                     )}
                     <div className="trainer-card-actions">
-                      <button type="button" className="trainer-full-profile-btn" onClick={() => setSelectedFacilitatorModal(t)}>View Full Profile &amp; Activities →</button>
+                      <button type="button" className="trainer-full-profile-btn" onClick={() => setSelectedFacilitatorModal(t)}>{le?.viewTrainerProfile ? `${le.viewTrainerProfile} →` : "View Full Profile & Activities →"}</button>
                       <div className="trainer-sub-actions-row">
                         <button type="button" className="trainer-expand-toggle-btn" onClick={() => setExpandedTrainer(isOpen ? null : t.id)} aria-expanded={isOpen}>{isOpen ? "Hide Sessions ▲" : `Sessions (${trainerActivities.length}) ▼`}</button>
-                        <a href="https://forms.google.com/" target="_blank" rel="noreferrer" className="trainer-contact-btn">Request Facilitator ↗</a>
+                        <a href="https://forms.google.com/" target="_blank" rel="noreferrer" className="trainer-contact-btn">{le?.requestFacilitator || "Request Facilitator ↗"}</a>
                       </div>
                     </div>
                   </article>
@@ -3425,7 +3459,7 @@ function CertifiedTrainers() {
             <div className="directory-empty-state">
               <span className="empty-icon">🔍</span>
               <h3>No facilitators match your criteria</h3>
-              <button type="button" className="primary-button" onClick={() => { setActiveCategory("all"); setSearchQuery(""); setTrainerCity("All cities"); setTrainerLanguage("All languages"); }}>Reset Filters</button>
+              <button type="button" className="primary-button" onClick={() => { setActiveCategory("all"); setSearchQuery(""); setTrainerCity("All cities"); setTrainerLanguage("All languages"); }}>{le?.resetFilters || "Reset Filters"}</button>
             </div>
           )}
         </div>
@@ -3631,6 +3665,8 @@ const UC_LEGEND = [
 
 function UpcomingCalendar() {
   const activities=usePublicActivities();
+  const { t } = useLanguage();
+  const le = t.learnEvents;
   // ---- State ----
   const today = new Date();
   const [viewYear, setViewYear] = useState(today.getFullYear());
@@ -3738,11 +3774,10 @@ function UpcomingCalendar() {
           {/* ---- Page header ---- */}
           <div className="uc-page-header">
             <div>
-              <span className="eyebrow">Upcoming Calendar</span>
-              <h2 className="uc-page-title">All Education &amp; Events</h2>
+              <span className="eyebrow">{le?.pageInfo?.["upcoming-calendar"]?.eyebrow || "Upcoming Calendar"}</span>
+              <h2 className="uc-page-title">{le?.calendarTitle || "All Education & Events"}</h2>
               <p className="uc-page-sub">
-                Online education, physical programmes and community events — all in one view.
-                Click any event to see details.
+                {le?.calendarSub || "Online education, physical programmes and community events — all in one view. Click any event to see details."}
               </p>
             </div>
           </div>
@@ -3750,40 +3785,40 @@ function UpcomingCalendar() {
           {/* ---- Filters ---- */}
           <div className="uc-filters">
             <div className="uc-filter-group">
-              <label htmlFor="uc-type" className="uc-filter-label">Type</label>
+              <label htmlFor="uc-type" className="uc-filter-label">{le?.type || "Type"}</label>
               <select
                 id="uc-type"
                 className="uc-filter-select"
                 value={typeFilter}
                 onChange={(e) => { setTypeFilter(e.target.value); setSelectedEvent(null); }}
               >
-                <option value="All types">All types</option>
+                <option value="All types">{le?.allTypes || "All types"}</option>
                 {calTypes.map((t) => <option key={t} value={t}>{t}</option>)}
               </select>
             </div>
 
             <div className="uc-filter-group">
-              <label htmlFor="uc-mode" className="uc-filter-label">Mode</label>
+              <label htmlFor="uc-mode" className="uc-filter-label">{le?.mode || "Mode"}</label>
               <select
                 id="uc-mode"
                 className="uc-filter-select"
                 value={modeFilter}
                 onChange={(e) => { setModeFilter(e.target.value); setSelectedEvent(null); }}
               >
-                <option value="All modes">All modes</option>
+                <option value="All modes">{le?.allModes || "All modes"}</option>
                 {modes.map((m) => <option key={m} value={m}>{m}</option>)}
               </select>
             </div>
 
             <div className="uc-filter-group">
-              <label htmlFor="uc-lang" className="uc-filter-label">Language</label>
+              <label htmlFor="uc-lang" className="uc-filter-label">{le?.language || "Language"}</label>
               <select
                 id="uc-lang"
                 className="uc-filter-select"
                 value={languageFilter}
                 onChange={(e) => { setLanguageFilter(e.target.value); setSelectedEvent(null); }}
               >
-                <option value="All languages">All languages</option>
+                <option value="All languages">{le?.allLanguages || "All languages"}</option>
                 {languages.map((l) => <option key={l} value={l}>{l}</option>)}
               </select>
             </div>
@@ -3794,11 +3829,11 @@ function UpcomingCalendar() {
                 className="uc-clear-btn"
                 onClick={() => { setTypeFilter("All types"); setModeFilter("All modes"); setLanguageFilter("All languages"); }}
               >
-                Clear filters
+                {le?.clearFilters || "Clear filters"}
               </button>
             )}
 
-            <span className="uc-event-count">{filteredEvents.length} events</span>
+            <span className="uc-event-count">{filteredEvents.length} {filteredEvents.length === 1 ? (le?.item || "event") : (le?.items || "events")}</span>
           </div>
 
           {/* ---- Calendar + Detail panel ---- */}
@@ -3808,17 +3843,17 @@ function UpcomingCalendar() {
             <div className="uc-calendar-panel">
               {/* Month navigation */}
               <div className="uc-month-nav">
-                <button type="button" className="uc-nav-btn" onClick={prevMonth} aria-label="Previous month">‹</button>
+                <button type="button" className="uc-nav-btn" onClick={prevMonth} aria-label={le?.previousMonth || "Previous month"}>‹</button>
                 <div className="uc-month-label">
-                  <h3>{MONTH_NAMES[viewMonth]} {viewYear}</h3>
+                  <h3>{(le?.months || MONTH_NAMES)[viewMonth]} {viewYear}</h3>
                 </div>
-                <button type="button" className="uc-nav-btn" onClick={nextMonth} aria-label="Next month">›</button>
-                <button type="button" className="uc-today-btn" onClick={goToday}>Today</button>
+                <button type="button" className="uc-nav-btn" onClick={nextMonth} aria-label={le?.nextMonth || "Next month"}>›</button>
+                <button type="button" className="uc-today-btn" onClick={goToday}>{le?.today || "Today"}</button>
               </div>
 
               {/* Day-of-week header */}
               <div className="uc-grid-header">
-                {DAY_LABELS.map((d) => (
+                {(le?.days || DAY_LABELS).map((d) => (
                   <div key={d} className="uc-day-label">{d}</div>
                 ))}
               </div>
@@ -3991,7 +4026,7 @@ function UpcomingCalendar() {
               <div className="uc-detail-empty" aria-hidden="true">
                 <div className="uc-detail-empty-inner">
                   <span className="uc-empty-icon">📅</span>
-                  <p>Click any event on the calendar to see its details here.</p>
+                  <p>{le?.calendarHint || "Click any event on the calendar to see its details here."}</p>
                 </div>
               </div>
             )}
@@ -4008,8 +4043,11 @@ function UpcomingCalendar() {
    ================================================================ */
 function LearnEvents({ module }) {
   const location = useLocation();
-  const page = pageInfo[module] || pageInfo["online-education"];
-  const heroImage = imageMap[page.image] || webinarImage;
+  const { t } = useLanguage();
+  const le = t.learnEvents;
+  const page = le?.pageInfo?.[module] || pageInfo[module] || pageInfo["online-education"];
+  const rawPage = pageInfo[module] || pageInfo["online-education"];
+  const heroImage = imageMap[rawPage.image] || webinarImage;
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "auto" });
@@ -4027,7 +4065,7 @@ function LearnEvents({ module }) {
             <h1>{page.title}</h1>
             <p>{page.intro}</p>
           </div>
-          <img src={heroImage} alt={page.imageAlt} />
+          <img src={heroImage} alt={page.imageAlt || rawPage.imageAlt} />
         </div>
       </section>
 
@@ -4041,7 +4079,7 @@ function LearnEvents({ module }) {
       {/* ---- Module navigation ---- */}
       <section className="module-nav">
         <div className="section-container">
-          <p>Explore education &amp; events</p>
+          <p>{le?.exploreText || "Explore education & events"}</p>
           <div className="module-nav-links">
             {sectionOrder.map((key) => (
               <Link
@@ -4053,7 +4091,7 @@ function LearnEvents({ module }) {
                     : "module-nav-link"
                 }
               >
-                {pageInfo[key].eyebrow}
+                {le?.pageInfo?.[key]?.eyebrow || pageInfo[key].eyebrow}
               </Link>
             ))}
           </div>

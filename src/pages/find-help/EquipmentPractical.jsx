@@ -4,6 +4,7 @@ import PublishedRecords from "../../components/PublishedRecords";
 import { useEffect, useMemo, useState } from "react";
 
 import equipmentResources from "../../data/equipmentResources";
+import { useLanguage } from "../../i18n/LanguageContext";
 
 import "./EquipmentPractical.css";
 
@@ -40,6 +41,9 @@ const heroCards = [
 ];
 
 function EquipmentPractical() {
+  const { t } = useLanguage();
+  const ep = t.equipmentPracticalPage || {};
+
   const [selectedCategory, setSelectedCategory] =
     useState("All");
 
@@ -179,34 +183,22 @@ function EquipmentPractical() {
         <div className="equipment-hero-left">
           <div className="equipment-hero-content">
             <span className="equipment-eyebrow">
-              Find Help & Support
+              {ep.kicker || "Find Help & Support"}
             </span>
 
             <h1>
-              Equipment
-              <br />
-
-              <em>
-                & Practical
-              </em>
-
-              <br />
-
-              Resources
+              {ep.title || "Equipment & Practical Resources"}
             </h1>
 
             <p>
-              Explore everyday aids, reminder
-              tools, mobility equipment and
-              assistive technology that may
-              support daily life.
+              {ep.subtitle || "Explore everyday aids, reminder tools, mobility equipment and assistive technology that may support daily life."}
             </p>
 
             <a
               href="#equipment-explore"
               className="equipment-hero-button"
             >
-              Explore resources
+              {ep.exploreBtn || "Explore resources"}
 
               <span>
                 ↓
@@ -283,7 +275,7 @@ function EquipmentPractical() {
             )}
 
             <span>
-              Hover to pause
+              {ep.hoverPause || "Hover to pause"}
             </span>
           </div>
         </div>
@@ -297,18 +289,15 @@ function EquipmentPractical() {
         <div className="equipment-container">
           <div className="equipment-needs-heading">
             <span>
-              Start with the need
+              {ep.needsEyebrow || "Start with the need"}
             </span>
 
             <h2>
-              What are you trying to make
-              easier?
+              {ep.needsTitle || "What are you trying to make easier?"}
             </h2>
 
             <p>
-              Choose the area that best
-              matches the practical challenge
-              you are looking at.
+              {ep.needsDesc || "Choose the area that best matches the practical challenge you are looking at."}
             </p>
           </div>
 
@@ -326,16 +315,15 @@ function EquipmentPractical() {
               </span>
 
               <h3>
-                Everyday tasks
+                {ep.need1Title || "Everyday tasks"}
               </h3>
 
               <p>
-                Practical support for common
-                daily activities and routines.
+                {ep.need1Desc || "Practical support for common daily activities and routines."}
               </p>
 
               <strong>
-                View aids →
+                {ep.need1Btn || "View aids →"}
               </strong>
             </button>
 
@@ -352,16 +340,15 @@ function EquipmentPractical() {
               </span>
 
               <h3>
-                Remembering medication
+                {ep.need2Title || "Remembering medication"}
               </h3>
 
               <p>
-                Tools for organising and
-                reminding medication routines.
+                {ep.need2Desc || "Tools for organising and reminding medication routines."}
               </p>
 
               <strong>
-                View tools →
+                {ep.need2Btn || "View tools →"}
               </strong>
             </button>
 
@@ -378,17 +365,15 @@ function EquipmentPractical() {
               </span>
 
               <h3>
-                Time & orientation
+                {ep.need3Title || "Time & orientation"}
               </h3>
 
               <p>
-                Tools that may help with dates,
-                routines and familiar
-                information.
+                {ep.need3Desc || "Tools that may help with dates, routines and familiar information."}
               </p>
 
               <strong>
-                View tools →
+                {ep.need3Btn || "View tools →"}
               </strong>
             </button>
 
@@ -405,16 +390,15 @@ function EquipmentPractical() {
               </span>
 
               <h3>
-                Moving around
+                {ep.need4Title || "Moving around"}
               </h3>
 
               <p>
-                Practical equipment that may
-                support mobility and movement.
+                {ep.need4Desc || "Practical equipment that may support mobility and movement."}
               </p>
 
               <strong>
-                View aids →
+                {ep.need4Btn || "View aids →"}
               </strong>
             </button>
           </div>
@@ -435,11 +419,11 @@ function EquipmentPractical() {
 
             <aside className="equipment-category-panel">
               <span className="equipment-small-label">
-                Browse by category
+                {ep.browseCategory || "Browse by category"}
               </span>
 
               <h2>
-                Practical resources
+                {ep.practicalResources || "Practical resources"}
               </h2>
 
               <div className="equipment-category-list">
@@ -468,7 +452,9 @@ function EquipmentPractical() {
                             ]}
                       </span>
 
-                      {category}
+                      {category === "All"
+                        ? (ep.allResources || "All resources")
+                        : category}
                     </button>
                   )
                 )}
@@ -476,15 +462,11 @@ function EquipmentPractical() {
 
               <div className="equipment-sidebar-note">
                 <strong>
-                  Looking for home safety
-                  guidance?
+                  {ep.homeSafetyNoteTitle || "Looking for home safety guidance?"}
                 </strong>
 
                 <p>
-                  Home safety guidance belongs
-                  under Caregiver Support and is
-                  kept separate from this
-                  equipment section.
+                  {ep.homeSafetyNoteText || "Home safety guidance belongs under Caregiver Support and is kept separate from this equipment section."}
                 </p>
               </div>
             </aside>
@@ -496,12 +478,12 @@ function EquipmentPractical() {
                 <div>
                   <span>
                     {selectedCategory === "All"
-                      ? "All resources"
+                      ? (ep.allResources || "All resources")
                       : selectedCategory}
                   </span>
 
                   <h2>
-                    Explore practical options
+                    {ep.explorePracticalOptions || "Explore practical options"}
                   </h2>
                 </div>
 
@@ -511,8 +493,8 @@ function EquipmentPractical() {
                   }{" "}
                   {filteredResources.length ===
                   1
-                    ? "category"
-                    : "categories"}
+                    ? (ep.categorySingular || "category")
+                    : (ep.categoryPlural || "categories")}
                 </strong>
               </div>
 
@@ -596,7 +578,7 @@ function EquipmentPractical() {
                           <div className="equipment-resource-details">
                             <div className="equipment-examples">
                               <span>
-                                Examples
+                                {ep.examples || "Examples"}
                               </span>
 
                               <ul>
@@ -620,8 +602,7 @@ function EquipmentPractical() {
 
                             <div className="equipment-source-panel">
                               <span>
-                                Where can I
-                                find this?
+                                {ep.whereToFind || "Where can I find this?"}
                               </span>
 
                               <p>
@@ -654,17 +635,13 @@ function EquipmentPractical() {
                                       target="_blank"
                                       rel="noreferrer"
                                     >
-                                      Visit
-                                      supplier ↗
+                                      {ep.visitSupplier || "Visit supplier ↗"}
                                     </a>
                                   )}
                                 </div>
                               ) : (
                                 <span className="equipment-pending">
-                                  Supplier
-                                  information
-                                  pending
-                                  verification
+                                  {ep.supplierPending || "Supplier information pending verification"}
                                 </span>
                               )}
                             </div>
@@ -675,14 +652,13 @@ function EquipmentPractical() {
                               >
                                 {resource.verificationStatus ===
                                 "verified"
-                                  ? "Verified"
-                                  : "Verification pending"}
+                                  ? (ep.verified || "Verified")
+                                  : (ep.verificationPending || "Verification pending")}
                               </span>
 
                               {resource.lastReviewed && (
                                 <small>
-                                  Last
-                                  reviewed:{" "}
+                                  {ep.lastReviewed || "Last reviewed:"}{" "}
                                   {
                                     resource.lastReviewed
                                   }
@@ -710,12 +686,11 @@ function EquipmentPractical() {
           <div className="equipment-guidance-layout">
             <div>
               <span>
-                Before choosing equipment
+                {ep.guidanceEyebrow || "Before choosing equipment"}
               </span>
 
               <h2>
-                Start with the person, not
-                the product.
+                {ep.guidanceTitle || "Start with the person, not the product."}
               </h2>
             </div>
 
@@ -726,8 +701,7 @@ function EquipmentPractical() {
                 </strong>
 
                 <p>
-                  Identify the daily
-                  difficulty or need first.
+                  {ep.guidance1 || "Identify the daily difficulty or need first."}
                 </p>
               </div>
 
@@ -737,9 +711,7 @@ function EquipmentPractical() {
                 </strong>
 
                 <p>
-                  Consider whether the person
-                  can use the equipment
-                  comfortably.
+                  {ep.guidance2 || "Consider whether the person can use the equipment comfortably."}
                 </p>
               </div>
 
@@ -749,9 +721,7 @@ function EquipmentPractical() {
                 </strong>
 
                 <p>
-                  Where appropriate, seek
-                  advice from a qualified
-                  healthcare professional.
+                  {ep.guidance3 || "Where appropriate, seek advice from a qualified healthcare professional."}
                 </p>
               </div>
             </div>
@@ -772,18 +742,11 @@ function EquipmentPractical() {
 
             <div>
               <strong>
-                Information & Navigation Only
+                {ep.boundaryBoxTitle || "Information & Navigation Only"}
               </strong>
 
               <p>
-                Dementia Care Connect provides
-                practical information and links
-                to relevant external resources.
-                It does not prescribe
-                equipment, provide clinical
-                assessment or guarantee
-                third-party products or
-                suppliers.
+                {ep.boundaryBoxText || "Dementia Care Connect provides practical information and links to relevant external resources. It does not prescribe equipment, provide clinical assessment or guarantee third-party products or suppliers."}
               </p>
             </div>
           </div>

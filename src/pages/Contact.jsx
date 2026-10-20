@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { useLanguage } from '../i18n/LanguageContext';
 import { enquiryTypes, validateEnquiry } from '../../shared/enquiry.js';
 import { contact } from '../data/contact';
 import './Contact.css';
@@ -9,6 +10,8 @@ function Channel({ href, title, children }) {
 }
 
 export default function Contact() {
+  const { t } = useLanguage();
+  const c = t.contact || {};
   const [values, setValues] = useState({ name: '', email: '', type: enquiryTypes[0], message: '', website: '' });
   const [errors, setErrors] = useState({});
   const [status, setStatus] = useState('');
@@ -65,21 +68,21 @@ export default function Contact() {
   }
 
   return <main className="contact-page">
-    <header className="contact-hero"><div className="contact-container"><p className="contact-kicker">ALZHEIMER’S CARE PROJECT</p><h1>Contact us</h1><p>Project enquiries, community updates and connection with our organisers.</p></div></header>
+    <header className="contact-hero"><div className="contact-container"><p className="contact-kicker">{c.kicker || "ALZHEIMER’S CARE PROJECT"}</p><h1>{c.title || "Contact us"}</h1><p>{c.subtitle || "Project enquiries, community updates and connection with our organisers."}</p></div></header>
     <div className="contact-container contact-grid">
-      <section aria-labelledby="project-contact"><h2 id="project-contact">Alzheimer’s Care Project</h2><p>Connect with the project team about education, activities, collaboration and website resources.</p>
-        <Channel href={contact.projectEmail && `mailto:${contact.projectEmail}`} title="Project email">{contact.projectEmail || 'For project enquiries and collaboration.'}</Channel>
-        <Channel href={contact.facebook} title="Facebook Page">Project updates, educational information and activities.</Channel>
-        <Channel href={contact.messenger} title="Facebook Messenger">A general enquiry channel for the project.</Channel>
-        <Channel href={contact.whatsappCommunity} title="Join Our WhatsApp Community">Receive project updates, educational information and activity announcements.</Channel>
-        <section className="contact-organiser" aria-labelledby="organiser"><h2 id="organiser">Our organiser</h2><h3>Rotary Club of Bintulu Central (RCBC)</h3><p>Dementia Care Hub is an initiative of the Alzheimer’s Care Project organised by RCBC.</p>
-          <Channel href={contact.organiserEmail && `mailto:${contact.organiserEmail}`} title="Official RCBC email">{contact.organiserEmail || 'For organiser-level enquiries.'}</Channel>
-          {contact.organiserWebsite && <p><a href={contact.organiserWebsite}>RCBC official website</a></p>}
+      <section aria-labelledby="project-contact"><h2 id="project-contact">{c.projectContact || "Alzheimer’s Care Project"}</h2><p>{c.projectContactSub || "Connect with the project team about education, activities, collaboration and website resources."}</p>
+        <Channel href={contact.projectEmail && `mailto:${contact.projectEmail}`} title={c.projectEmail || "Project email"}>{contact.projectEmail || 'For project enquiries and collaboration.'}</Channel>
+        <Channel href={contact.facebook} title={c.facebookPage || "Facebook Page"}>Project updates, educational information and activities.</Channel>
+        <Channel href={contact.messenger} title={c.messenger || "Facebook Messenger"}>A general enquiry channel for the project.</Channel>
+        <Channel href={contact.whatsappCommunity} title={c.whatsapp || "Join Our WhatsApp Community"}>Receive project updates, educational information and activity announcements.</Channel>
+        <section className="contact-organiser" aria-labelledby="organiser"><h2 id="organiser">{c.organiser || "Our organiser"}</h2><h3>{c.rcbc || "Rotary Club of Bintulu Central (RCBC)"}</h3><p>{c.rcbcSub || "Dementia Care Hub is an initiative of the Alzheimer’s Care Project organised by RCBC."}</p>
+          <Channel href={contact.organiserEmail && `mailto:${contact.organiserEmail}`} title={c.officialEmail || "Official RCBC email"}>{contact.organiserEmail || 'For organiser-level enquiries.'}</Channel>
+          {contact.organiserWebsite && <p><a href={contact.organiserWebsite}>{c.website || "RCBC official website"}</a></p>}
           {contact.organiserFacebook && <p><a href={contact.organiserFacebook}>RCBC Facebook Page</a></p>}
           {contact.approvedPostalAddress && <address>{contact.approvedPostalAddress}</address>}
         </section>
       </section>
-      <section className="contact-form-card" aria-labelledby="enquiry-heading"><h2 id="enquiry-heading">Send an enquiry</h2>
+      <section className="contact-form-card" aria-labelledby="enquiry-heading"><h2 id="enquiry-heading">{c.title || "Send an enquiry"}</h2>
         <div className="contact-boundary"><strong>Our service boundary</strong><p>Dementia Care Hub does not provide emergency, medical consultation or crisis support services.</p><p>For external services, visit <Link to="/find-help">Find Help &amp; Support</Link>. For event registration, visit the relevant <Link to="/learn-events/events">Education &amp; Events page</Link>.</p></div>
         <p id="privacy-notice">We use your name, email and message to manage and respond to your enquiry through the project’s administrative workflow. Please do not include sensitive medical details.</p>
         <form ref={form} onSubmit={submit} noValidate aria-describedby="privacy-notice" aria-busy={busy}>

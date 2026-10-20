@@ -45,11 +45,14 @@ import ReviewQueue from "./admin/pages/ReviewQueue";
 import Contribution from "./admin/pages/Contribution";
 
 
+import { LanguageProvider } from "./i18n/LanguageContext";
+
 function App() {
   return (
     <BrowserRouter>
-      <Header />
-      <TrainerProvider>
+      <LanguageProvider>
+        <Header />
+        <TrainerProvider>
 
         <Routes>
           <Route path="/get-updated" element={<ProjectServices />} />
@@ -302,6 +305,7 @@ function App() {
       </TrainerProvider>
       <Footer />
       <ScrollToTop />
+      </LanguageProvider>
     </BrowserRouter>
   );
 }

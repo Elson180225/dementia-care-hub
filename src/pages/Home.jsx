@@ -1,5 +1,6 @@
 import PublishedRecords from "../components/PublishedRecords";
 import { Link } from "react-router-dom";
+import { useLanguage } from "../i18n/LanguageContext";
 
 import "./Home.css";
 
@@ -8,79 +9,78 @@ import FadeIn from "../components/FadeIn/FadeIn";
 import Statistics from "../components/Statistics/Statistics";
 
 function Home() {
+  const { t } = useLanguage();
+  const h = t.home;
+
   return (
     <main className="home-page">
-      <PublishedRecords kind="content_pages" slug="home" title="Project updates"/>
+      <PublishedRecords kind="content_pages" slug="home" title="Project updates" />
       {/* =====================================================
           ROW 1 — HERO
       ====================================================== */}
-
       <section className="hero-section">
-  <HeroSlideshow />
+        <HeroSlideshow />
 
-  <div className="section-container hero-layout">
-    <div className="hero-copy">
-      <span className="hero-eyebrow">
-        Alzheimer&apos;s Care Project by RCBC
-      </span>
+        <div className="section-container hero-layout">
+          <div className="hero-copy">
+            <span className="hero-eyebrow">
+              {h.eyebrow}
+            </span>
 
-      <h1>
-        Dementia Care Connect
-      </h1>
+            <h1>
+              {h.title}
+            </h1>
 
-      <div className="hero-phase-line">
-        <span>Phase 2</span>
-        <span className="hero-phase-dot">•</span>
-        <span>Go Digital</span>
-      </div>
+            <div className="hero-phase-line">
+              <span>{h.phase}</span>
+              <span className="hero-phase-dot">•</span>
+              <span>{h.phaseTheme}</span>
+            </div>
 
-      <p className="hero-project-theme">
-        Understanding the Missing Pieces
-      </p>
+            <p className="hero-project-theme">
+              {h.projectTheme}
+            </p>
 
-      <p className="hero-description">
-        Find clear information, practical support and learning
-        resources for people living with dementia, families,
-        caregivers and the wider community.
-      </p>
+            <p className="hero-description">
+              {h.description}
+            </p>
 
-      <div className="hero-actions">
-        <a
-          href="#visitor-pathways"
-          className="hero-btn hero-btn-primary"
-        >
-          Find Your Path
-        </a>
+            <div className="hero-actions">
+              <a
+                href="#visitor-pathways"
+                className="hero-btn hero-btn-primary"
+              >
+                {h.findPath}
+              </a>
 
-        <Link
-          to="/learn-events/dementia-education"
-          className="hero-btn hero-btn-secondary"
-        >
-          Understand Dementia
-        </Link>
-      </div>
+              <Link
+                to="/understand-dementia"
+                className="hero-btn hero-btn-secondary"
+              >
+                {h.understandDementia}
+              </Link>
+            </div>
 
-      <div className="hero-help-line">
-        <span className="hero-help-dot" />
+            <div className="hero-help-line">
+              <span className="hero-help-dot" />
 
-        <div>
-          <strong>
-            Not sure where to begin?
-          </strong>
+              <div>
+                <strong>
+                  {h.notSure}
+                </strong>
 
-          <a href="#visitor-pathways">
-            Tell us what brings you here →
-          </a>
+                <a href="#visitor-pathways">
+                  {h.tellUs}
+                </a>
+              </div>
+            </div>
+          </div>
         </div>
-      </div>
-    </div>
-  </div>
-</section>
+      </section>
 
       {/* =====================================================
           ROW 2 — WHAT BRINGS YOU HERE?
       ====================================================== */}
-
       <section
         className="visitor-pathways-section"
         id="visitor-pathways"
@@ -89,20 +89,19 @@ function Home() {
           <FadeIn>
             <div className="home-heading centred-heading">
               <span className="home-section-number">
-                02
+                {h.pathwaysSectionNum}
               </span>
 
               <span className="home-section-label">
-                What Brings You Here?
+                {h.pathwaysSectionLabel}
               </span>
 
               <h2>
-                Tell us what you need.
+                {h.pathwaysHeading}
               </h2>
 
               <p>
-                Choose the pathway that best describes why
-                you are visiting Dementia Care Connect.
+                {h.pathwaysSubheading}
               </p>
             </div>
           </FadeIn>
@@ -110,12 +109,12 @@ function Home() {
           <div className="visitor-pathways-grid">
             <FadeIn delay={0}>
               <Link
-                to="/learn-events/dementia-education"
+                to="/understand-dementia"
                 className="visitor-card visitor-card-purple"
               >
                 <div className="visitor-card-header">
                   <span className="visitor-card-number">
-                    01
+                    {h.pathway1.number}
                   </span>
 
                   <span className="visitor-card-arrow">
@@ -128,18 +127,15 @@ function Home() {
                 </div>
 
                 <h3>
-                  I want to understand
+                  {h.pathway1.title}
                 </h3>
 
                 <p>
-                  Dementia, Alzheimer&apos;s, signs,
-                  when to be concerned, and Healthy &
-                  Active Living to support brain health,
-                  wellbeing and dementia risk reduction.
+                  {h.pathway1.desc}
                 </p>
 
                 <span className="visitor-card-link">
-                  Understanding Dementia
+                  {h.pathway1.link}
                   <span>→</span>
                 </span>
               </Link>
@@ -152,7 +148,7 @@ function Home() {
               >
                 <div className="visitor-card-header">
                   <span className="visitor-card-number">
-                    02
+                    {h.pathway2.number}
                   </span>
 
                   <span className="visitor-card-arrow">
@@ -165,19 +161,15 @@ function Home() {
                 </div>
 
                 <h3>
-                  I need help & support
+                  {h.pathway2.title}
                 </h3>
 
                 <p>
-                  Next steps if concerned about changes
-                  or after a diagnosis; assessment and
-                  healthcare pathways; support services;
-                  government and financial resources;
-                  practical resources; and planning ahead.
+                  {h.pathway2.desc}
                 </p>
 
                 <span className="visitor-card-link">
-                  Find Help & Support
+                  {h.pathway2.link}
                   <span>→</span>
                 </span>
               </Link>
@@ -190,7 +182,7 @@ function Home() {
               >
                 <div className="visitor-card-header">
                   <span className="visitor-card-number">
-                    03
+                    {h.pathway3.number}
                   </span>
 
                   <span className="visitor-card-arrow">
@@ -203,17 +195,15 @@ function Home() {
                 </div>
 
                 <h3>
-                  I am caring for someone
+                  {h.pathway3.title}
                 </h3>
 
                 <p>
-                  Caregiver guidance, caregiver training,
-                  support groups and relevant caregiver
-                  support resources.
+                  {h.pathway3.desc}
                 </p>
 
                 <span className="visitor-card-link">
-                  Caregiver Support
+                  {h.pathway3.link}
                   <span>→</span>
                 </span>
               </Link>
@@ -226,7 +216,7 @@ function Home() {
               >
                 <div className="visitor-card-header">
                   <span className="visitor-card-number">
-                    04
+                    {h.pathway4.number}
                   </span>
 
                   <span className="visitor-card-arrow">
@@ -239,17 +229,15 @@ function Home() {
                 </div>
 
                 <h3>
-                  I want to learn or participate
+                  {h.pathway4.title}
                 </h3>
 
                 <p>
-                  Training, webinars, events,
-                  learning resources and ways to
-                  participate.
+                  {h.pathway4.desc}
                 </p>
 
                 <span className="visitor-card-link">
-                  Education & Events
+                  {h.pathway4.link}
                   <span>→</span>
                 </span>
               </Link>
@@ -258,9 +246,7 @@ function Home() {
 
           <FadeIn delay={350}>
             <p className="pathways-note">
-              Not sure which pathway is right for you?
-              Start with the option that best matches
-              what you need today.
+              {h.pathwaysNote}
             </p>
           </FadeIn>
         </div>
@@ -269,7 +255,6 @@ function Home() {
       {/* =====================================================
           ROW 3 — STATISTICS
       ====================================================== */}
-
       <Statistics />
     </main>
   );

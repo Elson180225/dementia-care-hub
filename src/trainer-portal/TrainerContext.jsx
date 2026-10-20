@@ -3,15 +3,45 @@ import { watchIdleSession } from './idleSession';
 const TrainerContext = createContext(null);
 const empty = { session:null, adminSession:null, profile:{}, profiles:[], activities:[], accessRequests:[], history:[], users:[], contributions:[], projectReach:[], maintenance:[] };
 export async function api(path, data) {
- const response=await fetch(path,{credentials:'same-origin',...(data?{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)}:{})});
- const result=await response.json(); if(!response.ok) throw Object.assign(new Error(result.error || 'Request failed'),{status:response.status}); return result;
+  let response;
+  try {
+    response = await fetch(path, {
+      credentials: 'same-origin',
+      ...(data ? { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) } : {})
+    });
+  } catch (err) {
+    throw Object.assign(new Error(err.message || 'Network request failed'), { status: 0 });
+  }
+
+  let result = null;
+  const contentType = response.headers.get('content-type') || '';
+  if (contentType.includes('application/json')) {
+    try {
+      result = await response.json();
+    } catch {
+      result = null;
+    }
+  }
+
+  if (!response.ok) {
+    throw Object.assign(new Error(result?.error || response.statusText || 'Request failed'), { status: response.status });
+  }
+  return result;
 }
 export default function TrainerProvider({children}) {
  const [state,setState]=useState(empty); const [loading,setLoading]=useState(true); const [error,setError]=useState('');
  const queue=useRef(Promise.resolve());
- const refresh=useCallback(async()=>{ const {user}=await api('/api/auth/me'); setState(user?await api('/api/portal'):empty); },[]);
+ const refresh=useCallback(async()=>{
+   try {
+     const data = await api('/api/auth/me');
+     const user = data?.user;
+     setState(user ? await api('/api/portal') : empty);
+   } catch {
+     setState(empty);
+   }
+ },[]);
  const signedInId=state.session?.id || state.adminSession?.id;
- useEffect(()=>{refresh().catch(e=>setError(e.message)).finally(()=>setLoading(false));},[refresh]);
+ useEffect(()=>{refresh().finally(()=>setLoading(false));},[refresh]);
  useEffect(()=>{
   if(!signedInId)return;
   return watchIdleSession({target:document,checkSession:async()=>(await api('/api/auth/me')).user,
