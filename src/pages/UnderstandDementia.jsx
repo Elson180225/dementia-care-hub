@@ -3,7 +3,6 @@ import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import "./UnderstandDementia.css";
 
-/* Local English content until the i18n module is restored. */
 const understandingDementiaContent = {
   eyebrow: "Understanding Dementia",
   title: "Understanding Dementia",
@@ -42,6 +41,31 @@ const understandingDementiaContent = {
     "Dementia is not a single disease. It describes a group of symptoms that can affect memory, reasoning, language and the ability to manage everyday tasks. Different underlying conditions can cause these changes. A healthcare professional can help investigate persistent concerns.",
     "Alzheimer's disease is a common cause of dementia, but the terms are not interchangeable. It generally develops gradually, and people may experience changes in memory, communication and daily activities over time. Assessment and support can help individuals and families plan for their needs.",
     "Dementia affects people differently. The changes someone experiences, how quickly they develop and the support they need can vary. Listening to the person, respecting their preferences and adapting support to their situation are important.",
+  ],
+  commonTypesTitle: "Common types of dementia",
+  commonTypesIntro:
+    "Dementia is an umbrella term. These are some of the conditions that can cause dementia symptoms:",
+  commonTypes: [
+    {
+      title: "Alzheimer’s disease",
+      description:
+        "Often involves gradual changes in memory, thinking and everyday functioning.",
+    },
+    {
+      title: "Vascular dementia",
+      description:
+        "Linked to problems with blood supply to the brain; symptoms can include difficulties with planning and thinking.",
+    },
+    {
+      title: "Lewy body dementia",
+      description:
+        "May involve changes in attention, movement, sleep and visual perception.",
+    },
+    {
+      title: "Frontotemporal dementia",
+      description:
+        "Often affects behaviour, personality or language, sometimes before memory changes become obvious.",
+    },
   ],
   youngerOnset: "Younger-onset dementia:",
   youngerText: "Dementia can sometimes affect people under 65.",
@@ -108,31 +132,39 @@ const understandingDementiaContent = {
     "Healthy routines can support general wellbeing and brain health.",
   livingCards: [
     {
-      title: "Stay connected",
+      title: "Stay Healthy",
       items: [
-        "Spend time with friends and family",
-        "Join community activities",
+        "Have regular checks for blood pressure and diabetes, and manage them with your healthcare team.",
+        "Check hearing and vision, and seek support when they change.",
+        "Avoid smoking and limit alcohol; protect yourself from head injuries.",
+        "Make sleep and balanced meals part of your routine.",
       ],
     },
     {
-      title: "Stay active",
+      title: "Stay Active",
       items: [
-        "Choose enjoyable physical activities",
-        "Make movement part of daily routines",
+        "Choose enjoyable activities such as walking, dancing or gardening.",
+        "Make movement part of daily life in ways that suit your abilities.",
       ],
     },
     {
-      title: "Support health",
+      title: "Stay Connected & Engaged",
       items: [
-        "Attend regular health checks",
-        "Prioritise sleep and balanced meals",
+        "Spend time with family, friends and neighbours.",
+        "Join community, cultural or volunteering activities that interest you.",
       ],
     },
     {
-      title: "Keep learning",
-      items: ["Explore hobbies", "Try activities that stimulate thinking"],
+      title: "Keep Your Brain & Mind Active",
+      items: [
+        "Explore hobbies, reading, music or learning something new.",
+        "Try activities that encourage thinking, creativity and conversation.",
+      ],
     },
   ],
+  riskTitle: "Dementia Risk Reduction",
+  riskDescription:
+    "Looking after heart health, hearing and vision, staying active and connected, avoiding smoking and harmful alcohol use, preventing head injuries, and getting enough sleep may help reduce the risk of dementia. No single habit can eliminate the risk, and healthy living cannot guarantee prevention.",
   learnTogether: "Learn and connect",
   learnTogetherText:
     "Explore education and community activities for people and families.",
@@ -145,23 +177,59 @@ const understandingDementiaContent = {
   faqs: [
     {
       q: "Is dementia a normal part of ageing?",
-      a: "No. Dementia is not a normal part of ageing, although age is a risk factor.",
+      a: "No. Dementia is not a normal part of ageing, although age can increase risk.",
+      link: { href: "#overview", label: "Learn about dementia" },
     },
     {
       q: "Is dementia the same as Alzheimer's disease?",
-      a: "No. Alzheimer's disease is one cause of dementia; there are others.",
+      a: "No. Alzheimer's disease is one cause of dementia, but there are others.",
+      link: { href: "#common-types", label: "See common types" },
     },
     {
       q: "Can dementia be diagnosed through an online questionnaire?",
-      a: "No. Diagnosis requires assessment by qualified healthcare professionals.",
+      a: "No. A qualified healthcare professional must assess symptoms.",
+      link: { href: "#early-signs", label: "See early signs" },
     },
     {
       q: "What should I do if I notice changes?",
-      a: "Talk with a healthcare professional, especially when changes are persistent or affect daily life.",
+      a: "Speak with a healthcare professional if changes persist or affect everyday life.",
+      link: {
+        href: "/find-help/assessment-healthcare",
+        label: "Find assessment information",
+      },
     },
     {
       q: "Where can caregivers find help?",
-      a: "Visit the Find Help and Support section for information about available services.",
+      a: "Caregiver Support offers practical guidance, training and community connections.",
+      link: { href: "/caregiver-support", label: "Explore caregiver support" },
+    },
+    {
+      q: "Can younger people develop dementia?",
+      a: "Yes. Dementia can affect people under 65, although it is less common.",
+      link: { href: "#overview", label: "Read the overview" },
+    },
+    {
+      q: "Is dementia hereditary?",
+      a: "Most cases are not directly inherited, but some rare forms have strong genetic links.",
+      link: { href: "#common-types", label: "Explore dementia types" },
+    },
+    {
+      q: "Can dementia risk be reduced?",
+      a: "Some risk factors can be managed through health care and everyday habits.",
+      link: { href: "#risk-reduction", label: "Explore risk reduction" },
+    },
+    {
+      q: "Can healthy living prevent dementia?",
+      a: "Healthy habits may reduce risk, but they cannot guarantee prevention.",
+      link: { href: "#healthy-living", label: "Healthy and active living" },
+    },
+    {
+      q: "When should I seek further assessment?",
+      a: "Seek professional advice if changes are persistent, worsening or affecting daily life.",
+      link: {
+        href: "/find-help/assessment-healthcare",
+        label: "Find assessment information",
+      },
     },
   ],
   concerned: "Need more support?",
@@ -188,7 +256,11 @@ function UnderstandDementia() {
 
   return (
     <main className="understand-page">
-      <PublishedRecords kind="content_pages" slug="understand-dementia" title="Project updates"/>
+      <PublishedRecords
+        kind="content_pages"
+        slug="understand-dementia"
+        title="Project updates"
+      />
       <section className="understand-hero">
         <div className="understand-container understand-hero-grid">
           <div>
@@ -259,6 +331,18 @@ function UnderstandDementia() {
           >
             <h3>{t.overviewCards[selectedOverview].title}</h3>
             <p>{t.overviewDetails[selectedOverview]}</p>
+          </div>
+          <div className="understand-common-types" id="common-types">
+            <h3>{t.commonTypesTitle}</h3>
+            <p>{t.commonTypesIntro}</p>
+            <div className="understand-types-grid">
+              {t.commonTypes.map((item) => (
+                <article key={item.title}>
+                  <h4>{item.title}</h4>
+                  <p>{item.description}</p>
+                </article>
+              ))}
+            </div>
           </div>
           <p className="understand-note">
             <strong>{t.youngerOnset}</strong> {t.youngerText}
@@ -445,6 +529,10 @@ function UnderstandDementia() {
               </article>
             ))}
           </div>
+          <div className="understand-risk" id="risk-reduction">
+            <h3>{t.riskTitle}</h3>
+            <p>{t.riskDescription}</p>
+          </div>
           <div className="understand-callout">
             <div>
               <h3>{t.learnTogether}</h3>
@@ -473,7 +561,14 @@ function UnderstandDementia() {
                   {faq.q}
                   <span aria-hidden="true">＋</span>
                 </summary>
-                <p>{faq.a}</p>
+                <p>
+                  {faq.a}{" "}
+                  {faq.link.href.startsWith("#") ? (
+                    <a href={faq.link.href}>{faq.link.label} →</a>
+                  ) : (
+                    <Link to={faq.link.href}>{faq.link.label} →</Link>
+                  )}
+                </p>
               </details>
             ))}
             <p className="understand-faq-link">
