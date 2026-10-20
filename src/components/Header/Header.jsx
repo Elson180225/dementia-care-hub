@@ -224,6 +224,11 @@ function Header() {
             </span>
 
             <div className="top-actions">
+              <nav className="utility-nav" aria-label="Updates and trainer access">
+                <Link to="/get-updated" onClick={closeMobileMenu}>GET UPDATED</Link>
+                <span aria-hidden="true">|</span>
+                <Link to="/trainer-portal" onClick={closeMobileMenu}>TRAINER PORTAL</Link>
+              </nav>
               {/* SEARCH */}
 
               <button

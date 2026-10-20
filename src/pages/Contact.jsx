@@ -72,7 +72,7 @@ export default function Contact() {
         <Channel href={contact.facebook} title="Facebook Page">Project updates, educational information and activities.</Channel>
         <Channel href={contact.messenger} title="Facebook Messenger">A general enquiry channel for the project.</Channel>
         <Channel href={contact.whatsappCommunity} title="Join Our WhatsApp Community">Receive project updates, educational information and activity announcements.</Channel>
-        <section className="contact-organiser" aria-labelledby="organiser"><h2 id="organiser">Our organiser</h2><h3>Rotary Club of Bintulu Central (RCBC)</h3><p>Dementia Care Hub is an initiative of the Alzheimer’s Care Project organised by RCBC.</p>
+        <section className="contact-organiser" aria-labelledby="organiser"><h2 id="organiser">Our organiser</h2><h3>Rotary Club of Bintulu Central (RCBC)</h3><p>Dementia Care Connect is an initiative of the Alzheimer’s Care Project organised by RCBC.</p>
           <Channel href={contact.organiserEmail && `mailto:${contact.organiserEmail}`} title="Official RCBC email">{contact.organiserEmail || 'For organiser-level enquiries.'}</Channel>
           {contact.organiserWebsite && <p><a href={contact.organiserWebsite}>RCBC official website</a></p>}
           {contact.organiserFacebook && <p><a href={contact.organiserFacebook}>RCBC Facebook Page</a></p>}
@@ -80,7 +80,7 @@ export default function Contact() {
         </section>
       </section>
       <section className="contact-form-card" aria-labelledby="enquiry-heading"><h2 id="enquiry-heading">Send an enquiry</h2>
-        <div className="contact-boundary"><strong>Our service boundary</strong><p>Dementia Care Hub does not provide emergency, medical consultation or crisis support services.</p><p>For external services, visit <Link to="/find-help">Find Help &amp; Support</Link>. For event registration, visit the relevant <Link to="/learn-events/events">Education &amp; Events page</Link>.</p></div>
+        <div className="contact-boundary"><strong>Our service boundary</strong><p>Dementia Care Connect does not provide emergency, medical consultation or crisis support services.</p><p>For external services, visit <Link to="/find-help">Find Help &amp; Support</Link>. For event registration, visit the relevant <Link to="/learn-events/events">Education &amp; Events page</Link>.</p></div>
         <p id="privacy-notice">We use your name, email and message to manage and respond to your enquiry through the project’s administrative workflow. Please do not include sensitive medical details.</p>
         <form ref={form} onSubmit={submit} noValidate aria-describedby="privacy-notice" aria-busy={busy}>
           {['name', 'email', 'type', 'message'].map(field => <div className="contact-field" key={field}><label htmlFor={`contact-${field}`}>{({ name: 'Name', email: 'Email', type: 'Enquiry Type', message: 'Message' })[field]} <span>(required)</span></label>
