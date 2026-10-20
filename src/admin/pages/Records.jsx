@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { api } from "../../trainer-portal/TrainerContext";
 import { Field, describe } from "../../trainer-portal/ui";
 import { recordTypes } from "../../../shared/admin-records.js";
+import SubscriberAudience from '../SubscriberAudience';
 
 const KINDS = Object.keys(recordTypes);
 const ZONE = { timeZone: "Asia/Kuala_Lumpur" };
@@ -164,6 +165,7 @@ export default function Records() {
   return (
     <>
       <h1>Content and records</h1>
+      <SubscriberAudience />
       <p>
         One place to maintain directory listings, learning resources, FAQs, page content, subscribers,
         DCS certificates and enquiries. Inclusion does not mean RCBC endorses the provider.
