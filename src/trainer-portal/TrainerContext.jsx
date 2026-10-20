@@ -52,12 +52,12 @@ export async function api(path, data) {
       : {}),
   });
 
-  const result = await response.json();
+// An empty or non-JSON reply means the API server is not running or not reachable
+  const result = await response.json().catch(() => null);
 
   if (!response.ok) {
     throw Object.assign(
-      new Error(result.error || "Request failed"),
-      { status: response.status }
+      new Error(result.error || "Cannot reach the server. Please check that API is running (npm run server) and try again."),
     );
   }
 
