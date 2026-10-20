@@ -3,7 +3,6 @@ import { Link, useLocation } from "react-router-dom";
 import caregiverPhoto from "../assets/caregiver-support.jpg";
 import "./CaregiverSupport.css";
 
-// Practical education content lives alongside its page, as in Understanding Dementia.
 const guidanceTopics = [
   {
     id: "home-safety",
@@ -97,11 +96,8 @@ const guidanceTopics = [
   },
 ];
 
-// Publish only real organisations that have completed the platform's review process.
-// Entries should contain: id, name, registrationNo, city, address, email,
-// languages[], focuses[], frequency, officialUrl, acceptingVolunteers, approved.
-// No sample or unverified organisations are presented as genuine listings.
-const supportGroupListings = [];
+// Directory entries use the backend's snake_case field names (including languages[]).
+const supportGroupsUrl = "/api/public/organisations?category=support-group";
 
 const volunteerTypes = [
   {
@@ -126,17 +122,6 @@ const volunteerTypes = [
   },
 ];
 
-const filterOptions = {
-  languages: ["English", "Bahasa Melayu", "Mandarin", "Other"],
-  focuses: [
-    "Family caregivers",
-    "People living with dementia",
-    "Peer support",
-    "Community education",
-    "Other",
-  ],
-};
-
 function SectionHeading({ eyebrow, title, description }) {
   return (
     <div className="caregiver-section-heading">
@@ -152,9 +137,45 @@ function CaregiverSupport() {
   const [activeTopic, setActiveTopic] = useState(guidanceTopics[0].id);
   const [city, setCity] = useState("");
   const [language, setLanguage] = useState("");
-  const [focus, setFocus] = useState("");
   const [volunteerOnly, setVolunteerOnly] = useState(false);
   const [selectedVolunteer, setSelectedVolunteer] = useState(0);
+  const [supportGroups, setSupportGroups] = useState([]);
+  const [groupsLoading, setGroupsLoading] = useState(true);
+  const [groupsError, setGroupsError] = useState("");
+  const [reloadGroups, setReloadGroups] = useState(0);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    setGroupsLoading(true);
+    setGroupsError("");
+    fetch(supportGroupsUrl, { signal: controller.signal })
+      .then(async (response) => {
+        if (!response.ok) {
+          throw new Error(
+            "Support groups could not be loaded. Please try again.",
+          );
+        }
+        const data = await response.json();
+        if (!Array.isArray(data))
+          throw new Error("Unexpected support-group response.");
+        return data;
+      })
+      .then((data) => {
+        if (!controller.signal.aborted) setSupportGroups(data);
+      })
+      .catch((error) => {
+        if (!controller.signal.aborted) {
+          setGroupsError(
+            error.message || "Support groups could not be loaded.",
+          );
+          setSupportGroups([]);
+        }
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) setGroupsLoading(false);
+      });
+    return () => controller.abort();
+  }, [reloadGroups]);
 
   // Supports direct links from the header and former caregiver URLs.
   useEffect(() => {
@@ -168,27 +189,38 @@ function CaregiverSupport() {
 
   const topic =
     guidanceTopics.find((item) => item.id === activeTopic) ?? guidanceTopics[0];
-  const approvedGroups = useMemo(
-    () => supportGroupListings.filter((entry) => entry.approved === true),
-    [],
+  const availableLanguages = useMemo(
+    () =>
+      [
+        ...new Set(
+          supportGroups.flatMap((group) =>
+            Array.isArray(group.languages) ? group.languages : [],
+          ),
+        ),
+      ].sort((a, b) => a.localeCompare(b)),
+    [supportGroups],
   );
   const filteredGroups = useMemo(
     () =>
-      approvedGroups.filter(
-        (entry) =>
+      supportGroups.filter(
+        (group) =>
           (!city ||
-            entry.city.toLowerCase().includes(city.trim().toLowerCase())) &&
-          (!language || entry.languages.includes(language)) &&
-          (!focus || entry.focuses.includes(focus)) &&
-          (!volunteerOnly || entry.acceptingVolunteers),
+            (group.city || "")
+              .toLowerCase()
+              .includes(city.trim().toLowerCase())) &&
+          (!language ||
+            (Array.isArray(group.languages) &&
+              group.languages.some(
+                (item) => item.toLowerCase() === language.toLowerCase(),
+              ))) &&
+          (!volunteerOnly || group.accepting_volunteers === true),
       ),
-    [approvedGroups, city, language, focus, volunteerOnly],
+    [supportGroups, city, language, volunteerOnly],
   );
 
   const resetFilters = () => {
     setCity("");
     setLanguage("");
-    setFocus("");
     setVolunteerOnly(false);
   };
 
@@ -280,7 +312,7 @@ function CaregiverSupport() {
               {
                 number: "03",
                 title: "Support Groups",
-                text: "Look for reviewed groups by location, language and focus.",
+                text: "Find published groups by city, language and volunteer availability.",
                 target: "support-groups",
               },
               {
@@ -471,45 +503,28 @@ function CaregiverSupport() {
               <p className="caregiver-eyebrow">Certificate Verification</p>
               <h3>Check a DCS certificate</h3>
               <p>
-                The planned verification service will use a participant's name
-                and certificate number. Only limited certificate details will be
-                displayed to protect privacy.
-              </p>
-              <p className="caregiver-verification-warning">
-                <strong>Not yet available:</strong> verification requires a
-                connected, authorised certificate database. Please do not enter
-                personal or certificate details here yet.
+                Verify a DCS programme certificate using the participant's name
+                and certificate reference through the existing secure
+                verification page.
               </p>
             </div>
-            <div
-              className="caregiver-verification-preview"
-              aria-label="Planned certificate verification fields"
-            >
-              <span className="caregiver-preview-tag">PLANNED FEATURE</span>
-              <label htmlFor="caregiver-certificate-name">
-                Participant name
-              </label>
-              <input
-                id="caregiver-certificate-name"
-                type="text"
-                placeholder="Name on certificate"
-                disabled
-              />
-              <label htmlFor="caregiver-certificate-number">
-                Certificate number
-              </label>
-              <input
-                id="caregiver-certificate-number"
-                type="text"
-                placeholder="Certificate number"
-                disabled
-              />
-              <button type="button" disabled>
-                Verification coming soon
-              </button>
+            <div className="caregiver-verification-preview">
+              <span className="caregiver-preview-tag">
+                CERTIFICATE VERIFICATION
+              </span>
+              <p>
+                Have the name shown on the certificate and the certificate
+                reference ready.
+              </p>
+              <Link
+                className="caregiver-button caregiver-button-green"
+                to="/caregiver-support/verify-certificate"
+              >
+                Verify a certificate <span aria-hidden="true">↗</span>
+              </Link>
               <small>
-                Future results: masked name (where appropriate), programme,
-                city, year and status.
+                Only programme completion is verified; this is not a
+                professional licence.
               </small>
             </div>
           </div>
@@ -530,7 +545,7 @@ function CaregiverSupport() {
           <SectionHeading
             eyebrow="03 / Support Groups"
             title="Connection makes a difference"
-            description="Find organisations and peer groups suited to your location, preferred language and support needs. Only reviewed and approved listings will appear here."
+            description="Find published support groups by city, language and volunteer availability. Only records approved for publication appear here."
           />
           <div className="caregiver-directory">
             <div className="caregiver-directory-head">
@@ -539,7 +554,11 @@ function CaregiverSupport() {
                 <p>Search the approved group directory.</p>
               </div>
               <span className="caregiver-directory-count">
-                {filteredGroups.length} listings
+                {groupsLoading
+                  ? "Loading groups…"
+                  : groupsError
+                    ? "Unavailable"
+                    : `${filteredGroups.length} listings`}
               </span>
             </div>
             <div className="caregiver-filter-grid">
@@ -559,20 +578,10 @@ function CaregiverSupport() {
                   onChange={(event) => setLanguage(event.target.value)}
                 >
                   <option value="">All languages</option>
-                  {filterOptions.languages.map((item) => (
-                    <option key={item}>{item}</option>
-                  ))}
-                </select>
-              </label>
-              <label>
-                Focus
-                <select
-                  value={focus}
-                  onChange={(event) => setFocus(event.target.value)}
-                >
-                  <option value="">All focus areas</option>
-                  {filterOptions.focuses.map((item) => (
-                    <option key={item}>{item}</option>
+                  {availableLanguages.map((item) => (
+                    <option key={item} value={item}>
+                      {item}
+                    </option>
                   ))}
                 </select>
               </label>
@@ -594,39 +603,52 @@ function CaregiverSupport() {
                 Clear filters
               </button>
             </div>
-            {filteredGroups.length > 0 ? (
+            {groupsLoading ? (
+              <div className="caregiver-empty-state" role="status">
+                <h4>Loading support groups…</h4>
+                <p>Checking the latest published listings.</p>
+              </div>
+            ) : groupsError ? (
+              <div className="caregiver-empty-state" role="alert">
+                <h4>Unable to load support groups</h4>
+                <p>{groupsError}</p>
+                <button
+                  type="button"
+                  className="caregiver-text-action"
+                  onClick={() => setReloadGroups((n) => n + 1)}
+                >
+                  Try again →
+                </button>
+              </div>
+            ) : filteredGroups.length > 0 ? (
               <div className="caregiver-results" aria-live="polite">
                 {filteredGroups.map((group) => (
                   <article className="caregiver-result-card" key={group.id}>
                     <span className="caregiver-result-approved">
-                      Reviewed listing
+                      Published listing
                     </span>
                     <h4>{group.name}</h4>
+                    {group.city && (
+                      <p>
+                        <strong>City:</strong> {group.city}
+                      </p>
+                    )}
                     <p>
-                      <strong>Registration:</strong> {group.registrationNo}
-                    </p>
-                    <p>
-                      <strong>Location:</strong> {group.address}, {group.city}
-                    </p>
-                    <p>
-                      <strong>Languages:</strong> {group.languages.join(", ")}
-                    </p>
-                    <p>
-                      <strong>Focus:</strong> {group.focuses.join(", ")}
-                    </p>
-                    <p>
-                      <strong>Activities:</strong> {group.frequency}
+                      <strong>Languages:</strong>{" "}
+                      {Array.isArray(group.languages) && group.languages.length
+                        ? group.languages.join(", ")
+                        : "Not specified"}
                     </p>
                     <p>
                       <strong>Accepting volunteers:</strong>{" "}
-                      {group.acceptingVolunteers ? "Yes" : "No"}
+                      {group.accepting_volunteers ? "Yes" : "No"}
                     </p>
                     {group.email && (
                       <a href={`mailto:${group.email}`}>Email organisation</a>
                     )}
-                    {group.officialUrl && (
+                    {group.website && /^https?:\/\//i.test(group.website) && (
                       <a
-                        href={group.officialUrl}
+                        href={group.website}
                         target="_blank"
                         rel="noopener noreferrer"
                       >
@@ -642,16 +664,16 @@ function CaregiverSupport() {
                   ⌕
                 </span>
                 <h4>
-                  {approvedGroups.length === 0
-                    ? "Approved group listings are coming soon"
+                  {supportGroups.length === 0
+                    ? "No published support groups yet"
                     : "No groups match these filters"}
                 </h4>
                 <p>
-                  {approvedGroups.length === 0
-                    ? "No organisations have been added to the approved directory yet. This is a live page layout, not a list of invented organisations."
-                    : "Try another city, language or focus, or clear your filters."}
+                  {supportGroups.length === 0
+                    ? "There are no support-group listings currently published in the directory."
+                    : "Try another city or language, or clear the volunteer filter."}
                 </p>
-                {approvedGroups.length > 0 && (
+                {supportGroups.length > 0 && (
                   <button
                     type="button"
                     className="caregiver-text-action"
