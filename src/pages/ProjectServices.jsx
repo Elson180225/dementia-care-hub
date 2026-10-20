@@ -12,7 +12,9 @@ export default function ProjectServices({certificate=false}) {
    else {setMessage(token?'You have been unsubscribed.':r.message);setUnsubscribe(r.unsubscribeLink || '');}
   }catch(err){setMessage(err.message);}finally{setBusy(false);}
  }
- return <main className="tp-page"><div className="tp-container"><h1>{certificate?'Verify a DCS certificate':token?'Unsubscribe from updates':'Get Updated'}</h1><form className="tp-card" onSubmit={submit}>
+ return <main className="tp-page"><div className="tp-container"><h1>{certificate?'Verify a DCS certificate':token?'Unsubscribe from updates':'Get Updated'}</h1>
+ {!certificate && !token && <p>Stay connected with Dementia Care Connect. Register to receive updates on upcoming webinars, education, training and project activities.</p>}
+ <form className="tp-card" onSubmit={submit}>
  {!token && <><label className="tp-field">{certificate?'Name on certificate':'Name'}<input name="name" required/></label>{certificate?<label className="tp-field">Certificate reference<input name="certificateRef" required/></label>:<>
  <label className="tp-field">Email<input name="email" type="email" required/></label><label className="tp-field">City<input name="city" required/></label><label className="tp-field">State<input name="state" required/></label><label className="tp-field">Preferred language<select name="language">{['English','Bahasa Malaysia','Chinese'].map(x=><option key={x}>{x}</option>)}</select></label>
  <p>Receive updates and reminders about upcoming webinars, seminars, education and project activities. RCBC stores your name, email, locality, language and consent for this purpose. Authorised administrators and our email provider process these details. No public account is created. Every reminder includes an unsubscribe link. Contact RCBC through the Contact page for correction or deletion requests.</p>

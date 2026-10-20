@@ -9,6 +9,7 @@ import {
 } from "react";
 import { watchIdleSession } from "./idleSession";
 import { normalizePortalState } from './portalState';
+import { useLocation } from 'react-router-dom';
 
 const DEV_PREVIEW =
   import.meta.env.DEV &&
@@ -55,9 +56,10 @@ export async function api(path, data) {
 // An empty or non-JSON reply means the API server is not running or not reachable
   const result = await response.json().catch(() => null);
 
-  if (!response.ok) {
+  if (!response.ok || !result || typeof result !== 'object') {
     throw Object.assign(
-      new Error(result.error || "Cannot reach the server. Please check that API is running (npm run server) and try again."),
+      new Error(result?.error || "Cannot reach the server. Please check that API is running (npm run server) and try again."),
+      { status: response.status },
     );
   }
 
@@ -65,6 +67,8 @@ export async function api(path, data) {
 }
 
 export default function TrainerProvider({ children }) {
+  const { pathname } = useLocation();
+  const isAccountPage = pathname.startsWith('/trainer-portal') || pathname.startsWith('/admin');
   const [state, setState] = useState(() =>
   DEV_PREVIEW ? empty : {
     ...empty,
@@ -202,7 +206,7 @@ export default function TrainerProvider({ children }) {
     <TrainerContext.Provider
       value={{ state, dispatch, refresh, loading }}
     >
-      {error && (
+      {error && isAccountPage && (
         <p role="alert" className="tp-note">
           {error}
         </p>

@@ -48,7 +48,7 @@ import Contribution from "./admin/pages/Contribution";
 // The Admin Dashboard is a back-office area, so it hides the public site header and footer.
 function PublicOnly({ children }) {
   const { pathname } = useLocation();
-  return pathname.startsWith("/admin") || pathname.startWith("/trainer-portal") ? null : children;
+  return pathname.startsWith("/admin") || pathname.startsWith("/trainer-portal") ? null : children;
 }
 
 function App() {
