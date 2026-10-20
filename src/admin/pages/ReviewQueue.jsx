@@ -46,16 +46,6 @@ export default function ReviewQueue() {
     });
   }
 
-  function decide(item, decision) {
-    const comment = (comments[item.key] ?? "").trim();
-    if (decision !== "approved" && !comment) {
-      setErrors((e) => ({ ...e, [item.key]: "Please add a short comment so the trainer knows why." }));
-      return;
-    }
-    dispatch({ type: "ADMIN_REVIEW", target: item.target, id: item.id, decision, comment });
-    setErrors((e) => ({ ...e, [item.key]: "" }));
-  }
-
   return (
     <>
       <h1>Review queue</h1>
@@ -72,6 +62,22 @@ export default function ReviewQueue() {
             <p className="tp-dev">{item.kind}</p>
             <h2>{item.title}</h2>
             <p>{item.detail}</p>
+            {item.target === "profile" && (
+              <dl className="tp-dl">
+                <dt>Short profile</dt><dd>{item.profile.shortProfile || "–"}</dd>
+                <dt>Qualifications</dt><dd>{item.profile.qualifications || "–"}</dd>
+                <dt>Relevant experience</dt><dd>{item.profile.experience || "–"}</dd>
+                <dt>Profile photo</dt>
+                <dd>{item.profile.photoUrl ? <a href={item.profile.photoUrl} target="_blank" rel="noreferrer">View photo</a> : "–"}</dd>
+                <dt>Supporting documents</dt>
+                <dd>
+                  {(item.profile.supportingDocuments || []).length === 0 ? "–" :
+                    item.profile.supportingDocuments.map((url, i) => (
+                      <a key={url} href={url} target="_blank" rel="noreferrer">Document {i + 1} </a>
+                    ))}
+                </dd>
+              </dl>
+            )}
             {item.target === "access" && (
                 <Field
                     id={`ref-${item.key}`}
