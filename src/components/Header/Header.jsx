@@ -146,7 +146,7 @@ const menuItems = [
   ========================================================= */
 
   {
-    label: "About Us",
+    label: "About the Project",
     path: "/about",
 
     children: [
@@ -155,16 +155,8 @@ const menuItems = [
         path: "/about",
       },
       {
-        label: "Where to Find Us",
-        path: "/about/locations",
-      },
-      {
         label: "Contact Us",
         path: "/about/contact",
-      },
-      {
-        label: "Support the Project",
-        path: "/about/support",
       },
     ],
   },

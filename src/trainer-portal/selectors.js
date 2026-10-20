@@ -43,7 +43,8 @@ export function buildQueue({ accessRequests, profile, profiles = [profile], acti
 
   profiles.filter(p => p.status === "submitted").forEach(p => items.push({
     key:`profile-${p.id}`, target:"profile", id:p.id, kind:"Trainer profile update", title:p.name,
-    detail:`${p.city} · ${p.language}`, approveLabel:"Approve update"
+    detail:`${p.city} · ${p.language}`, approveLabel:"Approve update",
+  profile: p
   }));
 
   activities
