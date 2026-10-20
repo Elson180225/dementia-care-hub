@@ -4,6 +4,8 @@ import { enquiryHandler } from './enquiries.js';
 import { authHandler } from './auth.js';
 import { portalHandler } from './portal.js';
 import { pool } from './db.js';
+import { subscriberPool } from './subscriber-db.js';
+import { startReminderWorker } from './reminders.js';
 import { filesHandler } from './uploads.js';
 import { managementHandler } from './management.js';
 import { publicRecordsHandler } from './public-records.js';
@@ -38,6 +40,10 @@ const server = createServer(async (req, res) => {
   }
 
   // Check whether the backend is running
+  if(url.pathname==='/api/health/subscribers' && req.method==='GET') {
+   await subscriberPool.query('SELECT id FROM subscribers LIMIT 0');
+   return sendJson(res,200,{status:'OK',database:'PostgreSQL',separate:subscriberPool!==pool});
+  }
   if (url.pathname === '/api/health' && req.method === 'GET') {
     return sendJson(res, 200, {
       status: 'OK',
@@ -78,6 +84,11 @@ const server = createServer(async (req, res) => {
  }
 });
 
+server.on('error',error=>{
+ console.error(error.code==='EADDRINUSE'?`Port ${port} is already in use. Stop the existing API before starting another server.`:'API listener failed: '+error.code);
+ process.exitCode=1;
+});
 server.listen(port, '127.0.0.1', () => {
   console.log(`Dementia Care Hub API listening on http://127.0.0.1:${port}`);
+  try {startReminderWorker();} catch(error) {console.error('Reminder worker disabled:',error.message);}
 });

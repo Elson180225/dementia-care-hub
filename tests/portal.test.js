@@ -6,6 +6,7 @@ import { randomUUID } from 'node:crypto';
 import pg from 'pg';
 import { digest, hashPassword, checkPassword } from '../server/auth.js';
 import { recordTypes } from '../shared/admin-records.js';
+import { unsubscribeToken } from '../server/subscriber-tokens.js';
 
 test('passwords use salted hashes',()=>{
  const a=hashPassword('a long test password');
@@ -21,7 +22,7 @@ test('PostgreSQL portal and administrative workflows',{skip:!process.env.TEST_DA
  const db=new pg.Pool({connectionString:connection.toString()});let server;
  try {
   for(const name of ['001_shared_records.sql','003_admin_auth.sql','004_record_details.sql','005_admin_workflow.sql','006_portal_operations.sql','007_content_feedback.sql','008_idle_sessions.sql']) await db.query(await readFile(new URL('../database/'+name,import.meta.url),'utf8'));
-  server=spawn(process.execPath,['server/index.js'],{env:{...process.env,DATABASE_URL:connection.toString(),API_PORT:'3098'},stdio:['ignore','pipe','pipe']});
+  server=spawn(process.execPath,['server/index.js'],{env:{...process.env,DATABASE_URL:connection.toString(),SUBSCRIBER_DATABASE_URL:'',SUBSCRIBER_TOKEN_SECRET:'test-secret-'.repeat(5),REMINDERS_ENABLED:'false',API_PORT:'3098'},stdio:['ignore','pipe','pipe']});
   let serverErrors='';server.stderr.on('data',d=>{serverErrors+=d;});
   await new Promise((resolve,reject)=>{server.stdout.once('data',resolve);server.once('error',reject);server.once('exit',()=>reject(new Error('Test API exited: '+serverErrors)));});
   async function request(path,data,cookie='',method) {
@@ -125,6 +126,13 @@ test('PostgreSQL portal and administrative workflows',{skip:!process.env.TEST_DA
   assert.equal(ok(await request('public/faqs')).data.length,0);
   const subscriber=ok(await request('public/subscribe',{name:'Subscriber',email:'subscriber@test.example',city:'Bintulu',state:'Sarawak',language:'English',consent:true}));
   assert.ok(subscriber.data.unsubscribeLink);
+  const exportAudience=async(cookie='')=>fetch('http://127.0.0.1:3098/api/admin/subscribers/export',{headers:{cookie}});
+  assert.equal((await exportAudience()).status,401);
+  assert.equal((await exportAudience(trainer.cookie)).status,403);
+  assert.match(await (await exportAudience(admin.cookie)).text(),/subscriber@test.example/);
+  const subscriberId=(await db.query('SELECT id FROM subscribers')).rows[0].id;
+  ok(await request('public/unsubscribe',{token:unsubscribeToken(subscriberId,'test-secret-'.repeat(5))}));
+  assert.ok(!(await (await exportAudience(admin.cookie)).text()).includes('subscriber@test.example'));
   ok(await request('public/unsubscribe',{token:subscriber.data.unsubscribeLink.split('=')[1]}));
   assert.ok((await db.query('SELECT unsubscribed_at FROM subscribers')).rows[0].unsubscribed_at);
   ok(await request('public/subscribe',{email:'bad'}),400);

@@ -95,7 +95,7 @@ function getMenuItems(m) {
     },
     {
       label: m.learnEvents,
-      menuOnly: true,
+      path: "/learn-events",
       children: [
         {
           label: m.onlineEducation,
@@ -120,7 +120,7 @@ function getMenuItems(m) {
       ],
     },
     {
-      label: m.aboutUs,
+      label: m.aboutProject,
       path: "/about",
       children: [
         {
@@ -128,16 +128,8 @@ function getMenuItems(m) {
           path: "/about",
         },
         {
-          label: m.locations,
-          path: "/about/locations",
-        },
-        {
           label: m.contactUs,
           path: "/about/contact",
-        },
-        {
-          label: m.supportProject,
-          path: "/about/support",
         },
       ],
     },
@@ -285,8 +277,8 @@ function Header() {
                 className="brand-logo"
               />
               <div className="brand-text">
-                <strong>Dementia Care Hub</strong>
-                <span>Support • Learn • Connect</span>
+                <strong>{t.header?.hubTitle || "Dementia Care Hub"}</strong>
+                <span>{t.header?.hubSubtitle || "Support • Learn • Connect"}</span>
               </div>
             </Link>
 

@@ -49,9 +49,7 @@ function Footer() {
 
             <Link to="/about/contact">{m.contactUs}</Link>
 
-            <Link to="/about/locations">{m.locations}</Link>
-
-            <Link to="/about/support">{m.supportProject}</Link>
+            <Link to="/about/support">{f.trainerPortal || "Trainer Portal"}</Link>
           </div>
 
           <div className="footer-contact">
@@ -85,6 +83,10 @@ function Footer() {
 
             <span>
               © {new Date().getFullYear()} {f.rights}
+              {/* Discreet entry for the RCBC project team; not promoted in the main navigation. */}
+              <Link to="/admin" className="footer-admin-link">
+                {f.adminAccess || "Admin access"}
+              </Link>
             </span>
           </div>
         </div>

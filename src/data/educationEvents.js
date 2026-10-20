@@ -84,7 +84,7 @@ export const activities = [
     trainer: "RCBC Education Team",
     description: "A completed public webinar about practical caregiver support and community connection.",
     learn: ["Caregiver support", "Asking for help", "Useful follow-up resources"],
-    recording: "https://www.youtube.com/",
+    recording: "https://www.facebook.com/rotarybintulucentral",
   },
 ];
 

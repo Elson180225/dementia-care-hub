@@ -113,7 +113,7 @@ const healthcareProviders = [
     services: [
       "Neurology",
       "Specialist Consultation",
-      "Health Screening",
+      "Health Assessment",
       "Allied Health",
     ],
 

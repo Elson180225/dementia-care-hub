@@ -4,6 +4,9 @@ import { body, currentUser, digest, fail } from './auth.js';
 import { isAllowedOrigin } from './origin.js';
 import { decision } from './decisions.js';
 import { recordTypes } from '../shared/admin-records.js';
+import { subscriberPool,subscriberTransaction,subscriberAuditTable } from './subscriber-db.js';
+import { audienceQuery,subscriberCsv,syncBrevo } from './subscriber-export.js';
+import { reminderSettings } from './reminders.js';
 
 function validUrl(value) {
  if(!value) return;
@@ -14,6 +17,20 @@ export async function managementHandler(req,res,url,send) {
  const user=await currentUser(req);
  if(user?.role!=='admin') fail('Admin access required',user?403:401);
  if(req.method==='POST' && !isAllowedOrigin(req.headers.origin)) fail('Origin not allowed',403);
+ if(url.pathname==='/api/admin/subscribers/export' && req.method==='GET') {
+  const rows=(await subscriberPool.query(audienceQuery(Object.fromEntries(url.searchParams)))).rows;
+  res.writeHead(200,{'Content-Type':'text/csv; charset=utf-8','Content-Disposition':'attachment; filename="get-updated-brevo.csv"','Cache-Control':'no-store'});
+  return res.end(subscriberCsv(rows));
+ }
+ if(url.pathname==='/api/admin/subscribers/sync' && req.method==='POST') {
+  const rows=(await subscriberPool.query(audienceQuery(await body(req)))).rows;
+  const suppressed=(await subscriberPool.query('SELECT email FROM subscribers WHERE unsubscribed_at IS NOT NULL')).rows;
+  return send(res,200,await syncBrevo(rows,suppressed));
+ }
+ if(url.pathname==='/api/admin/subscribers/reminders' && req.method==='GET') {
+  const deliveries=(await subscriberPool.query('SELECT activity_id,starts_at,status,attempts,attempted_at,sent_at,provider_message_id,error FROM reminder_deliveries ORDER BY attempted_at DESC LIMIT 50')).rows;
+  return send(res,200,{enabled:process.env.REMINDERS_ENABLED==='true',leadHours:reminderSettings().hours,deliveries});
+ }
  if(url.pathname==='/api/admin/invitations' && req.method==='POST') {
   const data=await body(req);const email=String(data.email || '').trim().toLowerCase();
   if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) fail('Enter a valid administrator email');
@@ -50,11 +67,13 @@ export async function managementHandler(req,res,url,send) {
  }
  const kind=url.pathname.split('/')[4];const config=recordTypes[kind];
  if(!config || url.pathname!==`/api/admin/records/${kind}`) fail('Not found',404);
- if(req.method==='GET') return send(res,200,(await pool.query(`SELECT * FROM ${config.table} ORDER BY id DESC LIMIT 500`)).rows);
+ const recordsPool=kind==='subscribers'?subscriberPool:pool;
+ const recordsTransaction=kind==='subscribers'?subscriberTransaction:transaction;
+ if(req.method==='GET') return send(res,200,(await recordsPool.query(`SELECT * FROM ${config.table} ORDER BY id DESC LIMIT 500`)).rows);
  if(req.method!=='POST') fail('Method not allowed',405);
  const data=await body(req);
  const id=data.id || randomUUID();
- await transaction(async db=>{
+ await recordsTransaction(async db=>{
   const old=(await db.query(`SELECT * FROM ${config.table} WHERE id=$1 FOR UPDATE`,[id])).rows[0];
   if(config.readonlyCreate && !old) fail('Enquiries are created through the contact form');
   if(data.remove) {
@@ -100,7 +119,7 @@ export async function managementHandler(req,res,url,send) {
   const sql=old?`UPDATE ${config.table} SET ${names.map((n,i)=>`${n}=$${i+2}`).join(',')} WHERE id=$1`:`INSERT INTO ${config.table}(id,${names.join(',')}) VALUES(${params.map((_,i)=>'$'+(i+1)).join(',')})`;
   await db.query(sql,params);
   const action=values.review_status==='archived'?'archived':values.publication_status==='published'?'published':old?.publication_status==='published'?'unpublished':kind==='subscribers' && values.unsubscribed_at?'unsubscribed':kind==='dcs_certificates' && values.status==='revoked'?'revoked':'corrected';
-  await decision(db,user,kind,id,action,values.admin_comment || '',old?.review_status || old?.status || null,values.review_status || values.status || null);
+  await decision(db,user,kind,id,action,values.admin_comment || '',old?.review_status || old?.status || null,values.review_status || values.status || null,kind==='subscribers'?subscriberAuditTable:'audit_log');
  },user.id);
  return send(res,200,{ok:true,id});
 }

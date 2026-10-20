@@ -37,12 +37,14 @@ export function buildQueue({ accessRequests, profile, profiles = [profile], acti
         detail: `${r.email} · ${r.city} · Certificate ref: ${r.certificateRef}`,
         approveLabel: "Approve access",
         canReject: true,
+        claimedRef: r.certificateRef,
       })
     );
 
   profiles.filter(p => p.status === "submitted").forEach(p => items.push({
     key:`profile-${p.id}`, target:"profile", id:p.id, kind:"Trainer profile update", title:p.name,
-    detail:`${p.city} ? ${p.language}`, approveLabel:"Approve update"
+    detail:`${p.city} · ${p.language}`, approveLabel:"Approve update",
+  profile: p
   }));
 
   activities

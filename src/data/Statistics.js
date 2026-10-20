@@ -13,7 +13,7 @@ const statistics = [
     chartRemainderLabel: "Other adults aged 60+",
 
     title:
-      "of Malaysians aged 60+ screened positive for probable dementia",
+      "of Malaysians aged 60+ identified with probable dementia",
 
     description:
       "The National Health and Morbidity Survey 2018 estimated that 8.5% of Malaysians aged 60 years and above had probable dementia.",
@@ -32,7 +32,7 @@ const statistics = [
       "https://iku.gov.my/images/IKU/Document/REPORT/NHMS2018/NHMS2018ElderlyHealthVolume2.pdf",
 
     note:
-      "This refers to probable dementia identified through population screening, not a count of clinically diagnosed dementia cases.",
+      "This refers to probable dementia identified through population health survey sampling, not a count of clinically diagnosed dementia cases.",
   },
 
   {

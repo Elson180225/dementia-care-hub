@@ -606,7 +606,7 @@ function CaregiverSupport() {
                       {group.acceptingVolunteers ? "Yes" : "No"}
                     </p>
                     {group.email && (
-                      <a href={`mailto:${group.email}`}>Email organisation</a>
+                      <a href={`mailto:${group.email}`}>{cs.emailOrganisation || "Email organisation"}</a>
                     )}
                     {group.officialUrl && (
                       <a
@@ -614,7 +614,7 @@ function CaregiverSupport() {
                         target="_blank"
                         rel="noopener noreferrer"
                       >
-                        Official website ↗
+                        {cs.officialWebsite || "Official website ↗"}
                       </a>
                     )}
                   </article>
@@ -734,7 +734,7 @@ function CaregiverSupport() {
             <ul>
               {(cs.volunteerTerms || [
                 "Volunteering is primarily unpaid. Personal costs are outside RCBC's responsibility unless separately agreed with the organisation.",
-                "The receiving organisation decides on screening, orientation, safety requirements and suitability for a role.",
+                "The receiving organisation decides on onboarding, orientation, safety requirements and suitability for a role.",
                 "When applying, you may be asked for contact details, location, languages, interests, availability, optional experience and a basic declaration of physical suitability for the activity.",
                 "RCBC does not employ, assign or pay volunteers through this platform, or arrange private one-to-one caregiving placements.",
               ]).map((term, i) => (

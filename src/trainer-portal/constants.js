@@ -20,3 +20,5 @@ export const COMPLETION_LABEL = {
 export const ACTIVITY_TYPES = ["Workshop", "Seminar"];
 export const MODES = ["Online", "Physical"];
 export const LANGUAGES = ["English", "Bahasa Malaysia", "Chinese"];
+
+export const ROLES = ["Trainer", "Co-Trainer", "Speaker"];

@@ -11,6 +11,11 @@
     "lint": "oxlint",
     "preview": "vite preview",
     "db:migrate": "node --env-file-if-exists=.env scripts/migrate.js",
+    "db:migrate:subscribers": "node --env-file-if-exists=.env scripts/migrate-subscribers.js",
+    "reminders:preview": "node --env-file-if-exists=.env scripts/reminders.js --dry-run",
+    "reminders:run": "node --env-file-if-exists=.env scripts/reminders.js",
+    "brevo:check": "node --env-file-if-exists=.env scripts/check-brevo.js",
+    "brevo:setup": "node --env-file-if-exists=.env scripts/check-brevo.js --setup",
     "admin:invite": "node --env-file-if-exists=.env scripts/invite-admin.js"
   },
   "dependencies": {
