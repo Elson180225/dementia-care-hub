@@ -483,7 +483,7 @@ export const translations = {
         },
         "languages": {
           "en": "English",
-          "ms": "Bahasa Melayu",
+          "ms": "Bahasa Malaysia",
           "sarawak": "Sarawak Malay / Local Dialect",
           "zh": "Mandarin / Dialects"
         }
@@ -2110,7 +2110,7 @@ export const translations = {
         },
         "languages": {
           "en": "English",
-          "ms": "Bahasa Melayu",
+          "ms": "Bahasa Malaysia",
           "sarawak": "Bahasa Melayu Sarawak / Dialek Tempatan",
           "zh": "Mandarin / Dialek"
         }
@@ -3738,7 +3738,7 @@ export const translations = {
         },
         "languages": {
           "en": "English",
-          "ms": "Bahasa Melayu",
+          "ms": "Bahasa Malaysia",
           "sarawak": "砂拉越马来语 / 本地方言",
           "zh": "中文 / 方言"
         }

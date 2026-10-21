@@ -82,7 +82,7 @@ export const modes = ["Online", "Physical"];
 
 export const cities = ["Bintulu", "Kuching", "Kota Samarahan", "Miri", "Sibu"];
 
-export const languages = ["English", "Bahasa Melayu", "中文"];
+export const languages = ["English", "Bahasa Malaysia", "Chinese"];
 
 /* ---- verified activities (aligned with official 2026 calendar, DCS poster & documented sessions) ---- */
 export const activities = [
@@ -96,7 +96,7 @@ export const activities = [
     time: "80 minutes",
     location: "Online",
     city: "Online",
-    language: "English / Bahasa Melayu",
+    language: "English / Bahasa Malaysia",
     speaker: "RCBC & ADFM Specialists",
     trainerId: null,
     description:
@@ -116,7 +116,7 @@ export const activities = [
     time: "9:00 AM – 6:00 PM",
     location: "Hock Lee Hotel & Residence, Kuching",
     city: "Kuching",
-    language: "English / Bahasa Melayu / 中文",
+    language: "English / Bahasa Malaysia / 中文",
     speaker: "12 ADFM-Certified Trainers & Advisory Specialists",
     trainerId: null,
     description:
@@ -136,7 +136,7 @@ export const activities = [
     time: "9:00 AM – 5:00 PM (3-Day Program, 26–28 June 2026)",
     location: "Kuching",
     city: "Kuching",
-    language: "English / Bahasa Melayu",
+    language: "English / Bahasa Malaysia",
     speaker: "Dr. Tiong Ing Khieng & ADFM Training Team",
     trainerId: 11,
     description:
@@ -156,7 +156,7 @@ export const activities = [
     time: "9:30 AM – 1:00 PM",
     location: "Bintulu Civic Centre — Conference Hall",
     city: "Bintulu",
-    language: "Bahasa Melayu / English",
+    language: "Bahasa Malaysia / English",
     speaker: "Rotary HopeCare Facilitators & Clinical Team",
     trainerId: 2,
     description:
@@ -177,7 +177,7 @@ export const activities = [
     time: "3-Day Program (28–30 Nov 2025)",
     location: "ParkCity Everly Hotel, Miri",
     city: "Miri",
-    language: "English / Bahasa Melayu",
+    language: "English / Bahasa Malaysia",
     speaker: "Dr. Tiong Ing Khieng (Consultant Geriatrician, SGH) & ADFM",
     trainerId: 11,
     description:
@@ -197,7 +197,7 @@ export const activities = [
     time: "3-Day Program",
     location: "Bintulu",
     city: "Bintulu",
-    language: "English / Bahasa Melayu",
+    language: "English / Bahasa Malaysia",
     speaker: "ADFM Training Faculty & SGH Geriatric Team",
     trainerId: null,
     description:
@@ -217,7 +217,7 @@ export const activities = [
     time: "3-Day Program (16/5/25 – 18/5/25)",
     location: "Sibu, Sarawak",
     city: "Sibu",
-    language: "English / Bahasa Melayu",
+    language: "English / Bahasa Malaysia",
     speaker: "ADFM Master Trainers & RCBC",
     trainerId: null,
     description:
@@ -237,7 +237,7 @@ export const activities = [
     time: "3-Day Program",
     location: "Kuching",
     city: "Kuching",
-    language: "English / Bahasa Melayu",
+    language: "English / Bahasa Malaysia",
     speaker: "ADFM Master Trainers & SGH Specialists",
     trainerId: null,
     description:
@@ -259,7 +259,7 @@ export const trainers = [
     category: "medical-professional",
     institution: "Klinik Kesihatan Batu Kawa (KK Batu Kawa)",
     city: "Kuching",
-    language: "Bahasa Melayu, English, Sarawak Malay",
+    language: "Bahasa Malaysia, English, Sarawak Malay",
     initials: "MA",
     badgeColor: "#0d716b",
     bio: "Medical Officer at Klinik Kesihatan Batu Kawa. Certified in the ADFM DCS-TTT framework, specializing in primary care dementia education, family counseling, and clinic referral pathways.",
@@ -271,7 +271,7 @@ export const trainers = [
     category: "medical-professional",
     institution: "KKTP, Klinik Kesihatan Tanah Putih",
     city: "Kuching",
-    language: "Bahasa Melayu, English",
+    language: "Bahasa Malaysia, English",
     initials: "IS",
     badgeColor: "#0284c7",
     bio: "Senior Medical Officer (UD43) at KK Tanah Putih. Dedicated to bridging community health clinics with elderly caregiver networks, conducting dementia education workshops, and managing chronic care integration.",
@@ -283,7 +283,7 @@ export const trainers = [
     category: "medical-professional",
     institution: "Klinik Kesihatan Kota Samarahan",
     city: "Kota Samarahan",
-    language: "Bahasa Melayu, Sarawak Malay, Iban",
+    language: "Bahasa Malaysia, Sarawak Malay, Iban",
     initials: "CS",
     badgeColor: "#d97706",
     bio: "Health Assistant at KK Kota Samarahan. Certified DCS facilitator with deep grassroots community outreach experience, facilitating bilingual caregiver dialogues and practical hands-on care sessions.",
@@ -295,7 +295,7 @@ export const trainers = [
     category: "medical-professional",
     institution: "Pre Hospital Care, Hospital Sentosa",
     city: "Kuching",
-    language: "English, Bahasa Melayu, Iban",
+    language: "English, Bahasa Malaysia, Iban",
     initials: "PN",
     badgeColor: "#7c3aed",
     bio: "Nursing Sister (U32) specializing in Pre-Hospital and psychiatric care at Hospital Sentosa. Experienced trainer in patient mobility, emergency home de-escalation, and dignity-first personal care routines.",
@@ -307,7 +307,7 @@ export const trainers = [
     category: "medical-professional",
     institution: "Jabatan Psikiatri dan Kesihatan Mental, Sarawak General Hospital",
     city: "Kuching",
-    language: "English, 中文 (Mandarin), Bahasa Melayu, Hokkien",
+    language: "English, 中文 (Mandarin), Bahasa Malaysia, Hokkien",
     initials: "YH",
     badgeColor: "#059669",
     bio: "Medical Officer at Sarawak General Hospital's Department of Psychiatry & Mental Health. Facilitates DCS workshops in multilingual settings, focusing on behavioral distress management and psychiatric support.",
@@ -319,7 +319,7 @@ export const trainers = [
     category: "medical-professional",
     institution: "Jabatan Psikiatri dan Kesihatan Mental, Sarawak General Hospital",
     city: "Kuching",
-    language: "English, 中文 (Mandarin), Bahasa Melayu",
+    language: "English, 中文 (Mandarin), Bahasa Malaysia",
     initials: "CC",
     badgeColor: "#db2777",
     bio: "Medical Officer at SGH Psychiatry and Mental Health Department. Leads caregiver empowerment circles and multilingual public education talks on recognizing cognitive decline and caregiver mental wellbeing.",
@@ -331,7 +331,7 @@ export const trainers = [
     category: "medical-professional",
     institution: "Hospital Sentosa, Kuching",
     city: "Kuching",
-    language: "Bahasa Melayu, English",
+    language: "Bahasa Malaysia, English",
     initials: "SZ",
     badgeColor: "#ea580c",
     bio: "Occupational Therapist at Hospital Sentosa. Specializes in adapting home living environments, sensory stimulation, fall prevention, and cognitive activities for individuals living with moderate to severe dementia.",
@@ -343,7 +343,7 @@ export const trainers = [
     category: "medical-professional",
     institution: "Sarawak General Hospital (SGH)",
     city: "Kuching",
-    language: "Bahasa Melayu, English",
+    language: "Bahasa Malaysia, English",
     initials: "EK",
     badgeColor: "#4f46e5",
     bio: "Occupational Therapist at Sarawak General Hospital. Experienced DCS-TTT educator training families in daily living activities (ADLs), gentle assistive transfer methods, and preserving personal autonomy at home.",
@@ -355,7 +355,7 @@ export const trainers = [
     category: "medical-professional",
     institution: "Klinik Psikiatri, Hospital Sentosa, Kuching",
     city: "Kuching",
-    language: "Bahasa Melayu, English",
+    language: "Bahasa Malaysia, English",
     initials: "ZZ",
     badgeColor: "#0891b2",
     bio: "Medical Officer at Hospital Sentosa Psychiatric Clinic. Focuses on dementia clinical staging, pharmacological safety awareness for family caregivers, and psychoeducation support groups.",
@@ -369,7 +369,7 @@ export const trainers = [
     category: "advisory-support",
     institution: "Klinik Kesihatan Kota Samarahan",
     city: "Kota Samarahan",
-    language: "English, Bahasa Melayu",
+    language: "English, Bahasa Malaysia",
     initials: "SS",
     badgeColor: "#b91c1c",
     bio: "Senior Family Medicine Specialist at KK Kota Samarahan. Serves on the ADFM QA/QC Advisory Board, supervising primary care dementia curriculum adaptation, clinical safety standards, and clinic referral networks.",
@@ -381,7 +381,7 @@ export const trainers = [
     category: "advisory-support",
     institution: "Pusat Jantung Sarawak & Sarawak General Hospital",
     city: "Kota Samarahan",
-    language: "English, 中文 (Mandarin), Bahasa Melayu",
+    language: "English, 中文 (Mandarin), Bahasa Malaysia",
     initials: "TK",
     badgeColor: "#1e3a8a",
     bio: "Consultant Geriatrician and Internal Medicine Specialist at Sarawak Heart Centre and SGH. Provides clinical advisory governance for the DCS-TTT certification syllabus and state-wide geriatric guidelines.",
@@ -393,7 +393,7 @@ export const trainers = [
     category: "advisory-support",
     institution: "Sarawak General Hospital (SGH)",
     city: "Kuching",
-    language: "English, 中文 (Mandarin), Bahasa Melayu",
+    language: "English, 中文 (Mandarin), Bahasa Malaysia",
     initials: "LJ",
     badgeColor: "#9333ea",
     bio: "Consultant Geriatrician at Sarawak General Hospital. Master clinical advisor overseeing complex BPSD protocols, ethical caregiving frameworks, and academic evaluation for the RCBC HopeCare initiative.",
@@ -487,7 +487,7 @@ export const physicalProgrammes = [
       "A rigorous, hands-on clinical training track crafted for institutional and community direct-care teams. Standardises compassionate clinical care, person-centred dementia support, and injury-free mobility assistance.",
     mode: "Physical 2-Day Intensive Hands-on Workshop",
     sessions: "Intensive 2-Day Track (16 hours clinical practice)",
-    language: "English / Bahasa Melayu",
+    language: "English / Bahasa Malaysia",
     location: "Kuching & Regional Healthcare Venues (To be announced)",
     cities: ["Kuching"],
     schedule: {
@@ -554,7 +554,7 @@ export const learningResources = [
     title: "DCS-Family: Foundation Course Curriculum Guide",
     sourceActivity: "DCS-Family 2026",
     type: "Syllabus Guide",
-    language: "English / Bahasa Melayu",
+    language: "English / Bahasa Malaysia",
     duration: "6 Core Modules",
     description:
       "Structured 6-module curriculum outline for family caregivers and community helpers under the 2026 DCS-Family intake.",
@@ -577,7 +577,7 @@ export const webinarTopics = [
     title: "Communication that supports dignity",
     description:
       "Simple ways to make conversations calmer and more connected.",
-    language: "Bahasa Melayu",
+    language: "Bahasa Malaysia",
     status: "upcoming",
   },
   {
@@ -598,7 +598,7 @@ export const webinarTopics = [
     title: "Responding to behaviour changes",
     description:
       "Look for possible causes and respond with patience and safety.",
-    language: "Bahasa Melayu",
+    language: "Bahasa Malaysia",
     status: "upcoming",
   },
   {
@@ -619,7 +619,7 @@ export const webinarTopics = [
     title: "Trainer community exchange",
     description:
       "Share learning ideas and delivery experiences with trainers.",
-    language: "English / Bahasa Melayu",
+    language: "English / Bahasa Malaysia",
     status: "upcoming",
   },
   {

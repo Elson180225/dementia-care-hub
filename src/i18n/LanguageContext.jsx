@@ -5,7 +5,7 @@ const LanguageContext = createContext(null);
 
 export const SUPPORTED_LANGUAGES = [
   { code: "en", label: "English", nativeLabel: "English" },
-  { code: "ms", label: "Bahasa Melayu", nativeLabel: "Bahasa Melayu" },
+  { code: "ms", label: "Bahasa Malaysia", nativeLabel: "Bahasa Malaysia" },
   { code: "zh", label: "Chinese (中文)", nativeLabel: "中文" },
 ];
 

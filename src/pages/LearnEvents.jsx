@@ -3140,8 +3140,6 @@ function CertifiedTrainers() {
               <div className="ct-stat"><strong>9</strong><span>{cs.statTrainers || "Certified Trainers"}</span></div>
               <div className="ct-stat-divider" />
               <div className="ct-stat"><strong>3</strong><span>{cs.statAdvisory || "Advisory Specialists"}</span></div>
-              <div className="ct-stat-divider" />
-              <div className="ct-stat"><strong>20+</strong><span>{cs.statSessions || "Sessions Delivered"}</span></div>
             </div>
           </div>
         </div>
@@ -3813,7 +3811,6 @@ function UpcomingCalendar() {
                 </div>
 
                 {/* Meta list */}
-                {`/* Meta list */`}
                 <dl className="uc-detail-meta">
                   {selectedEvent.suitableFor && (
                     <div className="uc-meta-row">
