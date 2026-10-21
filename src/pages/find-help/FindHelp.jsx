@@ -130,6 +130,14 @@ function FindHelp() {
                   Practical aids / equipment
                 </Link>
 
+                <Link to="/caregiver-support#support-groups">
+                  Peer / community support → Support Groups
+                </Link>
+
+                <a href="#advance-planning">
+                  Planning Ahead → Advance Planning
+                </a>
+
                 <Link to="/learn-events">
                   Education & learning resources
                 </Link>
@@ -170,6 +178,30 @@ function FindHelp() {
                 Open Resource Finder →
               </span>
             </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* ADVANCE PLANNING PLACEHOLDER */}
+
+      <section
+        className="find-help-planning"
+        id="advance-planning"
+      >
+        <div className="find-help-container">
+          <div className="find-help-planning-card">
+            <span>Planning Ahead</span>
+
+            <div>
+              <h2>Advance Planning</h2>
+
+              <p>
+                Planning ahead can help individuals and families
+                think about future care, preferences and important
+                decisions early. Detailed guidance will be added
+                after professional review.
+              </p>
+            </div>
           </div>
         </div>
       </section>
