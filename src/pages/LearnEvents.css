@@ -7019,20 +7019,24 @@
   width: 38px;
   height: 38px;
   border-radius: 50%;
-  background: #f0f5f2;
-  border: none;
+  background: #ffffff;
+  border: 1px solid #d0e0d8;
   font-size: 1.6rem;
+  line-height: 1;
   color: #173830;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   z-index: 10;
-  transition: all 0.2s;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  transition: all 0.2s ease;
 }
 
 .facilitator-modal-close:hover {
   background: #e1ede8;
+  border-color: #0d716b;
+  color: #0d716b;
   transform: rotate(90deg);
 }
 
@@ -7376,7 +7380,59 @@
   border-top: 1px solid #dce8e2;
   display: flex;
   justify-content: flex-end;
+  align-items: center;
   gap: 14px;
+}
+
+.facilitator-modal-footer .primary-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 24px;
+  background: linear-gradient(135deg, #0d716b 0%, #085550 100%);
+  color: #ffffff !important;
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 0.95rem;
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(13, 113, 107, 0.22);
+  transition: all 0.2s ease;
+  line-height: 1.3;
+}
+
+.facilitator-modal-footer .primary-button:hover {
+  background: linear-gradient(135deg, #095f5a 0%, #06403c 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(13, 113, 107, 0.32);
+  color: #ffffff !important;
+}
+
+.facilitator-modal-footer .btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 11px 22px;
+  background: #ffffff;
+  color: #374151;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.95rem;
+  border-radius: 10px;
+  border: 1.5px solid #d1d5db;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  line-height: 1.3;
+}
+
+.facilitator-modal-footer .btn-secondary:hover {
+  background: #f3f4f6;
+  border-color: #9ca3af;
+  color: #111827;
+  transform: translateY(-2px);
 }
 
 /* Part 3: Trainer Journey (5 Steps) */
@@ -7536,6 +7592,149 @@
   justify-content: center;
   gap: 16px;
   flex-wrap: wrap;
+}
+
+.cta-btn-row .primary-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 13px 28px;
+  background: #ffffff;
+  color: #0d716b !important;
+  text-decoration: none;
+  font-weight: 800;
+  font-size: 1rem;
+  border-radius: 12px;
+  border: 2px solid #ffffff;
+  cursor: pointer;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+  transition: all 0.25s ease;
+  line-height: 1.3;
+}
+
+.cta-btn-row .primary-button:hover {
+  background: #e6f5f0;
+  border-color: #e6f5f0;
+  color: #085550 !important;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.25);
+}
+
+.cta-btn-row .btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 13px 28px;
+  background: rgba(255, 255, 255, 0.08);
+  color: #ffffff !important;
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 1rem;
+  border-radius: 12px;
+  border: 2px solid rgba(255, 255, 255, 0.85);
+  cursor: pointer;
+  backdrop-filter: blur(4px);
+  transition: all 0.25s ease;
+  line-height: 1.3;
+}
+
+.cta-btn-row .btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: #ffffff;
+  color: #ffffff !important;
+  transform: translateY(-2px);
+}
+
+/* ================================================================
+   COMMON BUTTON & EMPTY-STATE STYLES (.primary-button, .btn-secondary)
+   ================================================================ */
+.primary-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 24px;
+  background: linear-gradient(135deg, #0d716b 0%, #085550 100%);
+  color: #ffffff !important;
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 0.95rem;
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(13, 113, 107, 0.25);
+  transition: all 0.25s ease;
+  line-height: 1.3;
+}
+
+.primary-button:hover {
+  background: linear-gradient(135deg, #095f5a 0%, #06403c 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(13, 113, 107, 0.35);
+  color: #ffffff !important;
+}
+
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 11px 22px;
+  background: #ffffff;
+  color: #0d716b;
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 0.95rem;
+  border-radius: 10px;
+  border: 1.5px solid #bfe0d3;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  line-height: 1.3;
+}
+
+.btn-secondary:hover {
+  background: #edf7f4;
+  border-color: #0d716b;
+  color: #085550;
+  transform: translateY(-2px);
+}
+
+.directory-empty-state,
+.events-empty-state {
+  text-align: center;
+  padding: 48px 24px;
+  background: #ffffff;
+  border: 1px dashed #cde3d8;
+  border-radius: 16px;
+  margin: 24px 0;
+}
+
+.directory-empty-state .empty-icon,
+.events-empty-state .empty-icon {
+  font-size: 2.4rem;
+  display: block;
+  margin-bottom: 12px;
+}
+
+.directory-empty-state h3,
+.events-empty-state h3 {
+  font-size: 1.25rem;
+  color: #173830;
+  margin: 0 0 8px;
+}
+
+.directory-empty-state p,
+.events-empty-state p {
+  color: #5d756b;
+  font-size: 0.95rem;
+  margin: 0 0 20px;
+}
+
+.directory-empty-state .primary-button,
+.events-empty-state .primary-button {
+  margin-top: 4px;
 }
 
 /* Responsive Breakpoints */

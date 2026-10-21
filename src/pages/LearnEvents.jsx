@@ -2905,11 +2905,14 @@ function MedicalCarousel({ trainers: carouselTrainers, onSelect, onViewAll }) {
     autoRef.current = setInterval(() => {
       const el = trackRef.current;
       if (!el || isUserInteracting.current) return;
-      el.scrollLeft += 1;
-      if (el.scrollLeft >= el.scrollWidth / 2) {
-        el.scrollLeft = 0;
+      const maxScroll = el.scrollWidth - el.clientWidth;
+      if (maxScroll <= 0) return;
+      if (el.scrollLeft >= maxScroll - 2) {
+        el.scrollTo({ left: 0, behavior: "smooth" });
+      } else {
+        el.scrollLeft += 1;
       }
-    }, 16);
+    }, 28);
   }, []);
 
   const stopAuto = useCallback(() => {
@@ -2938,7 +2941,14 @@ function MedicalCarousel({ trainers: carouselTrainers, onSelect, onViewAll }) {
     const el = trackRef.current;
     if (!el) return;
     pauseAndResume();
-    el.scrollBy({ left: dir * SCROLL_STEP, behavior: "smooth" });
+    const maxScroll = el.scrollWidth - el.clientWidth;
+    if (dir > 0 && el.scrollLeft >= maxScroll - 15) {
+      el.scrollTo({ left: 0, behavior: "smooth" });
+    } else if (dir < 0 && el.scrollLeft <= 15) {
+      el.scrollTo({ left: maxScroll, behavior: "smooth" });
+    } else {
+      el.scrollBy({ left: dir * SCROLL_STEP, behavior: "smooth" });
+    }
   }, [pauseAndResume]);
 
   /* ---- Drag (pointer events) ---- */
@@ -2969,7 +2979,7 @@ function MedicalCarousel({ trainers: carouselTrainers, onSelect, onViewAll }) {
     }
   }, []);
 
-  const items = [...carouselTrainers, ...carouselTrainers];
+  const items = carouselTrainers;
 
   return (
     <section className="ct-carousel-section">
@@ -3002,9 +3012,9 @@ function MedicalCarousel({ trainers: carouselTrainers, onSelect, onViewAll }) {
           role="list"
           aria-label="Medical professional trainers"
         >
-          {items.map((t, idx) => (
+          {items.map((t) => (
             <div
-              key={`mc-${t.id}-${idx}`}
+              key={`mc-${t.id}`}
               className="ct-mc-card"
               style={{ "--mc-color": t.badgeColor || "#0d716b" }}
               role="listitem"
