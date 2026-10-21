@@ -1081,3 +1081,24 @@
     transform: none;
   }
 }
+
+.caregiver-filter-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.caregiver-verification-preview p {
+  margin: 0;
+  color: #52675f;
+  line-height: 1.7;
+}
+.caregiver-verification-preview .caregiver-button {
+  text-align: center;
+  justify-self: start;
+}
+.caregiver-empty-state .caregiver-text-action {
+  margin-top: 14px;
+}
+@media (max-width: 700px) {
+  .caregiver-filter-grid {
+    grid-template-columns: 1fr;
+  }
+}
