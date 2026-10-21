@@ -1,77 +1,64 @@
 import { Link } from "react-router-dom";
+import { useLanguage } from "../../i18n/LanguageContext";
 import "./Footer.css";
 
 function Footer() {
+  const { language, setLanguage, t, languages, currentLanguageConfig } =
+    useLanguage();
+  const f = t.footer;
+  const m = t.header.menu;
+
+  const cycleLanguage = () => {
+    const currentIndex = languages.findIndex((l) => l.code === language);
+    const nextIndex = (currentIndex + 1) % languages.length;
+    setLanguage(languages[nextIndex].code);
+  };
+
   return (
     <footer className="site-footer">
       <div className="footer-container">
         <div className="footer-top">
           <div className="footer-brand">
-            <span className="footer-eyebrow">
-              Rotary Hope Care
-            </span>
+            <span className="footer-eyebrow">{f.eyebrow}</span>
 
-            <h2>
-              Alzheimer&apos;s Care
-            </h2>
+            <h2>{f.title}</h2>
 
-            <p>
-              Clear information, practical resources and community support for
-              people living with dementia, caregivers and families.
-            </p>
+            <p>{f.desc}</p>
           </div>
 
           <div className="footer-links-group">
-            <h3>Explore</h3>
-            <Link to="/get-updated">Get Updated</Link>
-            <Link to="/caregiver-support/verify-certificate">Verify DCS certificate</Link>
-
-            <Link to="/understand-dementia">
-              Understanding Dementia
+            <h3>{f.explore}</h3>
+            <Link to="/get-updated">{f.getUpdated}</Link>
+            <Link to="/caregiver-support/verify-certificate">
+              {f.verifyCert}
             </Link>
 
-            <Link to="/find-help">
-              Find Help
-            </Link>
+            <Link to="/understand-dementia">{m.understand}</Link>
 
-            <Link to="/caregiver-support">
-              Caregiver Support
-            </Link>
+            <Link to="/find-help">{m.findHelp}</Link>
 
-            <Link to="/learn-events">
-              Education & Events
-            </Link>
+            <Link to="/caregiver-support">{m.caregiverSupport}</Link>
+
+            <Link to="/learn-events">{m.learnEvents}</Link>
           </div>
 
           <div className="footer-links-group">
-            <h3>About</h3>
+            <h3>{f.about}</h3>
 
-            <Link to="/about">
-              About the Project
-            </Link>
+            <Link to="/about">{m.aboutProject}</Link>
 
-            <Link to="/about/contact">
-              Contact Us
-            </Link>
+            <Link to="/about/contact">{m.contactUs}</Link>
 
-            <Link to="/trainer-portal">
-              Trainer Portal
-            </Link>
+            <Link to="/trainer-portal">{f.trainerPortal || "Trainer Portal"}</Link>
           </div>
 
           <div className="footer-contact">
-            <h3>Need guidance?</h3>
+            <h3>{f.guidanceTitle}</h3>
 
-            <p>
-              If you&apos;re not sure where to start, contact the project team
-              and we&apos;ll help direct you to the appropriate information.
-            </p>
+            <p>{f.guidanceDesc}</p>
 
-            <Link
-              to="/about/contact"
-              className="footer-contact-button"
-            >
-              Contact Us
+            <Link to="/about/contact" className="footer-contact-button">
+              {f.contactBtn}
             </Link>
           </div>
         </div>
@@ -80,26 +67,26 @@ function Footer() {
 
         <div className="footer-bottom">
           <div>
-            <strong>
-              Rotary Club of Bintulu Central
-            </strong>
+            <strong>{f.organisation}</strong>
 
-            <span>
-              Hope Care • Alzheimer&apos;s Care
-            </span>
+            <span>{f.tagline}</span>
           </div>
 
           <div className="footer-bottom-links">
-            <button type="button">
-              English
+            <button
+              type="button"
+              onClick={cycleLanguage}
+              title="Click to switch language"
+            >
+              {currentLanguageConfig.nativeLabel}
             </button>
 
             <span>
-              © {new Date().getFullYear()} Rotary Hope Care
-                {/* Discreet entry for the RCBC project team; not promoted in the main navigation. */}
-                <Link to="/admin" className="footer-admin-link">
-                  Admin access
-                </Link>
+              © {new Date().getFullYear()} {f.rights}
+              {/* Discreet entry for the RCBC project team; not promoted in the main navigation. */}
+              <Link to="/admin" className="footer-admin-link">
+                {f.adminAccess || "Admin access"}
+              </Link>
             </span>
           </div>
         </div>

@@ -42,24 +42,37 @@ const empty = {
 };
 
 export async function api(path, data) {
-  const response = await fetch(path, {
-    credentials: "same-origin",
-    ...(data
-      ? {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(data),
-        }
-      : {}),
-  });
+  let response;
+  try {
+    response = await fetch(path, {
+      credentials: "same-origin",
+      ...(data
+        ? {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(data),
+          }
+        : {}),
+    });
+  } catch {
+    throw Object.assign(
+      new Error(
+        "Cannot reach the server. Please check that API is running (npm run server) and try again."
+      ),
+      { status: 0 }
+    );
+  }
 
-// An empty or non-JSON reply means the API server is not running or not reachable
+  // An empty or non-JSON reply means the API server is not running or not reachable
   const result = await response.json().catch(() => null);
 
   if (!response.ok || !result || typeof result !== 'object') {
     throw Object.assign(
-      new Error(result?.error || "Cannot reach the server. Please check that API is running (npm run server) and try again."),
-      { status: response.status },
+      new Error(
+        result?.error ||
+          "Cannot reach the server. Please check that API is running (npm run server) and try again."
+      ),
+      { status: response.status }
     );
   }
 
@@ -70,12 +83,15 @@ export default function TrainerProvider({ children }) {
   const { pathname } = useLocation();
   const isAccountPage = pathname.startsWith('/trainer-portal') || pathname.startsWith('/admin');
   const [state, setState] = useState(() =>
-  DEV_PREVIEW ? empty : {
-    ...empty,
-    session: null,
-    adminSession: null,
-    profile: {},
-  });
+    DEV_PREVIEW
+      ? empty
+      : {
+          ...empty,
+          session: null,
+          adminSession: null,
+          profile: {},
+        }
+  );
   const [loading, setLoading] = useState(!DEV_PREVIEW);
   const [error, setError] = useState("");
   const queue = useRef(Promise.resolve());
@@ -86,30 +102,34 @@ export default function TrainerProvider({ children }) {
       return;
     }
 
-    const { user } = await api("/api/auth/me");
-    setState(user ? normalizePortalState(await api("/api/portal"),empty) : empty);
-  }, []);    
+    try {
+      const data = await api("/api/auth/me");
+      const user = data?.user;
+      setState(
+        user ? normalizePortalState(await api("/api/portal"), empty) : empty
+      );
+    } catch {
+      setState(empty);
+    }
+  }, []);
 
-  const signedInId =
-  state.session?.id || state.adminSession?.id;
+  const signedInId = state.session?.id || state.adminSession?.id;
 
   useEffect(() => {
-  if (DEV_PREVIEW) return;
+    if (DEV_PREVIEW) return;
 
-  refresh()
-    .catch((e) => setError(e.message))
-    .finally(() => setLoading(false));
-}, [refresh]);
+    refresh()
+      .catch((e) => setError(e.message))
+      .finally(() => setLoading(false));
+  }, [refresh]);
 
   useEffect(() => {
     if (DEV_PREVIEW || !signedInId) return;
 
     return watchIdleSession({
       target: document,
-      checkSession: async () =>
-        (await api("/api/auth/me")).user,
-      reportActivity: (data) =>
-        api("/api/auth/activity", data),
+      checkSession: async () => (await api("/api/auth/me")).user,
+      reportActivity: (data) => api("/api/auth/activity", data),
       onExpired: () => {
         setState(empty);
         setError(
@@ -140,10 +160,7 @@ export default function TrainerProvider({ children }) {
 
     return () => {
       clearInterval(timer);
-      document.removeEventListener(
-        "visibilitychange",
-        update
-      );
+      document.removeEventListener("visibilitychange", update);
     };
   }, [signedInId, refresh]);
 
@@ -152,23 +169,18 @@ export default function TrainerProvider({ children }) {
       setError("Preview mode: changes are not saved.");
       return Promise.resolve(false);
     }
-    
+
     queue.current = queue.current
       .then(async () => {
         setError("");
 
-        if (
-          ["SIGN_OUT", "ADMIN_SIGN_OUT"].includes(action.type)
-        ) {
+        if (["SIGN_OUT", "ADMIN_SIGN_OUT"].includes(action.type)) {
           await api("/api/auth/logout", {});
           setState(empty);
           return true;
         }
 
-        const updatedState = await api(
-          "/api/portal/actions",
-          action
-        );
+        const updatedState = await api("/api/portal/actions", action);
 
         setState({
           ...empty,
@@ -219,3 +231,4 @@ export default function TrainerProvider({ children }) {
 export function useTrainer() {
   return useContext(TrainerContext);
 }
+

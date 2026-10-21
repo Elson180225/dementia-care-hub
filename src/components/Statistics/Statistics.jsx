@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 
 import statistics from "../../data/Statistics";
+import { useLanguage } from "../../i18n/LanguageContext";
 
 import "./Statistics.css";
 
@@ -373,11 +374,52 @@ function Statistics() {
       observer.disconnect();
   }, []);
 
+  const { t } = useLanguage();
+  const statText = t.statistics || {};
+
   const activeStatistic =
     statistics.find(
       (stat) =>
         stat.id === activeCard
     ) || statistics[0];
+
+  const regionLabel = activeStatistic.id === "malaysia"
+    ? (statText.tabMalaysia || activeStatistic.region)
+    : activeStatistic.id === "sarawak"
+    ? (statText.tabSarawak || activeStatistic.region)
+    : (statText.tabDistrict || activeStatistic.region);
+
+  const titleText = activeStatistic.id === "malaysia"
+    ? (statText.malaysiaTitle || activeStatistic.title)
+    : activeStatistic.id === "sarawak"
+    ? (statText.sarawakTitle || activeStatistic.title)
+    : (statText.districtsTitle || activeStatistic.title);
+
+  const descText = activeStatistic.id === "malaysia"
+    ? (statText.malaysiaDesc || activeStatistic.description)
+    : activeStatistic.id === "sarawak"
+    ? (statText.sarawakDesc || activeStatistic.description)
+    : (statText.districtsDesc || activeStatistic.description);
+
+  const highlightText = activeStatistic.id === "malaysia"
+    ? (statText.malaysiaHighlight || activeStatistic.highlight)
+    : activeStatistic.id === "sarawak"
+    ? (statText.sarawakHighlight || activeStatistic.highlight)
+    : activeStatistic.highlight;
+
+  const noteText = activeStatistic.id === "malaysia"
+    ? (statText.malaysiaNote || activeStatistic.note)
+    : activeStatistic.id === "sarawak"
+    ? (statText.sarawakNote || activeStatistic.note)
+    : (statText.districtsNote || activeStatistic.note);
+
+  const chartLabel = activeStatistic.id === "malaysia"
+    ? (statText.malaysiaChartLabel || activeStatistic.chartLabel)
+    : (statText.sarawakChartLabel || activeStatistic.chartLabel);
+
+  const chartRemainderLabel = activeStatistic.id === "malaysia"
+    ? (statText.malaysiaChartRemainder || activeStatistic.chartRemainderLabel)
+    : (statText.sarawakChartRemainder || activeStatistic.chartRemainderLabel);
 
   return (
     <section
@@ -396,21 +438,16 @@ function Statistics() {
         <div className="statistics-header">
           <div>
             <span className="statistics-kicker">
-              Why Does This
-              Matter?
+              {statText.kicker || "Why Does This Matter?"}
             </span>
 
             <h2>
-              Dementia in
-              Malaysia
+              {statText.title || "Dementia in Malaysia"}
             </h2>
           </div>
 
           <p>
-            Explore official
-            dementia and ageing
-            statistics for Malaysia
-            and Sarawak.
+            {statText.subtitle || "Explore official dementia and ageing statistics for Malaysia and Sarawak."}
           </p>
         </div>
 
@@ -421,73 +458,50 @@ function Statistics() {
           role="tablist"
           aria-label="Statistics categories"
         >
-          {statistics.map(
-            (stat) => (
+          {statistics.map((stat) => {
+            const label = stat.id === "malaysia" 
+              ? { short: statText.tabNational || stat.shortLabel, region: statText.tabMalaysia || stat.region }
+              : stat.id === "sarawak"
+              ? { short: statText.tabState || stat.shortLabel, region: statText.tabSarawak || stat.region }
+              : { short: statText.tabComparison || stat.shortLabel, region: statText.tabDistrict || stat.region };
+
+            return (
               <button
                 key={stat.id}
                 type="button"
                 role="tab"
-                aria-selected={
-                  activeCard ===
-                  stat.id
-                }
+                aria-selected={activeCard === stat.id}
                 className={`statistics-tab ${
-                  activeCard ===
-                  stat.id
-                    ? "statistics-tab-active"
-                    : ""
+                  activeCard === stat.id ? "statistics-tab-active" : ""
                 }`}
-                onClick={() =>
-                  setActiveCard(
-                    stat.id
-                  )
-                }
+                onClick={() => setActiveCard(stat.id)}
               >
-                <span>
-                  {
-                    stat.shortLabel
-                  }
-                </span>
-
-                <strong>
-                  {stat.region}
-                </strong>
+                <span>{label.short}</span>
+                <strong>{label.region}</strong>
               </button>
-            )
-          )}
+            );
+          })}
         </div>
 
         {/* VISUAL CARD */}
 
         <div
           className="statistics-card"
-          key={
-            activeStatistic.id
-          }
+          key={activeStatistic.id}
         >
           <div className="statistics-chart-area">
-            {activeStatistic.chartType ===
-              "donut" && (
+            {activeStatistic.chartType === "donut" && (
               <DonutChart
-                value={
-                  activeStatistic.value
-                }
-                label={
-                  activeStatistic.chartLabel
-                }
-                remainderLabel={
-                  activeStatistic.chartRemainderLabel
-                }
+                value={activeStatistic.value}
+                label={chartLabel}
+                remainderLabel={chartRemainderLabel}
                 active={visible}
               />
             )}
 
-            {activeStatistic.chartType ===
-              "bar" && (
+            {activeStatistic.chartType === "bar" && (
               <BarChart
-                bars={
-                  activeStatistic.bars
-                }
+                bars={activeStatistic.bars}
                 active={visible}
               />
             )}
@@ -497,86 +511,68 @@ function Statistics() {
 
           <div className="statistics-content">
             <span className="statistics-region">
-              {
-                activeStatistic.region
-              }
+              {regionLabel}
             </span>
 
             <h3>
-              {
-                activeStatistic.title
-              }
+              {titleText}
             </h3>
 
             <p className="statistics-description">
-              {
-                activeStatistic.description
-              }
+              {descText}
             </p>
 
             <div className="statistics-highlight">
               <span>
-                Key figure
+                {statText.keyFigure || "Key figure"}
               </span>
 
               <strong>
-                {
-                  activeStatistic.highlight
-                }
+                {highlightText}
               </strong>
             </div>
 
             <div className="statistics-source-grid">
               <div>
                 <span>
-                  Source
+                  {statText.source || "Source"}
                 </span>
 
                 <a
-                  href={
-                    activeStatistic.sourceUrl
-                  }
+                  href={activeStatistic.sourceUrl}
                   target="_blank"
                   rel="noreferrer"
                 >
-                  {
-                    activeStatistic.source
-                  }
+                  {activeStatistic.source}
                 </a>
               </div>
 
               <div>
                 <span>
-                  Data year
+                  {statText.dataYear || "Data year"}
                 </span>
 
                 <strong>
-                  {
-                    activeStatistic.dataYear
-                  }
+                  {activeStatistic.dataYear}
                 </strong>
               </div>
 
               <div>
                 <span>
-                  Last reviewed
+                  {statText.lastReviewed || "Last reviewed"}
                 </span>
 
                 <strong>
-                  {
-                    activeStatistic.reviewed
-                  }
+                  {activeStatistic.reviewed}
                 </strong>
               </div>
             </div>
 
             <div className="statistics-note">
               <strong>
-                Important:
+                {statText.important || "Important:"}
               </strong>{" "}
-              {
-                activeStatistic.note
-              }
+              {noteText}
             </div>
           </div>
         </div>
@@ -585,20 +581,14 @@ function Statistics() {
 
         <div className="statistics-bottom">
           <p>
-            Data shown are based
-            on official information
-            identified for the
-            project. Figures may be
-            updated when newer
-            official data become
-            available.
+            {statText.footerNote || "Data shown are based on official information identified for the project. Figures may be updated when newer official data become available."}
           </p>
 
           <Link
             to="/learn-events/dementia-education"
             className="statistics-link"
           >
-            What is Dementia?
+            {statText.learnMore || "What is Dementia?"}
             <span>→</span>
           </Link>
         </div>

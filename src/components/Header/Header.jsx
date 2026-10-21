@@ -1,182 +1,173 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-
 import rotaryLogo from "../../assets/rotary-logo.jpeg";
-
 import SearchOverlay from "../Search/SearchOverlay";
-
+import { useLanguage } from "../../i18n/LanguageContext";
 import "./Header.css";
 
-const menuItems = [
-  /* =========================================================
-     UNDERSTAND DEMENTIA
-  ========================================================= */
-
-  {
-    label: "Understanding Dementia",
-    path: "/understand-dementia",
-
-    children: [
-      {
-        label: "What is Dementia?",
-        path: "/understand-dementia/what-is-dementia",
-      },
-      {
-        label: "Alzheimer's Disease",
-        path: "/understand-dementia/alzheimers",
-      },
-      {
-        label: "Signs & Changes",
-        path: "/understand-dementia/signs-and-changes",
-      },
-      {
-        label: "Why These Changes Matter",
-        path: "/understand-dementia/why-changes-matter",
-      },
-      {
-        label: "When to Seek Medical Advice",
-        path: "/understand-dementia/medical-advice",
-      },
-      {
-        label: "Healthy Ageing & Risk Reduction",
-        path: "/understand-dementia/healthy-ageing",
-      },
-    ],
-  },
-
-  /* =========================================================
-     FIND HELP & SUPPORT
-  ========================================================= */
-
-  {
-    label: "Find Help & Support",
-    path: "/find-help",
-
-    children: [
-      {
-        label: "Start From Where You Are",
-        path: "/find-help",
-      },
-      {
-        label: "Assessment & Healthcare",
-        path: "/find-help/assessment-healthcare",
-      },
-      {
-        label: "Support Services Directory",
-        path: "/find-help/support-services",
-      },
-      {
-        label: "Government & Financial Resources",
-        path: "/find-help/government-financial",
-      },
-      {
-        label: "Equipment & Practical Resources",
-        path: "/find-help/equipment-practical",
-      },
-      {
-        label: "Resource Finder",
-        path: "/find-help/resource-finder",
-      },
-    ],
-  },
-
-  /* =========================================================
-     CAREGIVER SUPPORT
-  ========================================================= */
-
-  {
-    label: "Caregiver Support",
-    path: "/caregiver-support",
-    children: [
-      { 
-        label: "Caregiver Guidance", 
-        path: "/caregiver-support#guidance" 
-      },
-      { 
-        label: "Caregiver Training", 
-        path: "/caregiver-support#training" 
-      },
-      {
-        label: "Certificate Verification",
-        path: "/caregiver-support#certificate-verification",
-      },
-      { label: "Support Groups", 
-        path: "/caregiver-support#support-groups" 
-      },
-      { label: "Volunteer", 
-        path: "/caregiver-support#volunteer" 
-      },
-    ],
-  },
-
-  /* =========================================================
-     LEARN & EVENTS
-  ========================================================= */
-
-  {
-    label: "Education & Events",
-    menuOnly: true,
-
-    children: [
-      {
-        label: "Online Education",
-        path: "/learn-events/online-education",
-      },
-      {
-        label: "Physical Education",
-        path: "/learn-events/physical-education",
-      },
-      {
-        label: "Events",
-        path: "/learn-events/events",
-      },
-      {
-        label: "Certified Trainers",
-        path: "/learn-events/certified-trainers",
-      },
-      {
-        label: "Upcoming Calendar",
-        path: "/learn-events/upcoming-calendar",
-      },
-    ],
-  },
-
-  /* =========================================================
-     ABOUT US
-  ========================================================= */
-
-  {
-    label: "About the Project",
-    path: "/about",
-
-    children: [
-      {
-        label: "About the Project",
-        path: "/about",
-      },
-      {
-        label: "Contact Us",
-        path: "/about/contact",
-      },
-    ],
-  },
-];
+function getMenuItems(m) {
+  return [
+    {
+      label: m.understand,
+      path: "/understand-dementia",
+      children: [
+        {
+          label: m.whatIsDementia,
+          path: "/understand-dementia/what-is-dementia",
+        },
+        {
+          label: m.alzheimers,
+          path: "/understand-dementia/alzheimers",
+        },
+        {
+          label: m.signsChanges,
+          path: "/understand-dementia/signs-and-changes",
+        },
+        {
+          label: m.whyChangesMatter,
+          path: "/understand-dementia/why-changes-matter",
+        },
+        {
+          label: m.medicalAdvice,
+          path: "/understand-dementia/medical-advice",
+        },
+        {
+          label: m.healthyAgeing,
+          path: "/understand-dementia/healthy-ageing",
+        },
+      ],
+    },
+    {
+      label: m.findHelp,
+      path: "/find-help",
+      children: [
+        {
+          label: m.startWhereYouAre,
+          path: "/find-help",
+        },
+        {
+          label: m.assessmentHealthcare,
+          path: "/find-help/assessment-healthcare",
+        },
+        {
+          label: m.supportServices,
+          path: "/find-help/support-services",
+        },
+        {
+          label: m.govtFinancial,
+          path: "/find-help/government-financial",
+        },
+        {
+          label: m.equipmentPractical,
+          path: "/find-help/equipment-practical",
+        },
+        {
+          label: m.resourceFinder,
+          path: "/find-help/resource-finder",
+        },
+      ],
+    },
+    {
+      label: m.caregiverSupport,
+      path: "/caregiver-support",
+      children: [
+        {
+          label: m.caregiverGuidance,
+          path: "/caregiver-support#guidance",
+        },
+        {
+          label: m.caregiverTraining,
+          path: "/caregiver-support#training",
+        },
+        {
+          label: m.certVerification,
+          path: "/caregiver-support#certificate-verification",
+        },
+        {
+          label: m.supportGroups,
+          path: "/caregiver-support#support-groups",
+        },
+        {
+          label: m.volunteer,
+          path: "/caregiver-support#volunteer",
+        },
+      ],
+    },
+    {
+      label: m.learnEvents,
+      path: "/learn-events",
+      menuOnly: true,
+      children: [
+        {
+          label: m.onlineEducation,
+          path: "/learn-events/online-education",
+        },
+        {
+          label: m.physicalEducation,
+          path: "/learn-events/physical-education",
+        },
+        {
+          label: m.events,
+          path: "/learn-events/events",
+        },
+        {
+          label: m.certifiedTrainers,
+          path: "/learn-events/certified-trainers",
+        },
+        {
+          label: m.upcomingCalendar,
+          path: "/learn-events/upcoming-calendar",
+        },
+      ],
+    },
+    {
+      label: m.aboutProject,
+      path: "/about",
+      children: [
+        {
+          label: m.aboutProject,
+          path: "/about",
+        },
+        {
+          label: m.contactUs,
+          path: "/about/contact",
+        },
+      ],
+    },
+  ];
+}
 
 function Header() {
+  const { language, setLanguage, t, languages, currentLanguageConfig } =
+    useLanguage();
+
   const [openMenu, setOpenMenu] = useState(null);
-
   const [mobileOpen, setMobileOpen] = useState(false);
-
   const [searchOpen, setSearchOpen] = useState(false);
-
   const [languageOpen, setLanguageOpen] = useState(false);
-
   const [showHeader, setShowHeader] = useState(false);
 
-  /* =========================================================
-     SHOW HEADER AFTER USER SCROLLS
-  ========================================================= */
+  const languageWrapperRef = useRef(null);
 
+  /* Close language menu when clicking outside */
+  useEffect(() => {
+    const handleOutsideClick = (event) => {
+      if (
+        languageWrapperRef.current &&
+        !languageWrapperRef.current.contains(event.target)
+      ) {
+        setLanguageOpen(false);
+      }
+    };
+    if (languageOpen) {
+      document.addEventListener("mousedown", handleOutsideClick);
+    }
+    return () => {
+      document.removeEventListener("mousedown", handleOutsideClick);
+    };
+  }, [languageOpen]);
+
+  /* SHOW HEADER AFTER USER SCROLLS */
   useEffect(() => {
     const handleScroll = () => {
       if (window.scrollY > 120) {
@@ -187,41 +178,32 @@ function Header() {
     };
 
     handleScroll();
-
     window.addEventListener("scroll", handleScroll);
-
     return () => {
       window.removeEventListener("scroll", handleScroll);
     };
   }, []);
-
-  /* =========================================================
-     CLOSE MOBILE MENU
-  ========================================================= */
 
   const closeMobileMenu = () => {
     setMobileOpen(false);
     setOpenMenu(null);
   };
 
+  const menuItems = getMenuItems(t.header.menu);
+
   return (
     <>
       <header
         className={`site-header ${
-          showHeader
-            ? "site-header-visible"
-            : "site-header-hidden"
+          showHeader ? "site-header-visible" : "site-header-hidden"
         }`}
       >
         {/* ===================================================
             TOP BAR
         =================================================== */}
-
         <div className="top-bar">
           <div className="header-container top-bar-inner">
-            <span>
-              Dementia & Alzheimer&apos;s Information and Support
-            </span>
+            <span>{t.header.topBar}</span>
 
             <div className="top-actions">
               <nav className="utility-nav" aria-label="Updates and trainer access">
@@ -230,17 +212,13 @@ function Header() {
                 <Link to="/trainer-portal" onClick={closeMobileMenu}>TRAINER PORTAL</Link>
               </nav>
               {/* SEARCH */}
-
               <button
                 type="button"
                 className="animated-search-button"
                 onClick={() => setSearchOpen(true)}
-                aria-label="Search website"
+                aria-label={t.header.search}
               >
-                <span
-                  className="animated-search-icon"
-                  aria-hidden="true"
-                >
+                <span className="animated-search-icon" aria-hidden="true">
                   <svg
                     viewBox="0 0 24 24"
                     width="22"
@@ -251,59 +229,40 @@ function Header() {
                     strokeLinecap="round"
                     strokeLinejoin="round"
                   >
-                    <circle
-                      cx="11"
-                      cy="11"
-                      r="7"
-                    />
-
-                    <line
-                      x1="16.5"
-                      y1="16.5"
-                      x2="21"
-                      y2="21"
-                    />
+                    <circle cx="11" cy="11" r="7" />
+                    <line x1="16.5" y1="16.5" x2="21" y2="21" />
                   </svg>
                 </span>
 
-                <span className="animated-search-text">
-                  Search
-                </span>
+                <span className="animated-search-text">{t.header.search}</span>
               </button>
 
               {/* LANGUAGE */}
-
-              <div className="language-wrapper">
+              <div className="language-wrapper" ref={languageWrapperRef}>
                 <button
                   type="button"
-                  onClick={() =>
-                    setLanguageOpen(!languageOpen)
-                  }
+                  onClick={() => setLanguageOpen(!languageOpen)}
                   aria-expanded={languageOpen}
                   aria-label="Select language"
                 >
-                  English ▼
+                  {currentLanguageConfig.nativeLabel} ▼
                 </button>
 
                 {languageOpen && (
                   <div className="language-menu">
-                    <button
-                      type="button"
-                      onClick={() =>
-                        setLanguageOpen(false)
-                      }
-                    >
-                      English
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={() =>
-                        setLanguageOpen(false)
-                      }
-                    >
-                      Bahasa Melayu
-                    </button>
+                    {languages.map((item) => (
+                      <button
+                        key={item.code}
+                        type="button"
+                        className={language === item.code ? "language-menu-active" : ""}
+                        onClick={() => {
+                          setLanguage(item.code);
+                          setLanguageOpen(false);
+                        }}
+                      >
+                        {item.nativeLabel} {language === item.code ? "✓" : ""}
+                      </button>
+                    ))}
                   </div>
                 )}
               </div>
@@ -314,62 +273,39 @@ function Header() {
         {/* ===================================================
             MAIN HEADER
         =================================================== */}
-
         <div className="main-header">
           <div className="header-container main-header-inner">
             {/* BRAND */}
-
-            <Link
-              to="/"
-              className="brand"
-              onClick={closeMobileMenu}
-            >
+            <Link to="/" className="brand" onClick={closeMobileMenu}>
               <img
                 src={rotaryLogo}
                 alt="Rotary International"
                 className="brand-logo"
               />
-
               <div className="brand-text">
-                <strong>
-                  Dementia Care Connect
-                </strong>
-
-                <span>
-                  Support • Learn • Connect
-                </span>
+                <strong>{t.header?.hubTitle || "Dementia Care Connect"}</strong>
+                <span>{t.header?.hubSubtitle || "Support • Learn • Connect"}</span>
               </div>
             </Link>
 
             {/* =================================================
                 DESKTOP NAVIGATION
             ================================================= */}
-
-            <nav
-              className="desktop-nav"
-              aria-label="Main navigation"
-            >
+            <nav className="desktop-nav" aria-label="Main navigation">
               <Link
                 to="/"
                 className="nav-link"
-                onClick={() =>
-                  setOpenMenu(null)
-                }
+                onClick={() => setOpenMenu(null)}
               >
-                Home
+                {t.header.home}
               </Link>
-
 
               {menuItems.map((item) => (
                 <div
                   className="nav-item"
                   key={item.label}
-                  onMouseEnter={() =>
-                    setOpenMenu(item.label)
-                  }
-                  onMouseLeave={() =>
-                    setOpenMenu(null)
-                  }
+                  onMouseEnter={() => setOpenMenu(item.label)}
+                  onMouseLeave={() => setOpenMenu(null)}
                 >
                   {item.menuOnly ? (
                     <button
@@ -377,60 +313,37 @@ function Header() {
                       className="nav-link nav-menu-trigger"
                       onClick={() =>
                         setOpenMenu(
-                          openMenu === item.label
-                            ? null
-                            : item.label
+                          openMenu === item.label ? null : item.label
                         )
                       }
-                      onFocus={() =>
-                        setOpenMenu(item.label)
-                      }
-                      aria-expanded={
-                        openMenu === item.label
-                      }
+                      onFocus={() => setOpenMenu(item.label)}
+                      aria-expanded={openMenu === item.label}
                       aria-haspopup="true"
                     >
                       {item.label}
-
-                      <span aria-hidden="true">
-                        ⌄
-                      </span>
+                      <span aria-hidden="true"> ⌄</span>
                     </button>
                   ) : (
-                    <Link
-                      to={item.path}
-                      className="nav-link"
-                    >
+                    <Link to={item.path} className="nav-link">
                       {item.label}
-
-                      <span aria-hidden="true">
-                        ⌄
-                      </span>
+                      <span aria-hidden="true"> ⌄</span>
                     </Link>
                   )}
 
                   {/* DROPDOWN */}
-
                   {openMenu === item.label && (
                     <div className="dropdown-menu">
-                      <h3>
-                        {item.label}
-                      </h3>
-
+                      <h3>{item.label}</h3>
                       <div className="dropdown-grid">
-                        {item.children.map(
-                          (child) => (
-                            <Link
-                              key={child.path}
-                              to={child.path}
-                              onClick={() =>
-                                setOpenMenu(null)
-                              }
-                            >
-                              {child.label}
-                            </Link>
-                          )
-                        )}
+                        {item.children.map((child) => (
+                          <Link
+                            key={child.path}
+                            to={child.path}
+                            onClick={() => setOpenMenu(null)}
+                          >
+                            {child.label}
+                          </Link>
+                        ))}
                       </div>
                     </div>
                   )}
@@ -439,23 +352,19 @@ function Header() {
             </nav>
 
             {/* GET SUPPORT */}
-
             <Link
               to="/find-help"
               className="support-btn"
               onClick={closeMobileMenu}
             >
-              Get Support
+              {t.header.getSupport}
             </Link>
 
             {/* MOBILE MENU BUTTON */}
-
             <button
               type="button"
               className="mobile-menu-btn"
-              onClick={() =>
-                setMobileOpen(!mobileOpen)
-              }
+              onClick={() => setMobileOpen(!mobileOpen)}
               aria-label="Open navigation menu"
               aria-expanded={mobileOpen}
             >
@@ -466,49 +375,31 @@ function Header() {
           {/* =================================================
               MOBILE NAVIGATION
           ================================================= */}
-
           {mobileOpen && (
-            <nav
-              className="mobile-nav"
-              aria-label="Mobile navigation"
-            >
-              <Link
-                to="/"
-                onClick={closeMobileMenu}
-              >
-                Home
+            <nav className="mobile-nav" aria-label="Mobile navigation">
+              <Link to="/" onClick={closeMobileMenu}>
+                {t.header.home}
               </Link>
-
 
               {menuItems.map((item) => (
                 <details key={item.label}>
-                  <summary>
-                    {item.label}
-                  </summary>
-
+                  <summary>{item.label}</summary>
                   <div className="mobile-submenu">
                     {!item.menuOnly && (
-                      <Link
-                        to={item.path}
-                        onClick={closeMobileMenu}
-                      >
-                        Overview
+                      <Link to={item.path} onClick={closeMobileMenu}>
+                        {t.header.overview}
                       </Link>
                     )}
 
-                    {item.children.map(
-                      (child) => (
-                        <Link
-                          key={child.path}
-                          to={child.path}
-                          onClick={
-                            closeMobileMenu
-                          }
-                        >
-                          {child.label}
-                        </Link>
-                      )
-                    )}
+                    {item.children.map((child) => (
+                      <Link
+                        key={child.path}
+                        to={child.path}
+                        onClick={closeMobileMenu}
+                      >
+                        {child.label}
+                      </Link>
+                    ))}
                   </div>
                 </details>
               ))}
@@ -518,22 +409,17 @@ function Header() {
                 className="mobile-support-link"
                 onClick={closeMobileMenu}
               >
-                Get Support
+                {t.header.getSupport}
               </Link>
             </nav>
           )}
         </div>
       </header>
 
-      {/* =====================================================
-          SEARCH OVERLAY
-      ====================================================== */}
-
+      {/* SEARCH OVERLAY */}
       <SearchOverlay
         isOpen={searchOpen}
-        onClose={() =>
-          setSearchOpen(false)
-        }
+        onClose={() => setSearchOpen(false)}
       />
     </>
   );

@@ -51,13 +51,16 @@ function PublicOnly({ children }) {
   return pathname.startsWith("/admin") || pathname.startsWith("/trainer-portal") ? null : children;
 }
 
+import { LanguageProvider } from "./i18n/LanguageContext";
+
 function App() {
   return (
     <BrowserRouter>
-      <PublicOnly>
-      <Header />
-      </PublicOnly>
-      <TrainerProvider>
+      <LanguageProvider>
+        <PublicOnly>
+          <Header />
+        </PublicOnly>
+        <TrainerProvider>
 
         <Routes>
           <Route path="/get-updated" element={<ProjectServices />} />
@@ -312,6 +315,7 @@ function App() {
       <Footer />
       </PublicOnly>
       <ScrollToTop />
+      </LanguageProvider>
     </BrowserRouter>
   );
 }

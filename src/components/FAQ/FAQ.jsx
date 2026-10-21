@@ -1,9 +1,13 @@
 import PublishedRecords from "../PublishedRecords";
 import { useState } from "react";
-import faqs from "../../data/faqs";
+import defaultFaqs from "../../data/faqs";
+import { useLanguage } from "../../i18n/LanguageContext";
 import "./FAQ.css";
 
 function FAQ() {
+  const { t } = useLanguage();
+  const f = t.faq || {};
+  const faqs = f.items || defaultFaqs;
   const [openId, setOpenId] = useState(null);
 
   const toggleFAQ = (id) => {
@@ -14,17 +18,16 @@ function FAQ() {
     <section className="faq-section">
       <div className="faq-container">
         <div className="faq-heading">
-          <span className="faq-label">Frequently Asked Questions</span>
+          <span className="faq-label">{f.label || "Frequently Asked Questions"}</span>
 
-          <h2>Questions people often ask.</h2>
+          <h2>{f.title || "Questions people often ask."}</h2>
 
           <p>
-            Find quick answers to common questions about dementia,
-            Alzheimer&apos;s disease, support and available resources.
+            {f.desc || "Find quick answers to common questions about dementia, Alzheimer's disease, support and available resources."}
           </p>
         </div>
 
-        <PublishedRecords kind="faqs" title="RCBC reviewed FAQs"/>
+        <PublishedRecords kind="faqs" title={f.reviewedTitle || "RCBC reviewed FAQs"}/>
         <div className="faq-list">
           {faqs.map((faq) => {
             const isOpen = openId === faq.id;

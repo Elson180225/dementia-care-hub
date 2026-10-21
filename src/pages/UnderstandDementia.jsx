@@ -1,6 +1,7 @@
 import PublishedRecords from "../components/PublishedRecords";
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
+import { useLanguage } from "../i18n/LanguageContext";
 import "./UnderstandDementia.css";
 
 const understandingDementiaContent = {
@@ -237,7 +238,22 @@ const understandingDementiaContent = {
 };
 
 function UnderstandDementia() {
-  const t = understandingDementiaContent;
+  const { t: translationsData } = useLanguage();
+  const rawT = translationsData.understandDementia || {};
+  const t = {
+    ...understandingDementiaContent,
+    ...rawT,
+    commonTypes: rawT.commonTypes || understandingDementiaContent.commonTypes,
+    commonTypesTitle: rawT.commonTypesTitle || understandingDementiaContent.commonTypesTitle,
+    commonTypesIntro: rawT.commonTypesIntro || understandingDementiaContent.commonTypesIntro,
+    riskTitle: rawT.riskTitle || understandingDementiaContent.riskTitle,
+    riskDescription: rawT.riskDescription || understandingDementiaContent.riskDescription,
+    faqs: (rawT.faqs || understandingDementiaContent.faqs).map((faq, idx) => ({
+      ...understandingDementiaContent.faqs[idx],
+      ...faq,
+      link: faq.link || understandingDementiaContent.faqs[idx]?.link,
+    })),
+  };
   const [selectedOverview, setSelectedOverview] = useState(0);
   const [answers, setAnswers] = useState({});
   const [showResult, setShowResult] = useState(false);
@@ -563,10 +579,12 @@ function UnderstandDementia() {
                 </summary>
                 <p>
                   {faq.a}{" "}
-                  {faq.link.href.startsWith("#") ? (
-                    <a href={faq.link.href}>{faq.link.label} →</a>
-                  ) : (
-                    <Link to={faq.link.href}>{faq.link.label} →</Link>
+                  {faq.link?.href && (
+                    faq.link.href.startsWith("#") ? (
+                      <a href={faq.link.href}>{faq.link.label} →</a>
+                    ) : (
+                      <Link to={faq.link.href}>{faq.link.label} →</Link>
+                    )
                   )}
                 </p>
               </details>

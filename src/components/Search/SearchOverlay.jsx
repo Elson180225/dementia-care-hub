@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
+import { useLanguage } from "../../i18n/LanguageContext";
 import "./SearchOverlay.css";
 
 const searchItems = [
@@ -146,6 +147,8 @@ const searchItems = [
 ];
 
 function SearchOverlay({ isOpen, onClose }) {
+  const { t } = useLanguage();
+  const s = t.search;
   const [query, setQuery] = useState("");
   const inputRef = useRef(null);
 
@@ -218,8 +221,8 @@ function SearchOverlay({ isOpen, onClose }) {
       <div className="search-panel">
         <div className="search-panel-top">
           <div>
-            <span className="search-label">Search</span>
-            <h2>What are you looking for?</h2>
+            <span className="search-label">{s.label}</span>
+            <h2>{s.heading}</h2>
           </div>
 
           <button
@@ -237,7 +240,7 @@ function SearchOverlay({ isOpen, onClose }) {
           <input
             ref={inputRef}
             type="search"
-            placeholder="Try “caregiver”, “Alzheimer's” or “events”"
+            placeholder={s.placeholder}
             value={query}
             onChange={(event) => setQuery(event.target.value)}
             aria-label="Search website"
@@ -249,30 +252,30 @@ function SearchOverlay({ isOpen, onClose }) {
               onClick={() => setQuery("")}
               aria-label="Clear search"
             >
-              Clear
+              {s.clear}
             </button>
           )}
         </div>
 
         {!query && (
           <div className="search-suggestions">
-            <p>Popular searches</p>
+            <p>{s.popular}</p>
 
             <div className="suggestion-buttons">
               <button onClick={() => setQuery("dementia")}>
-                Dementia
+                {s.tagDementia || "Dementia"}
               </button>
 
               <button onClick={() => setQuery("caregiver")}>
-                Caregiver Support
+                {s.tagCaregiver || "Caregiver Support"}
               </button>
 
               <button onClick={() => setQuery("healthcare")}>
-                Healthcare
+                {s.tagHealthcare || "Healthcare"}
               </button>
 
               <button onClick={() => setQuery("events")}>
-                Events
+                {s.tagEvents || "Events"}
               </button>
             </div>
           </div>
@@ -283,7 +286,7 @@ function SearchOverlay({ isOpen, onClose }) {
             <div className="search-results-heading">
               <span>
                 {results.length}{" "}
-                {results.length === 1 ? "result" : "results"}
+                {results.length === 1 ? s.result : s.results}
               </span>
             </div>
 
@@ -314,12 +317,9 @@ function SearchOverlay({ isOpen, onClose }) {
               </div>
             ) : (
               <div className="search-empty">
-                <h3>No results found</h3>
+                <h3>{s.noResults}</h3>
 
-                <p>
-                  Try searching with a different word, such as
-                  “dementia”, “caregiver”, “doctor” or “events”.
-                </p>
+                <p>{s.noResultsDesc}</p>
               </div>
             )}
           </div>

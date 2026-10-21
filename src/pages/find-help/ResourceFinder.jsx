@@ -5,6 +5,7 @@ import { Link } from "react-router-dom";
 import supportServices from "../../data/supportServices";
 import governmentResources from "../../data/governmentResources";
 import equipmentResources from "../../data/equipmentResources";
+import { useLanguage } from "../../i18n/LanguageContext";
 
 import "./ResourceFinder.css";
 
@@ -85,6 +86,10 @@ const locations = [
 ];
 
 function ResourceFinder() {
+  const { t } = useLanguage();
+  const rf = t.resourceFinderPage || {};
+  const currentNeeds = rf.needs || needs;
+
   const [step, setStep] = useState(1);
 
   const [need, setNeed] = useState("");
@@ -302,26 +307,24 @@ function ResourceFinder() {
 
         <div className="rf-container rf-intro-inner">
           <span className="rf-eyebrow">
-            Find Help & Support
+            {rf.kicker || "Find Help & Support"}
           </span>
 
           <h1>
-            Not sure where
+            {rf.notSureTitle || "Not sure where"}
             <br />
-            <em>to start?</em>
+            <em>{rf.notSureTitleEm || "to start?"}</em>
           </h1>
 
           <p>
-            Answer three simple questions and we will
-            guide you towards the most relevant section
-            or available resource.
+            {rf.notSureDesc || "Answer three simple questions and we will guide you towards the most relevant section or available resource."}
           </p>
 
           <a
             href="#resource-finder"
             className="rf-start-link"
           >
-            Start finding support
+            {rf.startBtn || "Start finding support"}
 
             <span>
               ↓
@@ -354,7 +357,7 @@ function ResourceFinder() {
               </span>
 
               <p>
-                Your need
+                {rf.step1Progress || "Your need"}
               </p>
             </div>
 
@@ -372,7 +375,7 @@ function ResourceFinder() {
               </span>
 
               <p>
-                Support type
+                {rf.step2Progress || "Support type"}
               </p>
             </div>
 
@@ -390,7 +393,7 @@ function ResourceFinder() {
               </span>
 
               <p>
-                Location
+                {rf.step3Progress || "Location"}
               </p>
             </div>
           </div>
@@ -416,64 +419,66 @@ function ResourceFinder() {
               {step === 1 && (
                 <>
                   <span className="rf-question-label">
-                    Let's start here
+                    {rf.kicker || "Let's start here"}
                   </span>
 
                   <h2>
-                    What do you need help with?
+                    {rf.step1Title || "What do you need help with?"}
                   </h2>
 
                   <p className="rf-question-description">
-                    Choose the option that most closely
-                    describes what you are looking for.
+                    {rf.subtitle || "Choose the option that most closely describes what you are looking for."}
                   </p>
 
                   <div className="rf-needs-grid">
-                    {needs.map((item) => (
-                      <button
-                        type="button"
-                        key={item.id}
-                        className="rf-need-card"
-                        onClick={() =>
-                          chooseNeed(
-                            item.id
-                          )
-                        }
-                      >
-                        <div className="rf-need-top">
-                          <span className="rf-need-number">
-                            {
-                              item.number
-                            }
-                          </span>
-
-                          <span className="rf-need-icon">
-                            {
-                              item.icon
-                            }
-                          </span>
-                        </div>
-
-                        <h3>
-                          {
-                            item.title
+                    {currentNeeds.map((item, idx) => {
+                      const icon = needs[idx]?.icon || "+";
+                      return (
+                        <button
+                          type="button"
+                          key={item.id}
+                          className="rf-need-card"
+                          onClick={() =>
+                            chooseNeed(
+                              item.id
+                            )
                           }
-                        </h3>
+                        >
+                          <div className="rf-need-top">
+                            <span className="rf-need-number">
+                              {
+                                item.number
+                              }
+                            </span>
 
-                        <p>
-                          {
-                            item.description
-                          }
-                        </p>
+                            <span className="rf-need-icon">
+                              {
+                                icon
+                              }
+                            </span>
+                          </div>
 
-                        <strong>
-                          Select
-                          <span>
-                            →
-                          </span>
-                        </strong>
-                      </button>
-                    ))}
+                          <h3>
+                            {
+                              item.title
+                            }
+                          </h3>
+
+                          <p>
+                            {
+                              item.description
+                            }
+                          </p>
+
+                          <strong>
+                            {rf.selectNeedBtn || "Select"}
+                            <span>
+                              →
+                            </span>
+                          </strong>
+                        </button>
+                      );
+                    })}
                   </div>
                 </>
               )}
@@ -483,7 +488,7 @@ function ResourceFinder() {
               {step === 2 && (
                 <>
                   <span className="rf-question-label">
-                    You selected
+                    {rf.youSelected || "You selected"}
                   </span>
 
                   <div className="rf-current-selection">
@@ -501,8 +506,7 @@ function ResourceFinder() {
                   </div>
 
                   <h2>
-                    What type of support are you
-                    looking for?
+                    {rf.step2Heading || "What type of support are you looking for?"}
                   </h2>
 
                   <div className="rf-type-list">
@@ -550,7 +554,7 @@ function ResourceFinder() {
                       setStep(1)
                     }
                   >
-                    ← Back
+                    {rf.back || "← Back"}
                   </button>
                 </>
               )}
@@ -560,17 +564,15 @@ function ResourceFinder() {
               {step === 3 && (
                 <>
                   <span className="rf-question-label">
-                    Final question
+                    {rf.finalQuestion || "Final question"}
                   </span>
 
                   <h2>
-                    Where are you looking for
-                    support?
+                    {rf.step3Heading || "Where are you looking for support?"}
                   </h2>
 
                   <p className="rf-question-description">
-                    Select the closest location. You can
-                    also search across Sarawak.
+                    {rf.step3Desc || "Select the closest location. You can also search across Sarawak."}
                   </p>
 
                   <div className="rf-location-grid">
@@ -611,7 +613,7 @@ function ResourceFinder() {
                         setStep(2)
                       }
                     >
-                      ← Back
+                      {rf.back || "← Back"}
                     </button>
 
                     <button
@@ -622,7 +624,7 @@ function ResourceFinder() {
                         findResources
                       }
                     >
-                      Find my resources
+                      {rf.findResourcesBtn || "Find my resources"}
 
                       <span>
                         →
@@ -639,7 +641,7 @@ function ResourceFinder() {
           {need && (
             <div className="rf-trail">
               <span>
-                Your journey
+                {rf.yourJourney || "Your journey"}
               </span>
 
               <div>
@@ -680,7 +682,7 @@ function ResourceFinder() {
                   resetFinder
                 }
               >
-                Start again
+                {rf.startAgain || "Start again"}
               </button>
             </div>
           )}
@@ -700,16 +702,15 @@ function ResourceFinder() {
             <div className="rf-results-header">
               <div>
                 <span>
-                  Your results
+                  {rf.yourResults || "Your results"}
                 </span>
 
                 <h2>
-                  Here is where you can go next.
+                  {rf.resultsHeading || "Here is where you can go next."}
                 </h2>
 
                 <p>
-                  These results are based on the
-                  choices you made above.
+                  {rf.resultsDesc || "These results are based on the choices you made above."}
                 </p>
               </div>
 
@@ -724,11 +725,11 @@ function ResourceFinder() {
                 <span>
                   {need ===
                     "healthcare"
-                    ? "pathway"
+                    ? (rf.pathwayLabel || "pathway")
                     : results.length ===
                       1
-                    ? "resource"
-                    : "resources"}
+                    ? (rf.resourceLabel || "resource")
+                    : (rf.resourcesLabel || "resources")}
                 </span>
               </div>
             </div>
@@ -744,25 +745,22 @@ function ResourceFinder() {
 
                 <div>
                   <span>
-                    Recommended next step
+                    {rf.recommendedStep || "Recommended next step"}
                   </span>
 
                   <h3>
-                    Assessment & Healthcare
+                    {rf.healthcarePathwayTitle || "Assessment & Healthcare"}
                   </h3>
 
                   <p>
-                    Follow the assessment pathway to
-                    prepare for an appointment, understand
-                    government and private healthcare
-                    routes, and find provider information.
+                    {rf.healthcareResultDesc || "Follow the assessment pathway to prepare for an appointment, understand government and private healthcare routes, and find provider information."}
                   </p>
                 </div>
 
                 <Link
                   to="/find-help/assessment-healthcare"
                 >
-                  View pathway
+                  {rf.viewPathway || "View pathway"}
                   <span>
                     →
                   </span>
@@ -834,8 +832,8 @@ function ResourceFinder() {
                         >
                           {resource.verificationStatus ===
                           "verified"
-                            ? "Verified"
-                            : "Pending verification"}
+                            ? (rf.verified || "Verified")
+                            : (rf.pendingVerification || "Pending verification")}
                         </span>
 
                         <Link
@@ -843,7 +841,7 @@ function ResourceFinder() {
                             resource.path
                           }
                         >
-                          View details
+                          {rf.viewDetails || "View details"}
                           <span>
                             →
                           </span>
@@ -860,13 +858,11 @@ function ResourceFinder() {
                 </div>
 
                 <h3>
-                  No matching resource is available yet.
+                  {rf.emptyTitle || "No matching resource is available yet."}
                 </h3>
 
                 <p>
-                  The directory does not currently contain
-                  a matching verified record for this
-                  combination.
+                  {rf.emptyDesc || "The directory does not currently contain a matching verified record for this combination."}
                 </p>
 
                 <button
@@ -875,7 +871,7 @@ function ResourceFinder() {
                     resetFinder
                   }
                 >
-                  Try another search
+                  {rf.tryAnotherSearch || "Try another search"}
                 </button>
               </div>
             )}
@@ -892,20 +888,28 @@ function ResourceFinder() {
           <div className="rf-system-layout">
             <div className="rf-system-heading">
               <span>
-                One source of information
+                {rf.systemEyebrow || "One source of information"}
               </span>
 
               <h2>
-                Directory in.
-                <br />
-                Relevant answers out.
+                {rf.systemTitle ? (
+                  rf.systemTitle.split("\n").map((line, idx) => (
+                    <span key={idx}>
+                      {line}
+                      {idx === 0 && <br />}
+                    </span>
+                  ))
+                ) : (
+                  <>
+                    Directory in.
+                    <br />
+                    Relevant answers out.
+                  </>
+                )}
               </h2>
 
               <p>
-                The Resource Finder does not maintain a
-                separate provider database. It helps users
-                navigate information managed across the
-                relevant support sections.
+                {rf.systemDesc || "The Resource Finder does not maintain a separate provider database. It helps users navigate information managed across the relevant support sections."}
               </p>
             </div>
 
@@ -916,12 +920,11 @@ function ResourceFinder() {
                 </span>
 
                 <strong>
-                  Admin manages resources
+                  {rf.systemStep1Title || "Admin manages resources"}
                 </strong>
 
                 <p>
-                  Records are added, updated and reviewed
-                  centrally.
+                  {rf.systemStep1Desc || "Records are added, updated and reviewed centrally."}
                 </p>
               </div>
 
@@ -935,12 +938,11 @@ function ResourceFinder() {
                 </span>
 
                 <strong>
-                  Resource Finder filters them
+                  {rf.systemStep2Title || "Resource Finder filters them"}
                 </strong>
 
                 <p>
-                  User choices determine which information
-                  is most relevant.
+                  {rf.systemStep2Desc || "User choices determine which information is most relevant."}
                 </p>
               </div>
 
@@ -954,12 +956,11 @@ function ResourceFinder() {
                 </span>
 
                 <strong>
-                  User reaches the right section
+                  {rf.systemStep3Title || "User reaches the right section"}
                 </strong>
 
                 <p>
-                  The user can continue to the relevant
-                  verified information or external contact.
+                  {rf.systemStep3Desc || "The user can continue to the relevant verified information or external contact."}
                 </p>
               </div>
             </div>
@@ -980,15 +981,11 @@ function ResourceFinder() {
 
             <div>
               <strong>
-                Information & Navigation Only
+                {rf.boundaryBoxTitle || "Information & Navigation Only"}
               </strong>
 
               <p>
-                Dementia Care Connect provides information,
-                navigation and connection to external
-                services. It does not provide appointment
-                booking, medical referral or clinical
-                services.
+                {rf.boundaryBoxText || "Dementia Care Connect provides information, navigation and connection to external services. It does not provide appointment booking, medical referral or clinical services."}
               </p>
             </div>
           </div>

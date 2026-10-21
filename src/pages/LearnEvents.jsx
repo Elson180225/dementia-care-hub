@@ -2,6 +2,7 @@ import PublishedRecords from "../components/PublishedRecords";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { Link, useLocation } from "react-router-dom";
+import { useLanguage } from "../i18n/LanguageContext";
 
 import educationImage from "../assets/understand-dementia.jpg";
 import trainingImage from "../assets/Group_Photo_2.png";
@@ -36,6 +37,8 @@ import adfmPoster from "../assets/Certified_Trainer_Webinar/ADFM_Certified_Train
 import facilitatorInfo from "../assets/Certified_Trainer_Webinar/Facilitator_Certified_ADFM_Trainer/Facilitator_Information.jpg";
 
 import {
+  activities as defaultActivities,
+  trainers as defaultTrainers,
   pageInfo,
   sectionOrder,
   pathFor,
@@ -49,9 +52,20 @@ import {
 import "./LearnEvents.css";
 
 function usePublicActivities() {
- const [rows,setRows]=useState([]);
- useEffect(()=>{let active=true;fetch('/api/activities').then(r=>{if(!r.ok)throw new Error('Activities unavailable');return r.json();}).then(data=>{if(active)setRows(data.map(a=>({...a,date:a.starts_at,registrationLink:a.registration_link,poster:a.poster_url,location:a.venue,registrationDeadline:a.registration_deadline,capacity:a.capacity,trainers:a.trainers || [],status:a.cancelled_at?'cancelled':['completed','verified','archived'].includes(a.status)?'completed':'upcoming'})));}).catch(()=>{});return ()=>{active=false;};},[]);
- return rows;
+  const [rows, setRows] = useState(defaultActivities);
+  useEffect(() => {
+    let active = true;
+    fetch('/api/activities')
+      .then(r => { if (!r.ok) throw new Error('Activities unavailable'); return r.json(); })
+      .then(data => {
+        if (active && Array.isArray(data) && data.length > 0) {
+          setRows(data.map(a => ({ ...a, date: a.starts_at, registrationLink: a.registration_link, poster: a.poster_url, location: a.venue, registrationDeadline: a.registration_deadline, capacity: a.capacity, trainers: a.trainers || [], status: a.cancelled_at ? 'cancelled' : ['completed', 'verified', 'archived'].includes(a.status) ? 'completed' : 'upcoming' })));
+        }
+      })
+      .catch(() => { });
+    return () => { active = false; };
+  }, []);
+  return rows;
 }
 
 /* ---- image resolver ---- */
@@ -78,8 +92,19 @@ const onlineWebinars = [
 ];
 
 const trainerWebinars = [
-  { id: "trainer-dcs-family", title: "What is DCS-Family?", type: "CT Webinar", status: "completed", date: "16 May 2026", mode: "Online", language: "English", description: "An introduction to the DCS-Family programme for approved trainers and project contributors.", poster: dcsFamilyPoster },
-  { id: "trainer-dcs-family-learning", title: "DCS-Family: Trainer learning session", type: "CT Webinar", status: "completed", date: "16 May 2026", mode: "Online", language: "English", description: "Supporting trainers to explain the purpose and structure of the DCS-Family programme.", poster: dcsFamilyImage },
+  {
+    id: "trainer-dcs-family",
+    title: "Basic Dementia Care Skill (Family) Course — DCS-Family",
+    type: "DCS-Family",
+    status: "upcoming",
+    date: "16 May 2026",
+    time: "9:00 AM – 6:00 PM",
+    mode: "Physical",
+    location: "Hock Lee Hotel & Residence, Kuching",
+    language: "English / Bahasa Melayu / 中文",
+    description: "Foundation Dementia Care Course for family caregivers delivered by 12 ADFM-Certified Trainers. Covering 6 core modules, limited to 100 seats.",
+    poster: dcsFamilyPoster,
+  },
 ];
 
 const qaResources = [
@@ -108,79 +133,60 @@ qaResources[2].images = getQaImages("Understanding the Missing Pieces", qaResour
 
 const plannedTopicsList = [
   {
-    id: "topic-understanding-dementia",
+    id: "topic-webinar-season-1-2026",
+    month: "APR",
+    day: "11",
+    year: "2026",
+    title: "Webinar – Season 1 (Alzheimer's Care Project)",
+    date: "11 Apr 2026",
+    time: "80 minutes",
+    mode: "Online",
+    location: "Online",
+    language: "English / Bahasa Melayu",
+    speaker: "RCBC & ADFM Specialists",
+    suitableFor: "General public, families and caregivers",
+    description: "Opening online education webinar for the 2026 Season under the Alzheimer's Care Project 'Finding the Missing Pieces'. Conducted primarily in English with Bahasa Malaysia support provided where appropriate.",
+    image: webinarImage,
+    poster: webinarImage,
+    type: "RCBC Webinar",
+    status: "upcoming",
+  },
+  {
+    id: "topic-dcs-family-2026",
+    month: "MAY",
+    day: "16",
+    year: "2026",
+    title: "Basic Dementia Care Skill (Family) Course — DCS-Family",
+    date: "16 May 2026",
+    time: "9:00 AM – 6:00 PM",
+    mode: "Physical",
+    location: "Hock Lee Hotel & Residence, Kuching",
+    language: "English / Bahasa Melayu / 中文",
+    speaker: "12 ADFM-Certified Trainers & Advisory Specialists",
+    suitableFor: "Family caregivers, community helpers, and those interested in dementia care",
+    description: "Foundation Dementia Care Course covering 6 core modules: Basic DCS, Person-Centred Care, Effective Communication, BPSD, Meaningful Activities, and Advance Care Planning. Limited to 100 seats only.",
+    image: dcsFamilyPoster,
+    poster: dcsFamilyPoster,
+    type: "DCS-Family",
+    status: "upcoming",
+  },
+  {
+    id: "topic-dcs-ttt-2026",
     month: "JUN",
-    day: "23",
+    day: "26",
     year: "2026",
-    title: "Understanding Dementia: Early Detection & Support Pathways",
-    date: "23 Jun 2026",
-    time: "7:00 PM – 8:30 PM",
-    mode: "Online",
-    location: "Online (Zoom Webinar)",
-    language: "English",
-    speaker: "Dr. Sarah Lim",
-    suitableFor: "General public, families and new caregivers",
-    description: "An essential public webinar introducing dementia stages, early warning signs, clinical assessment steps, and practical daily communication approaches.",
-    image: alzheimers101Poster,
-    poster: alzheimers101Poster,
-    type: "Planned Webinar",
-    status: "upcoming",
-  },
-  {
-    id: "topic-communication-dignity",
-    month: "JUL",
-    day: "04",
-    year: "2026",
-    title: "Communication that Supports Dignity in Daily Care",
-    date: "04 Jul 2026",
-    time: "10:00 AM – 11:30 AM",
-    mode: "Online",
-    location: "Online (Zoom Webinar)",
-    language: "Bahasa Melayu",
-    speaker: "En. Ahmad Faizal",
-    suitableFor: "Caregivers and family members",
-    description: "Learn practical, compassionate communication strategies to defuse tension, navigate confusion with patience, and preserve dignity in everyday interactions.",
-    image: caregiverPoster,
-    poster: caregiverPoster,
-    type: "Planned Webinar",
-    status: "upcoming",
-  },
-  {
-    id: "topic-safe-home-space",
-    month: "AUG",
-    day: "15",
-    year: "2026",
-    title: "Safe Living Spaces: Adapting the Home for Alzheimer's",
-    date: "15 Aug 2026",
-    time: "2:30 PM – 4:00 PM",
-    mode: "Online",
-    location: "Online (Zoom Webinar)",
-    language: "English",
-    speaker: "Ms. Grace Tan",
-    suitableFor: "Home caregivers and family champions",
-    description: "Actionable guidance on room layout, lighting, bathroom safety, and sensory adjustments that maintain independence and reduce fall risks.",
-    image: safeHomePoster,
-    poster: safeHomePoster,
-    type: "Planned Webinar",
-    status: "upcoming",
-  },
-  {
-    id: "topic-future-planning",
-    month: "SEP",
-    day: "02",
-    year: "2026",
-    title: "Making Future Decisions & Advance Care Planning",
-    date: "02 Sep 2026",
-    time: "7:00 PM – 8:30 PM",
-    mode: "Online",
-    location: "Online (Zoom Webinar)",
-    language: "English",
-    speaker: "Dr. Sarah Lim & Legal Advisor",
-    suitableFor: "Adult children and spousal caregivers",
-    description: "How to facilitate thoughtful conversations with your family about advance care planning, financial management, and healthcare preferences.",
-    image: decisionPoster,
-    poster: decisionPoster,
-    type: "Planned Webinar",
+    title: "Dementia Care Skill – Train the Trainer Program — DCS-TTT",
+    date: "26 Jun 2026",
+    time: "9:00 AM – 5:00 PM (3-Day Program, 26–28 Jun 2026)",
+    mode: "Physical",
+    location: "Kuching",
+    language: "English / Bahasa Melayu",
+    speaker: "Dr. Tiong Ing Khieng & ADFM Training Team",
+    suitableFor: "Healthcare professionals, nurses, therapists, community educators",
+    description: "3-day Train-the-Trainer program in Kuching to train and certify healthcare educators and community champions across Sarawak under ADFM credentialing.",
+    image: adfmPoster,
+    poster: adfmPoster,
+    type: "DCS-TTT",
     status: "upcoming",
   },
 ];
@@ -248,6 +254,8 @@ function ModeIcon({ mode }) {
    Reusable detail view for any activity — matches PDF Section 4
    ================================================================ */
 function ActivityModal({ activity, onClose }) {
+  const { t } = useLanguage();
+  const am = t.learnEvents?.activityModal || {};
   const dialogRef = useRef(null);
 
   useEffect(() => {
@@ -298,33 +306,33 @@ function ActivityModal({ activity, onClose }) {
 
         <dl className="activity-details">
           <div>
-            <dt>Suitable for</dt>
+            <dt>{am.suitableFor || "Suitable for"}</dt>
             <dd>{activity.suitableFor || "Public, families and caregivers"}</dd>
           </div>
           <div>
-            <dt>Date &amp; time</dt>
+            <dt>{am.dateTime || "Date & time"}</dt>
             <dd>
-              {activity.date || "Past webinar"}
+              {activity.date || am.pastWebinar || "Past webinar"}
               <br />
               {activity.time}
             </dd>
           </div>
           <div>
-            <dt>Mode</dt>
+            <dt>{am.mode || "Mode"}</dt>
             <dd>
               <ModeIcon mode={activity.mode} />
             </dd>
           </div>
           <div>
-            <dt>Location</dt>
-            <dd>{activity.location || "Online"}</dd>
+            <dt>{am.location || "Location"}</dt>
+            <dd>{activity.location || am.online || "Online"}</dd>
           </div>
           <div>
-            <dt>Language</dt>
+            <dt>{am.language || "Language"}</dt>
             <dd>{activity.language}</dd>
           </div>
           <div>
-            <dt>Speaker / trainer</dt>
+            <dt>{am.speakerTrainer || "Speaker / trainer"}</dt>
             <dd>
               {activity.speaker || "RCBC Education Team"}
               {activity.trainerId && (
@@ -334,7 +342,7 @@ function ActivityModal({ activity, onClose }) {
                     to="/learn-events/certified-trainers"
                     onClick={onClose}
                   >
-                    View trainer profile
+                    {am.viewTrainerProfile || "View trainer profile"}
                   </Link>
                 </>
               )}
@@ -343,7 +351,7 @@ function ActivityModal({ activity, onClose }) {
         </dl>
 
         <div className="activity-description">
-          <h3>What you will learn</h3>
+          <h3>{am.whatYouWillLearn || "What you will learn"}</h3>
           <p>{activity.description}</p>
         </div>
 
@@ -359,7 +367,7 @@ function ActivityModal({ activity, onClose }) {
               {activity.recordingLink !== undefined &&
                 activity.recordingLink !== null && (
                   <button type="button" className="activity-action-btn">
-                    View recording
+                    {am.viewRecording || "View recording"}
                   </button>
                 )}
               {activity.materials && (
@@ -376,12 +384,12 @@ function ActivityModal({ activity, onClose }) {
               rel="noreferrer"
               className="activity-action-btn activity-action-register"
             >
-              Register now
-              <small>opens external form in a new tab</small>
+              {am.registerNow || "Register now"}
+              <small>{am.externalTabNote || "opens external form in a new tab"}</small>
             </a>
           ) : (
             <button type="button" disabled className="activity-action-btn">
-              Registration link to be added
+              {am.registrationLinkPending || "Registration link to be added"}
             </button>
           )}
         </div>
@@ -392,6 +400,7 @@ function ActivityModal({ activity, onClose }) {
 }
 
 function QAModal({ resource, onClose }) {
+  const { t } = useLanguage();
   const [currentPage, setCurrentPage] = useState(0);
   const dialogRef = useRef(null);
   const totalPages = resource.images.length;
@@ -439,7 +448,7 @@ function QAModal({ resource, onClose }) {
         <div className="qa-modal-heading">
           <span className="tag">{resource.language}</span>
           <h2 id="qa-title">{resource.title}</h2>
-          <p>Page {currentPage + 1} of {totalPages}</p>
+          <p>{(t.learnEvents?.activityModal?.pageOf || "Page {current} of {total}").replace('{current}', currentPage + 1).replace('{total}', totalPages)}</p>
         </div>
         <div className="qa-viewer">
           <button
@@ -481,6 +490,9 @@ function QAModal({ resource, onClose }) {
 }
 
 function ArchiveToolbar({ label, filters, onFiltersChange, totalCount, onReset }) {
+  const { t } = useLanguage();
+  const le = t.learnEvents;
+  const pm = le?.programModal || {};
   const isFiltered = Boolean(
     filters.query.trim() ||
     filters.language !== "All" ||
@@ -511,7 +523,7 @@ function ArchiveToolbar({ label, filters, onFiltersChange, totalCount, onReset }
           onChange={(event) =>
             onFiltersChange({ ...filters, query: event.target.value })
           }
-          placeholder={`Search ${label.toLowerCase()} by topic or title...`}
+          placeholder={le?.searchPlaceholder || `Search ${label.toLowerCase()} by topic or title...`}
           aria-label={`Search ${label}`}
         />
         {filters.query && (
@@ -535,9 +547,9 @@ function ArchiveToolbar({ label, filters, onFiltersChange, totalCount, onReset }
               onFiltersChange({ ...filters, language: event.target.value })
             }
           >
-            <option value="All">All languages</option>
-            <option value="English">English</option>
-            <option value="Bahasa Melayu">Bahasa Melayu</option>
+            <option value="All">{le?.allLanguages || "All languages"}</option>
+            <option value="English">{pm.languages?.en || "English"}</option>
+            <option value="Bahasa Melayu">{pm.languages?.ms || "Bahasa Melayu"}</option>
             <option value="中文">中文</option>
           </select>
         </div>
@@ -551,9 +563,9 @@ function ArchiveToolbar({ label, filters, onFiltersChange, totalCount, onReset }
                 onFiltersChange({ ...filters, timing: event.target.value })
               }
             >
-              <option value="All">All sessions</option>
-              <option value="Past">Past sessions</option>
-              <option value="Future">Upcoming</option>
+              <option value="All">{le?.all || "All sessions"}</option>
+              <option value="Past">{le?.past || "Past sessions"}</option>
+              <option value="Future">{le?.upcoming || "Upcoming"}</option>
             </select>
           </div>
         )}
@@ -563,14 +575,14 @@ function ArchiveToolbar({ label, filters, onFiltersChange, totalCount, onReset }
             type="button"
             className="archive-reset-btn"
             onClick={onReset}
-            title="Clear active filters"
+            title={le?.clearFilters || "Clear active filters"}
           >
-            Clear filters
+            {le?.clearFilters || "Clear filters"}
           </button>
         )}
 
         <span className="archive-results-badge">
-          {totalCount} {totalCount === 1 ? "item" : "items"}
+          {totalCount} {totalCount === 1 ? (le?.item || "item") : (le?.items || "items")}
         </span>
       </div>
     </div>
@@ -578,6 +590,8 @@ function ArchiveToolbar({ label, filters, onFiltersChange, totalCount, onReset }
 }
 
 function ArchivePagination({ label, page, pageCount, onPageChange }) {
+  const { t } = useLanguage();
+  const le = t.learnEvents;
   if (pageCount <= 1) return null;
 
   return (
@@ -588,10 +602,10 @@ function ArchivePagination({ label, page, pageCount, onPageChange }) {
         disabled={page === 1}
         aria-label={`Previous ${label} page`}
       >
-        ← Previous
+        {le?.previous || "← Previous"}
       </button>
       <span>
-        Page <strong>{page}</strong> of <strong>{pageCount}</strong>
+        {le?.page || "Page"} <strong>{page}</strong> {le?.of || "of"} <strong>{pageCount}</strong>
       </span>
       <button
         type="button"
@@ -599,13 +613,15 @@ function ArchivePagination({ label, page, pageCount, onPageChange }) {
         disabled={page === pageCount}
         aria-label={`Next ${label} page`}
       >
-        Next →
+        {le?.next || "Next →"}
       </button>
     </div>
   );
 }
 
 function ArchiveEmptyState({ label, onReset }) {
+  const { t } = useLanguage();
+  const am = t.learnEvents?.activityModal || {};
   return (
     <div className="archive-empty-state">
       <div className="empty-state-icon">
@@ -625,14 +641,14 @@ function ArchiveEmptyState({ label, onReset }) {
           <line x1="8" y1="11" x2="14" y2="11" />
         </svg>
       </div>
-      <h4>No {label.toLowerCase()} found</h4>
-      <p>Try searching with different keywords or clearing your active filters.</p>
+      <h4>{am.noResultsFound || `No ${label.toLowerCase()} found`}</h4>
+      <p>{am.noResultsDesc || "Try searching with different keywords or clearing your active filters."}</p>
       <button
         type="button"
         className="archive-reset-btn primary"
         onClick={onReset}
       >
-        Reset filters
+        {am.resetFilters || "Reset filters"}
       </button>
     </div>
   );
@@ -668,7 +684,9 @@ function pageItems(items, filters, page) {
    SECTION 1: ONLINE EDUCATION
    ================================================================ */
 function OnlineEducation() {
-  const activities=usePublicActivities();
+  const { t } = useLanguage();
+  const le = t.learnEvents;
+  const activities = usePublicActivities();
   const [selected, setSelected] = useState(null);
   const [selectedQa, setSelectedQa] = useState(null);
   const defaultFilters = { query: "", language: "All", timing: "All" };
@@ -697,12 +715,10 @@ function OnlineEducation() {
       <section className="content-section content-section-light">
         <div className="section-container">
           <div className="section-heading-block">
-            <span className="section-label">RCBC annual webinar series</span>
-            <h2>Previous &amp; future public education webinars</h2>
+            <span className="section-label">{le?.rcbcLabel || "RCBC annual webinar series"}</span>
+            <h2>{le?.rcbcTitle || "Previous & future public education webinars"}</h2>
             <p>
-              The annual RCBC webinar brings dementia education to the public.
-              Recordings from previous years are preserved as learning
-              resources.
+              {le?.rcbcDesc || "The annual RCBC webinar brings dementia education to the public. Recordings from previous years are preserved as learning resources."}
             </p>
           </div>
 
@@ -755,7 +771,7 @@ function OnlineEducation() {
                       <span>{a.language}</span>
                     </div>
                     <small className="activity-card-hint">
-                      Click to view details
+                      {le?.clickToView || "Click to view details"}
                     </small>
                   </div>
                 </article>
@@ -776,11 +792,10 @@ function OnlineEducation() {
       <section className="content-section content-section-cream">
         <div className="section-container">
           <div className="section-heading-block">
-            <span className="section-label">Certified trainer webinars</span>
-            <h2>Education delivered by certified trainers</h2>
+            <span className="section-label">{le?.ctLabel || "Certified trainer webinars"}</span>
+            <h2>{le?.ctTitle || "Education delivered by certified trainers"}</h2>
             <p>
-              Webinars conducted by trainers who have completed the DCS-TTT
-              pathway. Each session connects to the trainer&apos;s profile.
+              {le?.ctDesc || "Webinars conducted by trainers who have completed the DCS-TTT pathway. Each session connects to the trainer's profile."}
             </p>
           </div>
 
@@ -833,7 +848,7 @@ function OnlineEducation() {
                       <span>{a.language}</span>
                     </div>
                     <small className="activity-card-hint">
-                      Click to view details
+                      {le?.clickToView || "Click to view details"}
                     </small>
                   </div>
                 </article>
@@ -852,11 +867,10 @@ function OnlineEducation() {
           <div className="planned-topics-wrapper">
             <div className="planned-topics-header">
               <div className="planned-topics-title-area">
-                <span className="section-label">Looking ahead</span>
-                <h3 className="planned-topics-title">Upcoming Events &amp; Topics</h3>
+                <span className="section-label">{le?.lookingAhead || "Looking ahead"}</span>
+                <h3 className="planned-topics-title">{le?.upcomingEventsTitle || "Upcoming Events & Topics"}</h3>
                 <p>
-                  Future sessions shaped around the questions that matter most to
-                  families, caregivers, and trainers.
+                  {le?.upcomingEventsDesc || "Future sessions shaped around the questions that matter most to families, caregivers, and trainers."}
                 </p>
               </div>
 
@@ -876,7 +890,7 @@ function OnlineEducation() {
                     <circle cx="3.5" cy="12" r="1.5" fill="currentColor" />
                     <circle cx="3.5" cy="18" r="1.5" fill="currentColor" />
                   </svg>
-                  <span>LIST</span>
+                  <span>{le?.listView || "LIST"}</span>
                 </button>
                 <button
                   type="button"
@@ -891,7 +905,7 @@ function OnlineEducation() {
                     <rect x="14" y="14" width="7" height="7" rx="1.5" />
                     <rect x="3" y="14" width="7" height="7" rx="1.5" />
                   </svg>
-                  <span>GRID</span>
+                  <span>{le?.gridView || "GRID"}</span>
                 </button>
               </div>
             </div>
@@ -925,7 +939,7 @@ function OnlineEducation() {
                         className="topic-action-link"
                         onClick={() => setSelected(t)}
                       >
-                        View Event Details <span aria-hidden="true">→</span>
+                        {le?.viewEventDetails || "View Event Details"} <span aria-hidden="true">→</span>
                       </button>
                     </div>
                   </article>
@@ -957,7 +971,7 @@ function OnlineEducation() {
                         <span>{t.language}</span>
                       </div>
                       <p>{t.description}</p>
-                      <span className="topic-action-link">View Event Details →</span>
+                      <span className="topic-action-link">{le?.viewEventDetails || "View Event Details"} →</span>
                     </div>
                   </article>
                 ))}
@@ -971,12 +985,10 @@ function OnlineEducation() {
       <section className="content-section content-section-green">
         <div className="section-container">
           <div className="section-heading-block">
-            <span className="section-label">Learning resources</span>
-            <h2>Recordings, videos, Q&amp;A and approved materials</h2>
+            <span className="section-label">{le?.approvedLabel || "Learning resources"}</span>
+            <h2>{le?.approvedTitle || "Recordings, videos, Q&A and approved materials"}</h2>
             <p>
-              Selected educational content from completed activities, preserved
-              as ongoing learning resources. The archive grows as new
-              activities are completed.
+              {le?.approvedDesc || "Selected educational content from completed activities, preserved as ongoing learning resources. The archive grows as new activities are completed."}
             </p>
           </div>
 
@@ -1010,7 +1022,8 @@ function OnlineEducation() {
                   qaResources[0];
                 const videoTargetUrl =
                   r.videoUrl ||
-                  `https://www.youtube.com/results?search_query=${encodeURIComponent(r.title + " Dementia")}`;
+                  r.url ||
+                  "https://www.facebook.com/rotarybintulucentral";
 
                 return (
                   <article className="resource-card" key={r.id}>
@@ -1072,11 +1085,10 @@ function OnlineEducation() {
       <section className="content-section content-section-light qa-archive-section">
         <div className="section-container">
           <div className="section-heading-block">
-            <span className="section-label">Q&amp;A archive</span>
-            <h2>Questions from previous learning sessions</h2>
+            <span className="section-label">{le?.qaLabel || "Q&A archive"}</span>
+            <h2>{le?.qaTitle || "Questions from previous learning sessions"}</h2>
             <p>
-              Browse selected Q&amp;A image sets from past webinars. Open each
-              collection to review the full set of questions and answers.
+              {le?.qaDesc || "Browse selected Q&A image sets from past webinars. Open each collection to review the full set of questions and answers."}
             </p>
           </div>
 
@@ -1153,6 +1165,8 @@ function OnlineEducation() {
    PROGRAM REGISTRATION / APPLICATION / WAITLIST MODAL
    ================================================================ */
 function ProgramModal({ program, onClose }) {
+  const { t } = useLanguage();
+  const le = t.learnEvents;
   const [formData, setFormData] = useState({
     fullName: "",
     email: "",
@@ -1161,8 +1175,8 @@ function ProgramModal({ program, onClose }) {
       program.id === "dcs-family"
         ? "Family Caregiver / Relative"
         : program.id === "dcs-ttt"
-        ? "Healthcare Professional / Educator"
-        : "Direct-Care Worker / Nurse",
+          ? "Healthcare Professional / Educator"
+          : "Direct-Care Worker / Nurse",
     preferredLanguage: "English",
     intakeLocation:
       program.cities && program.cities.length > 0 ? program.cities[0] : "Kuching",
@@ -1183,12 +1197,13 @@ function ProgramModal({ program, onClose }) {
     setIsSubmitted(true);
   };
 
+  const pm = le?.programModal || {};
   const actionTitle =
     program.actionType === "apply"
-      ? "Submit TTT Application"
+      ? (pm.submitTtt || "Submit TTT Application")
       : program.actionType === "waitlist"
-      ? "Join Priority Waitlist"
-      : "Confirm DCS-Family Registration";
+        ? (pm.submitWaitlist || "Join Priority Waitlist")
+        : (pm.submitFamily || "Confirm DCS-Family Registration");
 
   return createPortal(
     <div
@@ -1227,12 +1242,12 @@ function ProgramModal({ program, onClose }) {
                 <polyline points="22 4 12 14.01 9 11.01" />
               </svg>
             </div>
-            <h3>Registration Details Received!</h3>
+            <h3>{le?.registrationReceived || "Registration Details Received!"}</h3>
             <p>
               Thank you, <strong>{formData.fullName || "Caregiver / Applicant"}</strong>. Your entry for <strong>{program.title}</strong> has been successfully recorded.
             </p>
             <p className="success-note">
-              Our community training coordinator will contact you via WhatsApp / Phone at <strong>{formData.phone || "your provided number"}</strong> or email (<strong>{formData.email}</strong>) to confirm session logistics, attendance requirements, and venue directions.
+              {pm.successNote || "Our community training coordinator will contact you via WhatsApp / Phone to confirm session logistics, attendance requirements, and venue directions."}
             </p>
             <div className="program-modal-actions">
               <button
@@ -1240,7 +1255,7 @@ function ProgramModal({ program, onClose }) {
                 className="activity-action-btn"
                 onClick={onClose}
               >
-                Close Window
+                {le?.closeWindow || "Close Window"}
               </button>
             </div>
           </div>
@@ -1248,40 +1263,40 @@ function ProgramModal({ program, onClose }) {
           <form className="program-modal-form" onSubmit={handleSubmit}>
             <div className="program-modal-summary">
               <div>
-                <strong>Scheduled Intake:</strong> {program.schedule?.date} ({program.schedule?.time})
+                <strong>{pm.scheduledIntake || "Scheduled Intake"}:</strong> {program.schedule?.date} ({program.schedule?.time})
               </div>
               <div>
-                <strong>Location:</strong> {program.location}
+                <strong>{pm.locationLabel || "Location"}:</strong> {program.location}
               </div>
             </div>
 
             <div className="form-grid">
               <div className="form-field">
-                <label htmlFor="reg-name">Full Name *</label>
+                <label htmlFor="reg-name">{pm.fullName || "Full Name *"}</label>
                 <input
                   id="reg-name"
                   type="text"
                   required
-                  placeholder="e.g. Grace Wong"
+                  placeholder={pm.fullNamePlaceholder || "e.g. Grace Wong"}
                   value={formData.fullName}
                   onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
                 />
               </div>
 
               <div className="form-field">
-                <label htmlFor="reg-phone">Phone / WhatsApp Number *</label>
+                <label htmlFor="reg-phone">{pm.phone || "Phone / WhatsApp Number *"}</label>
                 <input
                   id="reg-phone"
                   type="tel"
                   required
-                  placeholder="e.g. +60 12-345 6789"
+                  placeholder={pm.phonePlaceholder || "e.g. +60 12-345 6789"}
                   value={formData.phone}
                   onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                 />
               </div>
 
               <div className="form-field">
-                <label htmlFor="reg-email">Email Address *</label>
+                <label htmlFor="reg-email">{pm.email || "Email Address *"}</label>
                 <input
                   id="reg-email"
                   type="email"
@@ -1293,36 +1308,36 @@ function ProgramModal({ program, onClose }) {
               </div>
 
               <div className="form-field">
-                <label htmlFor="reg-role">Role / Background</label>
+                <label htmlFor="reg-role">{pm.role || "Role / Background"}</label>
                 <select
                   id="reg-role"
                   value={formData.role}
                   onChange={(e) => setFormData({ ...formData, role: e.target.value })}
                 >
-                  <option value="Family Caregiver / Relative">Family Caregiver / Relative</option>
-                  <option value="Healthcare Professional / Nurse">Healthcare Professional / Nurse</option>
-                  <option value="Direct-Care Worker / Attendant">Direct-Care Worker / Attendant</option>
-                  <option value="Community Volunteer">Community Volunteer</option>
-                  <option value="Other">Other</option>
+                  <option value="Family Caregiver / Relative">{pm.roles?.family || "Family Caregiver / Relative"}</option>
+                  <option value="Healthcare Professional / Nurse">{pm.roles?.healthcare || "Healthcare Professional / Nurse"}</option>
+                  <option value="Direct-Care Worker / Attendant">{pm.roles?.careWorker || "Direct-Care Worker / Attendant"}</option>
+                  <option value="Community Volunteer">{pm.roles?.volunteer || "Community Volunteer"}</option>
+                  <option value="Other">{pm.roles?.other || "Other"}</option>
                 </select>
               </div>
 
               <div className="form-field">
-                <label htmlFor="reg-lang">Preferred Language</label>
+                <label htmlFor="reg-lang">{pm.preferredLanguage || "Preferred Language"}</label>
                 <select
                   id="reg-lang"
                   value={formData.preferredLanguage}
                   onChange={(e) => setFormData({ ...formData, preferredLanguage: e.target.value })}
                 >
-                  <option value="English">English</option>
-                  <option value="Bahasa Melayu">Bahasa Melayu</option>
-                  <option value="Sarawak Malay / Local Dialect">Sarawak Malay / Local Dialect</option>
-                  <option value="Mandarin / Dialects">Mandarin / Dialects</option>
+                  <option value="English">{pm.languages?.en || "English"}</option>
+                  <option value="Bahasa Melayu">{pm.languages?.ms || "Bahasa Melayu"}</option>
+                  <option value="Sarawak Malay / Local Dialect">{pm.languages?.sarawak || "Sarawak Malay / Local Dialect"}</option>
+                  <option value="Mandarin / Dialects">{pm.languages?.zh || "Mandarin / Dialects"}</option>
                 </select>
               </div>
 
               <div className="form-field">
-                <label htmlFor="reg-city">Preferred City / Training Venue</label>
+                <label htmlFor="reg-city">{pm.preferredCity || "Preferred City / Training Venue"}</label>
                 <select
                   id="reg-city"
                   value={formData.intakeLocation}
@@ -1340,11 +1355,11 @@ function ProgramModal({ program, onClose }) {
             </div>
 
             <div className="form-field">
-              <label htmlFor="reg-notes">Special Needs, Caregiving Challenges or Questions (Optional)</label>
+              <label htmlFor="reg-notes">{pm.notes || "Special Needs, Caregiving Challenges or Questions (Optional)"}</label>
               <textarea
                 id="reg-notes"
                 rows={3}
-                placeholder="Share any specific caregiving difficulties, dietary needs, or accessibility requests..."
+                placeholder={pm.notesPlaceholder || "Share any specific caregiving difficulties, dietary needs, or accessibility requests..."}
                 value={formData.notes}
                 onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
               />
@@ -1356,7 +1371,7 @@ function ProgramModal({ program, onClose }) {
                 className="activity-action-btn secondary"
                 onClick={onClose}
               >
-                Cancel
+                {pm.cancel || "Cancel"}
               </button>
               <button
                 type="submit"
@@ -1377,6 +1392,8 @@ function ProgramModal({ program, onClose }) {
    SECTION 2: PHYSICAL EDUCATION (INTERACTIVE 3-TRACK TABBED SHOWCASE)
    ================================================================ */
 function PhysicalEducation() {
+  const { t } = useLanguage();
+  const le = t.learnEvents;
   const [activeTrackId, setActiveTrackId] = useState("dcs-family");
   const [activeModalProgram, setActiveModalProgram] = useState(null);
 
@@ -1391,46 +1408,15 @@ function PhysicalEducation() {
 
   return (
     <main className="module-main physical-education-main">
-      {/* ---- Urgent Caregiver Advice & Emergency Contingency Banner ---- */}
-      <section className="caregiver-advice-banner-wrap">
-        <div className="section-container">
-          <div className="caregiver-advice-banner">
-            <div className="advice-banner-icon" aria-hidden="true">
-              <svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" />
-              </svg>
-            </div>
-            <div className="advice-banner-content">
-              <h3>Need Immediate Care Advice, Respite or Urgent Contingency Help?</h3>
-              <p>
-                Caring for a person living with dementia can be overwhelming. If you need urgent daily advice, temporary care respite, or have an unexpected emergency where you cannot provide care:
-              </p>
-              <div className="advice-quick-actions">
-                <a href="https://www.adfm.org.my/foundation/" className="advice-pill">
-                  <span className="pill-dot" aria-hidden="true" />
-                  <strong>ADFM Helpline</strong>
-                </a>
-                <Link to="/find-help/support-services" className="advice-pill">
-                  Find Respite &amp; Day Care Services →
-                </Link>
-                <Link to="/find-help/assessment-healthcare" className="advice-pill">
-                  Diagnostic &amp; Healthcare Assessment →
-                </Link>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
       {/* ---- Interactive 3-Track Showcase Section ---- */}
       <section className="dcs-showcase-section">
         <div className="section-container">
           {/* Section Introduction */}
           <div className="section-heading-block dcs-section-header">
-            <span className="section-label">Dementia Care Series (DCS)</span>
-            <h2>Choose Your Learning Pathway</h2>
+            <span className="section-label">{le?.showcaseLabel || "Dementia Care Series (DCS)"}</span>
+            <h2>{le?.showcaseTitle || "Choose Your Learning Pathway"}</h2>
             <p>
-              Select your role category below to view tailored in-person training curriculum, scheduled dates, and registration details.
+              {le?.showcaseDesc || "Select your role category below to view tailored in-person training curriculum, scheduled dates, and registration details."}
             </p>
           </div>
 
@@ -1504,7 +1490,7 @@ function PhysicalEducation() {
                         <path d="M16 3.13a4 4 0 0 1 0 7.75" />
                       </svg>
                     </span>
-                    Who this is designed for
+                    {le?.whoDesignedFor || "Who this is designed for"}
                   </h4>
                   <p className="stage-suitable-text">{activeTrack.suitableFor}</p>
                 </div>
@@ -1518,40 +1504,26 @@ function PhysicalEducation() {
                       </svg>
                     </span>
                     {activeTrack.id === "dcs-ttt"
-                      ? "Accreditation Pathway Milestones"
-                      : "Core Learning Pillars & Competencies"}
+                      ? (le?.accreditationMilestones || "Accreditation Pathway Milestones")
+                      : (le?.corePillars || "Core Learning Pillars & Competencies")}
                   </h4>
 
                   {activeTrack.id === "dcs-ttt" ? (
                     <div className="stage-pathway-steps">
-                      <div className="stage-step-row">
-                        <span className="step-num">1</span>
-                        <div>
-                          <strong>Application &amp; Screening</strong>
-                          <p>Review of healthcare, educator, or senior community leadership background.</p>
+                      {(le?.stageSpecs?.accreditationSteps || [
+                        { title: "Application & Eligibility Review", desc: "Review of healthcare, educator, or senior community leadership background." },
+                        { title: "6 Full-Day Intensive Modules", desc: "Curriculum mastery, facilitation psychology, staging nuances, and governance." },
+                        { title: "Supervised Mock Teaching", desc: "Clinical observation, peer feedback, and rigorous delivery assessment." },
+                        { title: "Accreditation & Profile Listing", desc: "Award of RCBC Certified Trainer credential with public directory listing." }
+                      ]).map((step, idx) => (
+                        <div className="stage-step-row" key={idx}>
+                          <span className="step-num">{idx + 1}</span>
+                          <div>
+                            <strong>{step.title}</strong>
+                            <p>{step.desc}</p>
+                          </div>
                         </div>
-                      </div>
-                      <div className="stage-step-row">
-                        <span className="step-num">2</span>
-                        <div>
-                          <strong>6 Full-Day Intensive Modules</strong>
-                          <p>Curriculum mastery, facilitation psychology, staging nuances, and governance.</p>
-                        </div>
-                      </div>
-                      <div className="stage-step-row">
-                        <span className="step-num">3</span>
-                        <div>
-                          <strong>Supervised Mock Teaching</strong>
-                          <p>Clinical observation, peer feedback, and rigorous delivery assessment.</p>
-                        </div>
-                      </div>
-                      <div className="stage-step-row">
-                        <span className="step-num">4</span>
-                        <div>
-                          <strong>Accreditation &amp; Profile Listing</strong>
-                          <p>Award of RCBC Certified Trainer credential with public directory listing.</p>
-                        </div>
-                      </div>
+                      ))}
                     </div>
                   ) : (
                     <ul className="stage-pillars-list">
@@ -1587,7 +1559,7 @@ function PhysicalEducation() {
                         <line x1="8" x2="8" y1="2" y2="6" />
                         <line x1="3" x2="21" y1="10" y2="10" />
                       </svg>
-                      View in Upcoming Calendar
+                      {le?.viewInUpcomingCalendar || "View in Upcoming Calendar"}
                     </Link>
                   )}
 
@@ -1603,7 +1575,7 @@ function PhysicalEducation() {
                         <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
                         <path d="M16 3.13a4 4 0 0 1 0 7.75" />
                       </svg>
-                      View Certified Trainers Directory
+                      {le?.viewCertifiedTrainers || "View Certified Trainers Directory"}
                     </Link>
                   )}
 
@@ -1620,7 +1592,7 @@ function PhysicalEducation() {
                         <line x1="16" y1="13" x2="8" y2="13" />
                         <line x1="16" y1="17" x2="8" y2="17" />
                       </svg>
-                      Curriculum Overview
+                      {le?.curriculumOverview || "Curriculum Overview"}
                     </button>
                   )}
                 </div>
@@ -1630,7 +1602,7 @@ function PhysicalEducation() {
               <div className="stage-col-side">
                 {/* Specifications Card */}
                 <div className="stage-spec-card">
-                  <h4 className="spec-card-title">Programme Details &amp; Schedule</h4>
+                  <h4 className="spec-card-title">{le?.programDetailsSchedule || "Programme Details & Schedule"}</h4>
                   <dl className="stage-spec-list">
                     <div>
                       <dt>
@@ -1638,7 +1610,7 @@ function PhysicalEducation() {
                           <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
                           <circle cx="12" cy="10" r="3" />
                         </svg>
-                        Mode
+                        {le?.modeLabel || "Mode"}
                       </dt>
                       <dd>
                         <span className="stage-mode-pill">{activeTrack.mode}</span>
@@ -1651,7 +1623,7 @@ function PhysicalEducation() {
                           <rect x="2" y="7" width="20" height="14" rx="2" ry="2" />
                           <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" />
                         </svg>
-                        Sessions
+                        {le?.sessionsLabel || "Sessions"}
                       </dt>
                       <dd>{activeTrack.sessions}</dd>
                     </div>
@@ -1663,7 +1635,7 @@ function PhysicalEducation() {
                           <line x1="2" x2="22" y1="12" y2="12" />
                           <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
                         </svg>
-                        Language
+                        {le?.languageLabel || "Language"}
                       </dt>
                       <dd>{activeTrack.language}</dd>
                     </div>
@@ -1674,7 +1646,7 @@ function PhysicalEducation() {
                           <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" />
                           <circle cx="12" cy="10" r="3" />
                         </svg>
-                        Location
+                        {le?.locationLabel || "Location"}
                       </dt>
                       <dd>{activeTrack.location}</dd>
                     </div>
@@ -1687,7 +1659,7 @@ function PhysicalEducation() {
                           <line x1="8" x2="8" y1="2" y2="6" />
                           <line x1="3" x2="21" y1="10" y2="10" />
                         </svg>
-                        Next Scheduled Date &amp; Time
+                        {le?.nextScheduledDateTime || "Next Scheduled Date & Time"}
                       </dt>
                       <dd className="spec-schedule-value">
                         <strong>{activeTrack.schedule.date}</strong>
@@ -1709,9 +1681,9 @@ function PhysicalEducation() {
                     alt={activeTrack.title}
                   />
                   <div className="stage-media-caption">
-                    {activeTrack.id === "dcs-family" && "Delivered in person by RCBC Certified Trainers in small, compassionate cohorts."}
-                    {activeTrack.id === "dcs-ttt" && "Training is the programme. Certification is the outcome that empowers Sarawak."}
-                    {activeTrack.id === "dcs-care-worker" && "Mastering clinical BPSD protocols, distress communication, and safe handling."}
+                    {activeTrack.id === "dcs-family" && (le?.stageSpecs?.captions?.family || "Delivered in person by RCBC Certified Trainers in small, compassionate cohorts.")}
+                    {activeTrack.id === "dcs-ttt" && (le?.stageSpecs?.captions?.ttt || "Training is the programme. Certification is the outcome that empowers Sarawak.")}
+                    {activeTrack.id === "dcs-care-worker" && (le?.stageSpecs?.captions?.careWorker || "Mastering clinical BPSD protocols, distress communication, and safe handling.")}
                   </div>
                 </div>
               </div>
@@ -1821,100 +1793,7 @@ function ImageLightboxModal({ isOpen, onClose, image, title, subtitle, caption, 
   );
 }
 
-/* ================================================================
-   TOOLKIT PREVIEW MODAL
-   For certified trainer resources preview
-   ================================================================ */
-function ToolkitPreviewModal({ tool, onClose }) {
-  const dialogRef = useRef(null);
 
-  useEffect(() => {
-    if (!tool) return undefined;
-    dialogRef.current?.focus({ preventScroll: true });
-    const handleKeyDown = (e) => e.key === "Escape" && onClose();
-    document.addEventListener("keydown", handleKeyDown);
-    document.body.style.overflow = "hidden";
-    return () => {
-      document.removeEventListener("keydown", handleKeyDown);
-      document.body.style.overflow = "";
-    };
-  }, [tool, onClose]);
-
-  if (!tool) return null;
-
-  return createPortal(
-    <div
-      className="modal-backdrop"
-      role="presentation"
-      onMouseDown={(e) => e.target === e.currentTarget && onClose()}
-    >
-      <div
-        className="toolkit-modal-content"
-        role="dialog"
-        aria-modal="true"
-        tabIndex={-1}
-        ref={dialogRef}
-      >
-        <button
-          className="modal-close"
-          type="button"
-          onClick={onClose}
-          aria-label="Close resource preview"
-        >
-          &times;
-        </button>
-
-        <div className="toolkit-modal-header">
-          <span className="toolkit-modal-icon">{tool.icon}</span>
-          <div>
-            <span className="toolkit-tag">Certified Trainer Resource</span>
-            <h2>{tool.title}</h2>
-          </div>
-        </div>
-
-        <p className="toolkit-modal-desc">{tool.description}</p>
-
-        <div className="toolkit-modal-meta">
-          <div>
-            <strong>Target Audience:</strong> {tool.audience || "Certified DCS-TTT Trainers & Community Facilitators"}
-          </div>
-          <div>
-            <strong>Format:</strong> {tool.format || "PDF Slide Deck & Print-Ready Handouts"}
-          </div>
-          <div>
-            <strong>Approved By:</strong> RCBC & ADFM Clinical Governance Team
-          </div>
-        </div>
-
-        <div className="toolkit-modal-preview-box">
-          <h4>Resource Inclusions & Syllabus Checklist:</h4>
-          <ul>
-            {tool.items?.map((item, idx) => (
-              <li key={idx}>✓ {item}</li>
-            ))}
-          </ul>
-        </div>
-
-        <div className="toolkit-modal-footer">
-          <a
-            href="#download"
-            onClick={(e) => {
-              e.preventDefault();
-              alert(`Downloading "${tool.title}" package. Approved for certified DCS-TTT trainer use.`);
-            }}
-            className="primary-button"
-          >
-            Download Resource Package (.PDF) ↗
-          </a>
-          <button type="button" className="btn-secondary" onClick={onClose}>
-            Close Preview
-          </button>
-        </div>
-      </div>
-    </div>,
-    document.body
-  );
-}
 
 /* ================================================================
    FACILITATOR PROFILE MODAL
@@ -1922,6 +1801,10 @@ function ToolkitPreviewModal({ tool, onClose }) {
    Name | Cert Ref No | Location | Language | Bio | Approved Activities
    ================================================================ */
 function FacilitatorProfileModal({ facilitator, activities = [], onClose }) {
+  const { t } = useLanguage();
+  const le = t.learnEvents;
+  const fm = le?.facilitatorModal || {};
+  const am = le?.activityModal || {};
   const dialogRef = useRef(null);
   const [activeTab, setActiveTab] = useState("all"); // 'all' | 'upcoming' | 'completed'
 
@@ -1939,7 +1822,7 @@ function FacilitatorProfileModal({ facilitator, activities = [], onClose }) {
 
   if (!facilitator) return null;
 
-  const trainerActivities = activities.filter((a) => (a.trainerId === facilitator.id || a.trainers?.some(t=>t.trainerId===facilitator.id)));
+  const trainerActivities = activities.filter((a) => (a.trainerId === facilitator.id || a.trainers?.some(t => t.trainerId === facilitator.id)));
   const upcomingActs = trainerActivities.filter((a) => a.status === "upcoming");
   const pastActs = trainerActivities.filter((a) => a.status === "completed");
 
@@ -1947,8 +1830,8 @@ function FacilitatorProfileModal({ facilitator, activities = [], onClose }) {
     activeTab === "upcoming"
       ? upcomingActs
       : activeTab === "completed"
-      ? pastActs
-      : trainerActivities;
+        ? pastActs
+        : trainerActivities;
 
   const isAdvisory = facilitator.category === "advisory-support";
 
@@ -1992,9 +1875,6 @@ function FacilitatorProfileModal({ facilitator, activities = [], onClose }) {
               <span className={`facilitator-category-pill ${isAdvisory ? "is-advisory" : "is-clinical"}`}>
                 {isAdvisory ? "ADFM QA/QC Advisory Board" : "Certified Clinical Facilitator"}
               </span>
-              <span className="facilitator-cert-ref-pill">
-                Ref: {facilitator.certRef}
-              </span>
             </div>
 
             <h2 id="facilitator-modal-title">{facilitator.name}</h2>
@@ -2004,15 +1884,15 @@ function FacilitatorProfileModal({ facilitator, activities = [], onClose }) {
 
             <div className="facilitator-modal-meta-grid">
               <div className="modal-meta-item">
-                <span className="meta-label">Base Location</span>
+                <span className="meta-label">{fm.baseLocation || "Base Location"}</span>
                 <span className="meta-value">📍 {facilitator.city}</span>
               </div>
               <div className="modal-meta-item">
-                <span className="meta-label">Languages Spoken</span>
+                <span className="meta-label">{fm.languagesSpoken || "Languages Spoken"}</span>
                 <span className="meta-value">🌐 {facilitator.language}</span>
               </div>
               <div className="modal-meta-item">
-                <span className="meta-label">ADFM Accreditation</span>
+                <span className="meta-label">{fm.adfmAccreditation || "ADFM Accreditation"}</span>
                 <span className="meta-value">🛡️ DCS-TTT Framework</span>
               </div>
             </div>
@@ -2023,7 +1903,7 @@ function FacilitatorProfileModal({ facilitator, activities = [], onClose }) {
         <div className="facilitator-modal-body">
           {/* Biography & Delivery Scope */}
           <div className="facilitator-bio-section">
-            <h3>Facilitator Biography &amp; Practice Scope</h3>
+            <h3>{fm.bioScope || "Facilitator Biography & Practice Scope"}</h3>
             <p>{facilitator.bio}</p>
           </div>
 
@@ -2031,7 +1911,7 @@ function FacilitatorProfileModal({ facilitator, activities = [], onClose }) {
           <div className="facilitator-activities-section">
             <div className="activities-section-header">
               <div>
-                <h3>Approved Education Activities ({trainerActivities.length})</h3>
+                <h3>{fm.approvedActivities || "Approved Education Activities"} ({trainerActivities.length})</h3>
                 <p>Public webinars, community dialogue circles, and clinical training sessions led by this facilitator.</p>
               </div>
 
@@ -2088,11 +1968,11 @@ function FacilitatorProfileModal({ facilitator, activities = [], onClose }) {
                           rel="noreferrer"
                           className="modal-act-register-btn"
                         >
-                          Register Now ↗
+                          {am.registerNow || "Register Now"} ↗
                         </a>
                       ) : (
                         <div className="modal-act-archived-info">
-                          <span className="archived-pill">Completed</span>
+                          <span className="archived-pill">{le?.completed || "Completed"}</span>
                           {act.materials && <small>{act.materials}</small>}
                         </div>
                       )}
@@ -2129,10 +2009,10 @@ function FacilitatorProfileModal({ facilitator, activities = [], onClose }) {
             rel="noreferrer"
             className="primary-button"
           >
-            Request Facilitator for Community Session ↗
+            {le?.requestFacilitator || "Request Facilitator for Community Session ↗"}
           </a>
           <button type="button" className="btn-secondary" onClick={onClose}>
-            Close Profile
+            {le?.closeProfile || "Close Profile"}
           </button>
         </div>
       </div>
@@ -2145,7 +2025,10 @@ function FacilitatorProfileModal({ facilitator, activities = [], onClose }) {
    SECTION 3: EVENTS (Restored & Supercharged with Dialogue, Calendar, News)
    ================================================================ */
 function EventsSection() {
-  const activities=usePublicActivities();
+  const { t } = useLanguage();
+  const le = t.learnEvents;
+  const ev = le?.eventsSection || {};
+  const activities = usePublicActivities();
   const [selectedActivity, setSelectedActivity] = useState(null);
   const [lightboxData, setLightboxData] = useState(null);
 
@@ -2157,101 +2040,101 @@ function EventsSection() {
       title: '1st Half Yearly Activity Calendar: "Finding The Missing Pieces"',
       theme: "Finding The Missing Pieces",
       period: "January 2026 – June 2026",
-      intro: "A planned schedule of community screenings, caregiver dialogue circles, and healthcare webinars across Sarawak under the Rotary HopeCare initiative.",
+      intro: "Official calendar published by Rotary Club of Bintulu Central and ADFM, featuring key public webinars and dementia care skills training.",
       poster: yearlyCalendar2026Poster,
       highlights: [
         {
           num: "01",
-          phase: "Jan – Feb 2026",
-          title: "Public Dementia Screening & Early Intervention",
-          desc: "Mobile community screening booths in Bintulu and Kuching, distributing preliminary memory test guides and family awareness literature.",
-          tag: "Screening",
+          phase: "11 April 2026",
+          title: "Webinar – Season 1 (Online)",
+          desc: "Online interactive session (80 minutes) focusing on understanding dementia and finding the missing pieces of community care.",
+          tag: "Webinar",
           dotClass: "dot-1",
         },
         {
           num: "02",
-          phase: "Mar – Apr 2026",
-          title: "DCS-Family Workshops & Grassroots Dialogues",
-          desc: "Intensive small-group workshops for family caregivers, combined with grassroots dialogue circles held in community civic centres.",
-          tag: "Workshop",
+          phase: "16 May 2026",
+          title: "Basic Dementia Care Skill (Family) Course (DCS-Family)",
+          desc: "Full-day training (9:00 AM – 6:00 PM) at Hock Lee Hotel & Residence, Kuching, equipping 100 family caregivers with practical bedside care skills.",
+          tag: "Kuching",
           dotClass: "dot-2",
         },
         {
           num: "03",
-          phase: "May – Jun 2026",
-          title: "Regional Dementia Care Expos & Webinar Series",
-          desc: "Multi-organisation care expo in Bintulu Trade Centre and online public talks presented by certified ADFM geriatric specialists.",
-          tag: "Care Expo",
+          phase: "26 – 28 June 2026",
+          title: "Dementia Care Skill – Train the Trainer Program (DCS-TTT)",
+          desc: "Three-day comprehensive Train-the-Trainer program in Kuching to expand the cadre of certified ADFM trainers across Sarawak.",
+          tag: "TTT Program",
           dotClass: "dot-3",
         },
       ],
     },
     {
-      id: "2026-half-2",
-      editionLabel: "2026 (2nd Half)",
-      title: '2nd Half Yearly Activity Calendar: "Bridging Community Care"',
-      theme: "Bridging Community Care",
-      period: "July 2026 – December 2026",
-      intro: "Projected rollout of advanced DCS-Care Worker training cohorts, public World Alzheimer's Month awareness drives, and regional Sarawak dialogues.",
+      id: "2024-2025-ttt",
+      editionLabel: "2024–2025 Milestones",
+      title: 'DCS-TTT State-Wide Rollout: "68 Healthcare Workers Trained"',
+      theme: "Empowering Sarawak Healthcare Frontliners",
+      period: "November 2024 – November 2025",
+      intro: "Four completed cohorts of Dementia Care Skill Train-the-Trainer (DCS-TTT) programs across Sarawak documented in See Hua and Sin Chew Daily news.",
       poster: yearlyCalendar2026Poster,
       highlights: [
         {
-          num: "04",
-          phase: "Jul – Aug 2026",
-          title: "Advanced Caregiver Coaching & Respite Circles",
-          desc: "Specialized workshops addressing behavioural changes, safe transfers at home, and clinical respite pathways for long-term caregivers.",
-          tag: "Coaching",
+          num: "01",
+          phase: "Nov 2024 & May 2025",
+          title: "Cohorts 1 & 2: Kuching & Sibu",
+          desc: "First 18 medical personnel trained in Kuching, followed by Cohort 2 in Sibu to build regional dementia care competence.",
+          tag: "Kuching & Sibu",
           dotClass: "dot-1",
         },
         {
-          num: "05",
-          phase: "Sep – Oct 2026",
-          title: "World Alzheimer's Month State-Wide Campaign",
-          desc: "Coordinated memory screening expos, public dialogue forums, and awareness walks held concurrently in Kuching, Miri, and Bintulu.",
-          tag: "Campaign",
+          num: "02",
+          phase: "16 August 2025",
+          title: "Cohort 3 & Bintulu Community Dialogue",
+          desc: "DCS-TTT training in Bintulu paired with a large-scale public dialogue on dementia at Bintulu Civic Centre with local community leaders.",
+          tag: "Bintulu",
           dotClass: "dot-2",
         },
         {
-          num: "06",
-          phase: "Nov – Dec 2026",
-          title: "Annual Caregiver Recognition & TTT Convocation",
-          desc: "Graduation ceremony for newly certified community trainers, review of state-wide outcomes, and 2027 initiative planning.",
-          tag: "Review",
+          num: "03",
+          phase: "November 2025",
+          title: "Cohort 4: Miri (68 Total Certified)",
+          desc: "Final cohort of the initial phase conducted in Miri, successfully certifying 68 doctors, nurses, and allied healthcare professionals.",
+          tag: "Miri",
           dotClass: "dot-3",
         },
       ],
     },
     {
-      id: "2025-archive",
-      editionLabel: "2025 Archive",
-      title: 'Annual Activity Roadmap 2025: "Laying The Foundation"',
-      theme: "Laying The Foundation",
-      period: "Full Year 2025",
-      intro: "Archived overview of initial stakeholder engagements, trainer recruitment, and pilot dialogue workshops delivered across Sarawak.",
+      id: "adfm-curriculum",
+      editionLabel: "ADFM & Rotary Framework",
+      title: 'Community Support Ecosystem: "Structured Care Pathways"',
+      theme: "Certified Training & Public Advocacy",
+      period: "Ongoing Initiative",
+      intro: "Collaborative mission between Rotary Club of Bintulu Central and Alzheimer’s Disease Foundation Malaysia (ADFM) to deliver certified dementia care education.",
       poster: yearlyCalendar2026Poster,
       highlights: [
         {
           num: "01",
-          phase: "Early 2025",
-          title: "Stakeholder Alignment & ADFM Curriculum Adoption",
-          desc: "Formalising collaboration between Rotary Club of Bintulu Central and ADFM to adapt clinical guidelines into localized dialects.",
-          tag: "Alignment",
+          phase: "ADFM Certified Trainers",
+          title: "9 Certified Trainers & 3 QA/QC Specialists",
+          desc: "Multidisciplinary team of certified clinical trainers delivering evidence-based dementia care modules with official CPD accreditation.",
+          tag: "Faculty",
           dotClass: "dot-1",
         },
         {
           num: "02",
-          phase: "Mid 2025",
-          title: "Inaugural Community Dialogues in Bintulu & Kuching",
-          desc: "First series of in-person family dialogues, validating real-life home caregiver needs and distributing essential care packs.",
-          tag: "Dialogue",
+          phase: "DCS-Family Curriculum",
+          title: "6 Core Modules for Family Caregivers",
+          desc: "From understanding neurocognitive disorders and communication to behaviour management, daily living activities, and caregiver self-care.",
+          tag: "Curriculum",
           dotClass: "dot-2",
         },
         {
           num: "03",
-          phase: "Late 2025",
-          title: "DCS-TTT Pilot Cohort Training & Evaluation",
-          desc: "Testing of the Train-the-Trainer model with healthcare professionals and senior volunteers ahead of Phase 2 Go Digital launch.",
-          tag: "Pilot",
+          phase: "Community & Dialect Outreach",
+          title: "Multilingual Community Dialogues",
+          desc: "Engaging local Sarawakian families in English, Bahasa Melayu, and Chinese dialects to eliminate stigma and foster supportive networks.",
+          tag: "Outreach",
           dotClass: "dot-3",
         },
       ],
@@ -2355,19 +2238,19 @@ function EventsSection() {
       <section className="events-subnav-section">
         <div className="section-container">
           <div className="events-subnav-bar">
-            <span className="subnav-label">Jump to Section:</span>
+            <span className="subnav-label">{le?.jumpTo || "Jump to Section:"}</span>
             <div className="subnav-pills">
               <a href="#yearly-calendar" className="subnav-pill">
-                <span className="subnav-icon">📅</span> Yearly Activity Calendar
+                <span className="subnav-icon">📅</span> {le?.yearlyCal || "Yearly Activity Calendar"}
               </a>
               <a href="#community-dialogues" className="subnav-pill">
-                <span className="subnav-icon">🗣️</span> Community Dialogues
+                <span className="subnav-icon">🗣️</span> {le?.communityDial || "Community Dialogues"}
               </a>
               <a href="#event-finder" className="subnav-pill">
-                <span className="subnav-icon">🔍</span> Event Finder &amp; Filters
+                <span className="subnav-icon">🔍</span> {le?.communityEvents || "Event Finder & Filters"}
               </a>
               <a href="#media-coverage" className="subnav-pill">
-                <span className="subnav-icon">📰</span> Press &amp; Media Highlights
+                <span className="subnav-icon">📰</span> {ev.mediaHeadlines || le?.pressHighlights || "Press & Media Highlights"}
               </a>
             </div>
           </div>
@@ -2380,7 +2263,7 @@ function EventsSection() {
           {/* Header & Switcher Row */}
           <div className="yearly-calendar-header-row">
             <div className="events-section-header">
-              <span className="section-label">Annual Activity Roadmap</span>
+              <span className="section-label">{ev.roadmapLabel || "Annual Activity Roadmap"}</span>
               <h2>{currentRoadmap.title}</h2>
               <p>{currentRoadmap.intro}</p>
             </div>
@@ -2438,9 +2321,8 @@ function EventsSection() {
 
           {/* Animated Multi-Calendar Showcase Grid */}
           <div
-            className={`yearly-calendar-showcase-grid ${
-              slideDirection === "next" ? "slide-from-right" : "slide-from-left"
-            }`}
+            className={`yearly-calendar-showcase-grid ${slideDirection === "next" ? "slide-from-right" : "slide-from-left"
+              }`}
             key={currentRoadmap.id}
           >
             {/* Visual Poster Card */}
@@ -2482,7 +2364,7 @@ function EventsSection() {
                       <line x1="11" y1="8" x2="11" y2="14" />
                       <line x1="8" y1="11" x2="14" y2="11" />
                     </svg>
-                    <span>Click to View Fullscreen</span>
+                    <span>{le?.eventsSection?.clickFullscreen || "Click to View Fullscreen"}</span>
                   </span>
                 </div>
               </div>
@@ -2495,8 +2377,8 @@ function EventsSection() {
                   <span className="milestones-period-tag">{currentRoadmap.period}</span>
                   <span className="milestones-theme-tag">&ldquo;{currentRoadmap.theme}&rdquo;</span>
                 </div>
-                <h3>Key Roadmap Highlights</h3>
-                <p>Scheduled phases for community outreach, family workshops, and public education:</p>
+                <h3>{ev.roadmapHighlights || "Key Roadmap Highlights"}</h3>
+                <p>{ev.roadmapSubtitle || "Scheduled phases for community outreach, family workshops, and public education:"}</p>
               </div>
 
               {/* Connected Milestone Track */}
@@ -2537,7 +2419,7 @@ function EventsSection() {
                   <span className="btn-icon">🔍</span> Inspect Full Calendar Poster ↗
                 </button>
                 <a href="#event-finder" className="calendar-secondary-btn">
-                  <span className="btn-icon">↓</span> Browse Event Schedule Below
+                  <span className="btn-icon">↓</span> {ev.browseSchedule || "Browse Event Schedule Below"}
                 </a>
               </div>
             </div>
@@ -2545,15 +2427,14 @@ function EventsSection() {
         </div>
       </section>
 
-      {/* ---- Section 2: Community Dialogues Showcase (Dialogue) ---- */}
+      {/* ---- Section 2: Community Outreach Showcase (Sibu Batch 2 TTT) ---- */}
       <section id="community-dialogues" className="events-feature-section dialogues-showcase-section">
         <div className="section-container">
           <div className="events-section-header">
-            <span className="section-label">Community Outreach</span>
-            <h2>Voices of Sarawak: In-Person Community Dialogues</h2>
+            <span className="section-label">{ev.communityOutreach || "Community Outreach"}</span>
+            <h2>{ev.sibuBatch2Title || "Alzheimer’s Care Project: TTT Batch 2 in Sibu"}</h2>
             <p>
-              Safe, respectful spaces where family caregivers, community elders, and healthcare
-              professionals gather in their mother tongues to share real experiences without fear of stigma.
+              {ev.sibuBatch2Desc || "Back in May, our Batch 2 TTT in Sibu brought together a group of passionate participants from Kapit, Betong, and Sibu, who dedicated three days to learning, practicing, and preparing to serve their communities."}
             </p>
           </div>
 
@@ -2564,28 +2445,28 @@ function EventsSection() {
               onClick={() =>
                 setLightboxData({
                   image: dialogueImg1,
-                  title: "Community Dementia Dialogue — Bintulu Session",
-                  subtitle: "In-Person Dialogue Circle",
+                  title: "Alzheimer’s Care Project TTT Batch 2 — Sibu, Sarawak",
+                  subtitle: "Sibu, Sarawak (16/5/25 – 18/5/25)",
                   caption:
-                    "Families and community elders engaging with dementia facilitators at Bintulu Civic Centre on 16 August 2025.",
-                  date: "16 August 2025",
+                    "Back in May, our Batch 2 TTT in Sibu brought together a group of passionate participants from Kapit, Betong, Sibu, who dedicated three days to learning, practicing, and preparing to serve their communities.",
+                  date: "16–18 May 2025",
                 })
               }
             >
               <div className="dialogue-img-wrap">
-                <img src={dialogueImg1} alt="Community Dementia Dialogue 16 August 2025" />
-                <span className="dialogue-tag">Bintulu Civic Centre</span>
+                <img src={dialogueImg1} alt="Alzheimer's Care Project TTT Batch 2 Sibu, Sarawak (16/5/25 - 18/5/25)" />
+                <span className="dialogue-tag">Sibu, Sarawak</span>
                 <div className="dialogue-hover-btn">
-                  <span>🔍 View Photo</span>
+                  <span>{le?.eventsSection?.viewPhoto || "🔍 View Photo"}</span>
                 </div>
               </div>
               <div className="dialogue-card-body">
-                <h3>Caregiver Peer-to-Peer Dialogue Circle</h3>
+                <h3>{le?.eventsSection?.photo1Title || "Alzheimer’s Care Project TTT Batch 2 (16/5/25 – 18/5/25)"}</h3>
                 <p>
-                  Participants sharing daily caregiving challenges, emotional resilience,
-                  and practical coping strategies in a supportive group environment.
+                  Participants from Kapit, Betong, and Sibu dedicated three days to learning, practicing,
+                  and preparing to serve their communities with evidence-based dementia care skills.
                 </p>
-                <span className="dialogue-date">📅 16 August 2025 · Physical Session</span>
+                <span className="dialogue-date">📅 16–18 May 2025 · Sibu, Sarawak</span>
               </div>
             </article>
 
@@ -2594,28 +2475,27 @@ function EventsSection() {
               onClick={() =>
                 setLightboxData({
                   image: dialogueImg2,
-                  title: "Interactive Q&A and Practical Guidance",
-                  subtitle: "Clinical Facilitator Exchange",
+                  title: "Living Impact & Growing Caregiver Support — Sibu, Sarawak",
+                  subtitle: "Sibu, Sarawak (16/5/25 – 18/5/25)",
                   caption:
-                    "Experienced healthcare facilitators answering specific caregiving questions on behavioral distress and local healthcare access.",
-                  date: "16 August 2025",
+                    "Although months have passed, the impact, memories, and lessons from Sibu remain very much alive. What was planted then has continued to grow, in the way trainers share their knowledge, in the way caregivers feel supported, and in the way communities begin to open their hearts toward dementia care. Batch 2 was not just an event in May; it is a living part of our journey, shaping what we do today and reminding us that every step matters in building a dementia-friendly Sarawak.",
+                  date: "16–18 May 2025",
                 })
               }
             >
               <div className="dialogue-img-wrap">
-                <img src={dialogueImg2} alt="Community Dialogue Interactive Exchange 16 August 2025" />
-                <span className="dialogue-tag">Group Exchange</span>
+                <img src={dialogueImg2} alt="TTT Batch 2 Interactive Learning & Practice Sibu (16/5/25 - 18/5/25)" />
+                <span className="dialogue-tag">Sibu, Sarawak</span>
                 <div className="dialogue-hover-btn">
-                  <span>🔍 View Photo</span>
+                  <span>{le?.eventsSection?.viewPhoto || "🔍 View Photo"}</span>
                 </div>
               </div>
               <div className="dialogue-card-body">
-                <h3>Direct Facilitator Guidance &amp; Q&amp;A</h3>
+                <h3>{le?.eventsSection?.photo2Title || "Living Impact & Growing Caregiver Support"}</h3>
                 <p>
-                  Bridging clinical knowledge with home care reality. Families received
-                  individualised advice on communication, safety, and respite options.
+                  Although months have passed, the impact, memories, and lessons from Sibu remain very much alive in the way trainers share their knowledge, caregivers feel supported, and communities open their hearts toward dementia care.
                 </p>
-                <span className="dialogue-date">📅 16 August 2025 · Physical Session</span>
+                <span className="dialogue-date">📅 16–18 May 2025 · Sibu, Sarawak</span>
               </div>
             </article>
           </div>
@@ -2623,27 +2503,24 @@ function EventsSection() {
           {/* Dialogue Three Core Pillars */}
           <div className="dialogue-pillars-grid">
             <div className="dialogue-pillar-card">
-              <div className="pillar-icon">🗣️</div>
-              <h4>Local Language Comfort</h4>
+              <div className="pillar-icon">🌱</div>
+              <h4>{ev.pillar1Title || "Kapit, Betong & Sibu"}</h4>
               <p>
-                Dialogues are held in Bahasa Melayu, English, and Sarawakian dialects so
-                families can articulate delicate emotions without linguistic barriers.
+                {ev.pillar1Desc || "Uniting dedicated participants from across divisions who committed three days of intensive learning, roleplays, and community preparation."}
               </p>
             </div>
             <div className="dialogue-pillar-card">
-              <div className="pillar-icon">💡</div>
-              <h4>Practical Home Solutions</h4>
+              <div className="pillar-icon">🤝</div>
+              <h4>{ev.pillar2Title || "Enduring Grassroots Support"}</h4>
               <p>
-                Focus on real daily tasks: gentle bathing techniques, nighttime confusion,
-                and preserving dignity without burning out the family caregiver.
+                {ev.pillar2Desc || "What was planted in Sibu continues to grow in the way trainers share their knowledge and family caregivers feel genuinely supported."}
               </p>
             </div>
             <div className="dialogue-pillar-card">
-              <div className="pillar-icon">🩺</div>
-              <h4>Direct Access to Specialists</h4>
+              <div className="pillar-icon">🏛️</div>
+              <h4>{ev.pillar3Title || "A Living Journey"}</h4>
               <p>
-                Each dialogue is attended by certified ADFM/TTT trainers and clinicians
-                who provide trustworthy guidance and connect attendees to local clinics.
+                {ev.pillar3Desc || "Batch 2 is not just a past event; it is a living part of our journey shaping what we do today in building a dementia-friendly Sarawak."}
               </p>
             </div>
           </div>
@@ -2654,11 +2531,10 @@ function EventsSection() {
       <section id="event-finder" className="events-feature-section event-finder-section">
         <div className="section-container">
           <div className="events-section-header">
-            <span className="section-label">Find &amp; Register</span>
-            <h2>Explore Community Events &amp; Workshops</h2>
+            <span className="section-label">{ev.findRegisterEyebrow || "Find & Register"}</span>
+            <h2>{ev.exploreTitle || "Explore Community Events & Workshops"}</h2>
             <p>
-              Filter through public dialogues, regional care expos, educational workshops,
-              and forums across Sarawak. Click any card to view details or register externally.
+              {ev.exploreDesc || "Filter through public dialogues, regional care expos, educational workshops, and forums across Sarawak. Click any card to view details or register externally."}
             </p>
           </div>
 
@@ -2669,7 +2545,7 @@ function EventsSection() {
               <span className="finder-search-icon" aria-hidden="true">🔍</span>
               <input
                 type="text"
-                placeholder="Search events by title, venue, city, or speaker..."
+                placeholder={le?.eventsSection?.searchPlaceholder || "Search events by title, venue, city, or speaker..."}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 aria-label="Search events"
@@ -2689,13 +2565,13 @@ function EventsSection() {
             {/* Filter Selects & Controls */}
             <div className="finder-controls-row">
               <div className="finder-select-wrap">
-                <label htmlFor="city-filter-select" className="sr-only">Filter by city</label>
+                <label htmlFor="city-filter-select" className="sr-only">{ev.filterCity || "Filter by city"}</label>
                 <select
                   id="city-filter-select"
                   value={selectedCity}
                   onChange={(e) => setSelectedCity(e.target.value)}
                 >
-                  <option>All cities</option>
+                  <option>{ev.allCities || "All cities"}</option>
                   {cities.map((c) => (
                     <option key={c} value={c}>{c}</option>
                   ))}
@@ -2703,7 +2579,7 @@ function EventsSection() {
               </div>
 
               <div className="finder-select-wrap">
-                <label htmlFor="format-filter-select" className="sr-only">Filter by format</label>
+                <label htmlFor="format-filter-select" className="sr-only">{ev.filterFormat || "Filter by format"}</label>
                 <select
                   id="format-filter-select"
                   value={selectedFormat}
@@ -2716,13 +2592,13 @@ function EventsSection() {
               </div>
 
               <div className="finder-select-wrap">
-                <label htmlFor="lang-filter-select" className="sr-only">Filter by language</label>
+                <label htmlFor="lang-filter-select" className="sr-only">{ev.filterLanguage || "Filter by language"}</label>
                 <select
                   id="lang-filter-select"
                   value={selectedLanguage}
                   onChange={(e) => setSelectedLanguage(e.target.value)}
                 >
-                  <option>All languages</option>
+                  <option>{ev.allLanguages || "All languages"}</option>
                   {languages.map((l) => (
                     <option key={l} value={l}>{l}</option>
                   ))}
@@ -2736,21 +2612,21 @@ function EventsSection() {
                   className={`status-pill ${statusFilter === "all" ? "active" : ""}`}
                   onClick={() => setStatusFilter("all")}
                 >
-                  All
+                  {ev.all || "All"}
                 </button>
                 <button
                   type="button"
                   className={`status-pill ${statusFilter === "upcoming" ? "active" : ""}`}
                   onClick={() => setStatusFilter("upcoming")}
                 >
-                  Upcoming
+                  {ev.upcoming || "Upcoming"}
                 </button>
                 <button
                   type="button"
                   className={`status-pill ${statusFilter === "completed" ? "active" : ""}`}
                   onClick={() => setStatusFilter("completed")}
                 >
-                  Past
+                  {ev.past || "Past"}
                 </button>
               </div>
 
@@ -2760,7 +2636,7 @@ function EventsSection() {
                   className="finder-reset-btn"
                   onClick={clearAllFilters}
                 >
-                  Reset Filters
+                  {ev.resetFilters || "Reset Filters"}
                 </button>
               )}
             </div>
@@ -2769,7 +2645,7 @@ function EventsSection() {
           {/* Results Summary Counter */}
           <div className="finder-results-counter">
             <span className="counter-badge">
-              <strong>{filteredEvents.length}</strong> event{filteredEvents.length === 1 ? "" : "s"} found
+              {le?.eventsSection?.eventsFound ? le.eventsSection.eventsFound.replace('{count}', filteredEvents.length).replace('{plural}', filteredEvents.length === 1 ? '' : 's') : `${filteredEvents.length} event${filteredEvents.length === 1 ? '' : 's'} found`}
             </span>
             {hasActiveFilters && (
               <span className="active-filters-hint">
@@ -2834,17 +2710,17 @@ function EventsSection() {
                         rel="noreferrer"
                         className="event-register-btn"
                       >
-                        Register via Google Form ↗
+                        {ev.registerGoogleForm || "Register via Google Form ↗"}
                       </a>
                     ) : (
-                      <span className="event-completed-tag">Session Completed</span>
+                      <span className="event-completed-tag">{ev.sessionCompleted || "Session Completed"}</span>
                     )}
                     <button
                       type="button"
                       className="event-details-btn"
                       onClick={() => setSelectedActivity(event)}
                     >
-                      View Details
+                      {ev.viewDetails || "View Details"}
                     </button>
                   </div>
                 </article>
@@ -2853,10 +2729,10 @@ function EventsSection() {
           ) : (
             <div className="events-empty-state">
               <span className="empty-icon">🔍</span>
-              <h3>No matching events found</h3>
-              <p>We couldn't find any events matching your selected search query or filters.</p>
+              <h3>{ev.noMatchingEvents || "No matching events found"}</h3>
+              <p>{ev.noMatchingDesc || "We couldn't find any events matching your selected search query or filters."}</p>
               <button type="button" className="primary-button" onClick={clearAllFilters}>
-                Clear All Filters
+                {ev.clearAllFilters || "Clear All Filters"}
               </button>
             </div>
           )}
@@ -2867,11 +2743,10 @@ function EventsSection() {
       <section id="media-coverage" className="events-feature-section media-coverage-section">
         <div className="section-container">
           <div className="events-section-header">
-            <span className="section-label">Press &amp; Media Highlights</span>
-            <h2>Sarawak Dementia Care in the Headlines</h2>
+            <span className="section-label">{ev.mediaHeadlines || le?.pressHighlights || "Press & Media Highlights"}</span>
+            <h2>{ev.mediaHeadlines || "Sarawak Dementia Care in the Headlines"}</h2>
             <p>
-              Major regional news articles and press features reporting on the Rotary HopeCare
-              initiative, public dialogues, and train-the-trainer education.
+              {ev.mediaDesc || "Major regional news articles and press features reporting on the Rotary HopeCare initiative, public dialogues, and train-the-trainer education."}
             </p>
           </div>
 
@@ -3011,6 +2886,8 @@ function EventsSection() {
    MEDICAL CAROUSEL — draggable, auto-flowing, prev/next
    ================================================================ */
 function MedicalCarousel({ trainers: carouselTrainers, onSelect, onViewAll }) {
+  const { t } = useLanguage();
+  const cs = t.learnEvents?.certifiedTrainersSection || {};
   const trackRef = useRef(null);
   const autoRef = useRef(null);
   const isDragging = useRef(false);
@@ -3028,11 +2905,14 @@ function MedicalCarousel({ trainers: carouselTrainers, onSelect, onViewAll }) {
     autoRef.current = setInterval(() => {
       const el = trackRef.current;
       if (!el || isUserInteracting.current) return;
-      el.scrollLeft += 1;
-      if (el.scrollLeft >= el.scrollWidth / 2) {
-        el.scrollLeft = 0;
+      const maxScroll = el.scrollWidth - el.clientWidth;
+      if (maxScroll <= 0) return;
+      if (el.scrollLeft >= maxScroll - 2) {
+        el.scrollTo({ left: 0, behavior: "smooth" });
+      } else {
+        el.scrollLeft += 1;
       }
-    }, 16);
+    }, 28);
   }, []);
 
   const stopAuto = useCallback(() => {
@@ -3061,7 +2941,14 @@ function MedicalCarousel({ trainers: carouselTrainers, onSelect, onViewAll }) {
     const el = trackRef.current;
     if (!el) return;
     pauseAndResume();
-    el.scrollBy({ left: dir * SCROLL_STEP, behavior: "smooth" });
+    const maxScroll = el.scrollWidth - el.clientWidth;
+    if (dir > 0 && el.scrollLeft >= maxScroll - 15) {
+      el.scrollTo({ left: 0, behavior: "smooth" });
+    } else if (dir < 0 && el.scrollLeft <= 15) {
+      el.scrollTo({ left: maxScroll, behavior: "smooth" });
+    } else {
+      el.scrollBy({ left: dir * SCROLL_STEP, behavior: "smooth" });
+    }
   }, [pauseAndResume]);
 
   /* ---- Drag (pointer events) ---- */
@@ -3092,15 +2979,15 @@ function MedicalCarousel({ trainers: carouselTrainers, onSelect, onViewAll }) {
     }
   }, []);
 
-  const items = [...carouselTrainers, ...carouselTrainers];
+  const items = carouselTrainers;
 
   return (
     <section className="ct-carousel-section">
       <div className="section-container">
         <div className="ct-carousel-header">
           <div className="ct-carousel-header-text">
-            <span className="ct-section-eyebrow">Clinical Frontline</span>
-            <h3 className="ct-section-title">Medical Professionals</h3>
+            <span className="ct-section-eyebrow">{cs.clinicalFrontline || "Clinical Frontline"}</span>
+            <h3 className="ct-section-title">{cs.medicalProfessionals || "Medical Professionals"}</h3>
             <p className="ct-section-sub">
               {carouselTrainers.length} certified trainers · Drag, use arrows, or let it flow
             </p>
@@ -3125,9 +3012,9 @@ function MedicalCarousel({ trainers: carouselTrainers, onSelect, onViewAll }) {
           role="list"
           aria-label="Medical professional trainers"
         >
-          {items.map((t, idx) => (
+          {items.map((t) => (
             <div
-              key={`mc-${t.id}-${idx}`}
+              key={`mc-${t.id}`}
               className="ct-mc-card"
               style={{ "--mc-color": t.badgeColor || "#0d716b" }}
               role="listitem"
@@ -3140,13 +3027,12 @@ function MedicalCarousel({ trainers: carouselTrainers, onSelect, onViewAll }) {
                 </div>
               </div>
               <div className="ct-mc-body">
-                <span className="ct-mc-badge">Clinical Facilitator</span>
+                <span className="ct-mc-badge">{cs.clinicalFacilitator || "Clinical Facilitator"}</span>
                 <strong className="ct-mc-name">{t.name}</strong>
                 <span className="ct-mc-role">{t.role}</span>
                 <span className="ct-mc-inst">{t.institution.split(",")[0]}</span>
               </div>
               <div className="ct-mc-footer">
-                <span className="ct-mc-cert">{t.certRef}</span>
                 <button
                   type="button"
                   className="ct-mc-cta"
@@ -3175,10 +3061,24 @@ function MedicalCarousel({ trainers: carouselTrainers, onSelect, onViewAll }) {
    SECTION 4: CERTIFIED TRAINERS
    ================================================================ */
 function CertifiedTrainers() {
-  const activities=usePublicActivities();
-  const [trainers,setTrainers]=useState([]);
-  const [directoryError,setDirectoryError]=useState("");
-  useEffect(()=>{let alive=true;fetch('/api/trainers').then(r=>{if(!r.ok)throw new Error('Trainer directory unavailable');return r.json();}).then(rows=>{if(alive)setTrainers(rows.map(t=>({...t,category:'certified-trainer',role:'Certified Trainer',institution:'RCBC',certRef:t.certificate_ref,bio:t.short_profile,initials:t.name.split(' ').map(n=>n[0]).join(''),photo:t.photo_url})));}).catch(e=>{if(alive)setDirectoryError(e.message);});return ()=>{alive=false;};},[]);
+  const { t: i18nData } = useLanguage();
+  const le = i18nData.learnEvents;
+  const cs = le?.certifiedTrainersSection || {};
+  const activities = usePublicActivities();
+  const [trainers, setTrainers] = useState(defaultTrainers);
+  const [directoryError, setDirectoryError] = useState("");
+  useEffect(() => {
+    let alive = true;
+    fetch('/api/trainers')
+      .then(r => { if (!r.ok) throw new Error('Trainer directory unavailable'); return r.json(); })
+      .then(rows => {
+        if (alive && Array.isArray(rows) && rows.length > 0) {
+          setTrainers(rows.map(t => ({ ...t, category: 'certified-trainer', role: 'Certified Trainer', institution: 'RCBC', bio: t.short_profile, initials: t.name.split(' ').map(n => n[0]).join(''), photo: t.photo_url })));
+        }
+      })
+      .catch(e => { if (alive) setDirectoryError(e.message); });
+    return () => { alive = false; };
+  }, []);
 
   const [selectedFacilitatorModal, setSelectedFacilitatorModal] = useState(null);
   const [activeCategory, setActiveCategory] = useState("all");
@@ -3187,20 +3087,19 @@ function CertifiedTrainers() {
   const [trainerLanguage, setTrainerLanguage] = useState("All languages");
   const [expandedTrainer, setExpandedTrainer] = useState(null);
   const [openFaq, setOpenFaq] = useState(null);
-  const [activeToolkitModal, setActiveToolkitModal] = useState(null);
   const [trainerLightbox, setTrainerLightbox] = useState(null);
 
   const clinicalFacilitators = useMemo(() => trainers.filter((t) => t.category === "medical-professional"), [trainers]);
   const advisoryFacilitators = useMemo(() => trainers.filter((t) => t.category === "advisory-support"), [trainers]);
 
-  const getTrainerActivities = (trainerId) => activities.filter((a) => (a.trainerId === trainerId || a.trainers?.some(t=>t.trainerId===trainerId)));
+  const getTrainerActivities = (trainerId) => activities.filter((a) => (a.trainerId === trainerId || a.trainers?.some(t => t.trainerId === trainerId)));
 
   const filteredTrainers = useMemo(() => trainers.filter((t) => {
     if (activeCategory !== "all" && t.category !== activeCategory) return false;
     if (trainerCity !== "All cities" && t.city !== trainerCity) return false;
     if (trainerLanguage !== "All languages" && !t.language.toLowerCase().includes(trainerLanguage.toLowerCase())) return false;
     if (searchQuery.trim()) {
-      const text = `${t.name} ${t.role} ${t.institution} ${t.certRef} ${t.city} ${t.bio}`.toLowerCase();
+      const text = `${t.name} ${t.role} ${t.institution} ${t.city} ${t.bio}`.toLowerCase();
       if (!text.includes(searchQuery.toLowerCase().trim())) return false;
     }
     return true;
@@ -3212,7 +3111,7 @@ function CertifiedTrainers() {
     if (el) el.scrollIntoView({ behavior: "smooth" });
   };
 
-  const trainerSteps = [
+  const defaultTrainerSteps = [
     { num: "01", title: "Learn", subtitle: "Foundations & Clinical Insight", desc: "Build a strong understanding of dementia types, symptom progression, and person-centred care principles guided by ADFM syllabus." },
     { num: "02", title: "Prepare", subtitle: "Audience & Curriculum Selection", desc: "Select the appropriate DCS module and tailor slide decks to your local community dialect." },
     { num: "03", title: "Deliver", subtitle: "Facilitate with Empathy & Dignity", desc: "Conduct interactive, judgment-free workshops that invite active storytelling and teach practical daily techniques." },
@@ -3220,19 +3119,15 @@ function CertifiedTrainers() {
     { num: "05", title: "Connect", subtitle: "Sustained Community Respite", desc: "Link participants with local support groups, memory clinics, and future webinars so no family walks alone." },
   ];
 
-  const toolkitResources = [
-    { icon: "▣", title: "Session Presentation Slides", description: "Standardised, clinically verified slide decks with visual diagrams and bilingual speaking notes.", audience: "Family & Community Facilitators", format: "PowerPoint & PDF (16:9 HD)", items: ["What is Dementia vs Alzheimer's Disease", "Stages and Common Behavioral Changes", "Person-Centred Communication Framework", "Local Respite and Clinical Contacts Directory"] },
-    { icon: "▤", title: "Participant Handouts & Guides", description: "Take-home brochures and illustrated care sheets designed for clear, large-print home reading.", audience: "Family Caregivers & Volunteers", format: "Print-Ready PDF (A4 Foldable)", items: ["10 Daily Coping Strategies for Caregivers", "De-escalating Agitation and Repetition", "Sarawak Emergency and Respite Helplines", "Caregiver Emotional Self-Care Checkup"] },
-    { icon: "✓", title: "Trainer Session Checklist", description: "Pre-session preparation checklist covering room layout, audiovisual setup, and emotional safety.", audience: "Lead Certified Trainers", format: "Interactive 1-Page Checklist", items: ["Room accessibility and seating configuration", "Audio amplification and microphone testing", "Tissues, water, and quiet contemplation corner", "Emergency referral protocol and on-call info"] },
-    { icon: "?", title: "Discussion Facilitation Guide", description: "Carefully structured prompts to stimulate safe group sharing and resolve difficult medical queries.", audience: "Workshop Facilitators", format: "Pocket Facilitation Handbook", items: ["Opening icebreakers for hesitant caregivers", "Navigating family guilt, denial, and burnout", "Handling questions on genetic inheritance", "Closing reflection and encouragement prompts"] },
-  ];
-
-  const trainerFaqs = [
+  const defaultTrainerFaqs = [
     { q: "Can certified trainers adapt materials into local dialects?", a: "Yes. Trainers are encouraged to deliver sessions in local Sarawakian dialects. However, core medical terminology and slide contents must follow the approved RCBC & ADFM framework." },
     { q: "How should personal medical or diagnostic questions be handled?", a: "Community education sessions must remain educational, not diagnostic. Trainers guide participants to qualified geriatricians or government clinics for formal assessment." },
     { q: "How do I register or announce a new community workshop?", a: "Certified trainers can submit planned session dates via the RCBC Trainer Portal. Once approved, sessions are published on this website's Upcoming Calendar." },
-    { q: "What are the eligibility requirements for DCS-TTT certification?", a: "Applicants should be healthcare professionals, certified educators, or senior community NGO volunteers with eldercare experience. Applications undergo screening by RCBC and ADFM master trainers." },
+    { q: "What are the eligibility requirements for DCS-TTT certification?", a: "Applicants should be healthcare professionals, certified educators, or senior community NGO volunteers with eldercare experience. Applications undergo review by RCBC and ADFM master trainers." },
   ];
+
+  const trainerSteps = (cs.pathwaySteps && cs.pathwaySteps.length > 0) ? cs.pathwaySteps : defaultTrainerSteps;
+  const trainerFaqs = (cs.faqs && cs.faqs.length > 0) ? cs.faqs : defaultTrainerFaqs;
 
   return (
     <main className="module-main certified-trainers-module">
@@ -3244,20 +3139,17 @@ function CertifiedTrainers() {
       <section className="ct-hero">
         <div className="section-container">
           <div className="ct-hero-inner">
-            <span className="ct-eyebrow">RCBC &amp; ADFM Certified</span>
+            <span className="ct-eyebrow">{cs.eyebrow || "RCBC & ADFM Certified"}</span>
             <h2 className="ct-hero-title">
-              Meet your<br /><em>facilitators.</em>
+              {cs.heroTitlePrefix || "Meet your"}<br /><em>{cs.heroTitleEm || "facilitators."}</em>
             </h2>
             <p className="ct-hero-sub">
-              Experienced medical professionals certified under the Dementia Care Series (DCS-TTT) framework —
-              bringing real caregiving knowledge to every session.
+              {cs.heroSub || "Experienced medical professionals certified under the Dementia Care Series (DCS-TTT) framework — bringing real caregiving knowledge to every session."}
             </p>
             <div className="ct-hero-stats">
-              <div className="ct-stat"><strong>9</strong><span>Certified Trainers</span></div>
+              <div className="ct-stat"><strong>9</strong><span>{cs.statTrainers || "Certified Trainers"}</span></div>
               <div className="ct-stat-divider" />
-              <div className="ct-stat"><strong>3</strong><span>Advisory Specialists</span></div>
-              <div className="ct-stat-divider" />
-              <div className="ct-stat"><strong>20+</strong><span>Sessions Delivered</span></div>
+              <div className="ct-stat"><strong>3</strong><span>{cs.statAdvisory || "Advisory Specialists"}</span></div>
             </div>
           </div>
         </div>
@@ -3278,10 +3170,10 @@ function CertifiedTrainers() {
       <section className="ct-advisory-section">
         <div className="section-container">
           <div className="ct-advisory-header">
-            <span className="ct-section-eyebrow advisory">Clinical Governance</span>
-            <h3 className="ct-section-title">ADFM QA/QC Advisory Board</h3>
+            <span className="ct-section-eyebrow advisory">{cs.clinicalGovernance || "Clinical Governance"}</span>
+            <h3 className="ct-section-title">{cs.advisoryTitle || "ADFM QA/QC Advisory Board"}</h3>
             <p className="ct-section-sub">
-              Senior specialists overseeing curriculum fidelity and certification standards.
+              {cs.advisorySub || "Senior specialists overseeing curriculum fidelity and certification standards."}
             </p>
           </div>
 
@@ -3299,13 +3191,12 @@ function CertifiedTrainers() {
                   <span className="ct-advisory-initials">{t.initials}</span>
                 </div>
                 <div className="ct-advisory-info">
-                  <span className="ct-advisory-badge">Advisory Board</span>
+                  <span className="ct-advisory-badge">{cs.advisoryBoardBadge || "Advisory Board"}</span>
                   <strong className="ct-advisory-name">{t.name}</strong>
                   <span className="ct-advisory-role">{t.role}</span>
                   <span className="ct-advisory-inst">{t.institution.split(",")[0]}</span>
                 </div>
                 <div className="ct-advisory-footer">
-                  <span className="ct-advisory-cert">{t.certRef}</span>
                   <span className="ct-advisory-cta">View profile →</span>
                 </div>
               </button>
@@ -3322,10 +3213,9 @@ function CertifiedTrainers() {
           <div className="trainer-boundary-banner" role="note">
             <div className="boundary-shield-icon" aria-hidden="true">🛡️</div>
             <div className="boundary-text-content">
-              <h4>Certification Scope &amp; Boundary</h4>
+              <h4>{cs.scopeBoundaryTitle || "Certification Scope & Boundary"}</h4>
               <p>
-                Certified Trainer status is granted strictly for community dementia education under the RCBC &amp; ADFM DCS-TTT initiative,
-                and should not be construed as a broader clinical endorsement or guarantee.
+                {cs.scopeBoundaryDesc || "Certified Trainer status is granted strictly for community dementia education under the RCBC & ADFM DCS-TTT initiative, and should not be construed as a broader clinical endorsement or guarantee."}
               </p>
             </div>
           </div>
@@ -3333,27 +3223,27 @@ function CertifiedTrainers() {
           <div className="directory-header-row">
             <div>
               <span className="section-label">Verified Profiles</span>
-              <h2>Trainer Directory &amp; Approved Activities</h2>
+              <h2>{le?.directoryTitle || "Trainer Directory & Approved Activities"}</h2>
             </div>
           </div>
 
           <div className="directory-controls-bar">
             <div className="directory-track-tabs" role="tablist" aria-label="Facilitator Category">
-              <button type="button" className={`track-tab-btn ${activeCategory === "all" ? "is-active" : ""}`} onClick={() => setActiveCategory("all")} role="tab" aria-selected={activeCategory === "all"}>All ({trainers.length})</button>
-              <button type="button" className={`track-tab-btn ${activeCategory === "medical-professional" ? "is-active" : ""}`} onClick={() => setActiveCategory("medical-professional")} role="tab" aria-selected={activeCategory === "medical-professional"}>Clinical ({clinicalFacilitators.length})</button>
-              <button type="button" className={`track-tab-btn ${activeCategory === "advisory-support" ? "is-active" : ""}`} onClick={() => setActiveCategory("advisory-support")} role="tab" aria-selected={activeCategory === "advisory-support"}>Advisory ({advisoryFacilitators.length})</button>
+              <button type="button" className={`track-tab-btn ${activeCategory === "all" ? "is-active" : ""}`} onClick={() => setActiveCategory("all")} role="tab" aria-selected={activeCategory === "all"}>{le?.all || "All"} ({trainers.length})</button>
+              <button type="button" className={`track-tab-btn ${activeCategory === "medical-professional" ? "is-active" : ""}`} onClick={() => setActiveCategory("medical-professional")} role="tab" aria-selected={activeCategory === "medical-professional"}>{cs.categoryClinical || "Clinical"} ({clinicalFacilitators.length})</button>
+              <button type="button" className={`track-tab-btn ${activeCategory === "advisory-support" ? "is-active" : ""}`} onClick={() => setActiveCategory("advisory-support")} role="tab" aria-selected={activeCategory === "advisory-support"}>{cs.categoryAdvisory || "Advisory"} ({advisoryFacilitators.length})</button>
             </div>
             <div className="directory-filters-cluster">
               <div className="directory-search-input-wrap">
-                <input type="text" placeholder="Search name, clinic, or role..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} aria-label="Search trainers" />
+                <input type="text" placeholder={le?.searchPlaceholder || "Search name, clinic, or role..."} value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} aria-label="Search trainers" />
                 {searchQuery && <button type="button" className="search-clear-btn" onClick={() => setSearchQuery("")} aria-label="Clear">&times;</button>}
               </div>
               <select value={trainerCity} onChange={(e) => setTrainerCity(e.target.value)} aria-label="Filter by city">
-                <option>All cities</option>
+                <option value="All cities">{le?.allCities || "All cities"}</option>
                 {cities.map((c) => <option key={c} value={c}>{c}</option>)}
               </select>
               <select value={trainerLanguage} onChange={(e) => setTrainerLanguage(e.target.value)} aria-label="Filter by language">
-                <option>All languages</option>
+                <option value="All languages">{le?.allLanguages || "All languages"}</option>
                 {languages.map((l) => <option key={l} value={l}>{l}</option>)}
               </select>
             </div>
@@ -3371,25 +3261,24 @@ function CertifiedTrainers() {
                   <article className={`trainer-profile-card ${isAdvisory ? "card-advisory-theme" : ""} ${isOpen ? "is-expanded" : ""}`} key={t.id}>
                     <div className="trainer-card-topbar">
                       <div className="trainer-avatar-wrap" style={{ backgroundColor: t.badgeColor || "#0d716b" }}>
-                        {t.photo ? <img src={t.photo} alt={t.name} style={{width:"100%",height:"100%",objectFit:"cover",borderRadius:"50%"}}/> : <span className="trainer-avatar-letter">{t.initials || t.name.charAt(0)}</span>}
+                        {t.photo ? <img src={t.photo} alt={t.name} style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "50%" }} /> : <span className="trainer-avatar-letter">{t.initials || t.name.charAt(0)}</span>}
                         <span className="trainer-verified-check" title="RCBC Verified">✓</span>
                       </div>
                       <div className="trainer-primary-info">
                         <span className={`trainer-category-chip ${isAdvisory ? "chip-advisory" : "chip-clinical"}`}>{isAdvisory ? "Advisory Board" : "Certified Trainer"}</span>
                         <h3>{t.name}</h3>
                         <p className="trainer-role-title"><strong>{t.role}</strong> &bull; {t.institution}</p>
-                        <span className="trainer-cert-badge">Cert. Ref: {t.certRef}</span>
                       </div>
                     </div>
                     <div className="trainer-meta-strip">
-                      <div className="trainer-meta-col"><span className="meta-lbl">Location</span><strong className="meta-val">📍 {t.city}</strong></div>
-                      <div className="trainer-meta-col"><span className="meta-lbl">Languages</span><strong className="meta-val">🌐 {t.language}</strong></div>
+                      <div className="trainer-meta-col"><span className="meta-lbl">{le?.locationLabel || "Location"}</span><strong className="meta-val">📍 {t.city}</strong></div>
+                      <div className="trainer-meta-col"><span className="meta-lbl">{le?.languageLabel || "Languages"}</span><strong className="meta-val">🌐 {t.language}</strong></div>
                     </div>
                     <p className="trainer-biography">{t.bio}</p>
                     <div className="trainer-activity-counter-bar">
-                      <div className="counter-col"><strong>{upcomingCount}</strong><span>Upcoming</span></div>
+                      <div className="counter-col"><strong>{upcomingCount}</strong><span>{le?.upcoming || "Upcoming"}</span></div>
                       <div className="counter-divider" />
-                      <div className="counter-col"><strong>{pastCount}</strong><span>Past</span></div>
+                      <div className="counter-col"><strong>{pastCount}</strong><span>{le?.past || "Past"}</span></div>
                     </div>
                     {isOpen && (
                       <div className="trainer-drawer-content">
@@ -3411,10 +3300,10 @@ function CertifiedTrainers() {
                       </div>
                     )}
                     <div className="trainer-card-actions">
-                      <button type="button" className="trainer-full-profile-btn" onClick={() => setSelectedFacilitatorModal(t)}>View Full Profile &amp; Activities →</button>
+                      <button type="button" className="trainer-full-profile-btn" onClick={() => setSelectedFacilitatorModal(t)}>{le?.viewTrainerProfile ? `${le.viewTrainerProfile} →` : "View Full Profile & Activities →"}</button>
                       <div className="trainer-sub-actions-row">
                         <button type="button" className="trainer-expand-toggle-btn" onClick={() => setExpandedTrainer(isOpen ? null : t.id)} aria-expanded={isOpen}>{isOpen ? "Hide Sessions ▲" : `Sessions (${trainerActivities.length}) ▼`}</button>
-                        <a href="https://forms.google.com/" target="_blank" rel="noreferrer" className="trainer-contact-btn">Request Facilitator ↗</a>
+                        <a href="https://forms.google.com/" target="_blank" rel="noreferrer" className="trainer-contact-btn">{le?.requestFacilitator || "Request Facilitator ↗"}</a>
                       </div>
                     </div>
                   </article>
@@ -3424,8 +3313,8 @@ function CertifiedTrainers() {
           ) : (
             <div className="directory-empty-state">
               <span className="empty-icon">🔍</span>
-              <h3>No facilitators match your criteria</h3>
-              <button type="button" className="primary-button" onClick={() => { setActiveCategory("all"); setSearchQuery(""); setTrainerCity("All cities"); setTrainerLanguage("All languages"); }}>Reset Filters</button>
+              <h3>{cs.noFacilitators || "No facilitators match your criteria"}</h3>
+              <button type="button" className="primary-button" onClick={() => { setActiveCategory("all"); setSearchQuery(""); setTrainerCity("All cities"); setTrainerLanguage("All languages"); }}>{le?.resetFilters || "Reset Filters"}</button>
             </div>
           )}
         </div>
@@ -3438,18 +3327,18 @@ function CertifiedTrainers() {
         <div className="section-container">
           <div className="framework-box">
             <div className="framework-text">
-              <span className="framework-chip">ADFM Credentialing</span>
-              <h3>Certification Syllabus &amp; Guidelines</h3>
-              <p>Evidence-based standards governing every certified trainer. Click to view the full guide.</p>
+              <span className="framework-chip">{cs.frameworkChip || "ADFM Credentialing"}</span>
+              <h3>{cs.frameworkTitle || "Certification Syllabus & Guidelines"}</h3>
+              <p>{cs.frameworkDesc || "Evidence-based standards governing every certified trainer. Click to view the full guide."}</p>
             </div>
             <div className="framework-posters-row">
               <div className="framework-card" role="button" tabIndex={0} onClick={() => setTrainerLightbox({ image: adfmPoster, title: "ADFM Certified Trainers Framework", subtitle: "Official Dementia Training Syllabus", caption: "Official syllabus overview and certification standards." })} onKeyDown={(e) => e.key === "Enter" && setTrainerLightbox({ image: adfmPoster, title: "ADFM Certified Trainers Framework", subtitle: "Official Dementia Training Syllabus", caption: "Official syllabus." })}>
                 <div className="framework-thumb-wrap"><img src={adfmPoster} alt="ADFM Certified Trainers Poster" /><div className="framework-hover-hint"><span>🔍 View Poster</span></div></div>
-                <div className="framework-card-info"><h4>ADFM Certified Trainers Poster</h4><small>Click to view high-res guide</small></div>
+                <div className="framework-card-info"><h4>{cs.adfmPosterTitle || "ADFM Certified Trainers Poster"}</h4><small>{cs.clickHighRes || "Click to view high-res guide"}</small></div>
               </div>
               <div className="framework-card" role="button" tabIndex={0} onClick={() => setTrainerLightbox({ image: facilitatorInfo, title: "Facilitator Information & Delivery Scope", subtitle: "ADFM Accredited Facilitator Guidelines", caption: "Facilitator competency standards and approved delivery scope." })} onKeyDown={(e) => e.key === "Enter" && setTrainerLightbox({ image: facilitatorInfo, title: "Facilitator Information", subtitle: "ADFM Guidelines", caption: "Facilitator standards." })}>
                 <div className="framework-thumb-wrap"><img src={facilitatorInfo} alt="Facilitator Information Guide" /><div className="framework-hover-hint"><span>🔍 View Info</span></div></div>
-                <div className="framework-card-info"><h4>Facilitator Information Guide</h4><small>Click to view standards &amp; code</small></div>
+                <div className="framework-card-info"><h4>{cs.facilitatorInfoTitle || "Facilitator Information Guide"}</h4><small>{cs.clickStandards || "Click to view standards & code"}</small></div>
               </div>
             </div>
           </div>
@@ -3462,9 +3351,9 @@ function CertifiedTrainers() {
       <section className="trainer-journey-section">
         <div className="section-container">
           <div className="events-section-header">
-            <span className="section-label">Trainer Pathway</span>
-            <h2>Your journey as a trainer</h2>
-            <p>Five stages from learning to community impact.</p>
+            <span className="section-label">{cs.pathwaySectionLabel || "Trainer Pathway"}</span>
+            <h2>{cs.pathwayTitle || "Your journey as a trainer"}</h2>
+            <p>{cs.pathwaySub || "Five stages from learning to community impact."}</p>
           </div>
           <div className="trainer-steps-grid">
             {trainerSteps.map((step) => (
@@ -3480,60 +3369,13 @@ function CertifiedTrainers() {
       </section>
 
       {/* ======================================================
-          TOOLKIT
-      ====================================================== */}
-      <section className="trainer-toolkit-section">
-        <div className="section-container">
-          <div className="events-section-header">
-            <span className="section-label">Enablement Toolkit</span>
-            <h2>Resources in one place</h2>
-            <p>Approved materials to simplify facilitation and uphold clinical accuracy.</p>
-          </div>
-          <div className="toolkit-resources-grid">
-            {toolkitResources.map((res) => (
-              <article className="toolkit-resource-card" key={res.title}>
-                <div className="toolkit-card-icon">{res.icon}</div>
-                <div className="toolkit-card-content">
-                  <h3>{res.title}</h3>
-                  <p>{res.description}</p>
-                  <span className="toolkit-format-tag">{res.format}</span>
-                  <button type="button" className="toolkit-preview-btn" onClick={() => setActiveToolkitModal(res)}>Preview &amp; Checklist ↗</button>
-                </div>
-              </article>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ======================================================
-          BEFORE YOUR SESSION CHECKLIST
-      ====================================================== */}
-      <section className="session-checklist-section">
-        <div className="section-container">
-          <div className="checklist-layout-box">
-            <div className="checklist-intro">
-              <span className="section-label">Pre-Flight Guide</span>
-              <h2>Before your session</h2>
-              <p>Four things every trainer checks before stepping in.</p>
-            </div>
-            <ol className="four-checks-list">
-              <li><div className="check-number">1</div><div><strong>Know Your Audience</strong><p>Confirm whether attendees are caregivers, adult children, or volunteers.</p></div></li>
-              <li><div className="check-number">2</div><div><strong>Use Clear Language &amp; Visuals</strong><p>Avoid abbreviations. Use large fonts and translate key points verbally.</p></div></li>
-              <li><div className="check-number">3</div><div><strong>Allow Time for Emotion</strong><p>Acknowledge caregiver grief. Never rush sharing circles.</p></div></li>
-              <li><div className="check-number">4</div><div><strong>End with Local Resources</strong><p>Always share local clinic contacts and the Rotary HopeCare support channel.</p></div></li>
-            </ol>
-          </div>
-        </div>
-      </section>
-
-      {/* ======================================================
           FAQS
       ====================================================== */}
       <section className="trainer-faqs-section">
         <div className="section-container">
           <div className="events-section-header">
-            <span className="section-label">Quick Answers</span>
-            <h2>Frequently asked questions</h2>
+            <span className="section-label">{cs.quickAnswersLabel || "Quick Answers"}</span>
+            <h2>{cs.faqsTitle || "Frequently asked questions"}</h2>
           </div>
           <div className="trainer-faqs-accordion">
             {trainerFaqs.map((faq, idx) => {
@@ -3558,11 +3400,11 @@ function CertifiedTrainers() {
       <section className="trainer-bottom-cta">
         <div className="section-container">
           <div className="cta-box-content">
-            <h2>Ready to expand dementia education across Sarawak?</h2>
-            <p>Join our certified trainer community or explore upcoming events.</p>
+            <h2>{cs.ctaTitle || "Ready to expand dementia education across Sarawak?"}</h2>
+            <p>{cs.ctaSub || "Join our certified trainer community or explore upcoming events."}</p>
             <div className="cta-btn-row">
-              <Link to="/learn-events/physical-education" className="primary-button">Learn About DCS-TTT Certification ↗</Link>
-              <Link to="/learn-events/events" className="btn-secondary">View Community Events</Link>
+              <Link to="/learn-events/physical-education" className="primary-button">{cs.ctaLearnBtn || "Learn About DCS-TTT Certification ↗"}</Link>
+              <Link to="/learn-events/events" className="btn-secondary">{cs.ctaEventsBtn || "View Community Events"}</Link>
             </div>
           </div>
         </div>
@@ -3570,7 +3412,6 @@ function CertifiedTrainers() {
 
       {/* Modals */}
       {selectedFacilitatorModal && <FacilitatorProfileModal facilitator={selectedFacilitatorModal} activities={activities} onClose={() => setSelectedFacilitatorModal(null)} />}
-      {activeToolkitModal && <ToolkitPreviewModal tool={activeToolkitModal} onClose={() => setActiveToolkitModal(null)} />}
       {trainerLightbox && <ImageLightboxModal isOpen={!!trainerLightbox} onClose={() => setTrainerLightbox(null)} image={trainerLightbox.image} title={trainerLightbox.title} subtitle={trainerLightbox.subtitle} caption={trainerLightbox.caption} />}
     </main>
   );
@@ -3583,19 +3424,19 @@ function CertifiedTrainers() {
 // Parse "15 Oct 2026", "23 Jun 2026", "16 May 2026" → Date
 function parseActivityDate(dateStr) {
   if (!dateStr || dateStr === "Past webinar") return new Date(NaN);
-  const months = { Jan:0,Feb:1,Mar:2,Apr:3,May:4,Jun:5,Jul:6,Aug:7,Sep:8,Oct:9,Nov:10,Dec:11 };
+  const months = { Jan: 0, Feb: 1, Mar: 2, Apr: 3, May: 4, Jun: 5, Jul: 6, Aug: 7, Sep: 8, Oct: 9, Nov: 10, Dec: 11 };
   if (/^\d{4}-\d{2}-\d{2}T/.test(dateStr)) {
-    const date=new Date(dateStr);
+    const date = new Date(dateStr);
     if (Number.isNaN(date.getTime())) return new Date(NaN);
-    const local=date.toLocaleDateString("sv-SE",{timeZone:"Asia/Kuala_Lumpur"});
-    const [y,m,d]=local.split("-").map(Number);
-    return new Date(y,m-1,d);
+    const local = date.toLocaleDateString("sv-SE", { timeZone: "Asia/Kuala_Lumpur" });
+    const [y, m, d] = local.split("-").map(Number);
+    return new Date(y, m - 1, d);
   }
   const parts = dateStr.trim().split(" ");
   if (parts.length < 3) return new Date(NaN);
   const day = parseInt(parts[0], 10);
   const mon = months[parts[1]];
-  const yr  = parseInt(parts[2], 10);
+  const yr = parseInt(parts[2], 10);
   if (Number.isNaN(day) || mon === undefined || Number.isNaN(yr)) return new Date(NaN);
   return new Date(yr, mon, day);
 }
@@ -3603,34 +3444,36 @@ function parseActivityDate(dateStr) {
 // Map activity type → short CSS slug
 function getTypeSlug(type) {
   const map = {
-    "RCBC Webinar":   "rcbc",
-    "CT Webinar":     "ct",
-    "Planned Webinar":"planned",
-    "DCS-Family":     "dcs-family",
-    "DCS-TTT":        "dcs-ttt",
-    "Expo":           "expo",
-    "Dialogue":       "dialogue",
-    "Forum":          "forum",
-    "Workshop":       "workshop",
-    "Public Talk":    "talk",
-    "Masterclass":    "masterclass",
-    "Other":          "other",
+    "RCBC Webinar": "rcbc",
+    "CT Webinar": "ct",
+    "Planned Webinar": "planned",
+    "DCS-Family": "dcs-family",
+    "DCS-TTT": "dcs-ttt",
+    "Expo": "expo",
+    "Dialogue": "dialogue",
+    "Forum": "forum",
+    "Workshop": "workshop",
+    "Public Talk": "talk",
+    "Masterclass": "masterclass",
+    "Other": "other",
   };
   return map[type] || "other";
 }
 
 const UC_LEGEND = [
-  { label: "RCBC Webinar",    slug: "rcbc" },
-  { label: "CT Webinar",      slug: "ct" },
-  { label: "DCS Programme",   slug: "dcs-family" },
-  { label: "Expo / Event",    slug: "expo" },
-  { label: "Dialogue",        slug: "dialogue" },
-  { label: "Public Talk",     slug: "talk" },
-  { label: "Past",            slug: "past" },
+  { label: "RCBC Webinar", slug: "rcbc" },
+  { label: "CT Webinar", slug: "ct" },
+  { label: "DCS Programme", slug: "dcs-family" },
+  { label: "Expo / Event", slug: "expo" },
+  { label: "Dialogue", slug: "dialogue" },
+  { label: "Public Talk", slug: "talk" },
+  { label: "Past", slug: "past" },
 ];
 
 function UpcomingCalendar() {
-  const activities=usePublicActivities();
+  const activities = usePublicActivities();
+  const { t } = useLanguage();
+  const le = t.learnEvents;
   // ---- State ----
   const today = new Date();
   const [viewYear, setViewYear] = useState(today.getFullYear());
@@ -3638,6 +3481,7 @@ function UpcomingCalendar() {
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [typeFilter, setTypeFilter] = useState("All types");
   const [modeFilter, setModeFilter] = useState("All modes");
+  const [cityFilter, setCityFilter] = useState("All cities");
   const [languageFilter, setLanguageFilter] = useState("All languages");
   const detailRef = useRef(null);
 
@@ -3655,11 +3499,15 @@ function UpcomingCalendar() {
     return allCalendarEvents.filter((a) => {
       if (typeFilter !== "All types" && a.type !== typeFilter) return false;
       if (modeFilter !== "All modes" && a.mode !== modeFilter) return false;
+      if (cityFilter !== "All cities") {
+        const matchesCity = a.city === cityFilter || (a.location && a.location.toLowerCase().includes(cityFilter.toLowerCase()));
+        if (!matchesCity) return false;
+      }
       if (languageFilter !== "All languages" &&
         !a.language.toLowerCase().includes(languageFilter.toLowerCase())) return false;
       return true;
     });
-  }, [allCalendarEvents, typeFilter, modeFilter, languageFilter]);
+  }, [allCalendarEvents, typeFilter, modeFilter, cityFilter, languageFilter]);
 
   // ---- Build a map: "YYYY-MM-DD" → [events] ----
   const eventsByDay = useMemo(() => {
@@ -3675,8 +3523,8 @@ function UpcomingCalendar() {
   }, [filteredEvents]);
 
   // ---- Calendar grid helpers ----
-  const MONTH_NAMES = ["January","February","March","April","May","June","July","August","September","October","November","December"];
-  const DAY_LABELS  = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+  const MONTH_NAMES = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+  const DAY_LABELS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
   const firstDay = new Date(viewYear, viewMonth, 1).getDay(); // 0=Sun
   const daysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate();
@@ -3723,7 +3571,19 @@ function UpcomingCalendar() {
     return [...s].sort();
   }, [allCalendarEvents]);
 
-  const hasActiveFilters = typeFilter !== "All types" || modeFilter !== "All modes" || languageFilter !== "All languages";
+  const calCities = useMemo(() => {
+    const set = new Set(cities);
+    allCalendarEvents.forEach((a) => {
+      if (a.city && a.city !== "Online") set.add(a.city);
+    });
+    return [...set].sort();
+  }, [allCalendarEvents]);
+
+  const hasActiveFilters =
+    typeFilter !== "All types" ||
+    modeFilter !== "All modes" ||
+    cityFilter !== "All cities" ||
+    languageFilter !== "All languages";
 
   // ---- Build grid cells (leading blanks + day cells) ----
   const cells = [];
@@ -3738,11 +3598,10 @@ function UpcomingCalendar() {
           {/* ---- Page header ---- */}
           <div className="uc-page-header">
             <div>
-              <span className="eyebrow">Upcoming Calendar</span>
-              <h2 className="uc-page-title">All Education &amp; Events</h2>
+              <span className="eyebrow">{le?.pageInfo?.["upcoming-calendar"]?.eyebrow || "Upcoming Calendar"}</span>
+              <h2 className="uc-page-title">{le?.calendarTitle || "All Education & Events"}</h2>
               <p className="uc-page-sub">
-                Online education, physical programmes and community events — all in one view.
-                Click any event to see details.
+                {le?.calendarSub || "Online education, physical programmes and community events — all in one view. Click any event to see details."}
               </p>
             </div>
           </div>
@@ -3750,40 +3609,53 @@ function UpcomingCalendar() {
           {/* ---- Filters ---- */}
           <div className="uc-filters">
             <div className="uc-filter-group">
-              <label htmlFor="uc-type" className="uc-filter-label">Type</label>
+              <label htmlFor="uc-type" className="uc-filter-label">{le?.type || "Type"}</label>
               <select
                 id="uc-type"
                 className="uc-filter-select"
                 value={typeFilter}
                 onChange={(e) => { setTypeFilter(e.target.value); setSelectedEvent(null); }}
               >
-                <option value="All types">All types</option>
+                <option value="All types">{le?.allTypes || "All types"}</option>
                 {calTypes.map((t) => <option key={t} value={t}>{t}</option>)}
               </select>
             </div>
 
             <div className="uc-filter-group">
-              <label htmlFor="uc-mode" className="uc-filter-label">Mode</label>
+              <label htmlFor="uc-mode" className="uc-filter-label">{le?.mode || "Mode"}</label>
               <select
                 id="uc-mode"
                 className="uc-filter-select"
                 value={modeFilter}
                 onChange={(e) => { setModeFilter(e.target.value); setSelectedEvent(null); }}
               >
-                <option value="All modes">All modes</option>
+                <option value="All modes">{le?.allModes || "All modes"}</option>
                 {modes.map((m) => <option key={m} value={m}>{m}</option>)}
               </select>
             </div>
 
             <div className="uc-filter-group">
-              <label htmlFor="uc-lang" className="uc-filter-label">Language</label>
+              <label htmlFor="uc-city" className="uc-filter-label">{le?.city || "City"}</label>
+              <select
+                id="uc-city"
+                className="uc-filter-select"
+                value={cityFilter}
+                onChange={(e) => { setCityFilter(e.target.value); setSelectedEvent(null); }}
+              >
+                <option value="All cities">{le?.allCities || "All cities"}</option>
+                {calCities.map((c) => <option key={c} value={c}>{c}</option>)}
+              </select>
+            </div>
+
+            <div className="uc-filter-group">
+              <label htmlFor="uc-lang" className="uc-filter-label">{le?.language || "Language"}</label>
               <select
                 id="uc-lang"
                 className="uc-filter-select"
                 value={languageFilter}
                 onChange={(e) => { setLanguageFilter(e.target.value); setSelectedEvent(null); }}
               >
-                <option value="All languages">All languages</option>
+                <option value="All languages">{le?.allLanguages || "All languages"}</option>
                 {languages.map((l) => <option key={l} value={l}>{l}</option>)}
               </select>
             </div>
@@ -3792,13 +3664,18 @@ function UpcomingCalendar() {
               <button
                 type="button"
                 className="uc-clear-btn"
-                onClick={() => { setTypeFilter("All types"); setModeFilter("All modes"); setLanguageFilter("All languages"); }}
+                onClick={() => {
+                  setTypeFilter("All types");
+                  setModeFilter("All modes");
+                  setCityFilter("All cities");
+                  setLanguageFilter("All languages");
+                }}
               >
-                Clear filters
+                {le?.clearFilters || "Clear filters"}
               </button>
             )}
 
-            <span className="uc-event-count">{filteredEvents.length} events</span>
+            <span className="uc-event-count">{filteredEvents.length} {filteredEvents.length === 1 ? (le?.item || "event") : (le?.items || "events")}</span>
           </div>
 
           {/* ---- Calendar + Detail panel ---- */}
@@ -3808,17 +3685,17 @@ function UpcomingCalendar() {
             <div className="uc-calendar-panel">
               {/* Month navigation */}
               <div className="uc-month-nav">
-                <button type="button" className="uc-nav-btn" onClick={prevMonth} aria-label="Previous month">‹</button>
+                <button type="button" className="uc-nav-btn" onClick={prevMonth} aria-label={le?.previousMonth || "Previous month"}>‹</button>
                 <div className="uc-month-label">
-                  <h3>{MONTH_NAMES[viewMonth]} {viewYear}</h3>
+                  <h3>{(le?.months || MONTH_NAMES)[viewMonth]} {viewYear}</h3>
                 </div>
-                <button type="button" className="uc-nav-btn" onClick={nextMonth} aria-label="Next month">›</button>
-                <button type="button" className="uc-today-btn" onClick={goToday}>Today</button>
+                <button type="button" className="uc-nav-btn" onClick={nextMonth} aria-label={le?.nextMonth || "Next month"}>›</button>
+                <button type="button" className="uc-today-btn" onClick={goToday}>{le?.today || "Today"}</button>
               </div>
 
               {/* Day-of-week header */}
               <div className="uc-grid-header">
-                {DAY_LABELS.map((d) => (
+                {(le?.days || DAY_LABELS).map((d) => (
                   <div key={d} className="uc-day-label">{d}</div>
                 ))}
               </div>
@@ -3832,30 +3709,63 @@ function UpcomingCalendar() {
                   const dayEvents = eventsForDay(day);
                   const todayClass = isToday(day) ? "uc-cell-today" : "";
                   const hasEvents = dayEvents.length > 0;
+                  const isSelectedDay = selectedEvent && dayEvents.some((ev) => ev.id === selectedEvent.id);
                   const visibleEvents = dayEvents.slice(0, 5);
                   const overflow = dayEvents.length - visibleEvents.length;
                   return (
                     <div
                       key={`day-${day}`}
-                      className={`uc-cell ${todayClass} ${hasEvents ? "uc-cell-has-events" : ""}`}
+                      className={`uc-cell ${todayClass} ${hasEvents ? "uc-cell-has-events" : ""} ${isSelectedDay ? "uc-cell-selected" : ""}`}
+                      onClick={hasEvents ? () => {
+                        if (dayEvents.length > 1 && selectedEvent) {
+                          const currIdx = dayEvents.findIndex((ev) => ev.id === selectedEvent.id);
+                          if (currIdx >= 0) {
+                            setSelectedEvent(dayEvents[(currIdx + 1) % dayEvents.length]);
+                            return;
+                          }
+                        }
+                        setSelectedEvent(dayEvents[0]);
+                      } : undefined}
+                      role={hasEvents ? "button" : undefined}
+                      tabIndex={hasEvents ? 0 : undefined}
+                      onKeyDown={hasEvents ? (e) => {
+                        if (e.key === "Enter" || e.key === " ") {
+                          e.preventDefault();
+                          setSelectedEvent(dayEvents[0]);
+                        }
+                      } : undefined}
+                      aria-label={hasEvents ? `${day} ${(le?.months || MONTH_NAMES)[viewMonth]} ${viewYear}, ${dayEvents.length} ${dayEvents.length === 1 ? "event" : "events"}` : undefined}
                     >
                       <span className="uc-cell-num">{day}</span>
                       {hasEvents && (
-                        <div className="uc-dots-row">
-                          {visibleEvents.map((ev) => (
-                            <button
-                              key={ev.id}
-                              type="button"
-                              className={`uc-dot uc-dot-${getTypeSlug(ev.type)} ${ev.status === "completed" ? "uc-dot-past" : ""} ${selectedEvent?.id === ev.id ? "uc-dot-active" : ""}`}
-                              onClick={() => setSelectedEvent(ev)}
-                              aria-label={`${ev.title} on ${ev.date}`}
-                              aria-pressed={selectedEvent?.id === ev.id}
-                              data-tooltip={ev.title}
-                            />
-                          ))}
-                          {overflow > 0 && (
-                            <span className="uc-dot-overflow">+{overflow}</span>
-                          )}
+                        <div className="uc-cell-events-info">
+                          <div className="uc-dots-row">
+                            {visibleEvents.map((ev) => (
+                              <button
+                                key={ev.id}
+                                type="button"
+                                className={`uc-dot uc-dot-${getTypeSlug(ev.type)} ${ev.status === "completed" ? "uc-dot-past" : ""} ${selectedEvent?.id === ev.id ? "uc-dot-active" : ""}`}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setSelectedEvent(ev);
+                                }}
+                                aria-label={`${ev.title} on ${ev.date}`}
+                                aria-pressed={selectedEvent?.id === ev.id}
+                                data-tooltip={ev.title}
+                              />
+                            ))}
+                            {overflow > 0 && (
+                              <span className="uc-dot-overflow">+{overflow}</span>
+                            )}
+                          </div>
+                          <div className="uc-cell-label-wrap">
+                            <span className="uc-cell-event-title" title={dayEvents[0].title}>
+                              {dayEvents[0].title}
+                            </span>
+                            {dayEvents.length > 1 && (
+                              <span className="uc-cell-extra-badge">+{dayEvents.length - 1} more</span>
+                            )}
+                          </div>
                         </div>
                       )}
                     </div>
@@ -3914,41 +3824,41 @@ function UpcomingCalendar() {
                 <dl className="uc-detail-meta">
                   {selectedEvent.suitableFor && (
                     <div className="uc-meta-row">
-                      <dt>Suitable for</dt>
+                      <dt>{le?.activityModal?.suitableFor || "Suitable for"}</dt>
                       <dd>{selectedEvent.suitableFor}</dd>
                     </div>
                   )}
                   <div className="uc-meta-row">
-                    <dt>Date &amp; time</dt>
+                    <dt>{le?.activityModal?.dateTime || "Date & time"}</dt>
                     <dd>
                       {selectedEvent.date}
                       {selectedEvent.time && <><br /><span className="uc-meta-time">{selectedEvent.time}</span></>}
                     </dd>
                   </div>
                   <div className="uc-meta-row">
-                    <dt>Mode</dt>
+                    <dt>{le?.activityModal?.mode || "Mode"}</dt>
                     <dd><ModeIcon mode={selectedEvent.mode} /></dd>
                   </div>
                   {selectedEvent.location && (
                     <div className="uc-meta-row">
-                      <dt>Location</dt>
+                      <dt>{le?.activityModal?.location || "Location"}</dt>
                       <dd>{selectedEvent.location}</dd>
                     </div>
                   )}
                   <div className="uc-meta-row">
-                    <dt>Language</dt>
+                    <dt>{le?.activityModal?.language || "Language"}</dt>
                     <dd>{selectedEvent.language}</dd>
                   </div>
                   {selectedEvent.speaker && (
                     <div className="uc-meta-row">
-                      <dt>Speaker / Trainer</dt>
+                      <dt>{le?.activityModal?.speakerTrainer || "Speaker / Trainer"}</dt>
                       <dd>
                         {selectedEvent.speaker}
                         {selectedEvent.trainerId && (
                           <>
                             {" — "}
                             <Link to="/learn-events/certified-trainers" className="uc-trainer-link">
-                              View trainer profile
+                              {le?.activityModal?.viewTrainerProfile || "View trainer profile"}
                             </Link>
                           </>
                         )}
@@ -3960,15 +3870,17 @@ function UpcomingCalendar() {
                 {/* Description */}
                 {selectedEvent.description && (
                   <div className="uc-detail-desc">
-                    <h4>What you will learn</h4>
+                    <h4>{le?.activityModal?.whatYouWillLearn || "What you will learn"}</h4>
                     <p>{selectedEvent.description}</p>
                   </div>
                 )}
 
                 {/* Action */}
                 <div className="uc-detail-action">
-                  {selectedEvent.status === "cancelled" ? (<span className="uc-action-past">This activity has been cancelled.</span>) : selectedEvent.status === "completed" ? (
-                    <span className="uc-action-past">This session has been completed.</span>
+                  {selectedEvent.status === "cancelled" ? (
+                    <span className="uc-action-past">{le?.upcomingCalendarSection?.cancelled || "This activity has been cancelled."}</span>
+                  ) : selectedEvent.status === "completed" ? (
+                    <span className="uc-action-past">{le?.upcomingCalendarSection?.completed || "This session has been completed."}</span>
                   ) : selectedEvent.registrationLink != null ? (
                     <a
                       href={selectedEvent.registrationLink || "#"}
@@ -3976,12 +3888,12 @@ function UpcomingCalendar() {
                       rel="noreferrer"
                       className="uc-register-btn"
                     >
-                      Register Now
-                      <small>Opens external registration form</small>
+                      {le?.activityModal?.registerNow || "Register Now"}
+                      <small>{le?.upcomingCalendarSection?.registerExternal || le?.activityModal?.externalTabNote || "Opens external registration form"}</small>
                     </a>
                   ) : (
                     <button type="button" className="uc-register-btn uc-register-btn-disabled" disabled>
-                      Registration link coming soon
+                      {le?.upcomingCalendarSection?.registerLinkSoon || le?.activityModal?.registrationLinkPending || "Registration link coming soon"}
                     </button>
                   )}
                 </div>
@@ -3991,7 +3903,7 @@ function UpcomingCalendar() {
               <div className="uc-detail-empty" aria-hidden="true">
                 <div className="uc-detail-empty-inner">
                   <span className="uc-empty-icon">📅</span>
-                  <p>Click any event on the calendar to see its details here.</p>
+                  <p>{le?.calendarHint || "Click any event on the calendar to see its details here."}</p>
                 </div>
               </div>
             )}
@@ -4008,8 +3920,11 @@ function UpcomingCalendar() {
    ================================================================ */
 function LearnEvents({ module }) {
   const location = useLocation();
-  const page = pageInfo[module] || pageInfo["online-education"];
-  const heroImage = imageMap[page.image] || webinarImage;
+  const { t } = useLanguage();
+  const le = t.learnEvents;
+  const page = le?.pageInfo?.[module] || pageInfo[module] || pageInfo["online-education"];
+  const rawPage = pageInfo[module] || pageInfo["online-education"];
+  const heroImage = imageMap[rawPage.image] || webinarImage;
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "auto" });
@@ -4027,12 +3942,12 @@ function LearnEvents({ module }) {
             <h1>{page.title}</h1>
             <p>{page.intro}</p>
           </div>
-          <img src={heroImage} alt={page.imageAlt} />
+          <img src={heroImage} alt={page.imageAlt || rawPage.imageAlt} />
         </div>
       </section>
 
       {/* ---- Section content ---- */}
-      {module === "online-education" && <><PublishedRecords kind="learning_resources" title="Approved learning resources"/><OnlineEducation /></>}
+      {module === "online-education" && <><PublishedRecords kind="learning_resources" title="Approved learning resources" /><OnlineEducation /></>}
       {module === "physical-education" && <PhysicalEducation />}
       {module === "events" && <EventsSection />}
       {module === "certified-trainers" && <CertifiedTrainers />}
@@ -4041,7 +3956,7 @@ function LearnEvents({ module }) {
       {/* ---- Module navigation ---- */}
       <section className="module-nav">
         <div className="section-container">
-          <p>Explore education &amp; events</p>
+          <p>{le?.exploreText || "Explore education & events"}</p>
           <div className="module-nav-links">
             {sectionOrder.map((key) => (
               <Link
@@ -4053,7 +3968,7 @@ function LearnEvents({ module }) {
                     : "module-nav-link"
                 }
               >
-                {pageInfo[key].eyebrow}
+                {le?.pageInfo?.[key]?.eyebrow || pageInfo[key].eyebrow}
               </Link>
             ))}
           </div>

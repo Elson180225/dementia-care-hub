@@ -2,6 +2,7 @@ import PublishedRecords from "../../components/PublishedRecords";
 import { useMemo, useState } from "react";
 
 import supportServices from "../../data/supportServices";
+import { useLanguage } from "../../i18n/LanguageContext";
 
 import "./SupportServices.css";
 
@@ -24,6 +25,9 @@ const cities = [
 ];
 
 function SupportServices() {
+  const { t } = useLanguage();
+  const ss = t.supportServicesPage || {};
+
   const [search, setSearch] = useState("");
 
   const [category, setCategory] =
@@ -76,7 +80,7 @@ function SupportServices() {
 
   return (
     <main className="support-services-page">
-      <PublishedRecords kind="organisations" category="services" title="Published directory records" />
+      <PublishedRecords kind="organisations" category="services" title={ss.publishedTitle || "Published directory records"} />
       {/* =====================================================
           HERO
       ====================================================== */}
@@ -84,16 +88,15 @@ function SupportServices() {
       <section className="support-services-hero">
         <div className="support-services-container">
           <span className="support-services-kicker">
-            Find Help & Support
+            {ss.kicker || "Find Help & Support"}
           </span>
 
           <h1>
-            Support Services Directory
+            {ss.title || "Support Services Directory"}
           </h1>
 
           <p>
-            Browse available external support services and
-            providers by service type and location.
+            {ss.subtitle || "Browse available external support services and providers by service type and location."}
           </p>
         </div>
       </section>
@@ -107,17 +110,16 @@ function SupportServices() {
           <div className="support-services-heading">
             <div>
               <span>
-                Browse Services
+                {ss.categoriesEyebrow || t.header?.menu?.supportServices || "Support Services"}
               </span>
 
               <h2>
-                Find the type of support you need.
+                {ss.directoryHeading || "Find the type of support you need."}
               </h2>
             </div>
 
             <p>
-              Search and filter available listings by
-              service type and location.
+              {ss.directorySub || "Search and filter available listings by service type and location."}
             </p>
           </div>
 
@@ -131,7 +133,7 @@ function SupportServices() {
 
               <input
                 type="search"
-                placeholder="Search provider or service"
+                placeholder={ss.searchPlaceholder || "Search provider or service"}
                 value={search}
                 onChange={(event) =>
                   setSearch(
@@ -157,7 +159,7 @@ function SupportServices() {
                     value={item}
                   >
                     {item === "All"
-                      ? "All service types"
+                      ? (ss.allServices || "All service types")
                       : item}
                   </option>
                 )
@@ -180,7 +182,7 @@ function SupportServices() {
                     value={item}
                   >
                     {item === "All"
-                      ? "All locations"
+                      ? (ss.allCities || "All locations")
                       : item}
                   </option>
                 )
@@ -192,7 +194,7 @@ function SupportServices() {
               className="support-reset-button"
               onClick={resetFilters}
             >
-              Reset
+              {ss.reset || "Reset"}
             </button>
           </div>
 
@@ -200,7 +202,7 @@ function SupportServices() {
 
           <div className="support-results-summary">
             <span>
-              Showing
+              {ss.showing || "Showing"}
             </span>
 
             <strong>
@@ -212,8 +214,8 @@ function SupportServices() {
             <span>
               {filteredServices.length ===
               1
-                ? "service"
-                : "services"}
+                ? (ss.serviceLabel || "service")
+                : (ss.servicesLabel || "services")}
             </span>
           </div>
 
@@ -253,7 +255,7 @@ function SupportServices() {
                     <div className="support-service-details">
                       <div>
                         <span>
-                          Location
+                          {ss.labelLocation || "Location"}
                         </span>
 
                         <strong>
@@ -265,7 +267,7 @@ function SupportServices() {
 
                       <div>
                         <span>
-                          Specialist field
+                          {ss.labelSpecialist || "Specialist field"}
                         </span>
 
                         <strong>
@@ -277,23 +279,23 @@ function SupportServices() {
 
                       <div>
                         <span>
-                          Phone
+                          {ss.labelPhone || "Phone"}
                         </span>
 
                         <strong>
                           {service.phone ||
-                            "Pending"}
+                            (ss.pending || "Pending")}
                         </strong>
                       </div>
 
                       <div>
                         <span>
-                          Email
+                          {ss.labelEmail || "Email"}
                         </span>
 
                         <strong>
                           {service.email ||
-                            "Pending"}
+                            (ss.pending || "Pending")}
                         </strong>
                       </div>
                     </div>
@@ -306,16 +308,16 @@ function SupportServices() {
                       >
                         {service.verificationStatus ===
                         "verified"
-                          ? "Verified"
+                          ? (ss.verified || "Verified")
                           : service.verificationStatus ===
                             "rejected"
-                          ? "Not approved"
-                          : "Verification pending"}
+                          ? (ss.notApproved || "Not approved")
+                          : (ss.verificationPending || "Verification pending")}
                       </span>
 
                       {service.lastReviewed && (
                         <small>
-                          Last reviewed:{" "}
+                          {ss.lastReviewed || "Last reviewed:"}{" "}
                           {
                             service.lastReviewed
                           }
@@ -327,7 +329,7 @@ function SupportServices() {
 
                     <div className="support-publication-state">
                       <span>
-                        Record status
+                        {ss.recordStatus || "Record status"}
                       </span>
 
                       <strong>
@@ -345,13 +347,11 @@ function SupportServices() {
               </span>
 
               <h3>
-                No matching services
+                {ss.noResults || "No matching services"}
               </h3>
 
               <p>
-                Try changing your
-                search or filter
-                selection.
+                {ss.emptyDesc || "Try changing your search or filter selection."}
               </p>
 
               <button
@@ -360,7 +360,7 @@ function SupportServices() {
                   resetFilters
                 }
               >
-                Clear filters
+                {ss.clearFilters || "Clear filters"}
               </button>
             </div>
           )}
@@ -376,11 +376,11 @@ function SupportServices() {
           <div className="support-services-heading">
             <div>
               <span>
-                Service Categories
+                {ss.categoriesEyebrow || "Service Categories"}
               </span>
 
               <h2>
-                What can you find here?
+                {ss.categoriesTitle || "What can you find here?"}
               </h2>
             </div>
           </div>
@@ -431,7 +431,7 @@ function SupportServices() {
                     </h3>
 
                     <strong>
-                      View services →
+                      {ss.viewServices || "View services →"}
                     </strong>
                   </button>
                 )
@@ -449,46 +449,41 @@ function SupportServices() {
           <div className="support-admin-ready-box">
             <div>
               <span>
-                Admin-ready structure
+                {ss.adminEyebrow || "Admin-ready structure"}
               </span>
 
               <h2>
-                Directory content can be managed centrally.
+                {ss.adminTitle || "Directory content can be managed centrally."}
               </h2>
 
               <p>
-                Service information is separated from the
-                page interface. When the Admin module and
-                backend are added, administrators will be
-                able to add, edit, verify, publish and
-                archive directory records without changing
-                the public page code.
+                {ss.adminDesc || "Service information is separated from the page interface. When the Admin module and backend are added, administrators will be able to add, edit, verify, publish and archive directory records without changing the public page code."}
               </p>
             </div>
 
             <div className="support-admin-fields">
               <span>
-                Provider
+                {ss.adminProvider || "Provider"}
               </span>
 
               <span>
-                Category
+                {ss.adminCategory || "Category"}
               </span>
 
               <span>
-                Location
+                {ss.adminLocation || "Location"}
               </span>
 
               <span>
-                Contact
+                {ss.adminContact || "Contact"}
               </span>
 
               <span>
-                Verification
+                {ss.adminVerification || "Verification"}
               </span>
 
               <span>
-                Publication status
+                {ss.adminStatus || "Publication status"}
               </span>
             </div>
           </div>
@@ -508,21 +503,15 @@ function SupportServices() {
 
             <div>
               <strong>
-                Directory Listing Notice
+                {ss.disclaimerTitle || "Directory Listing Notice"}
               </strong>
 
               <p>
-                Dementia Care Connect provides information
-                and navigation to external providers.
-                Inclusion in this directory does not
-                constitute endorsement, recommendation or
-                guarantee by RCBC.
+                {ss.disclaimerP1 || "Dementia Care Connect provides information and navigation to external providers. Inclusion in this directory does not constitute endorsement, recommendation or guarantee by RCBC."}
               </p>
 
               <p>
-                Provider information should be verified and
-                periodically reviewed before public
-                publication.
+                {ss.disclaimerP2 || "Provider information should be verified and periodically reviewed before public publication."}
               </p>
             </div>
           </div>

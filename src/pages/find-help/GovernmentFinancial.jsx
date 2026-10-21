@@ -2,6 +2,7 @@ import PublishedRecords from "../../components/PublishedRecords";
 import { useMemo, useState } from "react";
 
 import governmentResources from "../../data/governmentResources";
+import { useLanguage } from "../../i18n/LanguageContext";
 
 import "./GovernmentFinancial.css";
 
@@ -14,6 +15,9 @@ const categories = [
 ];
 
 function GovernmentFinancial() {
+  const { t } = useLanguage();
+  const gf = t.governmentFinancialPage || {};
+
   const [search, setSearch] = useState("");
 
   const [category, setCategory] = useState("All");
@@ -47,7 +51,7 @@ function GovernmentFinancial() {
 
   return (
     <main className="government-page">
-      <PublishedRecords kind="organisations" category="financial" title="Published directory records" />
+      <PublishedRecords kind="organisations" category="financial" title={gf.publishedTitle || "Published directory records"} />
       {/* =====================================================
           HERO
       ====================================================== */}
@@ -55,18 +59,15 @@ function GovernmentFinancial() {
       <section className="government-hero">
         <div className="government-container">
           <span className="government-kicker">
-            Find Help & Support
+            {gf.kicker || "Find Help & Support"}
           </span>
 
           <h1>
-            Government & Financial Resources
+            {gf.title || "Government & Financial Resources"}
           </h1>
 
           <p>
-            Find information about official government
-            programmes, financial support and other external
-            resources that may be relevant to you or your
-            family.
+            {gf.subtitle || "Find information about official government programmes, financial support and other external resources that may be relevant to you or your family."}
           </p>
         </div>
       </section>
@@ -84,15 +85,11 @@ function GovernmentFinancial() {
 
             <div>
               <strong>
-                Information & Navigation Only
+                {gf.boundaryTitle || "Information & Navigation Only"}
               </strong>
 
               <p>
-                Dementia Care Connect does not provide
-                government benefits, financial assistance or
-                subsidies. This page helps users find relevant
-                official information and the responsible
-                external agency.
+                {gf.boundaryText || "Dementia Care Connect does not provide government benefits, financial assistance or subsidies. This page helps users find relevant official information and the responsible external agency."}
               </p>
             </div>
           </div>
@@ -108,16 +105,16 @@ function GovernmentFinancial() {
           <div className="government-heading">
             <div>
               <span>
-                Official Resource Navigation
+                {gf.kicker || t.header?.menu?.govtFinancial || "Government & Financial Resources"}
               </span>
 
               <h2>
-                Find relevant programmes and information.
+                {gf.findProgrammesTitle || "Find relevant programmes and information."}
               </h2>
             </div>
 
             <p>
-              Search by programme, agency or support type.
+              {gf.findProgrammesSub || "Search by programme, agency or support type."}
             </p>
           </div>
 
@@ -131,7 +128,7 @@ function GovernmentFinancial() {
 
               <input
                 type="search"
-                placeholder="Search programmes or agencies"
+                placeholder={gf.searchPlaceholder || "Search programmes or agencies"}
                 value={search}
                 onChange={(event) =>
                   setSearch(event.target.value)
@@ -152,7 +149,7 @@ function GovernmentFinancial() {
                   value={item}
                 >
                   {item === "All"
-                    ? "All resource types"
+                    ? (gf.allCategories || "All resource types")
                     : item}
                 </option>
               ))}
@@ -163,7 +160,7 @@ function GovernmentFinancial() {
               className="government-reset"
               onClick={resetFilters}
             >
-              Reset
+              {gf.reset || "Reset"}
             </button>
           </div>
 
@@ -171,7 +168,7 @@ function GovernmentFinancial() {
 
           <div className="government-result-count">
             <span>
-              Showing
+              {gf.showing || "Showing"}
             </span>
 
             <strong>
@@ -180,8 +177,8 @@ function GovernmentFinancial() {
 
             <span>
               {filteredResources.length === 1
-                ? "resource"
-                : "resources"}
+                ? (gf.resourceLabel || "resource")
+                : (gf.resourcesLabel || "resources")}
             </span>
           </div>
 
@@ -210,7 +207,7 @@ function GovernmentFinancial() {
 
                   <div className="government-agency">
                     <span>
-                      Responsible agency
+                      {gf.responsibleAgency || "Responsible agency"}
                     </span>
 
                     <strong>
@@ -227,7 +224,7 @@ function GovernmentFinancial() {
                   <div className="government-info-grid">
                     <div>
                       <span>
-                        Basic eligibility
+                        {gf.basicEligibility || "Basic eligibility"}
                       </span>
 
                       <p>
@@ -237,7 +234,7 @@ function GovernmentFinancial() {
 
                     <div>
                       <span>
-                        How to access
+                        {gf.howToAccess || "How to access"}
                       </span>
 
                       <p>
@@ -251,27 +248,27 @@ function GovernmentFinancial() {
                   <div className="government-contact">
                     <div>
                       <span>
-                        Phone
+                        {gf.phone || "Phone"}
                       </span>
 
                       <strong>
-                        {resource.phone || "Pending"}
+                        {resource.phone || (gf.pending || "Pending")}
                       </strong>
                     </div>
 
                     <div>
                       <span>
-                        Email
+                        {gf.email || "Email"}
                       </span>
 
                       <strong>
-                        {resource.email || "Pending"}
+                        {resource.email || (gf.pending || "Pending")}
                       </strong>
                     </div>
 
                     <div>
                       <span>
-                        Official website
+                        {gf.officialWebsite || "Official website"}
                       </span>
 
                       {resource.website ? (
@@ -280,11 +277,11 @@ function GovernmentFinancial() {
                           target="_blank"
                           rel="noreferrer"
                         >
-                          Visit official source ↗
+                          {gf.visitOfficial || "Visit official source ↗"}
                         </a>
                       ) : (
                         <strong>
-                          Pending
+                          {gf.pending || "Pending"}
                         </strong>
                       )}
                     </div>
@@ -298,11 +295,11 @@ function GovernmentFinancial() {
                     >
                       {resource.verificationStatus ===
                       "verified"
-                        ? "Verified"
+                        ? (gf.verified || "Verified")
                         : resource.verificationStatus ===
                           "rejected"
-                        ? "Not approved"
-                        : "Verification pending"}
+                        ? (gf.notApproved || "Not approved")
+                        : (gf.verificationPending || "Verification pending")}
                     </span>
 
                     <span className="government-record-status">
@@ -311,7 +308,7 @@ function GovernmentFinancial() {
 
                     {resource.lastReviewed && (
                       <small>
-                        Reviewed: {resource.lastReviewed}
+                        {gf.reviewed || "Reviewed:"} {resource.lastReviewed}
                       </small>
                     )}
                   </div>
@@ -325,18 +322,18 @@ function GovernmentFinancial() {
               </span>
 
               <h3>
-                No matching resources
+                {gf.noResults || "No matching resources"}
               </h3>
 
               <p>
-                Try changing the search or category filter.
+                {gf.emptyDesc || "Try changing the search or category filter."}
               </p>
 
               <button
                 type="button"
                 onClick={resetFilters}
               >
-                Clear filters
+                {gf.clearFilters || "Clear filters"}
               </button>
             </div>
           )}
@@ -352,11 +349,11 @@ function GovernmentFinancial() {
           <div className="government-heading">
             <div>
               <span>
-                How This Section Works
+                {gf.howEyebrow || "How This Section Works"}
               </span>
 
               <h2>
-                Use official information to take the next step.
+                {gf.howTitle || "Use official information to take the next step."}
               </h2>
             </div>
           </div>
@@ -368,12 +365,11 @@ function GovernmentFinancial() {
               </span>
 
               <h3>
-                Find a relevant resource
+                {gf.step1Title || "Find a relevant resource"}
               </h3>
 
               <p>
-                Search the available programmes and information
-                based on your needs.
+                {gf.step1Desc || "Search the available programmes and information based on your needs."}
               </p>
             </div>
 
@@ -383,12 +379,11 @@ function GovernmentFinancial() {
               </span>
 
               <h3>
-                Check basic eligibility
+                {gf.step2Title || "Check basic eligibility"}
               </h3>
 
               <p>
-                Review the available eligibility information
-                before continuing.
+                {gf.step2Desc || "Review the available eligibility information before continuing."}
               </p>
             </div>
 
@@ -398,12 +393,11 @@ function GovernmentFinancial() {
               </span>
 
               <h3>
-                Continue to the official agency
+                {gf.step3Title || "Continue to the official agency"}
               </h3>
 
               <p>
-                Use the official contact details or website for
-                final information, applications and decisions.
+                {gf.step3Desc || "Use the official contact details or website for final information, applications and decisions."}
               </p>
             </div>
           </div>
@@ -419,52 +413,49 @@ function GovernmentFinancial() {
           <div className="government-admin-box">
             <div>
               <span>
-                Admin-ready structure
+                {gf.adminEyebrow || "Admin-ready structure"}
               </span>
 
               <h2>
-                Resources can be managed without changing the page.
+                {gf.adminTitle || "Resources can be managed without changing the page."}
               </h2>
 
               <p>
-                When the Admin module and backend are added,
-                administrators can create, edit, verify,
-                publish, archive and review government or
-                financial resource records centrally.
+                {gf.adminDesc || "When the Admin module and backend are added, administrators can create, edit, verify, publish, archive and review government or financial resource records centrally."}
               </p>
             </div>
 
             <div className="government-admin-fields">
               <span>
-                Programme name
+                {gf.adminName || "Programme name"}
               </span>
 
               <span>
-                Agency
+                {gf.adminAgency || "Agency"}
               </span>
 
               <span>
-                Category
+                {gf.adminCategory || "Category"}
               </span>
 
               <span>
-                Eligibility
+                {gf.adminEligibility || "Eligibility"}
               </span>
 
               <span>
-                Access information
+                {gf.adminAccess || "Access information"}
               </span>
 
               <span>
-                Official contact
+                {gf.adminContact || "Official contact"}
               </span>
 
               <span>
-                Verification
+                {gf.adminVerification || "Verification"}
               </span>
 
               <span>
-                Publication status
+                {gf.adminStatus || "Publication status"}
               </span>
             </div>
           </div>
@@ -484,15 +475,11 @@ function GovernmentFinancial() {
 
             <div>
               <strong>
-                External Programme Notice
+                {gf.noticeTitle || "External Programme Notice"}
               </strong>
 
               <p>
-                Programme availability, eligibility and
-                application requirements are determined by the
-                responsible government agency or external
-                provider. Dementia Care Connect provides
-                navigation and information only.
+                {gf.noticeText || "Programme availability, eligibility and application requirements are determined by the responsible government agency or external provider. Dementia Care Connect provides navigation and information only."}
               </p>
             </div>
           </div>

@@ -312,6 +312,12 @@
   color: #087b78;
 }
 
+.language-menu button.language-menu-active {
+  background: #eaf3f1;
+  color: #087b78;
+  font-weight: 600;
+}
+
 /* ============================================================
    MAIN HEADER
 ============================================================ */
