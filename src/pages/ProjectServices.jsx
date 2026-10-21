@@ -55,6 +55,12 @@ export default function ProjectServices({ certificate = false }) {
             ? ps.unsubscribeTitle || 'Unsubscribe from updates'
             : ps.subscribeTitle || 'Get Updated'}
         </h1>
+        {!certificate && !token && (
+          <p>
+            {ps.getUpdatedIntro ||
+              'Stay connected with Dementia Care Connect. Register to receive updates on upcoming webinars, education, training and project activities.'}
+          </p>
+        )}
         <form className="tp-card" onSubmit={submit}>
           {!token && (
             <>

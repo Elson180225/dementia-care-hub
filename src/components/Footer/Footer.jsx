@@ -49,7 +49,7 @@ function Footer() {
 
             <Link to="/about/contact">{m.contactUs}</Link>
 
-            <Link to="/about/support">{f.trainerPortal || "Trainer Portal"}</Link>
+            <Link to="/trainer-portal">{f.trainerPortal || "Trainer Portal"}</Link>
           </div>
 
           <div className="footer-contact">

@@ -80,6 +80,31 @@
   gap: 8px;
 }
 
+.utility-nav {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.utility-nav a {
+  color: #17383a;
+  text-decoration: none;
+  padding: 10px 0;
+}
+
+.utility-nav a:hover {
+  color: #087b78;
+  text-decoration: underline;
+}
+
+.utility-nav a:focus-visible {
+  outline: 3px solid #f5a800;
+  outline-offset: 3px;
+}
+
 /* ============================================================
    ANIMATED SEARCH
 ============================================================ */
@@ -752,6 +777,15 @@
 
   .top-actions {
     gap: 4px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    width: 100%;
+  }
+
+  .utility-nav {
+    margin-right: auto;
+    gap: 6px;
+    font-size: 11px;
   }
 
   .top-actions .animated-search-button {

@@ -96,6 +96,7 @@ function getMenuItems(m) {
     {
       label: m.learnEvents,
       path: "/learn-events",
+      menuOnly: true,
       children: [
         {
           label: m.onlineEducation,
@@ -205,6 +206,11 @@ function Header() {
             <span>{t.header.topBar}</span>
 
             <div className="top-actions">
+              <nav className="utility-nav" aria-label="Updates and trainer access">
+                <Link to="/get-updated" onClick={closeMobileMenu}>GET UPDATED</Link>
+                <span aria-hidden="true">|</span>
+                <Link to="/trainer-portal" onClick={closeMobileMenu}>TRAINER PORTAL</Link>
+              </nav>
               {/* SEARCH */}
               <button
                 type="button"
@@ -277,7 +283,7 @@ function Header() {
                 className="brand-logo"
               />
               <div className="brand-text">
-                <strong>{t.header?.hubTitle || "Dementia Care Hub"}</strong>
+                <strong>{t.header?.hubTitle || "Dementia Care Connect"}</strong>
                 <span>{t.header?.hubSubtitle || "Support • Learn • Connect"}</span>
               </div>
             </Link>
