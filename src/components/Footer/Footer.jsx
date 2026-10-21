@@ -27,7 +27,7 @@ function Footer() {
             <Link to="/caregiver-support/verify-certificate">Verify DCS certificate</Link>
 
             <Link to="/understand-dementia">
-              Understand Dementia
+              Understanding Dementia
             </Link>
 
             <Link to="/find-help">
@@ -39,7 +39,7 @@ function Footer() {
             </Link>
 
             <Link to="/learn-events">
-              Learn & Events
+              Education & Events
             </Link>
           </div>
 
@@ -54,7 +54,7 @@ function Footer() {
               Contact Us
             </Link>
 
-            <Link to="/about/support">
+            <Link to="/trainer-portal">
               Trainer Portal
             </Link>
           </div>
