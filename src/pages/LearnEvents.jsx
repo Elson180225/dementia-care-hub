@@ -2885,123 +2885,101 @@ function EventsSection() {
 /* ================================================================
    MEDICAL CAROUSEL — draggable, auto-flowing, prev/next
    ================================================================ */
-function MedicalCarousel({ trainers: carouselTrainers = [], onSelect, onViewAll }) {
+function MedicalCarousel({ trainers: carouselTrainers, onSelect, onViewAll }) {
   const { t } = useLanguage();
   const cs = t.learnEvents?.certifiedTrainersSection || {};
   const trackRef = useRef(null);
-  const isInteracting = useRef(false);
-  const resumeTimeout = useRef(null);
+  const autoRef = useRef(null);
   const isDragging = useRef(false);
   const startX = useRef(0);
   const startScroll = useRef(0);
   const hasDragged = useRef(false);
+  const isUserInteracting = useRef(false);
+  const resumeTimeout = useRef(null);
 
-  const [items, setItems] = useState(() => carouselTrainers);
+  const SCROLL_STEP = 220;
 
-  // Keep items in sync when carouselTrainers data loads
-  useEffect(() => {
-    if (carouselTrainers && carouselTrainers.length > 0) {
-      setItems(carouselTrainers);
-    }
-  }, [carouselTrainers]);
-
-  /* ---- Continuous smooth flow (requestAnimationFrame) ---- */
-  useEffect(() => {
-    let animId;
-    let lastTime = performance.now();
-
-    const loop = (now) => {
-      const dt = Math.min(now - lastTime, 80);
-      lastTime = now;
-
+  /* ---- Auto-scroll (slow drift) ---- */
+  const startAuto = useCallback(() => {
+    if (autoRef.current) return;
+    autoRef.current = setInterval(() => {
       const el = trackRef.current;
-      if (el && !isInteracting.current && items.length > 1) {
-        // Continuous gentle flow (~40px / sec)
-        el.scrollLeft += (40 * dt) / 1000;
-
-        const firstCard = el.firstElementChild;
-        if (firstCard) {
-          const step = firstCard.offsetWidth + 20; // card width + 20px gap
-          if (el.scrollLeft >= step) {
-            el.scrollLeft -= step;
-            setItems((prev) => {
-              if (prev.length <= 1) return prev;
-              const [first, ...rest] = prev;
-              return [...rest, first];
-            });
-          }
-        }
+      if (!el || isUserInteracting.current) return;
+      const maxScroll = el.scrollWidth - el.clientWidth;
+      if (maxScroll <= 0) return;
+      if (el.scrollLeft >= maxScroll - 2) {
+        el.scrollTo({ left: 0, behavior: "smooth" });
+      } else {
+        el.scrollLeft += 1;
       }
-
-      animId = requestAnimationFrame(loop);
-    };
-
-    animId = requestAnimationFrame(loop);
-    return () => cancelAnimationFrame(animId);
-  }, [items.length]);
-
-  /* ---- Hover stop ---- */
-  const onMouseEnter = useCallback(() => {
-    isInteracting.current = true;
+    }, 28);
   }, []);
 
-  const onMouseLeave = useCallback(() => {
-    if (!isDragging.current) {
-      isInteracting.current = false;
-    }
+  const stopAuto = useCallback(() => {
+    clearInterval(autoRef.current);
+    autoRef.current = null;
   }, []);
 
-  /* ---- Prev / Next buttons ---- */
-  const scrollBy = useCallback((dir) => {
-    isInteracting.current = true;
+  const pauseAndResume = useCallback(() => {
+    isUserInteracting.current = true;
     clearTimeout(resumeTimeout.current);
     resumeTimeout.current = setTimeout(() => {
-      isInteracting.current = false;
-    }, 2000);
-
-    if (dir > 0) {
-      // Advance to next trainer
-      setItems((prev) => {
-        if (prev.length <= 1) return prev;
-        const [first, ...rest] = prev;
-        return [...rest, first];
-      });
-    } else {
-      // Go back to previous trainer
-      setItems((prev) => {
-        if (prev.length <= 1) return prev;
-        const last = prev[prev.length - 1];
-        const rest = prev.slice(0, -1);
-        return [last, ...rest];
-      });
-    }
+      isUserInteracting.current = false;
+    }, 3000);
   }, []);
+
+  useEffect(() => {
+    startAuto();
+    return () => {
+      stopAuto();
+      clearTimeout(resumeTimeout.current);
+    };
+  }, [startAuto, stopAuto]);
+
+  /* ---- Prev / Next ---- */
+  const scrollBy = useCallback((dir) => {
+    const el = trackRef.current;
+    if (!el) return;
+    pauseAndResume();
+    const maxScroll = el.scrollWidth - el.clientWidth;
+    if (dir > 0 && el.scrollLeft >= maxScroll - 15) {
+      el.scrollTo({ left: 0, behavior: "smooth" });
+    } else if (dir < 0 && el.scrollLeft <= 15) {
+      el.scrollTo({ left: maxScroll, behavior: "smooth" });
+    } else {
+      el.scrollBy({ left: dir * SCROLL_STEP, behavior: "smooth" });
+    }
+  }, [pauseAndResume]);
 
   /* ---- Drag (pointer events) ---- */
   const onPointerDown = useCallback((e) => {
     if (e.button !== 0) return;
     isDragging.current = true;
     hasDragged.current = false;
-    isInteracting.current = true;
     startX.current = e.clientX;
     startScroll.current = trackRef.current?.scrollLeft ?? 0;
+    pauseAndResume();
     trackRef.current?.setPointerCapture(e.pointerId);
-  }, []);
+  }, [pauseAndResume]);
 
   const onPointerMove = useCallback((e) => {
-    if (!isDragging.current || !trackRef.current) return;
+    if (!isDragging.current) return;
     const dx = e.clientX - startX.current;
     if (Math.abs(dx) > 4) hasDragged.current = true;
-    trackRef.current.scrollLeft = startScroll.current - dx;
+    if (trackRef.current) trackRef.current.scrollLeft = startScroll.current - dx;
   }, []);
 
-  const onPointerUp = useCallback(() => {
-    isDragging.current = false;
-    clearTimeout(resumeTimeout.current);
-    resumeTimeout.current = setTimeout(() => {
-      isInteracting.current = false;
-    }, 1500);
+  const onPointerUp = useCallback(() => { isDragging.current = false; }, []);
+
+  const onMouseEnter = useCallback(() => { isUserInteracting.current = true; }, []);
+  const onMouseLeave = useCallback(() => {
+    if (!isDragging.current) {
+      clearTimeout(resumeTimeout.current);
+      resumeTimeout.current = setTimeout(() => { isUserInteracting.current = false; }, 800);
+    }
   }, []);
+
+  const items = carouselTrainers;
 
   return (
     <section className="ct-carousel-section">
