@@ -49,6 +49,7 @@ import {
   cities,
   languages,
 } from "../data/learn-events-data";
+import defaultCmsContent from "../../shared/learn-events-content.json";
 import "./LearnEvents.css";
 
 function usePublicActivities() {
@@ -66,6 +67,41 @@ function usePublicActivities() {
     return () => { active = false; };
   }, []);
   return rows;
+}
+
+function useLearnEventsContent() {
+  const [content, setContent] = useState(defaultCmsContent);
+  useEffect(() => {
+    let active = true;
+    fetch('/api/public/learn-events-content')
+      .then(r => { if (!r.ok) throw new Error('CMS unavailable'); return r.json(); })
+      .then(data => {
+        if (active && data && typeof data === 'object' && Object.keys(data).length > 0) {
+          setContent(data);
+        }
+      })
+      .catch(() => { });
+    return () => { active = false; };
+  }, []);
+  return content;
+}
+
+function resolveMediaImage(src, fallback) {
+  if (!src) return fallback;
+  if (typeof src === "object") return src;
+  if (typeof src === "string") {
+    if (src.startsWith("http://") || src.startsWith("https://") || src.startsWith("/api/files/")) return src;
+    if (src.includes("dcs-family")) return dcsFamilyPoster;
+    if (src.includes("adfm")) return adfmPoster;
+    if (src.includes("yearly-calendar") || src.includes("yearlyCalendar")) return yearlyCalendar2026Poster;
+    if (src.includes("dialogue-1") || src.includes("2025_8_16(1)")) return dialogueImg1;
+    if (src.includes("dialogue-2") || src.includes("2025_8_16")) return dialogueImg2;
+    if (src.includes("sinchew") || src.includes("Sin_Chew")) return newsSinChew;
+    if (src.includes("seehua") || src.includes("See_Hua")) return newsSeeHua;
+    if (src.includes("Group_Photo_2")) return trainingImage;
+    if (src.includes("webinar")) return webinarImage;
+  }
+  return src || fallback;
 }
 
 /* ---- image resolver ---- */
@@ -687,6 +723,10 @@ function OnlineEducation() {
   const { t } = useLanguage();
   const le = t.learnEvents;
   const activities = usePublicActivities();
+  const cmsContent = useLearnEventsContent();
+  const onlineCms = cmsContent.onlineEducation || {};
+  const upcomingTopics = (onlineCms.upcomingTopics && onlineCms.upcomingTopics.length > 0) ? onlineCms.upcomingTopics : plannedTopicsList;
+  const approvedList = (onlineCms.approvedResources && onlineCms.approvedResources.length > 0) ? onlineCms.approvedResources : learningResources;
   const [selected, setSelected] = useState(null);
   const [selectedQa, setSelectedQa] = useState(null);
   const defaultFilters = { query: "", language: "All", timing: "All" };
@@ -700,7 +740,7 @@ function OnlineEducation() {
 
   const rcbcWebinars = [...activities.filter((item) => item.type === "RCBC Webinar"), ...onlineWebinars];
   const ctWebinars = [...activities.filter((item) => item.type === "CT Webinar"), ...trainerWebinars];
-  const archiveResources = learningResources.map((resource) => ({ ...resource, status: "completed" }));
+  const archiveResources = approvedList.map((resource) => ({ ...resource, status: "completed" }));
 
   const publicResults = pageItems(rcbcWebinars, publicFilters, publicPage);
   const trainerResults = pageItems(ctWebinars, trainerFilters, trainerPage);
@@ -909,7 +949,7 @@ function OnlineEducation() {
 
             {topicView === "list" ? (
               <div className="planned-topics-list">
-                {plannedTopicsList.map((t) => (
+                {upcomingTopics.map((t) => (
                   <article className="planned-topic-row" key={t.id}>
                     <div className="topic-date-block">
                       <span className="topic-month">{t.month}</span>
@@ -918,7 +958,7 @@ function OnlineEducation() {
                     </div>
 
                     <div className="topic-thumb">
-                      <img src={t.image} alt={t.title} />
+                      <img src={resolveMediaImage(t.image, webinarImage)} alt={t.title} />
                     </div>
 
                     <div className="topic-details">
@@ -944,7 +984,7 @@ function OnlineEducation() {
               </div>
             ) : (
               <div className="planned-topics-grid">
-                {plannedTopicsList.map((t) => (
+                {upcomingTopics.map((t) => (
                   <article
                     className="planned-topic-grid-card"
                     key={t.id}
@@ -954,7 +994,7 @@ function OnlineEducation() {
                     onKeyDown={(e) => e.key === "Enter" && setSelected(t)}
                   >
                     <div className="topic-grid-image">
-                      <img src={t.image} alt={t.title} />
+                      <img src={resolveMediaImage(t.image, webinarImage)} alt={t.title} />
                       <div className="topic-grid-date-badge">
                         <span>{t.month}</span>
                         <strong>{t.day}</strong>
@@ -1322,6 +1362,7 @@ function ProgramModal({ program, onClose }) {
 function PhysicalEducation() {
   const { t } = useLanguage();
   const le = t.learnEvents;
+  const cmsContent = useLearnEventsContent();
   const [activeTrackId, setActiveTrackId] = useState("dcs-family");
   const [activeModalProgram, setActiveModalProgram] = useState(null);
 
@@ -1331,8 +1372,12 @@ function PhysicalEducation() {
     "dcs-care-worker": healthcareSupportImg,
   };
 
+  const programmes = (cmsContent.physicalEducation?.programmes && cmsContent.physicalEducation.programmes.length > 0)
+    ? cmsContent.physicalEducation.programmes
+    : physicalProgrammes;
+
   const activeTrack =
-    physicalProgrammes.find((p) => p.id === activeTrackId) || physicalProgrammes[0];
+    programmes.find((p) => p.id === activeTrackId) || programmes[0];
 
   return (
     <main className="module-main physical-education-main">
@@ -1354,7 +1399,7 @@ function PhysicalEducation() {
             role="tablist"
             aria-label="Dementia Care Series Learning Tracks"
           >
-            {physicalProgrammes.map((p) => {
+            {programmes.map((p) => {
               const isActive = activeTrackId === p.id;
               return (
                 <button
@@ -1605,7 +1650,7 @@ function PhysicalEducation() {
                 {/* Media Preview Card */}
                 <div className="stage-media-card">
                   <img
-                    src={trackImages[activeTrack.id] || dcsFamilyImage}
+                    src={resolveMediaImage(activeTrack.image, trackImages[activeTrack.id] || dcsFamilyImage)}
                     alt={activeTrack.title}
                   />
                   <div className="stage-media-caption">
@@ -1957,6 +2002,8 @@ function EventsSection() {
   const le = t.learnEvents;
   const ev = le?.eventsSection || {};
   const activities = usePublicActivities();
+  const cmsContent = useLearnEventsContent();
+  const eventsCms = cmsContent.events || {};
   const [selectedActivity, setSelectedActivity] = useState(null);
   const [lightboxData, setLightboxData] = useState(null);
 
@@ -2069,18 +2116,20 @@ function EventsSection() {
     },
   ];
 
+  const activeRoadmaps = (eventsCms.roadmap && eventsCms.roadmap.length > 0) ? eventsCms.roadmap : roadmaps;
+
   // Carousel state
   const [activeRoadmapIndex, setActiveRoadmapIndex] = useState(0);
   const [slideDirection, setSlideDirection] = useState("next"); // 'next' | 'prev'
   const [isAnimating, setIsAnimating] = useState(false);
 
-  const currentRoadmap = roadmaps[activeRoadmapIndex];
+  const currentRoadmap = activeRoadmaps[activeRoadmapIndex] || activeRoadmaps[0];
 
   const handlePrevRoadmap = () => {
     if (isAnimating) return;
     setSlideDirection("prev");
     setIsAnimating(true);
-    setActiveRoadmapIndex((prev) => (prev === 0 ? roadmaps.length - 1 : prev - 1));
+    setActiveRoadmapIndex((prev) => (prev === 0 ? activeRoadmaps.length - 1 : prev - 1));
     setTimeout(() => setIsAnimating(false), 400);
   };
 
@@ -2088,7 +2137,7 @@ function EventsSection() {
     if (isAnimating) return;
     setSlideDirection("next");
     setIsAnimating(true);
-    setActiveRoadmapIndex((prev) => (prev === roadmaps.length - 1 ? 0 : prev + 1));
+    setActiveRoadmapIndex((prev) => (prev === activeRoadmaps.length - 1 ? 0 : prev + 1));
     setTimeout(() => setIsAnimating(false), 400);
   };
 
@@ -2229,7 +2278,7 @@ function EventsSection() {
                 <div className="switcher-counter-pill">
                   <span className="switcher-count-num">{activeRoadmapIndex + 1}</span>
                   <span className="switcher-count-sep">/</span>
-                  <span className="switcher-count-total">{roadmaps.length}</span>
+                  <span className="switcher-count-total">{activeRoadmaps.length}</span>
                 </div>
 
                 <button
@@ -2260,7 +2309,7 @@ function EventsSection() {
               tabIndex={0}
               onClick={() =>
                 setLightboxData({
-                  image: currentRoadmap.poster,
+                  image: resolveMediaImage(currentRoadmap.image || currentRoadmap.poster, yearlyCalendar2026Poster),
                   title: currentRoadmap.title,
                   subtitle: `${currentRoadmap.theme} — Annual Roadmap`,
                   caption: `${currentRoadmap.title} (${currentRoadmap.period}). Official activity roadmap delivered by Rotary Club of Bintulu Central and partner organisations across Sarawak.`,
@@ -2270,7 +2319,7 @@ function EventsSection() {
               onKeyDown={(e) =>
                 e.key === "Enter" &&
                 setLightboxData({
-                  image: currentRoadmap.poster,
+                  image: resolveMediaImage(currentRoadmap.image || currentRoadmap.poster, yearlyCalendar2026Poster),
                   title: currentRoadmap.title,
                   subtitle: `${currentRoadmap.theme} — Annual Roadmap`,
                   caption: `${currentRoadmap.title} (${currentRoadmap.period}).`,
@@ -2280,7 +2329,7 @@ function EventsSection() {
             >
               <div className="calendar-poster-thumb-wrap">
                 <img
-                  src={currentRoadmap.poster}
+                  src={resolveMediaImage(currentRoadmap.image || currentRoadmap.poster, yearlyCalendar2026Poster)}
                   alt={currentRoadmap.title}
                   className="calendar-poster-img"
                 />
@@ -3020,15 +3069,30 @@ function CertifiedTrainers() {
   const le = i18nData.learnEvents;
   const cs = le?.certifiedTrainersSection || {};
   const activities = usePublicActivities();
-  const [trainers, setTrainers] = useState(defaultTrainers);
+  const cmsContent = useLearnEventsContent();
+  const cmsTrainers = (cmsContent.certifiedTrainers?.trainersList && cmsContent.certifiedTrainers.trainersList.length > 0)
+    ? cmsContent.certifiedTrainers.trainersList
+    : defaultTrainers;
+  const [trainers, setTrainers] = useState(cmsTrainers);
   const [directoryError, setDirectoryError] = useState("");
+
+  useEffect(() => {
+    if (cmsContent.certifiedTrainers?.trainersList?.length > 0) {
+      setTrainers(cmsContent.certifiedTrainers.trainersList);
+    }
+  }, [cmsContent]);
+
   useEffect(() => {
     let alive = true;
     fetch('/api/trainers')
       .then(r => { if (!r.ok) throw new Error('Trainer directory unavailable'); return r.json(); })
       .then(rows => {
         if (alive && Array.isArray(rows) && rows.length > 0) {
-          setTrainers(rows.map(t => ({ ...t, category: 'certified-trainer', role: 'Certified Trainer', institution: 'RCBC', bio: t.short_profile, initials: t.name.split(' ').map(n => n[0]).join(''), photo: t.photo_url })));
+          // If public projection exists, overlay certified portal profiles
+          setTrainers(prev => {
+            const extra = rows.map(t => ({ ...t, category: 'medical-professional', role: 'Certified Trainer', institution: 'RCBC', bio: t.short_profile, initials: t.name.split(' ').map(n => n[0]).join(''), photo: t.photo_url }));
+            return [...prev, ...extra.filter(x => !prev.some(p => p.id === x.id || p.name === x.name))];
+          });
         }
       })
       .catch(e => { if (alive) setDirectoryError(e.message); });
