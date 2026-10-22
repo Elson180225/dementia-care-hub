@@ -138,6 +138,11 @@
   color: #854f0b;
 }
 
+.status-cancelled {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
 /* ---- mode tags ---- */
 .mode-tag {
   display: inline-flex;

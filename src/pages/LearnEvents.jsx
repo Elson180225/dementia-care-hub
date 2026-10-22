@@ -52,6 +52,58 @@ import {
 import defaultCmsContent from "../../shared/learn-events-content.json";
 import "./LearnEvents.css";
 
+function formatActivityDate(val) {
+  if (!val) return "";
+  const d = new Date(val);
+  if (Number.isNaN(d.getTime())) return val;
+  return d.toLocaleDateString("en-MY", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+    timeZone: "Asia/Kuala_Lumpur",
+  });
+}
+
+function formatActivityTime(val) {
+  if (!val) return "";
+  const d = new Date(val);
+  if (Number.isNaN(d.getTime())) return "";
+  return d.toLocaleTimeString("en-MY", {
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+    timeZone: "Asia/Kuala_Lumpur",
+  });
+}
+
+function formatDeadlineDate(val) {
+  if (!val) return "";
+  const d = new Date(val);
+  if (Number.isNaN(d.getTime())) return val;
+  return d.toLocaleDateString("en-MY", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+    timeZone: "Asia/Kuala_Lumpur",
+  }) + ", " + d.toLocaleTimeString("en-MY", {
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+    timeZone: "Asia/Kuala_Lumpur",
+  });
+}
+
+function isEventClosed(event) {
+  if (!event) return false;
+  if (event.status === "cancelled" || event.status === "completed") return false;
+  if (event.isClosed) return true;
+  if (event.registrationDeadline) {
+    const dl = new Date(event.registrationDeadline);
+    if (!Number.isNaN(dl.getTime()) && new Date() > dl) return true;
+  }
+  return false;
+}
+
 function usePublicActivities() {
   const [rows, setRows] = useState(defaultActivities);
   useEffect(() => {
@@ -60,7 +112,27 @@ function usePublicActivities() {
       .then(r => { if (!r.ok) throw new Error('Activities unavailable'); return r.json(); })
       .then(data => {
         if (active && Array.isArray(data) && data.length > 0) {
-          setRows(data.map(a => ({ ...a, date: a.starts_at, registrationLink: a.registration_link, poster: a.poster_url, location: a.venue, registrationDeadline: a.registration_deadline, capacity: a.capacity, trainers: a.trainers || [], status: a.cancelled_at ? 'cancelled' : ['completed', 'verified', 'archived'].includes(a.status) ? 'completed' : 'upcoming' })));
+          setRows(data.map(a => {
+            const isCancelled = Boolean(a.cancelled_at);
+            const isCompleted = ['completed', 'verified', 'archived'].includes(a.status);
+            const dl = a.registration_deadline ? new Date(a.registration_deadline) : null;
+            const isClosed = !isCancelled && !isCompleted && dl && !Number.isNaN(dl.getTime()) && (new Date() > dl);
+            return {
+              ...a,
+              rawDate: a.starts_at,
+              date: formatActivityDate(a.starts_at),
+              time: formatActivityTime(a.starts_at),
+              registrationLink: a.registration_link,
+              poster: a.poster_url,
+              location: a.venue,
+              registrationDeadline: a.registration_deadline,
+              registrationDeadlineFormatted: formatDeadlineDate(a.registration_deadline),
+              capacity: a.capacity,
+              trainers: a.trainers || [],
+              isClosed,
+              status: isCancelled ? 'cancelled' : isCompleted ? 'completed' : isClosed ? 'registration-closed' : 'upcoming'
+            };
+          }));
         }
       })
       .catch(() => { });
@@ -233,6 +305,7 @@ function StatusBadge({ status }) {
     upcoming: "Upcoming",
     completed: "Completed",
     "registration-closed": "Registration closed",
+    cancelled: "Cancelled",
   };
   return (
     <span className={`status-badge status-${status}`}>
@@ -349,10 +422,28 @@ function ActivityModal({ activity, onClose }) {
             <dt>{am.dateTime || "Date & time"}</dt>
             <dd>
               {activity.date || am.pastWebinar || "Past webinar"}
-              <br />
-              {activity.time}
+              {activity.time && <><br />{activity.time}</>}
             </dd>
           </div>
+          {activity.capacity && (
+            <div>
+              <dt>Capacity</dt>
+              <dd>{activity.capacity} seats</dd>
+            </div>
+          )}
+          {(activity.registrationDeadlineFormatted || activity.registrationDeadline) && (
+            <div>
+              <dt>Registration Deadline</dt>
+              <dd>
+                {activity.registrationDeadlineFormatted || activity.registrationDeadline}
+                {isEventClosed(activity) && (
+                  <span style={{ color: "#dc2626", fontWeight: 700, marginLeft: "0.5rem" }}>
+                    (Registration Closed)
+                  </span>
+                )}
+              </dd>
+            </div>
+          )}
           <div>
             <dt>{am.mode || "Mode"}</dt>
             <dd>
@@ -398,7 +489,11 @@ function ActivityModal({ activity, onClose }) {
         )}
 
         <div className="activity-modal-footer">
-          {isCompleted ? (
+          {activity.status === "cancelled" ? (
+            <button type="button" disabled className="activity-action-btn" style={{ opacity: 0.7, cursor: "not-allowed", background: "#fee2e2", color: "#991b1b", border: "1px solid #fecaca" }}>
+              Activity Cancelled
+            </button>
+          ) : isCompleted ? (
             <>
               {activity.recordingLink !== undefined &&
                 activity.recordingLink !== null && (
@@ -412,6 +507,10 @@ function ActivityModal({ activity, onClose }) {
                 </p>
               )}
             </>
+          ) : isEventClosed(activity) ? (
+            <button type="button" disabled className="activity-action-btn" style={{ opacity: 0.7, cursor: "not-allowed", background: "#fef3c7", color: "#92400e", border: "1px solid #fde68a" }}>
+              Registration Closed
+            </button>
           ) : activity.registrationLink !== undefined &&
             activity.registrationLink !== null ? (
             <a
@@ -2157,17 +2256,13 @@ function EventsSection() {
   const [statusFilter, setStatusFilter] = useState("all"); // 'all', 'upcoming', 'completed'
 
   // Format list for filtering
-  const eventFormats = ["All formats", "Dialogue", "Expo", "Forum", "Workshop", "Public Talk"];
+  const eventFormats = ["All formats", "Dialogue", "Expo", "Forum", "Workshop", "Seminar", "RCBC Webinar", "CT Webinar", "DCS-Family", "DCS-TTT", "Public Talk", "Other"];
 
   // Filtered community activities
   const filteredEvents = useMemo(() => {
     return activities.filter((ev) => {
-      // Must be a community event type (Dialogue, Expo, Forum, Workshop, Public Talk, Other)
-      const isCommunityEvent = ["Dialogue", "Expo", "Forum", "Workshop", "Seminar", "Public Talk", "Other"].includes(ev.type);
-      if (!isCommunityEvent) return false;
-
       // Status filter
-      if (statusFilter === "upcoming" && ev.status !== "upcoming") return false;
+      if (statusFilter === "upcoming" && ev.status !== "upcoming" && ev.status !== "registration-closed") return false;
       if (statusFilter === "completed" && ev.status !== "completed") return false;
 
       // City filter
@@ -2186,7 +2281,7 @@ function EventsSection() {
 
       // Search query
       if (searchQuery.trim()) {
-        const text = `${ev.title} ${ev.description} ${ev.location} ${ev.speaker} ${ev.type}`.toLowerCase();
+        const text = `${ev.title} ${ev.description} ${ev.location} ${ev.speaker} ${ev.type} ${ev.city}`.toLowerCase();
         if (!text.includes(searchQuery.toLowerCase().trim())) return false;
       }
 
@@ -2636,72 +2731,97 @@ function EventsSection() {
           {/* Events Grid */}
           {filteredEvents.length > 0 ? (
             <div className="events-cards-grid">
-              {filteredEvents.map((event) => (
-                <article className="rich-event-card" key={event.id}>
-                  <div className="event-card-header">
-                    <div className="event-card-thumb-wrap">
-                      <img src={eventImage} alt="" className="event-card-thumb" />
-                      <div className="event-thumb-overlay" />
+              {filteredEvents.map((event) => {
+                const closed = isEventClosed(event);
+                return (
+                  <article className="rich-event-card" key={event.id}>
+                    <div className="event-card-header">
+                      <div className="event-card-thumb-wrap">
+                        <img src={event.poster || eventImage} alt="" className="event-card-thumb" />
+                        <div className="event-thumb-overlay" />
+                      </div>
+                      <div className="event-card-badges">
+                        <span className="event-type-badge">{event.type}</span>
+                        {closed ? (
+                          <span className="status-badge status-registration-closed">Registration Closed</span>
+                        ) : (
+                          <StatusBadge status={event.status} />
+                        )}
+                      </div>
                     </div>
-                    <div className="event-card-badges">
-                      <span className="event-type-badge">{event.type}</span>
-                      <StatusBadge status={event.status} />
-                    </div>
-                  </div>
 
-                  <div className="event-card-body">
-                    <h3 className="event-card-title">{event.title}</h3>
-                    <p className="event-card-desc">{event.description}</p>
+                    <div className="event-card-body">
+                      <h3 className="event-card-title">{event.title}</h3>
+                      <p className="event-card-desc">{event.description}</p>
 
-                    <div className="event-meta-list">
-                      <div className="event-meta-item">
-                        <span className="meta-icon">📅</span>
-                        <span>{event.date}</span>
-                      </div>
-                      <div className="event-meta-item">
-                        <span className="meta-icon">⏰</span>
-                        <span>{event.time}</span>
-                      </div>
-                      <div className="event-meta-item">
-                        <span className="meta-icon">📍</span>
-                        <span>{event.location}</span>
-                      </div>
-                      <div className="event-meta-item">
-                        <span className="meta-icon">🌐</span>
-                        <span>{event.language}</span>
-                      </div>
-                      {event.speaker && (
+                      <div className="event-meta-list">
                         <div className="event-meta-item">
-                          <span className="meta-icon">👤</span>
-                          <span>{event.speaker}</span>
+                          <span className="meta-icon">📅</span>
+                          <span>{event.date}</span>
                         </div>
-                      )}
+                        {event.time && (
+                          <div className="event-meta-item">
+                            <span className="meta-icon">⏰</span>
+                            <span>{event.time}</span>
+                          </div>
+                        )}
+                        {event.capacity && (
+                          <div className="event-meta-item">
+                            <span className="meta-icon">👥</span>
+                            <span>Capacity: {event.capacity} seats</span>
+                          </div>
+                        )}
+                        {(event.registrationDeadlineFormatted || event.registrationDeadline) && (
+                          <div className="event-meta-item">
+                            <span className="meta-icon">⏳</span>
+                            <span>Deadline: {event.registrationDeadlineFormatted || event.registrationDeadline}</span>
+                          </div>
+                        )}
+                        <div className="event-meta-item">
+                          <span className="meta-icon">📍</span>
+                          <span>{event.location || event.city}</span>
+                        </div>
+                        <div className="event-meta-item">
+                          <span className="meta-icon">🌐</span>
+                          <span>{event.language}</span>
+                        </div>
+                        {event.speaker && (
+                          <div className="event-meta-item">
+                            <span className="meta-icon">👤</span>
+                            <span>{event.speaker}</span>
+                          </div>
+                        )}
+                      </div>
                     </div>
-                  </div>
 
-                  <div className="event-card-footer">
-                    {event.status === "upcoming" ? (
-                      <a
-                        href={event.registrationLink || "https://forms.google.com/"}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="event-register-btn"
+                    <div className="event-card-footer">
+                      {event.status === "cancelled" ? (
+                        <span className="event-completed-tag" style={{ background: "#fee2e2", color: "#991b1b", border: "1px solid #fecaca" }}>Cancelled</span>
+                      ) : event.status === "completed" ? (
+                        <span className="event-completed-tag">{ev.sessionCompleted || "Session Completed"}</span>
+                      ) : closed ? (
+                        <span className="event-completed-tag" style={{ background: "#fef3c7", color: "#92400e", border: "1px solid #fde68a" }}>Registration Closed</span>
+                      ) : (
+                        <a
+                          href={event.registrationLink || "https://forms.google.com/"}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="event-register-btn"
+                        >
+                          {ev.registerGoogleForm || "Register via Google Form ↗"}
+                        </a>
+                      )}
+                      <button
+                        type="button"
+                        className="event-details-btn"
+                        onClick={() => setSelectedActivity(event)}
                       >
-                        {ev.registerGoogleForm || "Register via Google Form ↗"}
-                      </a>
-                    ) : (
-                      <span className="event-completed-tag">{ev.sessionCompleted || "Session Completed"}</span>
-                    )}
-                    <button
-                      type="button"
-                      className="event-details-btn"
-                      onClick={() => setSelectedActivity(event)}
-                    >
-                      {ev.viewDetails || "View Details"}
-                    </button>
-                  </div>
-                </article>
-              ))}
+                        {ev.viewDetails || "View Details"}
+                      </button>
+                    </div>
+                  </article>
+                );
+              })}
             </div>
           ) : (
             <div className="events-empty-state">
@@ -3854,6 +3974,25 @@ function UpcomingCalendar() {
                       {selectedEvent.time && <><br /><span className="uc-meta-time">{selectedEvent.time}</span></>}
                     </dd>
                   </div>
+                  {selectedEvent.capacity && (
+                    <div className="uc-meta-row">
+                      <dt>Capacity</dt>
+                      <dd>{selectedEvent.capacity} seats</dd>
+                    </div>
+                  )}
+                  {(selectedEvent.registrationDeadlineFormatted || selectedEvent.registrationDeadline) && (
+                    <div className="uc-meta-row">
+                      <dt>Reg. Deadline</dt>
+                      <dd>
+                        {selectedEvent.registrationDeadlineFormatted || selectedEvent.registrationDeadline}
+                        {isEventClosed(selectedEvent) && (
+                          <span style={{ color: "#dc2626", fontWeight: 700, marginLeft: "0.4rem" }}>
+                            (Closed)
+                          </span>
+                        )}
+                      </dd>
+                    </div>
+                  )}
                   <div className="uc-meta-row">
                     <dt>{le?.activityModal?.mode || "Mode"}</dt>
                     <dd><ModeIcon mode={selectedEvent.mode} /></dd>
@@ -3900,6 +4039,10 @@ function UpcomingCalendar() {
                     <span className="uc-action-past">{le?.upcomingCalendarSection?.cancelled || "This activity has been cancelled."}</span>
                   ) : selectedEvent.status === "completed" ? (
                     <span className="uc-action-past">{le?.upcomingCalendarSection?.completed || "This session has been completed."}</span>
+                  ) : isEventClosed(selectedEvent) ? (
+                    <button type="button" className="uc-register-btn uc-register-btn-disabled" disabled style={{ background: "#fef3c7", color: "#92400e", border: "1px solid #fde68a", cursor: "not-allowed" }}>
+                      Registration Closed
+                    </button>
                   ) : selectedEvent.registrationLink != null ? (
                     <a
                       href={selectedEvent.registrationLink || "#"}

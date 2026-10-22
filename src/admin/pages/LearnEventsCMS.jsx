@@ -97,7 +97,7 @@ export default function LearnEventsCMS() {
           onClick={() => setActiveTab("sessions")}
           style={{ cursor: "pointer", background: "none", border: "none", padding: "0.6rem 1rem", borderBottom: activeTab === "sessions" ? "2px solid #0d716b" : "none", fontWeight: activeTab === "sessions" ? "700" : "500", color: activeTab === "sessions" ? "#0d716b" : "#4b5563" }}
         >
-          Scheduled Sessions &amp; Calendar
+          Events &amp; Workshop
         </button>
         <button
           type="button"
@@ -133,13 +133,13 @@ export default function LearnEventsCMS() {
         </button>
       </nav>
 
-      {/* TAB 1: SCHEDULED SESSIONS & CALENDAR */}
+      {/* TAB 1: EVENTS & WORKSHOP */}
       {activeTab === "sessions" && (
         <div>
-          <div style={{ background: "#f8fafc", padding: "1rem", borderRadius: "8px", border: "1px solid #e2e8f0", marginBottom: "1.5rem" }}>
-            <h3 style={{ margin: "0 0 0.5rem" }}>📅 Live Activities &amp; Interactive Calendar</h3>
+          <div style={{ background: "#f8fafc", padding: "1rem 1.25rem", borderRadius: "8px", border: "1px solid #e2e8f0", marginBottom: "1.5rem" }}>
+            <h3 style={{ margin: "0 0 0.5rem" }}>📅 Events &amp; Workshop Hub</h3>
             <p style={{ margin: 0, fontSize: "0.95rem", color: "#475569" }}>
-              Every activity published here immediately feeds into the public <strong>Upcoming Calendar</strong> and <strong>Explore Community Events &amp; Workshops</strong> directory with full filter support.
+              Create, update, and manage all project activities, community workshops, dialogues, and online sessions. Published activities immediately reflect across the public <strong>Explore Community Events &amp; Workshops</strong> directory and <strong>Upcoming Calendar</strong>.
             </p>
           </div>
           <Activities admin={true} />
