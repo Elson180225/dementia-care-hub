@@ -18,6 +18,22 @@ const ALL_ADMIN_TYPES = [
   "Other",
 ];
 
+const SARAWAK_DIVISIONS = [
+  "Online",
+  "Kuching",
+  "Bintulu",
+  "Miri",
+  "Sibu",
+  "Kota Samarahan",
+  "Sarikei",
+  "Mukah",
+  "Kapit",
+  "Betong",
+  "Sri Aman",
+  "Limbang",
+  "Serian",
+];
+
 const blank = {
   title: "",
   date: "",
@@ -120,14 +136,24 @@ export default function Activities({ admin = false }) {
   };
 
   const change = (e) => {
-    const values = { ...editing.values, [e.target.name]: e.target.value };
-    setEditing({ ...editing, values });
-    const found = validate(values);
+    const { name, value } = e.target;
+    let nextValues = { ...editing.values, [name]: value };
+    if (name === "mode") {
+      if (value === "Online") {
+        nextValues.venue = "Online";
+        if (!nextValues.city || nextValues.city === "") nextValues.city = "Online";
+      } else if (value === "Physical" && nextValues.venue === "Online") {
+        nextValues.venue = "";
+        if (nextValues.city === "Online") nextValues.city = "";
+      }
+    }
+    setEditing({ ...editing, values: nextValues });
+    const found = validate(nextValues);
     setErrors((previous) =>
       Object.fromEntries(
         Object.keys(previous)
-          .filter((name) => found[name])
-          .map((name) => [name, found[name]])
+          .filter((f) => found[f])
+          .map((f) => [f, found[f]])
       )
     );
   };
@@ -288,7 +314,10 @@ export default function Activities({ admin = false }) {
             </select>
           </Field>
 
-          {input("audience", "Suitable for", { placeholder: "e.g. Family caregivers, nurses, general public" })}
+          {input("audience", "Suitable for (Target Audience)", {
+            placeholder: "e.g. Family caregivers, frontline nurses, general public",
+            hint: "Specifies who this programme is designed for. Displayed on public event cards, details modal, and calendar.",
+          })}
 
           <Field id="description" label="What participants will learn" error={errors.description}>
             <textarea
@@ -371,7 +400,26 @@ export default function Activities({ admin = false }) {
             </button>
           </fieldset>
 
-          {input("city", "City / Division", { placeholder: "e.g. Kuching, Bintulu, Miri, Sibu" })}
+          <Field
+            id="city"
+            label="City / Division"
+            error={errors.city}
+            hint="Select a standard Sarawak division or enter custom locality. For online webinars, select 'Online'."
+          >
+            <input
+              id="city"
+              name="city"
+              list="sarawak-divisions-list"
+              value={v.city}
+              onChange={change}
+              placeholder="e.g. Kuching, Bintulu, Miri, Sibu, Online"
+            />
+            <datalist id="sarawak-divisions-list">
+              {SARAWAK_DIVISIONS.map((div) => (
+                <option key={div} value={div} />
+              ))}
+            </datalist>
+          </Field>
           {input("registrationDeadline", "Registration deadline", {
             type: "datetime-local",
             hint: "Optional. Once this date passes, the public card displays 'Registration Closed' and disables registration.",
@@ -654,16 +702,30 @@ export default function Activities({ admin = false }) {
                       <div style={{ fontWeight: 700, color: "#1f2937", marginBottom: "4px" }}>
                         {a.title}
                       </div>
-                      <div style={{ display: "flex", gap: "6px", alignItems: "center", flexWrap: "wrap" }}>
+                      <div style={{ display: "flex", gap: "6px", alignItems: "center", flexWrap: "wrap", marginBottom: "4px" }}>
                         <span style={{ fontSize: "0.78rem", fontWeight: 700, background: "#f3e8ff", color: "#6b21a8", padding: "2px 8px", borderRadius: "4px" }}>
                           {a.type}
                         </span>
-                        {a.audience && (
-                          <span style={{ fontSize: "0.82rem", color: "#6b7280" }}>
-                            · {a.audience}
+                        {(a.audience || a.suitableFor) && (
+                          <span style={{ fontSize: "0.82rem", color: "#4b5563" }}>
+                            🎯 Suitable for: <strong>{a.audience || a.suitableFor}</strong>
                           </span>
                         )}
                       </div>
+                      {a.trainers?.length > 0 && (
+                        <div style={{ fontSize: "0.82rem", color: "#4338ca", marginTop: "3px" }}>
+                          👤 Assigned Trainers:{" "}
+                          <strong>
+                            {a.trainers
+                              .map((t) =>
+                                t.name
+                                  ? (t.role ? `${t.name} (${t.role})` : t.name)
+                                  : availableTrainers.find((p) => p.id === t.trainerId)?.name || "Trainer"
+                              )
+                              .join(", ")}
+                          </strong>
+                        </div>
+                      )}
                       {a.cancelledAt && (
                         <div style={{ color: "#991b1b", fontSize: "0.82rem", marginTop: "4px" }}>
                           ⚠️ Cancelled: {a.cancellation_reason}
@@ -692,7 +754,11 @@ export default function Activities({ admin = false }) {
                         {a.mode}
                       </span>
                       <div style={{ fontSize: "0.85rem", color: "#4b5563", marginTop: "4px" }}>
-                        {a.venue || a.city || "—"}
+                        {a.mode === "Online"
+                          ? "Online"
+                          : a.venue && a.city && a.venue !== a.city && !a.venue.toLowerCase().includes(a.city.toLowerCase())
+                          ? `${a.venue}, ${a.city}`
+                          : a.venue || a.city || "—"}
                       </div>
                     </td>
 

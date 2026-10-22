@@ -117,6 +117,22 @@ function usePublicActivities() {
             const isCompleted = ['completed', 'verified', 'archived'].includes(a.status);
             const dl = a.registration_deadline ? new Date(a.registration_deadline) : null;
             const isClosed = !isCancelled && !isCompleted && dl && !Number.isNaN(dl.getTime()) && (new Date() > dl);
+            const trainerList = a.trainers || [];
+            const speakerNames = trainerList
+              .map(t => t.name ? (t.role ? `${t.name} (${t.role})` : t.name) : '')
+              .filter(Boolean)
+              .join(', ');
+            const primaryTrainerId = a.trainerId || (trainerList[0]?.trainerId ?? null);
+            const primarySpeaker = a.speaker || speakerNames || "Rotary HopeCare Facilitators";
+            const audienceVal = a.suitableFor || a.audience || "General public, caregivers and families";
+            const cityVal = a.city || (a.mode === "Online" ? "Online" : "Sarawak");
+            const venueVal = a.venue || a.location || (a.mode === "Online" ? "Online" : "");
+            const fullLoc = a.mode === "Online"
+              ? "Online"
+              : (venueVal && cityVal && venueVal !== cityVal && !venueVal.toLowerCase().includes(cityVal.toLowerCase())
+                  ? `${venueVal}, ${cityVal}`
+                  : (venueVal || cityVal || "Sarawak"));
+
             return {
               ...a,
               rawDate: a.starts_at,
@@ -124,11 +140,18 @@ function usePublicActivities() {
               time: formatActivityTime(a.starts_at),
               registrationLink: a.registration_link,
               poster: a.poster_url,
-              location: a.venue,
+              location: fullLoc,
+              venue: venueVal,
+              city: cityVal,
+              fullLocation: fullLoc,
+              suitableFor: audienceVal,
+              audience: audienceVal,
+              speaker: primarySpeaker,
+              trainerId: primaryTrainerId,
+              trainers: trainerList,
               registrationDeadline: a.registration_deadline,
               registrationDeadlineFormatted: formatDeadlineDate(a.registration_deadline),
               capacity: a.capacity,
-              trainers: a.trainers || [],
               isClosed,
               status: isCancelled ? 'cancelled' : isCompleted ? 'completed' : isClosed ? 'registration-closed' : 'upcoming'
             };
@@ -416,7 +439,7 @@ function ActivityModal({ activity, onClose }) {
         <dl className="activity-details">
           <div>
             <dt>{am.suitableFor || "Suitable for"}</dt>
-            <dd>{activity.suitableFor || "Public, families and caregivers"}</dd>
+            <dd>{activity.suitableFor || activity.audience || "Public, families and caregivers"}</dd>
           </div>
           <div>
             <dt>{am.dateTime || "Date & time"}</dt>
@@ -452,7 +475,7 @@ function ActivityModal({ activity, onClose }) {
           </div>
           <div>
             <dt>{am.location || "Location"}</dt>
-            <dd>{activity.location || am.online || "Online"}</dd>
+            <dd>{activity.fullLocation || activity.location || (activity.mode === "Online" ? "Online" : activity.city || "Sarawak")}</dd>
           </div>
           <div>
             <dt>{am.language || "Language"}</dt>
@@ -2258,6 +2281,14 @@ function EventsSection() {
   // Format list for filtering
   const eventFormats = ["All formats", "Dialogue", "Expo", "Forum", "Workshop", "Seminar", "RCBC Webinar", "CT Webinar", "DCS-Family", "DCS-TTT", "Public Talk", "Other"];
 
+  const availableCities = useMemo(() => {
+    const set = new Set(["Online", ...cities, "Sarikei", "Mukah", "Kapit", "Betong", "Sri Aman", "Limbang", "Serian"]);
+    activities.forEach((a) => {
+      if (a.city?.trim()) set.add(a.city.trim());
+    });
+    return [...set].sort();
+  }, [activities]);
+
   // Filtered community activities
   const filteredEvents = useMemo(() => {
     return activities.filter((ev) => {
@@ -2267,7 +2298,12 @@ function EventsSection() {
 
       // City filter
       if (selectedCity !== "All cities") {
-        const matchesCity = ev.city === selectedCity || (ev.location && ev.location.includes(selectedCity));
+        const sel = selectedCity.toLowerCase();
+        const matchesCity =
+          (ev.city && ev.city.toLowerCase() === sel) ||
+          (ev.location && ev.location.toLowerCase().includes(sel)) ||
+          (ev.venue && ev.venue.toLowerCase().includes(sel)) ||
+          (ev.fullLocation && ev.fullLocation.toLowerCase().includes(sel));
         if (!matchesCity) return false;
       }
 
@@ -2281,7 +2317,7 @@ function EventsSection() {
 
       // Search query
       if (searchQuery.trim()) {
-        const text = `${ev.title} ${ev.description} ${ev.location} ${ev.speaker} ${ev.type} ${ev.city}`.toLowerCase();
+        const text = `${ev.title} ${ev.description} ${ev.location} ${ev.venue || ''} ${ev.speaker} ${ev.type} ${ev.city} ${ev.suitableFor || ''} ${ev.audience || ''}`.toLowerCase();
         if (!text.includes(searchQuery.toLowerCase().trim())) return false;
       }
 
@@ -2644,7 +2680,7 @@ function EventsSection() {
                   onChange={(e) => setSelectedCity(e.target.value)}
                 >
                   <option>{ev.allCities || "All cities"}</option>
-                  {cities.map((c) => (
+                  {availableCities.map((c) => (
                     <option key={c} value={c}>{c}</option>
                   ))}
                 </select>
@@ -2779,8 +2815,14 @@ function EventsSection() {
                         )}
                         <div className="event-meta-item">
                           <span className="meta-icon">📍</span>
-                          <span>{event.location || event.city}</span>
+                          <span>{event.fullLocation || event.location || event.city}</span>
                         </div>
+                        {(event.suitableFor || event.audience) && (
+                          <div className="event-meta-item">
+                            <span className="meta-icon">🎯</span>
+                            <span>Suitable for: {event.suitableFor || event.audience}</span>
+                          </div>
+                        )}
                         <div className="event-meta-item">
                           <span className="meta-icon">🌐</span>
                           <span>{event.language}</span>
@@ -3231,7 +3273,15 @@ function CertifiedTrainers() {
   const clinicalFacilitators = useMemo(() => trainers.filter((t) => t.category === "medical-professional"), [trainers]);
   const advisoryFacilitators = useMemo(() => trainers.filter((t) => t.category === "advisory-support"), [trainers]);
 
-  const getTrainerActivities = (trainerId) => activities.filter((a) => (a.trainerId === trainerId || a.trainers?.some(t => t.trainerId === trainerId)));
+  const getTrainerActivities = (trainer) => activities.filter((a) => {
+    const tid = typeof trainer === 'object' ? trainer?.id : trainer;
+    const tname = typeof trainer === 'object' ? trainer?.name?.toLowerCase().trim() : '';
+    if (a.trainerId && (a.trainerId === tid || String(a.trainerId) === String(tid))) return true;
+    if (a.trainers?.some(t => t.trainerId === tid || String(t.trainerId) === String(tid))) return true;
+    if (tname && a.trainers?.some(t => t.name && t.name.toLowerCase().trim() === tname)) return true;
+    if (tname && a.speaker && a.speaker.toLowerCase().includes(tname)) return true;
+    return false;
+  });
 
   const filteredTrainers = useMemo(() => trainers.filter((t) => {
     if (activeCategory !== "all" && t.category !== activeCategory) return false;
@@ -3391,7 +3441,7 @@ function CertifiedTrainers() {
           {filteredTrainers.length > 0 ? (
             <div className="trainer-profiles-grid">
               {filteredTrainers.map((t) => {
-                const trainerActivities = getTrainerActivities(t.id);
+                const trainerActivities = getTrainerActivities(t);
                 const upcomingCount = trainerActivities.filter((a) => a.status === "upcoming").length;
                 const pastCount = trainerActivities.filter((a) => a.status === "completed").length;
                 const isOpen = expandedTrainer === t.id;
@@ -3639,7 +3689,12 @@ function UpcomingCalendar() {
       if (typeFilter !== "All types" && a.type !== typeFilter) return false;
       if (modeFilter !== "All modes" && a.mode !== modeFilter) return false;
       if (cityFilter !== "All cities") {
-        const matchesCity = a.city === cityFilter || (a.location && a.location.toLowerCase().includes(cityFilter.toLowerCase()));
+        const sel = cityFilter.toLowerCase();
+        const matchesCity =
+          (a.city && a.city.toLowerCase() === sel) ||
+          (a.location && a.location.toLowerCase().includes(sel)) ||
+          (a.venue && a.venue.toLowerCase().includes(sel)) ||
+          (a.fullLocation && a.fullLocation.toLowerCase().includes(sel));
         if (!matchesCity) return false;
       }
       if (languageFilter !== "All languages" &&
@@ -3711,9 +3766,9 @@ function UpcomingCalendar() {
   }, [allCalendarEvents]);
 
   const calCities = useMemo(() => {
-    const set = new Set(cities);
+    const set = new Set(["Online", ...cities, "Sarikei", "Mukah", "Kapit", "Betong", "Sri Aman", "Limbang", "Serian"]);
     allCalendarEvents.forEach((a) => {
-      if (a.city && a.city !== "Online") set.add(a.city);
+      if (a.city?.trim()) set.add(a.city.trim());
     });
     return [...set].sort();
   }, [allCalendarEvents]);
@@ -3961,10 +4016,10 @@ function UpcomingCalendar() {
 
                 {/* Meta list */}
                 <dl className="uc-detail-meta">
-                  {selectedEvent.suitableFor && (
+                  {(selectedEvent.suitableFor || selectedEvent.audience) && (
                     <div className="uc-meta-row">
                       <dt>{le?.activityModal?.suitableFor || "Suitable for"}</dt>
-                      <dd>{selectedEvent.suitableFor}</dd>
+                      <dd>{selectedEvent.suitableFor || selectedEvent.audience}</dd>
                     </div>
                   )}
                   <div className="uc-meta-row">

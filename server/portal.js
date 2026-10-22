@@ -16,7 +16,7 @@ export async function snapshot(user) {
  const admin=user.role==='admin';
  const profiles=(await pool.query('SELECT p.*,u.name,u.email FROM trainer_profiles p JOIN users u ON u.id=p.id WHERE $1 OR p.id=$2',[admin,user.id])).rows;
  const activities=(await pool.query(`SELECT a.*,coalesce(c.status,'none') AS completion_status,c.actual_venue,c.participants,c.actual_hours,c.admin_comment AS completion_comment,c.photos,
- coalesce((SELECT jsonb_agg(jsonb_build_object('trainerId',t.trainer_id,'role',t.role)) FROM activity_trainers t WHERE t.activity_id=a.id),'[]') AS trainers
+ coalesce((SELECT jsonb_agg(jsonb_build_object('trainerId',t.trainer_id,'role',t.role,'name',u.name)) FROM activity_trainers t LEFT JOIN users u ON u.id=t.trainer_id WHERE t.activity_id=a.id),'[]') AS trainers
  FROM activities a LEFT JOIN completions c ON c.activity_id=a.id
  WHERE $1 OR a.created_by=$2 OR EXISTS(SELECT 1 FROM activity_trainers t WHERE t.activity_id=a.id AND t.trainer_id=$2) ORDER BY a.starts_at DESC`,[admin,user.id])).rows;
  return {session:admin?null:{id:user.id},adminSession:admin?user:null,
@@ -42,7 +42,7 @@ export async function snapshot(user) {
 }
 export async function portalHandler(req,res,url,send) {
  if(req.method==='GET' && url.pathname==='/api/trainers') return send(res,200,(await pool.query('SELECT * FROM public_trainers')).rows);
- if(req.method==='GET' && url.pathname==='/api/activities') return send(res,200,(await pool.query("SELECT a.id,a.title,a.starts_at,a.type,a.mode,a.venue,a.city,a.language,a.audience,a.description,a.poster_url,CASE WHEN a.cancelled_at IS NULL THEN a.registration_link ELSE NULL END AS registration_link,a.status,a.cancelled_at,a.cancellation_reason,a.registration_deadline,a.capacity,coalesce((SELECT jsonb_agg(jsonb_build_object('trainerId',t.trainer_id,'role',t.role)) FROM activity_trainers t WHERE t.activity_id=a.id),'[]') AS trainers FROM activities a WHERE a.status IN ('published','completed','verified','archived') AND a.published_at IS NOT NULL")).rows);
+ if(req.method==='GET' && url.pathname==='/api/activities') return send(res,200,(await pool.query("SELECT a.id,a.title,a.starts_at,a.type,a.mode,a.venue,a.city,a.language,a.audience,a.description,a.poster_url,CASE WHEN a.cancelled_at IS NULL THEN a.registration_link ELSE NULL END AS registration_link,a.status,a.cancelled_at,a.cancellation_reason,a.registration_deadline,a.capacity,coalesce((SELECT jsonb_agg(jsonb_build_object('trainerId',t.trainer_id,'role',t.role,'name',u.name)) FROM activity_trainers t LEFT JOIN users u ON u.id=t.trainer_id WHERE t.activity_id=a.id),'[]') AS trainers FROM activities a WHERE a.status IN ('published','completed','verified','archived') AND a.published_at IS NOT NULL")).rows);
  const user=await currentUser(req); if(!user) fail('Please sign in',401);
  if(req.method==='GET' && url.pathname==='/api/portal/trainers') return send(res,200,(await pool.query("SELECT u.id,u.name,p.city,p.language FROM approved_trainer_accounts u JOIN trainer_profiles p ON p.id=u.id ORDER BY u.name")).rows);
  if(req.method==='GET' && url.pathname==='/api/portal') return send(res,200,await snapshot(user));
