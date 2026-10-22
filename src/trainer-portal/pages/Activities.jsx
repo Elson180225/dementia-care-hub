@@ -13,13 +13,27 @@ const blank = {
 function validate(v) {
   const e = {};
   if (!v.title.trim()) e.title = "Please enter a title.";
-  if (!v.date) e.date = "Please choose a date and time.";
+  if (!v.date || Number.isNaN(Date.parse(v.date))) e.date = "Please choose a valid date and time.";
   if (v.mode === "Physical" && !v.venue.trim()) e.venue = "Please enter the venue.";
   if (!v.audience.trim()) e.audience = "Please say who this is suitable for.";
   if (!v.description.trim()) e.description = "Please describe what participants will learn.";
-  if (!(Number(v.plannedHours) > 0)) e.plannedHours = "Enter planned hours greater than 0.";
-  if (v.registrationLink && !/^https?:\/\//i.test(v.registrationLink))
-    e.registrationLink = "The link must start with http:// or https://";
+  if (!Number.isFinite(Number(v.plannedHours)) || !(Number(v.plannedHours) > 0)) e.plannedHours = "Please enter planned hours greater than 0.";
+  if (v.registrationLink) {
+    try {
+      const url = new URL(v.registrationLink);
+      if (!["http:", "https:"].includes(url.protocol)) throw new Error();
+    } catch {
+      e.registrationLink = "Please enter a valid registration link starting with http:// or https://.";
+    }
+  }
+  if (v.registrationDeadline) {
+    if (Number.isNaN(Date.parse(v.registrationDeadline)))
+      e.registrationDeadline = "Please choose a valid registration deadline.";
+    else if (v.date && new Date(v.registrationDeadline) > new Date(v.date))
+      e.registrationDeadline = "Please choose a registration deadline on or before the event starts.";
+  }
+  if (v.capacity && (!Number.isInteger(Number(v.capacity)) || Number(v.capacity) <= 0))
+    e.capacity = "Please enter a whole number greater than 0 for capacity.";
   return e;
 }
 
@@ -53,13 +67,28 @@ export default function Activities({admin=false}) {
     setEditing(a ? { id: a.id, values: Object.fromEntries(Object.keys(blank).map((k) => [k, a[k] ?? ""])) } : { values: blank });
   };
 
-  const change = (e) =>
-    setEditing({ ...editing, values: { ...editing.values, [e.target.name]: e.target.value } });
+  const change = (e) => {
+    const values = { ...editing.values, [e.target.name]: e.target.value };
+    setEditing({ ...editing, values });
+    const found = validate(values);
+    setErrors(previous => Object.fromEntries(
+      Object.keys(previous).filter(name => found[name]).map(name => [name, found[name]])
+    ));
+  };
+
+  const checkField = (e) => {
+    const name = e.target.name;
+    if (!name || !(name in blank)) return;
+    setErrors(previous => ({ ...previous, [name]: validate(editing.values)[name] }));
+  };
 
   async function save(submitToo) {
     const found = validate(editing.values);
     setErrors(found);
-    if (Object.keys(found).length) return;
+    if (Object.keys(found).length) {
+      document.getElementById(Object.keys(found)[0])?.focus();
+      return;
+    }
     const id = editing.id ?? crypto.randomUUID();
     const venue = editing.values.mode === "Online" ? "Online" : editing.values.venue;
     if(!await dispatch({ type: "ACTIVITY_SAVE", activity: { id, ...editing.values, venue, trainers:assigned } })) return;
@@ -79,7 +108,7 @@ export default function Activities({admin=false}) {
     return (
       <>
         <h1>{editing.id ? "Edit workshop / seminar" : "New workshop / seminar"}</h1>
-        <form className="tp-card" noValidate onSubmit={(e) => e.preventDefault()}>
+        <form className="tp-card" noValidate onBlur={checkField} onSubmit={(e) => e.preventDefault()}>
           {input("title", "Title")}
           {input("date", "Date & time", { type: "datetime-local" })}
           <Field id="type" label="Activity type">
