@@ -2889,6 +2889,7 @@ function MedicalCarousel({ trainers: carouselTrainers, onSelect, onViewAll }) {
   const { t } = useLanguage();
   const cs = t.learnEvents?.certifiedTrainersSection || {};
   const trackRef = useRef(null);
+  const autoRef = useRef(null);
   const isDragging = useRef(false);
   const startX = useRef(0);
   const startScroll = useRef(0);
@@ -2896,47 +2897,43 @@ function MedicalCarousel({ trainers: carouselTrainers, onSelect, onViewAll }) {
   const isUserInteracting = useRef(false);
   const resumeTimeout = useRef(null);
 
-  const pauseAndResume = useCallback(() => {
-    isUserInteracting.current = true;
-    clearTimeout(resumeTimeout.current);
-    resumeTimeout.current = setTimeout(() => {
-      isUserInteracting.current = false;
-    }, 2500);
-  }, []);
-
-  /* ---- Auto-scroll (seamless continuous flow with requestAnimationFrame) ---- */
-  useEffect(() => {
-    let animId;
-    let lastTime = performance.now();
-
-    const loop = (now) => {
-      const dt = Math.min(now - lastTime, 50);
-      lastTime = now;
-
+  /* ---- Auto-scroll (continuous smooth flow like animation effect) ---- */
+  const startAuto = useCallback(() => {
+    if (autoRef.current) return;
+    autoRef.current = setInterval(() => {
       const el = trackRef.current;
-      if (el && !isUserInteracting.current) {
-        const halfWidth = el.scrollWidth / 2;
-        if (halfWidth > 0) {
-          // Continuous gentle drift (~32px / sec)
-          el.scrollLeft += (32 * dt) / 1000;
-          if (el.scrollLeft >= halfWidth) {
-            el.scrollLeft -= halfWidth;
-          }
-        }
+      if (!el || isUserInteracting.current) return;
+      el.scrollLeft += 1;
+      if (el.scrollLeft >= el.scrollWidth / 2) {
+        el.scrollLeft = 0;
       }
-
-      animId = requestAnimationFrame(loop);
-    };
-
-    animId = requestAnimationFrame(loop);
-    return () => cancelAnimationFrame(animId);
+    }, 16);
   }, []);
+
+  const stopAuto = useCallback(() => {
+    if (autoRef.current) {
+      clearInterval(autoRef.current);
+      autoRef.current = null;
+    }
+  }, []);
+
+  useEffect(() => {
+    startAuto();
+    return () => {
+      stopAuto();
+      clearTimeout(resumeTimeout.current);
+    };
+  }, [startAuto, stopAuto]);
 
   /* ---- Prev / Next ---- */
   const scrollBy = useCallback((dir) => {
     const el = trackRef.current;
     if (!el) return;
-    pauseAndResume();
+    isUserInteracting.current = true;
+    clearTimeout(resumeTimeout.current);
+    resumeTimeout.current = setTimeout(() => {
+      isUserInteracting.current = false;
+    }, 2500);
 
     const card = el.querySelector(".ct-mc-card");
     const step = card ? card.offsetWidth + 20 : 280;
@@ -2949,18 +2946,19 @@ function MedicalCarousel({ trainers: carouselTrainers, onSelect, onViewAll }) {
     }
 
     el.scrollBy({ left: dir * step, behavior: "smooth" });
-  }, [pauseAndResume]);
+  }, []);
 
   /* ---- Drag (pointer events) ---- */
   const onPointerDown = useCallback((e) => {
     if (e.button !== 0) return;
     isDragging.current = true;
     hasDragged.current = false;
+    isUserInteracting.current = true;
+    clearTimeout(resumeTimeout.current);
     startX.current = e.clientX;
     startScroll.current = trackRef.current?.scrollLeft ?? 0;
-    pauseAndResume();
     trackRef.current?.setPointerCapture(e.pointerId);
-  }, [pauseAndResume]);
+  }, []);
 
   const onPointerMove = useCallback((e) => {
     if (!isDragging.current || !trackRef.current) return;
@@ -2987,6 +2985,10 @@ function MedicalCarousel({ trainers: carouselTrainers, onSelect, onViewAll }) {
   const onPointerUp = useCallback(() => {
     isDragging.current = false;
     setTimeout(() => { hasDragged.current = false; }, 50);
+    clearTimeout(resumeTimeout.current);
+    resumeTimeout.current = setTimeout(() => {
+      isUserInteracting.current = false;
+    }, 1500);
   }, []);
 
   const onMouseEnter = useCallback(() => {
@@ -2999,7 +3001,7 @@ function MedicalCarousel({ trainers: carouselTrainers, onSelect, onViewAll }) {
       clearTimeout(resumeTimeout.current);
       resumeTimeout.current = setTimeout(() => {
         isUserInteracting.current = false;
-      }, 400);
+      }, 300);
     }
   }, []);
 
