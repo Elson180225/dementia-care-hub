@@ -693,11 +693,9 @@ function OnlineEducation() {
   const [publicFilters, setPublicFilters] = useState(defaultFilters);
   const [trainerFilters, setTrainerFilters] = useState(defaultFilters);
   const [resourceFilters, setResourceFilters] = useState(defaultFilters);
-  const [qaFilters, setQaFilters] = useState(defaultFilters);
   const [publicPage, setPublicPage] = useState(1);
   const [trainerPage, setTrainerPage] = useState(1);
   const [resourcePage, setResourcePage] = useState(1);
-  const [qaPage, setQaPage] = useState(1);
   const [topicView, setTopicView] = useState("list");
 
   const rcbcWebinars = [...activities.filter((item) => item.type === "RCBC Webinar"), ...onlineWebinars];
@@ -707,7 +705,6 @@ function OnlineEducation() {
   const publicResults = pageItems(rcbcWebinars, publicFilters, publicPage);
   const trainerResults = pageItems(ctWebinars, trainerFilters, trainerPage);
   const resourceResults = pageItems(archiveResources, resourceFilters, resourcePage);
-  const qaResults = pageItems(qaResources.map((resource) => ({ ...resource, status: "completed" })), qaFilters, qaPage);
 
   return (
     <main className="module-main">
@@ -1077,75 +1074,6 @@ function OnlineEducation() {
             page={resourceResults.page}
             pageCount={resourceResults.pageCount}
             onPageChange={setResourcePage}
-          />
-        </div>
-      </section>
-
-      {/* ---- Q&A archive ---- */}
-      <section className="content-section content-section-light qa-archive-section">
-        <div className="section-container">
-          <div className="section-heading-block">
-            <span className="section-label">{le?.qaLabel || "Q&A archive"}</span>
-            <h2>{le?.qaTitle || "Questions from previous learning sessions"}</h2>
-            <p>
-              {le?.qaDesc || "Browse selected Q&A image sets from past webinars. Open each collection to review the full set of questions and answers."}
-            </p>
-          </div>
-
-          <ArchiveToolbar
-            label="Q&A collections"
-            filters={qaFilters}
-            onFiltersChange={(value) => {
-              setQaFilters(value);
-              setQaPage(1);
-            }}
-            totalCount={qaResults.totalCount}
-            onReset={() => {
-              setQaFilters(defaultFilters);
-              setQaPage(1);
-            }}
-          />
-
-          {qaResults.items.length === 0 ? (
-            <ArchiveEmptyState
-              label="Q&A collections"
-              onReset={() => {
-                setQaFilters(defaultFilters);
-                setQaPage(1);
-              }}
-            />
-          ) : (
-            <div className="qa-resource-grid">
-              {qaResults.items.map((resource) => (
-                <article
-                  className="qa-resource-card"
-                  key={resource.title}
-                  onClick={() => setSelectedQa(resource)}
-                  onKeyDown={(event) =>
-                    event.key === "Enter" && setSelectedQa(resource)
-                  }
-                  role="button"
-                  tabIndex={0}
-                >
-                  <div className="qa-resource-image">
-                    <img src={resource.image} alt="" />
-                    <span>{resource.pages} pages</span>
-                  </div>
-                  <div>
-                    <span className="tag">{resource.language}</span>
-                    <h3>{resource.title}</h3>
-                    <span className="resource-link-btn">Review Q&amp;A →</span>
-                  </div>
-                </article>
-              ))}
-            </div>
-          )}
-
-          <ArchivePagination
-            label="Q&A collections"
-            page={qaResults.page}
-            pageCount={qaResults.pageCount}
-            onPageChange={setQaPage}
           />
         </div>
       </section>
