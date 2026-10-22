@@ -2889,7 +2889,6 @@ function MedicalCarousel({ trainers: carouselTrainers, onSelect, onViewAll }) {
   const { t } = useLanguage();
   const cs = t.learnEvents?.certifiedTrainersSection || {};
   const trackRef = useRef(null);
-  const autoRef = useRef(null);
   const isDragging = useRef(false);
   const startX = useRef(0);
   const startScroll = useRef(0);
@@ -2897,58 +2896,59 @@ function MedicalCarousel({ trainers: carouselTrainers, onSelect, onViewAll }) {
   const isUserInteracting = useRef(false);
   const resumeTimeout = useRef(null);
 
-  const SCROLL_STEP = 220;
-
-  /* ---- Auto-scroll (slow drift) ---- */
-  const startAuto = useCallback(() => {
-    if (autoRef.current) return;
-    autoRef.current = setInterval(() => {
-      const el = trackRef.current;
-      if (!el || isUserInteracting.current) return;
-      const maxScroll = el.scrollWidth - el.clientWidth;
-      if (maxScroll <= 0) return;
-      if (el.scrollLeft >= maxScroll - 2) {
-        el.scrollTo({ left: 0, behavior: "smooth" });
-      } else {
-        el.scrollLeft += 1;
-      }
-    }, 28);
-  }, []);
-
-  const stopAuto = useCallback(() => {
-    clearInterval(autoRef.current);
-    autoRef.current = null;
-  }, []);
-
   const pauseAndResume = useCallback(() => {
     isUserInteracting.current = true;
     clearTimeout(resumeTimeout.current);
     resumeTimeout.current = setTimeout(() => {
       isUserInteracting.current = false;
-    }, 3000);
+    }, 2500);
   }, []);
 
+  /* ---- Auto-scroll (seamless continuous flow with requestAnimationFrame) ---- */
   useEffect(() => {
-    startAuto();
-    return () => {
-      stopAuto();
-      clearTimeout(resumeTimeout.current);
+    let animId;
+    let lastTime = performance.now();
+
+    const loop = (now) => {
+      const dt = Math.min(now - lastTime, 50);
+      lastTime = now;
+
+      const el = trackRef.current;
+      if (el && !isUserInteracting.current) {
+        const halfWidth = el.scrollWidth / 2;
+        if (halfWidth > 0) {
+          // Continuous gentle drift (~32px / sec)
+          el.scrollLeft += (32 * dt) / 1000;
+          if (el.scrollLeft >= halfWidth) {
+            el.scrollLeft -= halfWidth;
+          }
+        }
+      }
+
+      animId = requestAnimationFrame(loop);
     };
-  }, [startAuto, stopAuto]);
+
+    animId = requestAnimationFrame(loop);
+    return () => cancelAnimationFrame(animId);
+  }, []);
 
   /* ---- Prev / Next ---- */
   const scrollBy = useCallback((dir) => {
     const el = trackRef.current;
     if (!el) return;
     pauseAndResume();
-    const maxScroll = el.scrollWidth - el.clientWidth;
-    if (dir > 0 && el.scrollLeft >= maxScroll - 15) {
-      el.scrollTo({ left: 0, behavior: "smooth" });
-    } else if (dir < 0 && el.scrollLeft <= 15) {
-      el.scrollTo({ left: maxScroll, behavior: "smooth" });
-    } else {
-      el.scrollBy({ left: dir * SCROLL_STEP, behavior: "smooth" });
+
+    const card = el.querySelector(".ct-mc-card");
+    const step = card ? card.offsetWidth + 20 : 280;
+    const halfWidth = el.scrollWidth / 2;
+
+    if (dir < 0 && el.scrollLeft <= 10) {
+      el.scrollLeft += halfWidth;
+    } else if (dir > 0 && el.scrollLeft >= halfWidth - 10) {
+      el.scrollLeft -= halfWidth;
     }
+
+    el.scrollBy({ left: dir * step, behavior: "smooth" });
   }, [pauseAndResume]);
 
   /* ---- Drag (pointer events) ---- */
@@ -2963,23 +2963,50 @@ function MedicalCarousel({ trainers: carouselTrainers, onSelect, onViewAll }) {
   }, [pauseAndResume]);
 
   const onPointerMove = useCallback((e) => {
-    if (!isDragging.current) return;
+    if (!isDragging.current || !trackRef.current) return;
     const dx = e.clientX - startX.current;
     if (Math.abs(dx) > 4) hasDragged.current = true;
-    if (trackRef.current) trackRef.current.scrollLeft = startScroll.current - dx;
+
+    const el = trackRef.current;
+    const halfWidth = el.scrollWidth / 2;
+    let nextScroll = startScroll.current - dx;
+    if (halfWidth > 0) {
+      if (nextScroll >= halfWidth) {
+        nextScroll -= halfWidth;
+        startX.current = e.clientX;
+        startScroll.current = nextScroll;
+      } else if (nextScroll < 0) {
+        nextScroll += halfWidth;
+        startX.current = e.clientX;
+        startScroll.current = nextScroll;
+      }
+    }
+    el.scrollLeft = nextScroll;
   }, []);
 
-  const onPointerUp = useCallback(() => { isDragging.current = false; }, []);
+  const onPointerUp = useCallback(() => {
+    isDragging.current = false;
+    setTimeout(() => { hasDragged.current = false; }, 50);
+  }, []);
 
-  const onMouseEnter = useCallback(() => { isUserInteracting.current = true; }, []);
+  const onMouseEnter = useCallback(() => {
+    isUserInteracting.current = true;
+    clearTimeout(resumeTimeout.current);
+  }, []);
+
   const onMouseLeave = useCallback(() => {
     if (!isDragging.current) {
       clearTimeout(resumeTimeout.current);
-      resumeTimeout.current = setTimeout(() => { isUserInteracting.current = false; }, 800);
+      resumeTimeout.current = setTimeout(() => {
+        isUserInteracting.current = false;
+      }, 400);
     }
   }, []);
 
-  const items = carouselTrainers;
+  if (!carouselTrainers || carouselTrainers.length === 0) return null;
+
+  // Duplicate the list to create a seamless infinite circular buffer
+  const items = [...carouselTrainers, ...carouselTrainers];
 
   return (
     <section className="ct-carousel-section">
@@ -2997,58 +3024,56 @@ function MedicalCarousel({ trainers: carouselTrainers, onSelect, onViewAll }) {
             <button type="button" className="ct-nav-btn" onClick={() => scrollBy(1)} aria-label="Next trainer">→</button>
           </div>
         </div>
-      </div>
 
-      <div className="ct-carousel-outer ct-mask">
-        <div
-          className="ct-carousel-track"
-          ref={trackRef}
-          onPointerDown={onPointerDown}
-          onPointerMove={onPointerMove}
-          onPointerUp={onPointerUp}
-          onPointerCancel={onPointerUp}
-          onMouseEnter={onMouseEnter}
-          onMouseLeave={onMouseLeave}
-          role="list"
-          aria-label="Medical professional trainers"
-        >
-          {items.map((t) => (
-            <div
-              key={`mc-${t.id}`}
-              className="ct-mc-card"
-              style={{ "--mc-color": t.badgeColor || "#0d716b" }}
-              role="listitem"
-            >
-              <div className="ct-mc-top-bar" aria-hidden="true" />
-              <div className="ct-mc-avatar-wrap">
-                <div className="ct-mc-avatar">
-                  <span className="ct-mc-initials">{t.initials}</span>
-                  <span className="ct-mc-verified" aria-hidden="true">✓</span>
+        <div className="ct-carousel-outer">
+          <div
+            className="ct-carousel-track"
+            ref={trackRef}
+            onPointerDown={onPointerDown}
+            onPointerMove={onPointerMove}
+            onPointerUp={onPointerUp}
+            onPointerCancel={onPointerUp}
+            onMouseEnter={onMouseEnter}
+            onMouseLeave={onMouseLeave}
+            role="list"
+            aria-label="Medical professional trainers"
+          >
+            {items.map((t, idx) => (
+              <div
+                key={`mc-${t.id}-${idx}`}
+                className="ct-mc-card"
+                style={{ "--mc-color": t.badgeColor || "#0d716b" }}
+                role="listitem"
+              >
+                <div className="ct-mc-top-bar" aria-hidden="true" />
+                <div className="ct-mc-avatar-wrap">
+                  <div className="ct-mc-avatar">
+                    <span className="ct-mc-initials">{t.initials}</span>
+                    <span className="ct-mc-verified" aria-hidden="true">✓</span>
+                  </div>
+                </div>
+                <div className="ct-mc-body">
+                  <span className="ct-mc-badge">{cs.clinicalFacilitator || "Clinical Facilitator"}</span>
+                  <strong className="ct-mc-name">{t.name}</strong>
+                  <span className="ct-mc-role">{t.role}</span>
+                  <span className="ct-mc-inst">{t.institution.split(",")[0]}</span>
+                </div>
+                <div className="ct-mc-footer">
+                  <button
+                    type="button"
+                    className="ct-mc-cta"
+                    onClick={() => !hasDragged.current && onSelect(t)}
+                    onPointerDown={(e) => e.stopPropagation()}
+                    aria-label={`View profile of ${t.name}`}
+                  >
+                    View profile →
+                  </button>
                 </div>
               </div>
-              <div className="ct-mc-body">
-                <span className="ct-mc-badge">{cs.clinicalFacilitator || "Clinical Facilitator"}</span>
-                <strong className="ct-mc-name">{t.name}</strong>
-                <span className="ct-mc-role">{t.role}</span>
-                <span className="ct-mc-inst">{t.institution.split(",")[0]}</span>
-              </div>
-              <div className="ct-mc-footer">
-                <button
-                  type="button"
-                  className="ct-mc-cta"
-                  onClick={() => !hasDragged.current && onSelect(t)}
-                  onPointerDown={(e) => e.stopPropagation()}
-                  aria-label={`View profile of ${t.name}`}
-                >
-                  View profile →
-                </button>
-              </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
-      </div>
 
-      <div className="section-container">
         <div className="ct-carousel-bottom">
           <button type="button" className="ct-view-all-btn" onClick={onViewAll}>View full directory →</button>
         </div>
