@@ -105,7 +105,7 @@ export async function portalHandler(req,res,url,send) {
   const existing=(await db.query('SELECT * FROM activities WHERE id=$1 FOR UPDATE',[id])).rows[0];
   if(existing && !admin && existing.created_by!==user.id) fail('Only the activity owner can edit this record',403);
   if(action.type==='ACTIVITY_SAVE') {
-   if(existing && (!['draft','returned',...(admin?['approved','published']:[])].includes(existing.status) || existing.cancelled_at)) fail('Activity cannot be edited in this state',409);
+   if(existing && !admin && (!['draft','returned'].includes(existing.status) || existing.cancelled_at)) fail('Activity cannot be edited in this state',409);
    const a=action.activity;
    validateLinks(a.posterUrl);
    await validateFileLinks(db,user,[a.posterUrl]);
@@ -120,6 +120,11 @@ export async function portalHandler(req,res,url,send) {
    if(a.registrationDeadline && new Date(a.registrationDeadline)>new Date(a.date)) fail('Registration deadline must be before the activity');
    if(a.capacity && (!Number.isInteger(Number(a.capacity)) || Number(a.capacity)<=0)) fail('Capacity must be a positive integer');
    await db.query("UPDATE activities SET registration_deadline=$2::timestamp AT TIME ZONE 'Asia/Kuala_Lumpur',capacity=$3,updated_at=now() WHERE id=$1",[id,a.registrationDeadline || null,a.capacity || null]);
+   if(admin && a.status && ['draft','submitted','approved','published','completed','verified','archived'].includes(a.status)) {
+    await db.query("UPDATE activities SET status=$2,published_at=CASE WHEN $2 IN ('published','completed','verified','archived') THEN COALESCE(published_at, now()) ELSE published_at END,updated_at=now() WHERE id=$1",[id,a.status]);
+   } else if(existing && ['completed','verified','archived'].includes(existing.status)) {
+    await db.query("UPDATE activities SET status=$2,published_at=COALESCE(published_at, now()),updated_at=now() WHERE id=$1",[id,existing.status]);
+   }
    if(a.trainers) {
     if(!Array.isArray(a.trainers) || (!admin && !a.trainers.length) || new Set(a.trainers.map(t=>t.trainerId)).size!==a.trainers.length || (!admin && !a.trainers.some(t=>t.trainerId===user.id))) fail('Assign distinct trainers and include yourself');
     const eligible=await db.query("SELECT id FROM approved_trainer_accounts WHERE id=ANY($1::uuid[])",[a.trainers.map(t=>t.trainerId)]);
@@ -132,6 +137,16 @@ export async function portalHandler(req,res,url,send) {
    if(admin) await logDecision(db,user,'activities',id,existing && existing.starts_at.toISOString()!==new Date(a.date+'+08:00').toISOString()?'rescheduled':'corrected','',existing?.status || null,existing?.status || 'draft');return;
   }
   if(!existing) fail('Activity not found',404);
+  if(action.type==='ACTIVITY_DELETE') {
+   if(!admin && (existing.created_by!==user.id || !['draft','returned'].includes(existing.status))) fail('Only draft activities can be deleted',403);
+   await db.query('DELETE FROM completions WHERE activity_id=$1',[id]);
+   await db.query('DELETE FROM evidence_records WHERE activity_id=$1',[id]);
+   await db.query('UPDATE cpd_records SET activity_id=NULL WHERE activity_id=$1',[id]);
+   await db.query('DELETE FROM activity_trainers WHERE activity_id=$1',[id]);
+   await db.query('DELETE FROM activities WHERE id=$1',[id]);
+   if(admin) await logDecision(db,user,'activities',id,'deleted','',existing.status,'deleted');
+   return;
+  }
   if(action.type==='ACTIVITY_SUBMIT') {
    if(!['draft','returned'].includes(existing.status)) fail('Activity is not editable',409);
    await db.query("UPDATE activities SET status='submitted',admin_comment='' WHERE id=$1",[id]); return;

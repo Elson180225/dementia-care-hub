@@ -2359,6 +2359,56 @@ function EventsSection() {
     setStatusFilter("all");
   };
 
+  const outreachStories = (eventsCms.communityOutreach?.stories && eventsCms.communityOutreach.stories.length > 0)
+    ? eventsCms.communityOutreach.stories
+    : [
+        {
+          id: "outreach-story-1",
+          title: "Alzheimer’s Care Project TTT Batch 2 (16/5/25 – 18/5/25)",
+          subtitle: "Sibu, Sarawak (16/5/25 – 18/5/25)",
+          date: "16–18 May 2025",
+          location: "Sibu, Sarawak",
+          description: "Participants from Kapit, Betong, and Sibu dedicated three days to learning, practicing, and preparing to serve their communities with evidence-based dementia care skills.",
+          image: dialogueImg1,
+        },
+        {
+          id: "outreach-story-2",
+          title: "Living Impact & Growing Caregiver Support",
+          subtitle: "Sibu, Sarawak (16/5/25 – 18/5/25)",
+          date: "16–18 May 2025",
+          location: "Sibu, Sarawak",
+          description: "Although months have passed, the impact, memories, and lessons from Sibu remain very much alive in the way trainers share their knowledge, caregivers feel supported, and communities open their hearts toward dementia care.",
+          image: dialogueImg2,
+        },
+      ];
+
+  const newsArticles = (eventsCms.headlinesNews?.articles && eventsCms.headlinesNews.articles.length > 0)
+    ? eventsCms.headlinesNews.articles
+    : [
+        {
+          id: "news-sin-chew",
+          outlet: "Malaysia Sin Chew Daily",
+          langPill: "中文报道",
+          subtitle: "Sarawak Regional Press Feature",
+          mainTitle: "Empowering Families & Community Dementia Care in Sarawak",
+          intro: "In-depth reporting on the collaboration between Rotary Club of Bintulu Central, local clinicians, and ADFM trainers to establish support networks for elderly families.",
+          category: "Press Feature",
+          date: "Published Feature",
+          image: newsSinChew,
+        },
+        {
+          id: "news-see-hua",
+          outlet: "See Hua Daily News",
+          langPill: "Sarawak Press",
+          subtitle: "Community News Coverage",
+          mainTitle: "HopeCare Initiative: Bridging Gaps in Dementia Support",
+          intro: "Coverage detailing the expansion of dementia care education into secondary towns like Bintulu, Miri, and Sibu to prevent caregiver isolation.",
+          category: "Press Release",
+          date: "Press Release",
+          image: newsSeeHua,
+        },
+      ];
+
   return (
     <main className="module-main events-experience-module">
       {/* ---- Interactive Jump Bar ---- */}
@@ -2398,9 +2448,9 @@ function EventsSection() {
             {/* Clean Segmented Calendar Switcher */}
             <div className="calendar-switcher-dock" aria-label="Select calendar edition">
               <div className="switcher-pills" role="tablist">
-                {roadmaps.map((rm, idx) => (
+                {activeRoadmaps.map((rm, idx) => (
                   <button
-                    key={rm.id}
+                    key={rm.id || idx}
                     type="button"
                     className={`switcher-pill-btn ${idx === activeRoadmapIndex ? "is-active" : ""}`}
                     onClick={() => handleSelectRoadmap(idx)}
@@ -2554,77 +2604,50 @@ function EventsSection() {
         </div>
       </section>
 
-      {/* ---- Section 2: Community Outreach Showcase (Sibu Batch 2 TTT) ---- */}
+      {/* ---- Section 2: Community Outreach Showcase ---- */}
       <section id="community-dialogues" className="events-feature-section dialogues-showcase-section">
         <div className="section-container">
           <div className="events-section-header">
-            <span className="section-label">{ev.communityOutreach || "Community Outreach"}</span>
-            <h2>{ev.sibuBatch2Title || "Alzheimer’s Care Project: TTT Batch 2 in Sibu"}</h2>
+            <span className="section-label">{eventsCms.communityOutreach?.eyebrow || ev.communityOutreach || "Community Outreach"}</span>
+            <h2>{eventsCms.communityOutreach?.mainTitle || ev.sibuBatch2Title || "Alzheimer’s Care Project: TTT Batch 2 in Sibu"}</h2>
             <p>
-              {ev.sibuBatch2Desc || "Back in May, our Batch 2 TTT in Sibu brought together a group of passionate participants from Kapit, Betong, and Sibu, who dedicated three days to learning, practicing, and preparing to serve their communities."}
+              {eventsCms.communityOutreach?.intro || ev.sibuBatch2Desc || "Back in May, our Batch 2 TTT in Sibu brought together a group of passionate participants from Kapit, Betong, and Sibu, who dedicated three days to learning, practicing, and preparing to serve their communities."}
             </p>
           </div>
 
           {/* Dialogue Photo Gallery */}
           <div className="dialogues-gallery-grid">
-            <article
-              className="dialogue-photo-card"
-              onClick={() =>
-                setLightboxData({
-                  image: dialogueImg1,
-                  title: "Alzheimer’s Care Project TTT Batch 2 — Sibu, Sarawak",
-                  subtitle: "Sibu, Sarawak (16/5/25 – 18/5/25)",
-                  caption:
-                    "Back in May, our Batch 2 TTT in Sibu brought together a group of passionate participants from Kapit, Betong, Sibu, who dedicated three days to learning, practicing, and preparing to serve their communities.",
-                  date: "16–18 May 2025",
-                })
-              }
-            >
-              <div className="dialogue-img-wrap">
-                <img src={dialogueImg1} alt="Alzheimer's Care Project TTT Batch 2 Sibu, Sarawak (16/5/25 - 18/5/25)" />
-                <span className="dialogue-tag">Sibu, Sarawak</span>
-                <div className="dialogue-hover-btn">
-                  <span>{le?.eventsSection?.viewPhoto || "🔍 View Photo"}</span>
-                </div>
-              </div>
-              <div className="dialogue-card-body">
-                <h3>{le?.eventsSection?.photo1Title || "Alzheimer’s Care Project TTT Batch 2 (16/5/25 – 18/5/25)"}</h3>
-                <p>
-                  Participants from Kapit, Betong, and Sibu dedicated three days to learning, practicing,
-                  and preparing to serve their communities with evidence-based dementia care skills.
-                </p>
-                <span className="dialogue-date">📅 16–18 May 2025 · Sibu, Sarawak</span>
-              </div>
-            </article>
-
-            <article
-              className="dialogue-photo-card"
-              onClick={() =>
-                setLightboxData({
-                  image: dialogueImg2,
-                  title: "Living Impact & Growing Caregiver Support — Sibu, Sarawak",
-                  subtitle: "Sibu, Sarawak (16/5/25 – 18/5/25)",
-                  caption:
-                    "Although months have passed, the impact, memories, and lessons from Sibu remain very much alive. What was planted then has continued to grow, in the way trainers share their knowledge, in the way caregivers feel supported, and in the way communities begin to open their hearts toward dementia care. Batch 2 was not just an event in May; it is a living part of our journey, shaping what we do today and reminding us that every step matters in building a dementia-friendly Sarawak.",
-                  date: "16–18 May 2025",
-                })
-              }
-            >
-              <div className="dialogue-img-wrap">
-                <img src={dialogueImg2} alt="TTT Batch 2 Interactive Learning & Practice Sibu (16/5/25 - 18/5/25)" />
-                <span className="dialogue-tag">Sibu, Sarawak</span>
-                <div className="dialogue-hover-btn">
-                  <span>{le?.eventsSection?.viewPhoto || "🔍 View Photo"}</span>
-                </div>
-              </div>
-              <div className="dialogue-card-body">
-                <h3>{le?.eventsSection?.photo2Title || "Living Impact & Growing Caregiver Support"}</h3>
-                <p>
-                  Although months have passed, the impact, memories, and lessons from Sibu remain very much alive in the way trainers share their knowledge, caregivers feel supported, and communities open their hearts toward dementia care.
-                </p>
-                <span className="dialogue-date">📅 16–18 May 2025 · Sibu, Sarawak</span>
-              </div>
-            </article>
+            {outreachStories.map((story, sIdx) => {
+              const storyImg = resolveMediaImage(story.image, sIdx === 0 ? dialogueImg1 : dialogueImg2);
+              return (
+                <article
+                  key={story.id || sIdx}
+                  className="dialogue-photo-card"
+                  onClick={() =>
+                    setLightboxData({
+                      image: storyImg,
+                      title: story.title,
+                      subtitle: story.subtitle || `${story.location || 'Sarawak'} (${story.date || ''})`,
+                      caption: story.description,
+                      date: story.date,
+                    })
+                  }
+                >
+                  <div className="dialogue-img-wrap">
+                    <img src={storyImg} alt={story.title} />
+                    {story.location && <span className="dialogue-tag">{story.location}</span>}
+                    <div className="dialogue-hover-btn">
+                      <span>{le?.eventsSection?.viewPhoto || "🔍 View Photo"}</span>
+                    </div>
+                  </div>
+                  <div className="dialogue-card-body">
+                    <h3>{story.title}</h3>
+                    <p>{story.description}</p>
+                    <span className="dialogue-date">📅 {story.date}{story.location ? ` · ${story.location}` : ""}</span>
+                  </div>
+                </article>
+              );
+            })}
           </div>
 
           {/* Dialogue Three Core Pillars */}
@@ -2909,77 +2932,42 @@ function EventsSection() {
           </div>
 
           <div className="news-clippings-grid">
-            {/* News Card 1: Sin Chew Daily */}
-            <article
-              className="news-clipping-card"
-              onClick={() =>
-                setLightboxData({
-                  image: newsSinChew,
-                  title: "Malaysia Sin Chew Daily (马来西亚星洲日报)",
-                  subtitle: "Sarawak Regional Press Feature",
-                  caption:
-                    "Feature article reporting on the Rotary Club of Bintulu Central HopeCare project, highlighting dementia education, stigma reduction, and family caregiver workshops.",
-                  date: "Published Feature",
-                })
-              }
-            >
-              <div className="news-img-wrap">
-                <img src={newsSinChew} alt="Malaysia Sin Chew Daily Press Coverage" />
-                <div className="news-img-hover-overlay">
-                  <span>🔍 Read Newspaper Clipping</span>
-                </div>
-              </div>
-              <div className="news-card-body">
-                <div className="news-outlet-meta">
-                  <span className="news-outlet-tag">Malaysia Sin Chew Daily</span>
-                  <span className="news-lang-pill">中文报道</span>
-                </div>
-                <h3>Empowering Families &amp; Community Dementia Care in Sarawak</h3>
-                <p>
-                  In-depth reporting on the collaboration between Rotary Club of Bintulu Central,
-                  local clinicians, and ADFM trainers to establish support networks for elderly families.
-                </p>
-                <div className="news-action-bar">
-                  <span className="news-click-prompt">Click to open high-res newspaper clipping ↗</span>
-                </div>
-              </div>
-            </article>
-
-            {/* News Card 2: See Hua Daily News */}
-            <article
-              className="news-clipping-card"
-              onClick={() =>
-                setLightboxData({
-                  image: newsSeeHua,
-                  title: "See Hua Daily News (诗华日报)",
-                  subtitle: "Community News Coverage",
-                  caption:
-                    "Press coverage highlighting the launch of community dementia dialogues, Train-the-Trainer pathways, and resource distribution across Sarawak.",
-                  date: "Press Release",
-                })
-              }
-            >
-              <div className="news-img-wrap">
-                <img src={newsSeeHua} alt="See Hua Daily News Press Coverage" />
-                <div className="news-img-hover-overlay">
-                  <span>🔍 Read Newspaper Clipping</span>
-                </div>
-              </div>
-              <div className="news-card-body">
-                <div className="news-outlet-meta">
-                  <span className="news-outlet-tag">See Hua Daily News</span>
-                  <span className="news-lang-pill">Sarawak Press</span>
-                </div>
-                <h3>HopeCare Initiative: Bridging Gaps in Dementia Support</h3>
-                <p>
-                  Coverage detailing the expansion of dementia care education into secondary
-                  towns like Bintulu, Miri, and Sibu to prevent caregiver isolation.
-                </p>
-                <div className="news-action-bar">
-                  <span className="news-click-prompt">Click to open high-res newspaper clipping ↗</span>
-                </div>
-              </div>
-            </article>
+            {newsArticles.map((art, aIdx) => {
+              const artImg = resolveMediaImage(art.image, aIdx === 0 ? newsSinChew : newsSeeHua);
+              return (
+                <article
+                  key={art.id || aIdx}
+                  className="news-clipping-card"
+                  onClick={() =>
+                    setLightboxData({
+                      image: artImg,
+                      title: `${art.outlet || 'News Outlet'} (${art.mainTitle || art.title || 'Press Clipping'})`,
+                      subtitle: art.subtitle || "Sarawak Regional Press Feature",
+                      caption: art.intro || art.description || "Feature article reporting on the Rotary Club of Bintulu Central HopeCare project.",
+                      date: art.date || "Published Feature",
+                    })
+                  }
+                >
+                  <div className="news-img-wrap">
+                    <img src={artImg} alt={art.mainTitle || art.title || "Press Coverage"} />
+                    <div className="news-img-hover-overlay">
+                      <span>🔍 Read Newspaper Clipping</span>
+                    </div>
+                  </div>
+                  <div className="news-card-body">
+                    <div className="news-outlet-meta">
+                      <span className="news-outlet-tag">{art.outlet}</span>
+                      {art.langPill && <span className="news-lang-pill">{art.langPill}</span>}
+                    </div>
+                    <h3>{art.mainTitle || art.title}</h3>
+                    <p>{art.intro || art.description}</p>
+                    <div className="news-action-bar">
+                      <span className="news-click-prompt">Click to open high-res newspaper clipping ↗</span>
+                    </div>
+                  </div>
+                </article>
+              );
+            })}
           </div>
         </div>
       </section>

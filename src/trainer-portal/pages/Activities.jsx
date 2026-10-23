@@ -49,6 +49,7 @@ const blank = {
   posterUrl: "",
   registrationDeadline: "",
   capacity: "",
+  status: "",
 };
 
 function validate(v) {
@@ -99,6 +100,7 @@ export default function Activities({
   const [availableTrainers, setAvailableTrainers] = useState([]);
   const [assigned, setAssigned] = useState([]);
   const [cancelling, setCancelling] = useState(null); // { id, reason, error }
+  const [deletingActivity, setDeletingActivity] = useState(null);
 
   // Search & Filter State
   const [searchQuery, setSearchQuery] = useState("");
@@ -137,9 +139,12 @@ export default function Activities({
       a
         ? {
             id: a.id,
-            values: Object.fromEntries(Object.keys(blank).map((k) => [k, a[k] ?? ""])),
+            values: {
+              ...Object.fromEntries(Object.keys(blank).map((k) => [k, a[k] ?? ""])),
+              status: a.status || "published",
+            },
           }
-        : { values: { ...blank, ...(defaultValues || {}) } }
+        : { values: { ...blank, status: admin ? "published" : "draft", ...(defaultValues || {}) } }
     );
   };
 
@@ -181,27 +186,33 @@ export default function Activities({
     }
     const id = editing.id ?? crypto.randomUUID();
     const venue = editing.values.mode === "Online" ? "Online" : editing.values.venue;
-    const payload = { id, ...editing.values, venue, trainers: assigned };
+    const currentActivity = state.activities.find((a) => a.id === id);
+    const resolvedStatus = editing.values.status || (currentActivity?.status ?? (saveMode === "publish" ? "published" : "draft"));
+    const payload = {
+      id,
+      ...editing.values,
+      status: admin ? resolvedStatus : editing.values.status,
+      venue,
+      trainers: assigned,
+    };
 
     const ok = await dispatch({ type: "ACTIVITY_SAVE", activity: payload });
     if (!ok) return;
 
-    if (admin && saveMode === "publish") {
-      const currentStatus = state.activities.find((a) => a.id === id)?.status || "draft";
-      if (currentStatus === "draft" || currentStatus === "returned") {
-        await dispatch({ type: "ACTIVITY_SUBMIT", id });
-        await dispatch({ type: "ADMIN_REVIEW", target: "activity", id, decision: "approved" });
-        await dispatch({ type: "ADMIN_REVIEW", target: "activity", id, decision: "published" });
-      } else if (currentStatus === "submitted") {
-        await dispatch({ type: "ADMIN_REVIEW", target: "activity", id, decision: "approved" });
-        await dispatch({ type: "ADMIN_REVIEW", target: "activity", id, decision: "published" });
-      } else if (currentStatus === "approved") {
-        await dispatch({ type: "ADMIN_REVIEW", target: "activity", id, decision: "published" });
-      }
+    if (admin && saveMode === "publish" && (!currentActivity || currentActivity.status === "draft" || currentActivity.status === "returned")) {
+      await dispatch({ type: "ACTIVITY_SUBMIT", id });
+      await dispatch({ type: "ADMIN_REVIEW", target: "activity", id, decision: "approved" });
+      await dispatch({ type: "ADMIN_REVIEW", target: "activity", id, decision: "published" });
     } else if (saveMode === "submit") {
       await dispatch({ type: "ACTIVITY_SUBMIT", id });
     }
     setEditing(null);
+  }
+
+  async function confirmDeleteActivity() {
+    if (!deletingActivity) return;
+    const ok = await dispatch({ type: "ACTIVITY_DELETE", id: deletingActivity.id });
+    if (ok) setDeletingActivity(null);
   }
 
   // Filter and pagination computations
@@ -295,6 +306,18 @@ export default function Activities({
         <form className="tp-card" noValidate onBlur={checkField} onSubmit={(e) => e.preventDefault()}>
           {input("title", "Title", { placeholder: "e.g. Dementia Care Skill Course (Family)" })}
           {input("date", "Date & time", { type: "datetime-local" })}
+
+          {admin && (
+            <Field id="status" label="Record Status" hint="Controls where this activity appears (e.g. Published on upcoming events, Completed in webinar archive).">
+              <select id="status" name="status" value={v.status || "published"} onChange={change}>
+                <option value="published">Published (Live on Upcoming Events & Calendar)</option>
+                <option value="completed">Completed (Archived / Past Webinar or Workshop)</option>
+                <option value="draft">Draft (Hidden from public)</option>
+                <option value="approved">Approved (Awaiting publish)</option>
+                <option value="archived">Archived</option>
+              </select>
+            </Field>
+          )}
 
           <Field id="type" label="Activity type">
             <select id="type" name="type" value={v.type} onChange={change}>
@@ -791,10 +814,10 @@ export default function Activities({
 
                     <td style={{ textAlign: "right" }}>
                       <div style={{ display: "inline-flex", gap: "6px", flexWrap: "wrap", justifyContent: "flex-end" }}>
-                        {(!a.cancelledAt &&
-                          (admin
-                            ? ["draft", "returned", "approved", "published"].includes(a.status)
-                            : ["draft", "returned"].includes(a.status) && a.created_by === state.session?.id)) && (
+                        {(admin ||
+                          (!a.cancelledAt &&
+                            ["draft", "returned"].includes(a.status) &&
+                            a.created_by === state.session?.id)) && (
                           <button
                             type="button"
                             className="tp-btn tp-btn-ghost"
@@ -802,6 +825,20 @@ export default function Activities({
                             onClick={() => open(a)}
                           >
                             Edit
+                          </button>
+                        )}
+
+                        {(admin ||
+                          (["draft", "returned"].includes(a.status) &&
+                            a.created_by === state.session?.id)) && (
+                          <button
+                            type="button"
+                            className="tp-btn tp-btn-ghost"
+                            style={{ minHeight: "36px", padding: "4px 12px", fontSize: "0.85rem", color: "#b91c1c", borderColor: "#fca5a5" }}
+                            onClick={() => setDeletingActivity(a)}
+                            title="Permanently delete this activity"
+                          >
+                            Delete
                           </button>
                         )}
 
@@ -945,6 +982,26 @@ export default function Activities({
           >
             Next ›
           </button>
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {deletingActivity && (
+        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 99999, padding: "1rem" }}>
+          <div style={{ background: "#fff", borderRadius: "10px", maxWidth: "480px", width: "100%", padding: "1.5rem", boxShadow: "0 20px 25px -5px rgba(0,0,0,0.2)" }}>
+            <h3 style={{ margin: "0 0 0.5rem", color: "#991b1b" }}>Confirm Activity Deletion</h3>
+            <p style={{ margin: "0 0 1rem", color: "#4b5563", fontSize: "0.95rem" }}>
+              Are you sure you want to permanently delete <strong>{deletingActivity.title}</strong>? This will remove the event, its trainer assignments, and any linked attendance records. This action cannot be undone.
+            </p>
+            <div style={{ display: "flex", justifyContent: "flex-end", gap: "0.75rem" }}>
+              <button type="button" className="tp-btn tp-btn-ghost" onClick={() => setDeletingActivity(null)}>
+                Cancel
+              </button>
+              <button type="button" className="tp-btn" style={{ background: "#dc2626", borderColor: "#dc2626", color: "#fff" }} onClick={confirmDeleteActivity}>
+                Yes, Delete Permanently
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </>

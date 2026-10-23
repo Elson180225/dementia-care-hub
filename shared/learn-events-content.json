@@ -295,6 +295,17 @@
             "dotClass": "dot-3"
           }
         ]
+      },
+      {
+        "id": "roadmap-1792743447694",
+        "editionLabel": "2027",
+        "title": "Fun Run ",
+        "theme": "Charity Fun Run ",
+        "period": "16th February 2027",
+        "intro": "ARE YOU Ready?!",
+        "image": "/api/files/6f0c0268-9672-47ab-abe5-87abc0bd3020",
+        "highlights": [],
+        "poster": "/api/files/6f0c0268-9672-47ab-abe5-87abc0bd3020"
       }
     ],
     "communityOutreach": {
@@ -514,6 +525,32 @@
         "badgeColor": "#9333ea",
         "avatarUrl": "",
         "bio": "Consultant Geriatrician at Sarawak General Hospital. Master clinical advisor overseeing complex BPSD protocols, ethical caregiving frameworks, and academic evaluation for the RCBC HopeCare initiative."
+      },
+      {
+        "id": "trainer-1792743066214",
+        "name": "LOI MING HUI",
+        "role": "Supervisor",
+        "institution": "Swinburne University of Technology Sarawak Campus",
+        "city": "Kuching",
+        "language": "English / Bahasa Melayu / Chinese",
+        "category": "medical-professional",
+        "bio": "",
+        "avatarUrl": "/api/files/c93af02c-4ea9-4c9b-b9f5-27427fc60f42",
+        "badgeColor": "#0d716b",
+        "initials": ""
+      },
+      {
+        "id": "trainer-1792743361135",
+        "name": "Terence Teo",
+        "role": "Medical Officer / Dementia Trainer",
+        "institution": "Sarawak General Hospital, Kuching",
+        "city": "Kuching",
+        "language": "English / Bahasa Melayu",
+        "category": "advisory-support",
+        "bio": "",
+        "avatarUrl": "",
+        "badgeColor": "#0d716b",
+        "initials": "TT"
       }
     ]
   }
