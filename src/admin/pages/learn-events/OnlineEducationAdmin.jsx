@@ -1,4 +1,5 @@
 import { useState, useMemo } from "react";
+import Activities from "../../../trainer-portal/pages/Activities";
 import UploadField from "../../../trainer-portal/UploadField";
 
 const BLANK_TOPIC = {
@@ -31,12 +32,18 @@ const BLANK_RESOURCE = {
 };
 
 export default function OnlineEducationAdmin({ content, onSave }) {
-  const [subSection, setSubSection] = useState("topics"); // "topics" | "resources"
+  // Sub-tabs: "webinars" | "topics" | "resources" | "headers"
+  const [subSection, setSubSection] = useState("webinars");
   const [editingTopic, setEditingTopic] = useState(null); // null or { values, isNew }
   const [editingResource, setEditingResource] = useState(null); // null or { values, isNew }
   const [deletingConfirm, setDeletingConfirm] = useState(null); // { type: 'topic'|'resource', id, title }
   const [topicErrors, setTopicErrors] = useState({});
   const [resourceErrors, setResourceErrors] = useState({});
+
+  // Headers editing state
+  const initialHeaders = content?.onlineEducation?.sectionHeader || {};
+  const [headersState, setHeadersState] = useState(initialHeaders);
+  const [headerSaving, setHeaderSaving] = useState(false);
 
   // Filter & Search states for Topics
   const [topicSearch, setTopicSearch] = useState("");
@@ -200,6 +207,16 @@ export default function OnlineEducationAdmin({ content, onSave }) {
     );
     await onSave(copy);
     setDeletingConfirm(null);
+  }
+
+  // HEADERS SAVE
+  async function handleSaveHeaders() {
+    setHeaderSaving(true);
+    const copy = JSON.parse(JSON.stringify(content));
+    if (!copy.onlineEducation) copy.onlineEducation = {};
+    copy.onlineEducation.sectionHeader = headersState;
+    await onSave(copy);
+    setHeaderSaving(false);
   }
 
   // ==========================================
@@ -595,20 +612,36 @@ export default function OnlineEducationAdmin({ content, onSave }) {
   }
 
   // ==========================================
-  // RENDER: MAIN LISTING TABLE VIEW
+  // RENDER: MAIN VIEW (WITH 4 SUB-TABS)
   // ==========================================
   return (
     <div className="online-education-admin-module">
       {/* Sub-section Switcher */}
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1.5rem", flexWrap: "wrap", gap: "1rem" }}>
-        <div style={{ display: "flex", gap: "8px", background: "#f3e8ff", padding: "4px", borderRadius: "10px" }}>
+        <div style={{ display: "flex", gap: "6px", background: "#f3e8ff", padding: "4px", borderRadius: "10px", flexWrap: "wrap" }}>
+          <button
+            type="button"
+            onClick={() => setSubSection("webinars")}
+            style={{
+              border: "none",
+              cursor: "pointer",
+              padding: "8px 16px",
+              borderRadius: "8px",
+              fontWeight: subSection === "webinars" ? 700 : 500,
+              background: subSection === "webinars" ? "#51277d" : "transparent",
+              color: subSection === "webinars" ? "#fff" : "#51277d",
+              transition: "all 0.15s ease",
+            }}
+          >
+            🎥 Public Education Webinars
+          </button>
           <button
             type="button"
             onClick={() => setSubSection("topics")}
             style={{
               border: "none",
               cursor: "pointer",
-              padding: "8px 18px",
+              padding: "8px 16px",
               borderRadius: "8px",
               fontWeight: subSection === "topics" ? 700 : 500,
               background: subSection === "topics" ? "#51277d" : "transparent",
@@ -616,7 +649,7 @@ export default function OnlineEducationAdmin({ content, onSave }) {
               transition: "all 0.15s ease",
             }}
           >
-            📅 Upcoming Topics &amp; Webinars ({topics.length})
+            📅 Upcoming Topics &amp; Previews ({topics.length})
           </button>
           <button
             type="button"
@@ -624,7 +657,7 @@ export default function OnlineEducationAdmin({ content, onSave }) {
             style={{
               border: "none",
               cursor: "pointer",
-              padding: "8px 18px",
+              padding: "8px 16px",
               borderRadius: "8px",
               fontWeight: subSection === "resources" ? 700 : 500,
               background: subSection === "resources" ? "#51277d" : "transparent",
@@ -634,10 +667,26 @@ export default function OnlineEducationAdmin({ content, onSave }) {
           >
             📚 Approved Learning Resources ({resources.length})
           </button>
+          <button
+            type="button"
+            onClick={() => setSubSection("headers")}
+            style={{
+              border: "none",
+              cursor: "pointer",
+              padding: "8px 16px",
+              borderRadius: "8px",
+              fontWeight: subSection === "headers" ? 700 : 500,
+              background: subSection === "headers" ? "#51277d" : "transparent",
+              color: subSection === "headers" ? "#fff" : "#51277d",
+              transition: "all 0.15s ease",
+            }}
+          >
+            ⚙️ Section Headers
+          </button>
         </div>
 
         <div>
-          {subSection === "topics" ? (
+          {subSection === "topics" && (
             <button
               type="button"
               className="tp-btn"
@@ -648,7 +697,8 @@ export default function OnlineEducationAdmin({ content, onSave }) {
             >
               + New Upcoming Topic
             </button>
-          ) : (
+          )}
+          {subSection === "resources" && (
             <button
               type="button"
               className="tp-btn"
@@ -663,7 +713,26 @@ export default function OnlineEducationAdmin({ content, onSave }) {
         </div>
       </div>
 
-      {/* Delete Confirmation Modal */}
+      {/* SUB-SECTION 1: LIVE PUBLIC WEBINARS (Interconnected with Activities Engine) */}
+      {subSection === "webinars" && (
+        <div>
+          <Activities
+            admin={true}
+            initialFilterMode="Online"
+            defaultValues={{
+              mode: "Online",
+              venue: "Online",
+              city: "Online",
+              type: "RCBC Webinar",
+            }}
+            pageTitle="Previous & Future Public Education Webinars"
+            pageSubtitle="Scheduled public education webinars (RCBC Webinar and CT Webinar series). When published, records appear immediately under 'Previous & future public education webinars' on the public website."
+            newButtonLabel="+ New Public Webinar"
+          />
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal for Topics and Resources */}
       {deletingConfirm && (
         <div
           role="dialog"
@@ -708,7 +777,7 @@ export default function OnlineEducationAdmin({ content, onSave }) {
         </div>
       )}
 
-      {/* SUB-SECTION 1: UPCOMING TOPICS */}
+      {/* SUB-SECTION 2: UPCOMING TOPICS & PREVIEWS */}
       {subSection === "topics" && (
         <div>
           {/* Stats Cards */}
@@ -914,7 +983,7 @@ export default function OnlineEducationAdmin({ content, onSave }) {
         </div>
       )}
 
-      {/* SUB-SECTION 2: APPROVED LEARNING RESOURCES */}
+      {/* SUB-SECTION 3: APPROVED LEARNING RESOURCES */}
       {subSection === "resources" && (
         <div>
           {/* Stats Cards */}
@@ -1120,6 +1189,175 @@ export default function OnlineEducationAdmin({ content, onSave }) {
               </button>
             </div>
           )}
+        </div>
+      )}
+
+      {/* SUB-SECTION 4: SECTION HEADERS & DESCRIPTIONS */}
+      {subSection === "headers" && (
+        <div className="tp-card">
+          <div style={{ marginBottom: "1.5rem" }}>
+            <h2 style={{ margin: 0, color: "#45206d" }}>⚙️ Online Education Section Titles &amp; Intros</h2>
+            <p style={{ margin: "0.25rem 0 0", color: "#61596a", fontSize: "0.95rem" }}>
+              Customize the section labels, headlines, and introductory paragraphs displayed on the public website's Online Education page.
+            </p>
+          </div>
+
+          <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
+            {/* RCBC Webinars Section */}
+            <div style={{ background: "#f9fafb", border: "1px solid #e5e7eb", borderRadius: "10px", padding: "1.25rem" }}>
+              <h3 style={{ margin: "0 0 0.75rem", color: "#0d716b", fontSize: "1.05rem" }}>
+                1. RCBC Public Webinar Series (Previous &amp; Future Public Education Webinars)
+              </h3>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 2fr", gap: "1rem", marginBottom: "0.75rem" }}>
+                <div className="tp-field" style={{ margin: 0 }}>
+                  <label htmlFor="h-rcbc-label">Badge Label</label>
+                  <input
+                    id="h-rcbc-label"
+                    type="text"
+                    value={headersState.rcbcLabel || ""}
+                    placeholder="e.g. RCBC annual webinar series"
+                    onChange={(e) => setHeadersState({ ...headersState, rcbcLabel: e.target.value })}
+                  />
+                </div>
+                <div className="tp-field" style={{ margin: 0 }}>
+                  <label htmlFor="h-rcbc-title">Main Headline Title</label>
+                  <input
+                    id="h-rcbc-title"
+                    type="text"
+                    value={headersState.rcbcTitle || ""}
+                    placeholder="e.g. Previous & future public education webinars"
+                    onChange={(e) => setHeadersState({ ...headersState, rcbcTitle: e.target.value })}
+                  />
+                </div>
+              </div>
+              <div className="tp-field" style={{ margin: 0 }}>
+                <label htmlFor="h-rcbc-desc">Section Description</label>
+                <textarea
+                  id="h-rcbc-desc"
+                  rows={2}
+                  value={headersState.rcbcDesc || ""}
+                  placeholder="Introductory text describing the annual RCBC public webinars..."
+                  onChange={(e) => setHeadersState({ ...headersState, rcbcDesc: e.target.value })}
+                />
+              </div>
+            </div>
+
+            {/* Certified Trainer Webinars Section */}
+            <div style={{ background: "#f9fafb", border: "1px solid #e5e7eb", borderRadius: "10px", padding: "1.25rem" }}>
+              <h3 style={{ margin: "0 0 0.75rem", color: "#0d716b", fontSize: "1.05rem" }}>
+                2. Certified Trainer Webinars Series
+              </h3>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 2fr", gap: "1rem", marginBottom: "0.75rem" }}>
+                <div className="tp-field" style={{ margin: 0 }}>
+                  <label htmlFor="h-ct-label">Badge Label</label>
+                  <input
+                    id="h-ct-label"
+                    type="text"
+                    value={headersState.ctLabel || ""}
+                    placeholder="e.g. Certified Trainer webinar"
+                    onChange={(e) => setHeadersState({ ...headersState, ctLabel: e.target.value })}
+                  />
+                </div>
+                <div className="tp-field" style={{ margin: 0 }}>
+                  <label htmlFor="h-ct-title">Main Headline Title</label>
+                  <input
+                    id="h-ct-title"
+                    type="text"
+                    value={headersState.ctTitle || ""}
+                    placeholder="e.g. Webinars hosted by ADFM certified trainers"
+                    onChange={(e) => setHeadersState({ ...headersState, ctTitle: e.target.value })}
+                  />
+                </div>
+              </div>
+              <div className="tp-field" style={{ margin: 0 }}>
+                <label htmlFor="h-ct-desc">Section Description</label>
+                <textarea
+                  id="h-ct-desc"
+                  rows={2}
+                  value={headersState.ctDesc || ""}
+                  placeholder="Introductory text describing webinars led by certified trainers..."
+                  onChange={(e) => setHeadersState({ ...headersState, ctDesc: e.target.value })}
+                />
+              </div>
+            </div>
+
+            {/* Looking Ahead Section */}
+            <div style={{ background: "#f9fafb", border: "1px solid #e5e7eb", borderRadius: "10px", padding: "1.25rem" }}>
+              <h3 style={{ margin: "0 0 0.75rem", color: "#0d716b", fontSize: "1.05rem" }}>
+                3. Looking Ahead (Upcoming Events &amp; Topics)
+              </h3>
+              <div className="tp-field" style={{ margin: "0 0 0.75rem" }}>
+                <label htmlFor="h-up-title">Headline Title</label>
+                <input
+                  id="h-up-title"
+                  type="text"
+                  value={headersState.upcomingTitle || ""}
+                  placeholder="e.g. Upcoming Events & Topics"
+                  onChange={(e) => setHeadersState({ ...headersState, upcomingTitle: e.target.value })}
+                />
+              </div>
+              <div className="tp-field" style={{ margin: 0 }}>
+                <label htmlFor="h-up-desc">Section Description</label>
+                <textarea
+                  id="h-up-desc"
+                  rows={2}
+                  value={headersState.upcomingDesc || ""}
+                  placeholder="Introductory text describing preview topics..."
+                  onChange={(e) => setHeadersState({ ...headersState, upcomingDesc: e.target.value })}
+                />
+              </div>
+            </div>
+
+            {/* Approved Learning Resources Section */}
+            <div style={{ background: "#f9fafb", border: "1px solid #e5e7eb", borderRadius: "10px", padding: "1.25rem" }}>
+              <h3 style={{ margin: "0 0 0.75rem", color: "#0d716b", fontSize: "1.05rem" }}>
+                4. Approved Learning Resources (Recordings &amp; Q&amp;A Viewer)
+              </h3>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 2fr", gap: "1rem", marginBottom: "0.75rem" }}>
+                <div className="tp-field" style={{ margin: 0 }}>
+                  <label htmlFor="h-app-label">Badge Label</label>
+                  <input
+                    id="h-app-label"
+                    type="text"
+                    value={headersState.approvedLabel || ""}
+                    placeholder="e.g. Learning resources"
+                    onChange={(e) => setHeadersState({ ...headersState, approvedLabel: e.target.value })}
+                  />
+                </div>
+                <div className="tp-field" style={{ margin: 0 }}>
+                  <label htmlFor="h-app-title">Main Headline Title</label>
+                  <input
+                    id="h-app-title"
+                    type="text"
+                    value={headersState.approvedTitle || ""}
+                    placeholder="e.g. Recordings, videos, Q&A and approved materials"
+                    onChange={(e) => setHeadersState({ ...headersState, approvedTitle: e.target.value })}
+                  />
+                </div>
+              </div>
+              <div className="tp-field" style={{ margin: 0 }}>
+                <label htmlFor="h-app-desc">Section Description</label>
+                <textarea
+                  id="h-app-desc"
+                  rows={2}
+                  value={headersState.approvedDesc || ""}
+                  placeholder="Introductory text describing permanent learning resources and Q&A archives..."
+                  onChange={(e) => setHeadersState({ ...headersState, approvedDesc: e.target.value })}
+                />
+              </div>
+            </div>
+          </div>
+
+          <div className="tp-actions" style={{ marginTop: "1.75rem" }}>
+            <button
+              type="button"
+              className="tp-btn"
+              disabled={headerSaving}
+              onClick={handleSaveHeaders}
+            >
+              {headerSaving ? "Saving..." : "💾 Save Section Headers"}
+            </button>
+          </div>
         </div>
       )}
     </div>

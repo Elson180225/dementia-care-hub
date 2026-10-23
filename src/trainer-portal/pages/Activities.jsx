@@ -82,7 +82,15 @@ function validate(v) {
   return e;
 }
 
-export default function Activities({ admin = false }) {
+export default function Activities({
+  admin = false,
+  initialFilterType = "all",
+  initialFilterMode = "all",
+  defaultValues = null,
+  pageTitle,
+  pageSubtitle,
+  newButtonLabel,
+}) {
   const { state, dispatch } = useTrainer();
   const [uploading, setUploading] = useState(0);
   const uploadBusy = (busy) => setUploading((n) => n + (busy ? 1 : -1));
@@ -94,8 +102,8 @@ export default function Activities({ admin = false }) {
 
   // Search & Filter State
   const [searchQuery, setSearchQuery] = useState("");
-  const [filterType, setFilterType] = useState("all");
-  const [filterMode, setFilterMode] = useState("all");
+  const [filterType, setFilterType] = useState(initialFilterType || "all");
+  const [filterMode, setFilterMode] = useState(initialFilterMode || "all");
   const [filterStatus, setFilterStatus] = useState("all");
   const [filterCity, setFilterCity] = useState("all");
   const [page, setPage] = useState(1);
@@ -131,7 +139,7 @@ export default function Activities({ admin = false }) {
             id: a.id,
             values: Object.fromEntries(Object.keys(blank).map((k) => [k, a[k] ?? ""])),
           }
-        : { values: blank }
+        : { values: { ...blank, ...(defaultValues || {}) } }
     );
   };
 
@@ -499,11 +507,12 @@ export default function Activities({ admin = false }) {
     <>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem", flexWrap: "wrap", gap: "1rem" }}>
         <div>
-          <h1 style={{ margin: 0 }}>{admin ? "Events & Workshop Management" : "Workshop & Seminar"}</h1>
+          <h1 style={{ margin: 0 }}>{pageTitle || (admin ? "Events & Workshop Management" : "Workshop & Seminar")}</h1>
           <p style={{ margin: "0.25rem 0 0", color: "#61596a", fontSize: "0.95rem" }}>
-            {admin
-              ? "Create and manage all community events, workshops, dialogues, and online sessions."
-              : "Submit your own activities. RCBC Admin reviews them before they appear in Education & Events."}
+            {pageSubtitle ||
+              (admin
+                ? "Create and manage all community events, workshops, dialogues, and online sessions."
+                : "Submit your own activities. RCBC Admin reviews them before they appear in Education & Events.")}
           </p>
         </div>
         <button
@@ -511,7 +520,7 @@ export default function Activities({ admin = false }) {
           onClick={() => open(null)}
           style={{ minWidth: "180px", whiteSpace: "nowrap" }}
         >
-          {admin ? "+ New Event / Workshop" : "+ New Workshop / Seminar"}
+          {newButtonLabel || (admin ? "+ New Event / Workshop" : "+ New Workshop / Seminar")}
         </button>
       </div>
 
