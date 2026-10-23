@@ -860,8 +860,14 @@ function OnlineEducation() {
   const [resourcePage, setResourcePage] = useState(1);
   const [topicView, setTopicView] = useState("list");
 
-  const rcbcWebinars = [...activities.filter((item) => item.type === "RCBC Webinar"), ...onlineWebinars];
-  const ctWebinars = [...activities.filter((item) => item.type === "CT Webinar"), ...trainerWebinars];
+  const rcbcWebinars = [
+    ...activities.filter((item) => item.type === "RCBC Webinar" || (item.mode === "Online" && item.type !== "CT Webinar")),
+    ...onlineWebinars,
+  ];
+  const ctWebinars = [
+    ...activities.filter((item) => item.type === "CT Webinar"),
+    ...trainerWebinars,
+  ];
   const archiveResources = approvedList.map((resource) => ({ ...resource, status: "completed" }));
 
   const publicResults = pageItems(rcbcWebinars, publicFilters, publicPage);
