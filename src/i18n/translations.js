@@ -7,7 +7,7 @@ export const translations = {
       "home": "Home",
       "overview": "Overview",
       "menu": {
-        "understand": "Understand Dementia",
+        "understand": "Understanding Dementia",
         "whatIsDementia": "What is Dementia?",
         "alzheimers": "Alzheimer's Disease",
         "signsChanges": "Signs & Changes",
@@ -27,7 +27,7 @@ export const translations = {
         "certVerification": "Certificate Verification",
         "supportGroups": "Support Groups",
         "volunteer": "Volunteer",
-        "learnEvents": "Learn & Events",
+        "learnEvents": "Education & Events",
         "onlineEducation": "Online Education",
         "physicalEducation": "Physical Education",
         "events": "Events",
@@ -39,7 +39,7 @@ export const translations = {
         "contactUs": "Contact Us",
         "supportProject": "Support the Project"
       },
-      "hubTitle": "Dementia Care Hub",
+      "hubTitle": "Dementia Care Connect",
       "hubSubtitle": "Support • Learn • Connect"
     },
     "footer": {
@@ -82,7 +82,7 @@ export const translations = {
       "projectTheme": "Understanding the Missing Pieces",
       "description": "Find clear information, practical support and learning resources for people living with dementia, families, caregivers and the wider community.",
       "findPath": "Find Your Path",
-      "understandDementia": "Understand Dementia",
+      "understandDementia": "Understanding Dementia",
       "notSure": "Not sure where to begin?",
       "tellUs": "Tell us what brings you here →",
       "pathwaysSectionNum": "02",
