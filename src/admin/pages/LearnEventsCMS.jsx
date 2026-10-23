@@ -3,6 +3,7 @@ import { api } from "../../trainer-portal/TrainerContext";
 import UploadField from "../../trainer-portal/UploadField";
 import Activities from "../../trainer-portal/pages/Activities";
 import defaultContent from "../../../shared/learn-events-content.json";
+import OnlineEducationAdmin from "./learn-events/OnlineEducationAdmin";
 import "../../trainer-portal/TrainerPortal.css";
 
 export default function LearnEventsCMS() {
@@ -33,15 +34,19 @@ export default function LearnEventsCMS() {
     };
   }, []);
 
-  async function handleSave() {
+  async function handleSave(newContent) {
+    const dataToSave = newContent || content;
     setSaving(true);
     setMessage("");
     setError("");
     try {
-      await api("/api/admin/learn-events-content", content);
+      await api("/api/admin/learn-events-content", dataToSave);
+      if (newContent) setContent(newContent);
       setMessage("All Learn & Events content saved successfully. Changes are now live on the website!");
+      return true;
     } catch (err) {
       setError(err.message || "Failed to save content. Please try again.");
+      return false;
     } finally {
       setSaving(false);
     }
@@ -64,12 +69,12 @@ export default function LearnEventsCMS() {
             Manage scheduled live sessions, online webinar records, physical programmes, and media highlights.
           </p>
         </div>
-        {activeTab !== "sessions" && (
+        {activeTab !== "sessions" && activeTab !== "online" && (
           <button
             type="button"
             className="tp-btn"
             disabled={saving}
-            onClick={handleSave}
+            onClick={() => handleSave()}
             style={{ minWidth: "160px" }}
           >
             {saving ? "Saving..." : "Save All Changes"}
@@ -148,217 +153,14 @@ export default function LearnEventsCMS() {
 
       {/* TAB 2: ONLINE EDUCATION */}
       {activeTab === "online" && (
-        <div className="tp-card" style={{ display: "flex", flexDirection: "column", gap: "2rem" }}>
-          <section>
-            <h2>Upcoming Events &amp; Topics</h2>
-            <p style={{ color: "#666" }}>Preview cards shown in the "Looking Ahead" section of Online Education.</p>
-            {content.onlineEducation?.upcomingTopics?.map((topic, idx) => (
-              <div key={topic.id || idx} style={{ border: "1px solid #e5e7eb", borderRadius: "8px", padding: "1.25rem", marginBottom: "1rem", background: "#f9fafb" }}>
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
-                  <div>
-                    <label style={{ display: "block", fontWeight: 600, marginBottom: "0.25rem" }}>Title</label>
-                    <input
-                      type="text"
-                      value={topic.title}
-                      style={{ width: "100%", padding: "0.5rem", borderRadius: "4px", border: "1px solid #ccc" }}
-                      onChange={(e) => {
-                        const copy = { ...content };
-                        copy.onlineEducation.upcomingTopics[idx].title = e.target.value;
-                        setContent(copy);
-                      }}
-                    />
-                  </div>
-                  <div>
-                    <label style={{ display: "block", fontWeight: 600, marginBottom: "0.25rem" }}>Date / Month Badge</label>
-                    <div style={{ display: "flex", gap: "0.5rem" }}>
-                      <input
-                        type="text"
-                        placeholder="Month (e.g. MAY)"
-                        value={topic.month}
-                        style={{ width: "80px", padding: "0.5rem", borderRadius: "4px", border: "1px solid #ccc" }}
-                        onChange={(e) => {
-                          const copy = { ...content };
-                          copy.onlineEducation.upcomingTopics[idx].month = e.target.value;
-                          setContent(copy);
-                        }}
-                      />
-                      <input
-                        type="text"
-                        placeholder="Day (e.g. 16)"
-                        value={topic.day}
-                        style={{ width: "80px", padding: "0.5rem", borderRadius: "4px", border: "1px solid #ccc" }}
-                        onChange={(e) => {
-                          const copy = { ...content };
-                          copy.onlineEducation.upcomingTopics[idx].day = e.target.value;
-                          setContent(copy);
-                        }}
-                      />
-                      <input
-                        type="text"
-                        placeholder="Time (e.g. 9:00 AM – 6:00 PM)"
-                        value={topic.time}
-                        style={{ flex: 1, padding: "0.5rem", borderRadius: "4px", border: "1px solid #ccc" }}
-                        onChange={(e) => {
-                          const copy = { ...content };
-                          copy.onlineEducation.upcomingTopics[idx].time = e.target.value;
-                          setContent(copy);
-                        }}
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem", marginTop: "1rem" }}>
-                  <div>
-                    <label style={{ display: "block", fontWeight: 600, marginBottom: "0.25rem" }}>Language</label>
-                    <input
-                      type="text"
-                      value={topic.language}
-                      style={{ width: "100%", padding: "0.5rem", borderRadius: "4px", border: "1px solid #ccc" }}
-                      onChange={(e) => {
-                        const copy = { ...content };
-                        copy.onlineEducation.upcomingTopics[idx].language = e.target.value;
-                        setContent(copy);
-                      }}
-                    />
-                  </div>
-                  <div>
-                    <label style={{ display: "block", fontWeight: 600, marginBottom: "0.25rem" }}>Location / Mode</label>
-                    <input
-                      type="text"
-                      value={topic.location}
-                      style={{ width: "100%", padding: "0.5rem", borderRadius: "4px", border: "1px solid #ccc" }}
-                      onChange={(e) => {
-                        const copy = { ...content };
-                        copy.onlineEducation.upcomingTopics[idx].location = e.target.value;
-                        setContent(copy);
-                      }}
-                    />
-                  </div>
-                </div>
-
-                <div style={{ marginTop: "1rem" }}>
-                  <label style={{ display: "block", fontWeight: 600, marginBottom: "0.25rem" }}>Description</label>
-                  <textarea
-                    rows={2}
-                    value={topic.description}
-                    style={{ width: "100%", padding: "0.5rem", borderRadius: "4px", border: "1px solid #ccc" }}
-                    onChange={(e) => {
-                      const copy = { ...content };
-                      copy.onlineEducation.upcomingTopics[idx].description = e.target.value;
-                      setContent(copy);
-                    }}
-                  />
-                </div>
-
-                <div style={{ marginTop: "1rem" }}>
-                  <label style={{ display: "block", fontWeight: 600, marginBottom: "0.25rem" }}>Event Poster / Image</label>
-                  <input
-                    type="text"
-                    placeholder="Image URL or local asset path"
-                    value={topic.image || ""}
-                    style={{ width: "100%", padding: "0.5rem", borderRadius: "4px", border: "1px solid #ccc", marginBottom: "0.5rem" }}
-                    onChange={(e) => {
-                      const copy = { ...content };
-                      copy.onlineEducation.upcomingTopics[idx].image = e.target.value;
-                      setContent(copy);
-                    }}
-                  />
-                  <UploadField
-                    kind="poster"
-                    label="Or upload a new image"
-                    value={topic.image}
-                    onChange={(url) => {
-                      const copy = { ...content };
-                      copy.onlineEducation.upcomingTopics[idx].image = url;
-                      setContent(copy);
-                    }}
-                  />
-                </div>
-              </div>
-            ))}
-          </section>
-
-          <section>
-            <h2>Approved Learning Resources (Watch Recording &amp; Q&amp;A)</h2>
-            <p style={{ color: "#666" }}>
-              Permanent learning resources. Each card features <strong>Watch recording ↗</strong> (direct external video URL) and <strong>Review Q&amp;A →</strong> (modal Q&amp;A viewer).
+        <div>
+          <div style={{ background: "#f8fafc", padding: "1rem 1.25rem", borderRadius: "8px", border: "1px solid #e2e8f0", marginBottom: "1.5rem" }}>
+            <h3 style={{ margin: "0 0 0.5rem" }}>💻 Online Education Management</h3>
+            <p style={{ margin: 0, fontSize: "0.95rem", color: "#475569" }}>
+              Manage upcoming online webinars, preview cards, and permanent Q&amp;A learning resources with full CRUD operations, keyword search, and pagination.
             </p>
-            {content.onlineEducation?.approvedResources?.map((res, idx) => (
-              <div key={res.id || idx} style={{ border: "1px solid #e5e7eb", borderRadius: "8px", padding: "1.25rem", marginBottom: "1rem", background: "#f9fafb" }}>
-                <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr 1fr", gap: "1rem" }}>
-                  <div>
-                    <label style={{ display: "block", fontWeight: 600, marginBottom: "0.25rem" }}>Resource Title</label>
-                    <input
-                      type="text"
-                      value={res.title}
-                      style={{ width: "100%", padding: "0.5rem", borderRadius: "4px", border: "1px solid #ccc" }}
-                      onChange={(e) => {
-                        const copy = { ...content };
-                        copy.onlineEducation.approvedResources[idx].title = e.target.value;
-                        setContent(copy);
-                      }}
-                    />
-                  </div>
-                  <div>
-                    <label style={{ display: "block", fontWeight: 600, marginBottom: "0.25rem" }}>Year</label>
-                    <input
-                      type="text"
-                      value={res.year}
-                      style={{ width: "100%", padding: "0.5rem", borderRadius: "4px", border: "1px solid #ccc" }}
-                      onChange={(e) => {
-                        const copy = { ...content };
-                        copy.onlineEducation.approvedResources[idx].year = e.target.value;
-                        setContent(copy);
-                      }}
-                    />
-                  </div>
-                  <div>
-                    <label style={{ display: "block", fontWeight: 600, marginBottom: "0.25rem" }}>Language</label>
-                    <input
-                      type="text"
-                      value={res.language}
-                      style={{ width: "100%", padding: "0.5rem", borderRadius: "4px", border: "1px solid #ccc" }}
-                      onChange={(e) => {
-                        const copy = { ...content };
-                        copy.onlineEducation.approvedResources[idx].language = e.target.value;
-                        setContent(copy);
-                      }}
-                    />
-                  </div>
-                </div>
-
-                <div style={{ marginTop: "1rem" }}>
-                  <label style={{ display: "block", fontWeight: 600, marginBottom: "0.25rem" }}>Watch Recording Link (Video URL)</label>
-                  <input
-                    type="url"
-                    placeholder="https://facebook.com/... or https://youtube.com/..."
-                    value={res.videoUrl || ""}
-                    style={{ width: "100%", padding: "0.5rem", borderRadius: "4px", border: "1px solid #ccc" }}
-                    onChange={(e) => {
-                      const copy = { ...content };
-                      copy.onlineEducation.approvedResources[idx].videoUrl = e.target.value;
-                      setContent(copy);
-                    }}
-                  />
-                </div>
-
-                <div style={{ marginTop: "1rem" }}>
-                  <label style={{ display: "block", fontWeight: 600, marginBottom: "0.25rem" }}>Description</label>
-                  <textarea
-                    rows={2}
-                    value={res.description}
-                    style={{ width: "100%", padding: "0.5rem", borderRadius: "4px", border: "1px solid #ccc" }}
-                    onChange={(e) => {
-                      const copy = { ...content };
-                      copy.onlineEducation.approvedResources[idx].description = e.target.value;
-                      setContent(copy);
-                    }}
-                  />
-                </div>
-              </div>
-            ))}
-          </section>
+          </div>
+          <OnlineEducationAdmin content={content} onSave={handleSave} />
         </div>
       )}
 
