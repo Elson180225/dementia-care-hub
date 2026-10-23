@@ -49,7 +49,60 @@ import {
   cities,
   languages,
 } from "../data/learn-events-data";
+import defaultCmsContent from "../../shared/learn-events-content.json";
 import "./LearnEvents.css";
+
+function formatActivityDate(val) {
+  if (!val) return "";
+  const d = new Date(val);
+  if (Number.isNaN(d.getTime())) return val;
+  return d.toLocaleDateString("en-MY", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+    timeZone: "Asia/Kuala_Lumpur",
+  });
+}
+
+function formatActivityTime(val) {
+  if (!val) return "";
+  const d = new Date(val);
+  if (Number.isNaN(d.getTime())) return "";
+  return d.toLocaleTimeString("en-MY", {
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+    timeZone: "Asia/Kuala_Lumpur",
+  });
+}
+
+function formatDeadlineDate(val) {
+  if (!val) return "";
+  const d = new Date(val);
+  if (Number.isNaN(d.getTime())) return val;
+  return d.toLocaleDateString("en-MY", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+    timeZone: "Asia/Kuala_Lumpur",
+  }) + ", " + d.toLocaleTimeString("en-MY", {
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+    timeZone: "Asia/Kuala_Lumpur",
+  });
+}
+
+function isEventClosed(event) {
+  if (!event) return false;
+  if (event.status === "cancelled" || event.status === "completed") return false;
+  if (event.isClosed) return true;
+  if (event.registrationDeadline) {
+    const dl = new Date(event.registrationDeadline);
+    if (!Number.isNaN(dl.getTime()) && new Date() > dl) return true;
+  }
+  return false;
+}
 
 function usePublicActivities() {
   const [rows, setRows] = useState(defaultActivities);
@@ -59,13 +112,102 @@ function usePublicActivities() {
       .then(r => { if (!r.ok) throw new Error('Activities unavailable'); return r.json(); })
       .then(data => {
         if (active && Array.isArray(data) && data.length > 0) {
-          setRows(data.map(a => ({ ...a, date: a.starts_at, registrationLink: a.registration_link, poster: a.poster_url, location: a.venue, registrationDeadline: a.registration_deadline, capacity: a.capacity, trainers: a.trainers || [], status: a.cancelled_at ? 'cancelled' : ['completed', 'verified', 'archived'].includes(a.status) ? 'completed' : 'upcoming' })));
+          setRows(data.map(a => {
+            const isCancelled = Boolean(a.cancelled_at);
+            const isCompleted = ['completed', 'verified', 'archived'].includes(a.status);
+            const dl = a.registration_deadline ? new Date(a.registration_deadline) : null;
+            const isClosed = !isCancelled && !isCompleted && dl && !Number.isNaN(dl.getTime()) && (new Date() > dl);
+            const trainerList = a.trainers || [];
+            const speakerNames = trainerList
+              .map(t => t.name ? (t.role ? `${t.name} (${t.role})` : t.name) : '')
+              .filter(Boolean)
+              .join(', ');
+            const primaryTrainerId = a.trainerId || (trainerList[0]?.trainerId ?? null);
+            const primarySpeaker = a.speaker || speakerNames || "Rotary HopeCare Facilitators";
+            const audienceVal = a.suitableFor || a.audience || "General public, caregivers and families";
+            const cityVal = a.city || (a.mode === "Online" ? "Online" : "Sarawak");
+            const venueVal = a.venue || a.location || (a.mode === "Online" ? "Online" : "");
+            const fullLoc = a.mode === "Online"
+              ? "Online"
+              : (venueVal && cityVal && venueVal !== cityVal && !venueVal.toLowerCase().includes(cityVal.toLowerCase())
+                  ? `${venueVal}, ${cityVal}`
+                  : (venueVal || cityVal || "Sarawak"));
+
+            return {
+              ...a,
+              rawDate: a.starts_at,
+              date: formatActivityDate(a.starts_at),
+              time: formatActivityTime(a.starts_at),
+              registrationLink: a.registration_link,
+              poster: resolveMediaImage(a.poster_url, webinarImage),
+              location: fullLoc,
+              venue: venueVal,
+              city: cityVal,
+              fullLocation: fullLoc,
+              suitableFor: audienceVal,
+              audience: audienceVal,
+              speaker: primarySpeaker,
+              trainerId: primaryTrainerId,
+              trainers: trainerList,
+              registrationDeadline: a.registration_deadline,
+              registrationDeadlineFormatted: formatDeadlineDate(a.registration_deadline),
+              capacity: a.capacity,
+              isClosed,
+              status: isCancelled ? 'cancelled' : isCompleted ? 'completed' : isClosed ? 'registration-closed' : 'upcoming'
+            };
+          }));
         }
       })
       .catch(() => { });
     return () => { active = false; };
   }, []);
   return rows;
+}
+
+function useLearnEventsContent() {
+  const [content, setContent] = useState(defaultCmsContent);
+  useEffect(() => {
+    let active = true;
+    fetch('/api/public/learn-events-content')
+      .then(r => { if (!r.ok) throw new Error('CMS unavailable'); return r.json(); })
+      .then(data => {
+        if (active && data && typeof data === 'object' && Object.keys(data).length > 0) {
+          setContent(data);
+        }
+      })
+      .catch(() => { });
+    return () => { active = false; };
+  }, []);
+  return content;
+}
+
+function resolveMediaImage(src, fallback) {
+  if (!src) return fallback;
+  if (typeof src === "object") return src;
+  if (typeof src === "string") {
+    if (src.startsWith("http://") || src.startsWith("https://") || src.startsWith("/api/files/")) return src;
+    if (src.includes("cataracts") || src.includes("Cataracts")) return cataractsPoster;
+    if (src.includes("alzheimers-101") || src.includes("Alzheimer's_101") || src.includes("Eye-Opening")) return alzheimers101Poster;
+    if (src.includes("early-detection") || src.includes("Early_Detection")) return earlyDetectionPoster;
+    if (src.includes("wellness") || src.includes("Embracing_Wellness")) return wellnessPoster;
+    if (src.includes("caregiver") || src.includes("Essential_Care")) return caregiverPoster;
+    if (src.includes("tooth-loss") || src.includes("Tooth_Loss")) return toothLossPoster;
+    if (src.includes("decisions") || src.includes("Suitable_Decision")) return decisionPoster;
+    if (src.includes("women") || src.includes("Peranan_Wanita")) return womenCarePoster;
+    if (src.includes("awareness") || src.includes("Awareness_Webinar")) return awarenessPoster;
+    if (src.includes("safe-home") || src.includes("Safe_Space")) return safeHomePoster;
+    if (src.includes("osteoporosis") || src.includes("OSTEOPOROSIS")) return osteoporosisPoster;
+    if (src.includes("dcs-family")) return dcsFamilyPoster;
+    if (src.includes("adfm")) return adfmPoster;
+    if (src.includes("yearly-calendar") || src.includes("yearlyCalendar")) return yearlyCalendar2026Poster;
+    if (src.includes("dialogue-1") || src.includes("2025_8_16(1)")) return dialogueImg1;
+    if (src.includes("dialogue-2") || src.includes("2025_8_16")) return dialogueImg2;
+    if (src.includes("sinchew") || src.includes("Sin_Chew")) return newsSinChew;
+    if (src.includes("seehua") || src.includes("See_Hua")) return newsSeeHua;
+    if (src.includes("Group_Photo_2")) return trainingImage;
+    if (src.includes("webinar")) return webinarImage;
+  }
+  return src || fallback;
 }
 
 /* ---- image resolver ---- */
@@ -78,31 +220,33 @@ const imageMap = {
 };
 
 const onlineWebinars = [
-  { id: "webinar-alzheimers-101", title: "Alzheimer's 101: Eye-opening facts", type: "RCBC Webinar", status: "completed", date: "Past webinar", mode: "Online", language: "English", description: "A public introduction to Alzheimer’s disease and the facts families should know.", poster: alzheimers101Poster },
-  { id: "webinar-awareness", title: "Alzheimer's Awareness Webinar", type: "RCBC Webinar", status: "completed", date: "Past webinar", mode: "Online", language: "English", description: "An accessible session for building awareness and understanding in the community.", poster: awarenessPoster },
-  { id: "webinar-early-detection", title: "Early Detection & Monitoring of Dementia", type: "RCBC Webinar", status: "completed", date: "Past webinar", mode: "Online", language: "中文", description: "Information about recognising changes early and discussing concerns with a healthcare professional.", poster: earlyDetectionPoster },
-  { id: "webinar-wellness", title: "Embracing Wellness: Ageing with Dignity in Sarawak", type: "RCBC Webinar", status: "completed", date: "Past webinar", mode: "Online", language: "English", description: "A conversation about wellbeing, dignity, and support as people age.", poster: wellnessPoster },
-  { id: "webinar-care", title: "Essential Care: Practical Tips for Alzheimer’s Caregivers", type: "RCBC Webinar", status: "completed", date: "Past webinar", mode: "Online", language: "English", description: "Practical ideas for caregivers supporting everyday routines and care needs.", poster: caregiverPoster },
-  { id: "webinar-women", title: "Peranan Wanita Dalam Penjagaan Alzheimer", type: "RCBC Webinar", status: "completed", date: "Past webinar", mode: "Online", language: "Bahasa Melayu", description: "A Malay-language conversation about women’s roles and experiences in Alzheimer’s care.", poster: womenCarePoster },
-  { id: "webinar-safe-home", title: "Safe Space: Adapting the Home for Alzheimer’s Care", type: "RCBC Webinar", status: "completed", date: "Past webinar", mode: "Online", language: "English", description: "Ideas for making everyday home environments safer and more supportive.", poster: safeHomePoster },
-  { id: "webinar-decisions", title: "Making the Most Suitable Decision", type: "RCBC Webinar", status: "completed", date: "Past webinar", mode: "Online", language: "English", description: "A reflective session about making informed care decisions with families.", poster: decisionPoster },
-  { id: "webinar-cataracts", title: "A Practical Webinar on Cataracts", type: "RCBC Webinar", status: "completed", date: "Past webinar", mode: "Online", language: "English", description: "A practical health education session on cataracts and ageing.", poster: cataractsPoster },
-  { id: "webinar-tooth-loss", title: "Is Tooth Loss Really Part of Getting Older?", type: "RCBC Webinar", status: "completed", date: "Past webinar", mode: "Online", language: "English", description: "A public education session about oral health and ageing.", poster: toothLossPoster },
-  { id: "webinar-osteoporosis", title: "Silent but Serious: Understanding Osteoporosis", type: "RCBC Webinar", status: "completed", date: "Past webinar", mode: "Online", language: "English", description: "An educational session about osteoporosis prevention and awareness.", poster: osteoporosisPoster },
+  { id: "webinar-alzheimers-101", title: "Alzheimer's 101: Eye-opening facts", type: "RCBC Webinar", status: "completed", date: "15 Mar 2024", rawDate: "2024-03-15T09:00:00+08:00", mode: "Online", language: "English", description: "A public introduction to Alzheimer’s disease and the facts families should know.", poster: alzheimers101Poster },
+  { id: "webinar-awareness", title: "Alzheimer's Awareness Webinar", type: "RCBC Webinar", status: "completed", date: "18 May 2024", rawDate: "2024-05-18T10:00:00+08:00", mode: "Online", language: "English", description: "An accessible session for building awareness and understanding in the community.", poster: awarenessPoster },
+  { id: "webinar-early-detection", title: "Early Detection & Monitoring of Dementia", type: "RCBC Webinar", status: "completed", date: "20 Jul 2024", rawDate: "2024-07-20T14:00:00+08:00", mode: "Online", language: "中文", description: "Information about recognising changes early and discussing concerns with a healthcare professional.", poster: earlyDetectionPoster },
+  { id: "webinar-wellness", title: "Embracing Wellness: Ageing with Dignity in Sarawak", type: "RCBC Webinar", status: "completed", date: "21 Sep 2024", rawDate: "2024-09-21T10:00:00+08:00", mode: "Online", language: "English", description: "A conversation about wellbeing, dignity, and support as people age.", poster: wellnessPoster },
+  { id: "webinar-care", title: "Essential Care: Practical Tips for Alzheimer’s Caregivers", type: "RCBC Webinar", status: "completed", date: "16 Nov 2024", rawDate: "2024-11-16T10:00:00+08:00", mode: "Online", language: "English", description: "Practical ideas for caregivers supporting everyday routines and care needs.", poster: caregiverPoster },
+  { id: "webinar-women", title: "Peranan Wanita Dalam Penjagaan Alzheimer", type: "RCBC Webinar", status: "completed", date: "18 Jan 2025", rawDate: "2025-01-18T10:00:00+08:00", mode: "Online", language: "Bahasa Melayu", description: "A Malay-language conversation about women’s roles and experiences in Alzheimer’s care.", poster: womenCarePoster },
+  { id: "webinar-safe-home", title: "Safe Space: Adapting the Home for Alzheimer’s Care", type: "RCBC Webinar", status: "completed", date: "15 Mar 2025", rawDate: "2025-03-15T10:00:00+08:00", mode: "Online", language: "English", description: "Ideas for making everyday home environments safer and more supportive.", poster: safeHomePoster },
+  { id: "webinar-decisions", title: "Making the Most Suitable Decision", type: "RCBC Webinar", status: "completed", date: "17 May 2025", rawDate: "2025-05-17T10:00:00+08:00", mode: "Online", language: "English", description: "A reflective session about making informed care decisions with families.", poster: decisionPoster },
+  { id: "webinar-cataracts", title: "A Practical Webinar on Cataracts", type: "RCBC Webinar", status: "completed", date: "19 Jul 2025", rawDate: "2025-07-19T10:00:00+08:00", mode: "Online", language: "English", description: "A practical health education session on cataracts and ageing.", poster: cataractsPoster },
+  { id: "webinar-tooth-loss", title: "Is Tooth Loss Really Part of Getting Older?", type: "RCBC Webinar", status: "completed", date: "20 Sep 2025", rawDate: "2025-09-20T10:00:00+08:00", mode: "Online", language: "English", description: "A public education session about oral health and ageing.", poster: toothLossPoster },
+  { id: "webinar-osteoporosis", title: "Silent but Serious: Understanding Osteoporosis", type: "RCBC Webinar", status: "completed", date: "15 Nov 2025", rawDate: "2025-11-15T10:00:00+08:00", mode: "Online", language: "English", description: "An educational session about osteoporosis prevention and awareness.", poster: osteoporosisPoster },
 ];
 
 const trainerWebinars = [
   {
     id: "trainer-dcs-family",
-    title: "Basic Dementia Care Skill (Family) Course — DCS-Family",
-    type: "DCS-Family",
+    title: "Basic Dementia Care Skill (Family) Course — DCS-Family Online Webinar",
+    type: "CT Webinar",
     status: "upcoming",
     date: "16 May 2026",
-    time: "9:00 AM – 6:00 PM",
-    mode: "Physical",
-    location: "Hock Lee Hotel & Residence, Kuching",
+    time: "9:00 AM – 1:00 PM",
+    mode: "Online",
+    location: "Online",
+    venue: "Online",
+    city: "Online",
     language: "English / Bahasa Melayu / 中文",
-    description: "Foundation Dementia Care Course for family caregivers delivered by 12 ADFM-Certified Trainers. Covering 6 core modules, limited to 100 seats.",
+    description: "Online Foundation Dementia Care Course for family caregivers delivered by ADFM-Certified Trainers covering core person-centred care modules.",
     poster: dcsFamilyPoster,
   },
 ];
@@ -197,6 +341,7 @@ function StatusBadge({ status }) {
     upcoming: "Upcoming",
     completed: "Completed",
     "registration-closed": "Registration closed",
+    cancelled: "Cancelled",
   };
   return (
     <span className={`status-badge status-${status}`}>
@@ -307,16 +452,34 @@ function ActivityModal({ activity, onClose }) {
         <dl className="activity-details">
           <div>
             <dt>{am.suitableFor || "Suitable for"}</dt>
-            <dd>{activity.suitableFor || "Public, families and caregivers"}</dd>
+            <dd>{activity.suitableFor || activity.audience || "Public, families and caregivers"}</dd>
           </div>
           <div>
             <dt>{am.dateTime || "Date & time"}</dt>
             <dd>
               {activity.date || am.pastWebinar || "Past webinar"}
-              <br />
-              {activity.time}
+              {activity.time && <><br />{activity.time}</>}
             </dd>
           </div>
+          {activity.capacity && (
+            <div>
+              <dt>Capacity</dt>
+              <dd>{activity.capacity} seats</dd>
+            </div>
+          )}
+          {(activity.registrationDeadlineFormatted || activity.registrationDeadline) && (
+            <div>
+              <dt>Registration Deadline</dt>
+              <dd>
+                {activity.registrationDeadlineFormatted || activity.registrationDeadline}
+                {isEventClosed(activity) && (
+                  <span style={{ color: "#dc2626", fontWeight: 700, marginLeft: "0.5rem" }}>
+                    (Registration Closed)
+                  </span>
+                )}
+              </dd>
+            </div>
+          )}
           <div>
             <dt>{am.mode || "Mode"}</dt>
             <dd>
@@ -325,7 +488,7 @@ function ActivityModal({ activity, onClose }) {
           </div>
           <div>
             <dt>{am.location || "Location"}</dt>
-            <dd>{activity.location || am.online || "Online"}</dd>
+            <dd>{activity.fullLocation || activity.location || (activity.mode === "Online" ? "Online" : activity.city || "Sarawak")}</dd>
           </div>
           <div>
             <dt>{am.language || "Language"}</dt>
@@ -362,7 +525,11 @@ function ActivityModal({ activity, onClose }) {
         )}
 
         <div className="activity-modal-footer">
-          {isCompleted ? (
+          {activity.status === "cancelled" ? (
+            <button type="button" disabled className="activity-action-btn" style={{ opacity: 0.7, cursor: "not-allowed", background: "#fee2e2", color: "#991b1b", border: "1px solid #fecaca" }}>
+              Activity Cancelled
+            </button>
+          ) : isCompleted ? (
             <>
               {activity.recordingLink !== undefined &&
                 activity.recordingLink !== null && (
@@ -376,6 +543,10 @@ function ActivityModal({ activity, onClose }) {
                 </p>
               )}
             </>
+          ) : isEventClosed(activity) ? (
+            <button type="button" disabled className="activity-action-btn" style={{ opacity: 0.7, cursor: "not-allowed", background: "#fef3c7", color: "#92400e", border: "1px solid #fde68a" }}>
+              Registration Closed
+            </button>
           ) : activity.registrationLink !== undefined &&
             activity.registrationLink !== null ? (
             <a
@@ -687,27 +858,36 @@ function OnlineEducation() {
   const { t } = useLanguage();
   const le = t.learnEvents;
   const activities = usePublicActivities();
+  const cmsContent = useLearnEventsContent();
+  const onlineCms = cmsContent.onlineEducation || {};
+  const upcomingTopics = (onlineCms.upcomingTopics && onlineCms.upcomingTopics.length > 0) ? onlineCms.upcomingTopics : plannedTopicsList;
+  const approvedList = (onlineCms.approvedResources && onlineCms.approvedResources.length > 0) ? onlineCms.approvedResources : learningResources;
   const [selected, setSelected] = useState(null);
   const [selectedQa, setSelectedQa] = useState(null);
   const defaultFilters = { query: "", language: "All", timing: "All" };
   const [publicFilters, setPublicFilters] = useState(defaultFilters);
   const [trainerFilters, setTrainerFilters] = useState(defaultFilters);
   const [resourceFilters, setResourceFilters] = useState(defaultFilters);
-  const [qaFilters, setQaFilters] = useState(defaultFilters);
   const [publicPage, setPublicPage] = useState(1);
   const [trainerPage, setTrainerPage] = useState(1);
   const [resourcePage, setResourcePage] = useState(1);
-  const [qaPage, setQaPage] = useState(1);
   const [topicView, setTopicView] = useState("list");
 
-  const rcbcWebinars = [...activities.filter((item) => item.type === "RCBC Webinar"), ...onlineWebinars];
-  const ctWebinars = [...activities.filter((item) => item.type === "CT Webinar"), ...trainerWebinars];
-  const archiveResources = learningResources.map((resource) => ({ ...resource, status: "completed" }));
+  const rcbcWebinars = [
+    ...activities.filter((item) => item.type === "RCBC Webinar" || (item.mode === "Online" && item.type !== "CT Webinar")),
+    ...(activities.some((item) => item.type === "RCBC Webinar") ? [] : onlineWebinars),
+  ];
+  const ctWebinars = [
+    ...activities.filter((item) => (item.type === "CT Webinar" || item.type === "DCS-Family") && item.mode === "Online"),
+    ...(activities.some((item) => (item.type === "CT Webinar" || item.type === "DCS-Family") && item.mode === "Online")
+      ? []
+      : trainerWebinars.filter((item) => item.mode === "Online")),
+  ];
+  const archiveResources = approvedList.map((resource) => ({ ...resource, status: "completed" }));
 
   const publicResults = pageItems(rcbcWebinars, publicFilters, publicPage);
   const trainerResults = pageItems(ctWebinars, trainerFilters, trainerPage);
   const resourceResults = pageItems(archiveResources, resourceFilters, resourcePage);
-  const qaResults = pageItems(qaResources.map((resource) => ({ ...resource, status: "completed" })), qaFilters, qaPage);
 
   return (
     <main className="module-main">
@@ -912,7 +1092,7 @@ function OnlineEducation() {
 
             {topicView === "list" ? (
               <div className="planned-topics-list">
-                {plannedTopicsList.map((t) => (
+                {upcomingTopics.map((t) => (
                   <article className="planned-topic-row" key={t.id}>
                     <div className="topic-date-block">
                       <span className="topic-month">{t.month}</span>
@@ -921,7 +1101,7 @@ function OnlineEducation() {
                     </div>
 
                     <div className="topic-thumb">
-                      <img src={t.image} alt={t.title} />
+                      <img src={resolveMediaImage(t.image, webinarImage)} alt={t.title} />
                     </div>
 
                     <div className="topic-details">
@@ -947,7 +1127,7 @@ function OnlineEducation() {
               </div>
             ) : (
               <div className="planned-topics-grid">
-                {plannedTopicsList.map((t) => (
+                {upcomingTopics.map((t) => (
                   <article
                     className="planned-topic-grid-card"
                     key={t.id}
@@ -957,7 +1137,7 @@ function OnlineEducation() {
                     onKeyDown={(e) => e.key === "Enter" && setSelected(t)}
                   >
                     <div className="topic-grid-image">
-                      <img src={t.image} alt={t.title} />
+                      <img src={resolveMediaImage(t.image, webinarImage)} alt={t.title} />
                       <div className="topic-grid-date-badge">
                         <span>{t.month}</span>
                         <strong>{t.day}</strong>
@@ -1077,75 +1257,6 @@ function OnlineEducation() {
             page={resourceResults.page}
             pageCount={resourceResults.pageCount}
             onPageChange={setResourcePage}
-          />
-        </div>
-      </section>
-
-      {/* ---- Q&A archive ---- */}
-      <section className="content-section content-section-light qa-archive-section">
-        <div className="section-container">
-          <div className="section-heading-block">
-            <span className="section-label">{le?.qaLabel || "Q&A archive"}</span>
-            <h2>{le?.qaTitle || "Questions from previous learning sessions"}</h2>
-            <p>
-              {le?.qaDesc || "Browse selected Q&A image sets from past webinars. Open each collection to review the full set of questions and answers."}
-            </p>
-          </div>
-
-          <ArchiveToolbar
-            label="Q&A collections"
-            filters={qaFilters}
-            onFiltersChange={(value) => {
-              setQaFilters(value);
-              setQaPage(1);
-            }}
-            totalCount={qaResults.totalCount}
-            onReset={() => {
-              setQaFilters(defaultFilters);
-              setQaPage(1);
-            }}
-          />
-
-          {qaResults.items.length === 0 ? (
-            <ArchiveEmptyState
-              label="Q&A collections"
-              onReset={() => {
-                setQaFilters(defaultFilters);
-                setQaPage(1);
-              }}
-            />
-          ) : (
-            <div className="qa-resource-grid">
-              {qaResults.items.map((resource) => (
-                <article
-                  className="qa-resource-card"
-                  key={resource.title}
-                  onClick={() => setSelectedQa(resource)}
-                  onKeyDown={(event) =>
-                    event.key === "Enter" && setSelectedQa(resource)
-                  }
-                  role="button"
-                  tabIndex={0}
-                >
-                  <div className="qa-resource-image">
-                    <img src={resource.image} alt="" />
-                    <span>{resource.pages} pages</span>
-                  </div>
-                  <div>
-                    <span className="tag">{resource.language}</span>
-                    <h3>{resource.title}</h3>
-                    <span className="resource-link-btn">Review Q&amp;A →</span>
-                  </div>
-                </article>
-              ))}
-            </div>
-          )}
-
-          <ArchivePagination
-            label="Q&A collections"
-            page={qaResults.page}
-            pageCount={qaResults.pageCount}
-            onPageChange={setQaPage}
           />
         </div>
       </section>
@@ -1394,6 +1505,7 @@ function ProgramModal({ program, onClose }) {
 function PhysicalEducation() {
   const { t } = useLanguage();
   const le = t.learnEvents;
+  const cmsContent = useLearnEventsContent();
   const [activeTrackId, setActiveTrackId] = useState("dcs-family");
   const [activeModalProgram, setActiveModalProgram] = useState(null);
 
@@ -1403,8 +1515,12 @@ function PhysicalEducation() {
     "dcs-care-worker": healthcareSupportImg,
   };
 
+  const programmes = (cmsContent.physicalEducation?.programmes && cmsContent.physicalEducation.programmes.length > 0)
+    ? cmsContent.physicalEducation.programmes
+    : physicalProgrammes;
+
   const activeTrack =
-    physicalProgrammes.find((p) => p.id === activeTrackId) || physicalProgrammes[0];
+    programmes.find((p) => p.id === activeTrackId) || programmes[0];
 
   return (
     <main className="module-main physical-education-main">
@@ -1426,7 +1542,7 @@ function PhysicalEducation() {
             role="tablist"
             aria-label="Dementia Care Series Learning Tracks"
           >
-            {physicalProgrammes.map((p) => {
+            {programmes.map((p) => {
               const isActive = activeTrackId === p.id;
               return (
                 <button
@@ -1677,7 +1793,7 @@ function PhysicalEducation() {
                 {/* Media Preview Card */}
                 <div className="stage-media-card">
                   <img
-                    src={trackImages[activeTrack.id] || dcsFamilyImage}
+                    src={resolveMediaImage(activeTrack.image, trackImages[activeTrack.id] || dcsFamilyImage)}
                     alt={activeTrack.title}
                   />
                   <div className="stage-media-caption">
@@ -2029,6 +2145,8 @@ function EventsSection() {
   const le = t.learnEvents;
   const ev = le?.eventsSection || {};
   const activities = usePublicActivities();
+  const cmsContent = useLearnEventsContent();
+  const eventsCms = cmsContent.events || {};
   const [selectedActivity, setSelectedActivity] = useState(null);
   const [lightboxData, setLightboxData] = useState(null);
 
@@ -2141,18 +2259,20 @@ function EventsSection() {
     },
   ];
 
+  const activeRoadmaps = (eventsCms.roadmap && eventsCms.roadmap.length > 0) ? eventsCms.roadmap : roadmaps;
+
   // Carousel state
   const [activeRoadmapIndex, setActiveRoadmapIndex] = useState(0);
   const [slideDirection, setSlideDirection] = useState("next"); // 'next' | 'prev'
   const [isAnimating, setIsAnimating] = useState(false);
 
-  const currentRoadmap = roadmaps[activeRoadmapIndex];
+  const currentRoadmap = activeRoadmaps[activeRoadmapIndex] || activeRoadmaps[0];
 
   const handlePrevRoadmap = () => {
     if (isAnimating) return;
     setSlideDirection("prev");
     setIsAnimating(true);
-    setActiveRoadmapIndex((prev) => (prev === 0 ? roadmaps.length - 1 : prev - 1));
+    setActiveRoadmapIndex((prev) => (prev === 0 ? activeRoadmaps.length - 1 : prev - 1));
     setTimeout(() => setIsAnimating(false), 400);
   };
 
@@ -2160,7 +2280,7 @@ function EventsSection() {
     if (isAnimating) return;
     setSlideDirection("next");
     setIsAnimating(true);
-    setActiveRoadmapIndex((prev) => (prev === roadmaps.length - 1 ? 0 : prev + 1));
+    setActiveRoadmapIndex((prev) => (prev === activeRoadmaps.length - 1 ? 0 : prev + 1));
     setTimeout(() => setIsAnimating(false), 400);
   };
 
@@ -2180,22 +2300,31 @@ function EventsSection() {
   const [statusFilter, setStatusFilter] = useState("all"); // 'all', 'upcoming', 'completed'
 
   // Format list for filtering
-  const eventFormats = ["All formats", "Dialogue", "Expo", "Forum", "Workshop", "Public Talk"];
+  const eventFormats = ["All formats", "Dialogue", "Expo", "Forum", "Workshop", "Seminar", "RCBC Webinar", "CT Webinar", "DCS-Family", "DCS-TTT", "Public Talk", "Other"];
+
+  const availableCities = useMemo(() => {
+    const set = new Set(["Online", ...cities, "Sarikei", "Mukah", "Kapit", "Betong", "Sri Aman", "Limbang", "Serian"]);
+    activities.forEach((a) => {
+      if (a.city?.trim()) set.add(a.city.trim());
+    });
+    return [...set].sort();
+  }, [activities]);
 
   // Filtered community activities
   const filteredEvents = useMemo(() => {
     return activities.filter((ev) => {
-      // Must be a community event type (Dialogue, Expo, Forum, Workshop, Public Talk, Other)
-      const isCommunityEvent = ["Dialogue", "Expo", "Forum", "Workshop", "Seminar", "Public Talk", "Other"].includes(ev.type);
-      if (!isCommunityEvent) return false;
-
       // Status filter
-      if (statusFilter === "upcoming" && ev.status !== "upcoming") return false;
+      if (statusFilter === "upcoming" && ev.status !== "upcoming" && ev.status !== "registration-closed") return false;
       if (statusFilter === "completed" && ev.status !== "completed") return false;
 
       // City filter
       if (selectedCity !== "All cities") {
-        const matchesCity = ev.city === selectedCity || (ev.location && ev.location.includes(selectedCity));
+        const sel = selectedCity.toLowerCase();
+        const matchesCity =
+          (ev.city && ev.city.toLowerCase() === sel) ||
+          (ev.location && ev.location.toLowerCase().includes(sel)) ||
+          (ev.venue && ev.venue.toLowerCase().includes(sel)) ||
+          (ev.fullLocation && ev.fullLocation.toLowerCase().includes(sel));
         if (!matchesCity) return false;
       }
 
@@ -2209,7 +2338,7 @@ function EventsSection() {
 
       // Search query
       if (searchQuery.trim()) {
-        const text = `${ev.title} ${ev.description} ${ev.location} ${ev.speaker} ${ev.type}`.toLowerCase();
+        const text = `${ev.title} ${ev.description} ${ev.location} ${ev.venue || ''} ${ev.speaker} ${ev.type} ${ev.city} ${ev.suitableFor || ''} ${ev.audience || ''}`.toLowerCase();
         if (!text.includes(searchQuery.toLowerCase().trim())) return false;
       }
 
@@ -2231,6 +2360,79 @@ function EventsSection() {
     setSelectedLanguage("All languages");
     setStatusFilter("all");
   };
+
+  const outreachStories = (eventsCms.communityOutreach?.stories && eventsCms.communityOutreach.stories.length > 0)
+    ? eventsCms.communityOutreach.stories
+    : [
+        {
+          id: "outreach-story-1",
+          title: "Alzheimer’s Care Project TTT Batch 2 (16/5/25 – 18/5/25)",
+          subtitle: "Sibu, Sarawak (16/5/25 – 18/5/25)",
+          date: "16–18 May 2025",
+          location: "Sibu, Sarawak",
+          description: "Participants from Kapit, Betong, and Sibu dedicated three days to learning, practicing, and preparing to serve their communities with evidence-based dementia care skills.",
+          image: dialogueImg1,
+        },
+        {
+          id: "outreach-story-2",
+          title: "Living Impact & Growing Caregiver Support",
+          subtitle: "Sibu, Sarawak (16/5/25 – 18/5/25)",
+          date: "16–18 May 2025",
+          location: "Sibu, Sarawak",
+          description: "Although months have passed, the impact, memories, and lessons from Sibu remain very much alive in the way trainers share their knowledge, caregivers feel supported, and communities open their hearts toward dementia care.",
+          image: dialogueImg2,
+        },
+      ];
+
+  const outreachPillars = (eventsCms.communityOutreach?.pillars && eventsCms.communityOutreach.pillars.length > 0)
+    ? eventsCms.communityOutreach.pillars
+    : [
+        {
+          id: "pillar-1",
+          icon: "🌱",
+          title: ev.pillar1Title || "Kapit, Betong & Sibu",
+          desc: ev.pillar1Desc || "Uniting dedicated participants from across divisions who committed three days of intensive learning, roleplays, and community preparation.",
+        },
+        {
+          id: "pillar-2",
+          icon: "🤝",
+          title: ev.pillar2Title || "Enduring Grassroots Support",
+          desc: ev.pillar2Desc || "What was planted in Sibu continues to grow in the way trainers share their knowledge and family caregivers feel genuinely supported.",
+        },
+        {
+          id: "pillar-3",
+          icon: "🏛️",
+          title: ev.pillar3Title || "A Living Journey",
+          desc: ev.pillar3Desc || "Batch 2 is not just a past event; it is a living part of our journey shaping what we do today in building a dementia-friendly Sarawak.",
+        },
+      ];
+
+  const newsArticles = (eventsCms.headlinesNews?.articles && eventsCms.headlinesNews.articles.length > 0)
+    ? eventsCms.headlinesNews.articles
+    : [
+        {
+          id: "news-sin-chew",
+          outlet: "Malaysia Sin Chew Daily",
+          langPill: "中文报道",
+          subtitle: "Sarawak Regional Press Feature",
+          mainTitle: "Empowering Families & Community Dementia Care in Sarawak",
+          intro: "In-depth reporting on the collaboration between Rotary Club of Bintulu Central, local clinicians, and ADFM trainers to establish support networks for elderly families.",
+          category: "Press Feature",
+          date: "Published Feature",
+          image: newsSinChew,
+        },
+        {
+          id: "news-see-hua",
+          outlet: "See Hua Daily News",
+          langPill: "Sarawak Press",
+          subtitle: "Community News Coverage",
+          mainTitle: "HopeCare Initiative: Bridging Gaps in Dementia Support",
+          intro: "Coverage detailing the expansion of dementia care education into secondary towns like Bintulu, Miri, and Sibu to prevent caregiver isolation.",
+          category: "Press Release",
+          date: "Press Release",
+          image: newsSeeHua,
+        },
+      ];
 
   return (
     <main className="module-main events-experience-module">
@@ -2271,9 +2473,9 @@ function EventsSection() {
             {/* Clean Segmented Calendar Switcher */}
             <div className="calendar-switcher-dock" aria-label="Select calendar edition">
               <div className="switcher-pills" role="tablist">
-                {roadmaps.map((rm, idx) => (
+                {activeRoadmaps.map((rm, idx) => (
                   <button
-                    key={rm.id}
+                    key={rm.id || idx}
                     type="button"
                     className={`switcher-pill-btn ${idx === activeRoadmapIndex ? "is-active" : ""}`}
                     onClick={() => handleSelectRoadmap(idx)}
@@ -2301,7 +2503,7 @@ function EventsSection() {
                 <div className="switcher-counter-pill">
                   <span className="switcher-count-num">{activeRoadmapIndex + 1}</span>
                   <span className="switcher-count-sep">/</span>
-                  <span className="switcher-count-total">{roadmaps.length}</span>
+                  <span className="switcher-count-total">{activeRoadmaps.length}</span>
                 </div>
 
                 <button
@@ -2332,7 +2534,7 @@ function EventsSection() {
               tabIndex={0}
               onClick={() =>
                 setLightboxData({
-                  image: currentRoadmap.poster,
+                  image: resolveMediaImage(currentRoadmap.image || currentRoadmap.poster, yearlyCalendar2026Poster),
                   title: currentRoadmap.title,
                   subtitle: `${currentRoadmap.theme} — Annual Roadmap`,
                   caption: `${currentRoadmap.title} (${currentRoadmap.period}). Official activity roadmap delivered by Rotary Club of Bintulu Central and partner organisations across Sarawak.`,
@@ -2342,7 +2544,7 @@ function EventsSection() {
               onKeyDown={(e) =>
                 e.key === "Enter" &&
                 setLightboxData({
-                  image: currentRoadmap.poster,
+                  image: resolveMediaImage(currentRoadmap.image || currentRoadmap.poster, yearlyCalendar2026Poster),
                   title: currentRoadmap.title,
                   subtitle: `${currentRoadmap.theme} — Annual Roadmap`,
                   caption: `${currentRoadmap.title} (${currentRoadmap.period}).`,
@@ -2352,7 +2554,7 @@ function EventsSection() {
             >
               <div className="calendar-poster-thumb-wrap">
                 <img
-                  src={currentRoadmap.poster}
+                  src={resolveMediaImage(currentRoadmap.image || currentRoadmap.poster, yearlyCalendar2026Poster)}
                   alt={currentRoadmap.title}
                   className="calendar-poster-img"
                 />
@@ -2427,102 +2629,61 @@ function EventsSection() {
         </div>
       </section>
 
-      {/* ---- Section 2: Community Outreach Showcase (Sibu Batch 2 TTT) ---- */}
+      {/* ---- Section 2: Community Outreach Showcase ---- */}
       <section id="community-dialogues" className="events-feature-section dialogues-showcase-section">
         <div className="section-container">
           <div className="events-section-header">
-            <span className="section-label">{ev.communityOutreach || "Community Outreach"}</span>
-            <h2>{ev.sibuBatch2Title || "Alzheimer’s Care Project: TTT Batch 2 in Sibu"}</h2>
+            <span className="section-label">{eventsCms.communityOutreach?.eyebrow || ev.communityOutreach || "Community Outreach"}</span>
+            <h2>{eventsCms.communityOutreach?.mainTitle || ev.sibuBatch2Title || "Alzheimer’s Care Project: TTT Batch 2 in Sibu"}</h2>
             <p>
-              {ev.sibuBatch2Desc || "Back in May, our Batch 2 TTT in Sibu brought together a group of passionate participants from Kapit, Betong, and Sibu, who dedicated three days to learning, practicing, and preparing to serve their communities."}
+              {eventsCms.communityOutreach?.intro || ev.sibuBatch2Desc || "Back in May, our Batch 2 TTT in Sibu brought together a group of passionate participants from Kapit, Betong, and Sibu, who dedicated three days to learning, practicing, and preparing to serve their communities."}
             </p>
           </div>
 
           {/* Dialogue Photo Gallery */}
           <div className="dialogues-gallery-grid">
-            <article
-              className="dialogue-photo-card"
-              onClick={() =>
-                setLightboxData({
-                  image: dialogueImg1,
-                  title: "Alzheimer’s Care Project TTT Batch 2 — Sibu, Sarawak",
-                  subtitle: "Sibu, Sarawak (16/5/25 – 18/5/25)",
-                  caption:
-                    "Back in May, our Batch 2 TTT in Sibu brought together a group of passionate participants from Kapit, Betong, Sibu, who dedicated three days to learning, practicing, and preparing to serve their communities.",
-                  date: "16–18 May 2025",
-                })
-              }
-            >
-              <div className="dialogue-img-wrap">
-                <img src={dialogueImg1} alt="Alzheimer's Care Project TTT Batch 2 Sibu, Sarawak (16/5/25 - 18/5/25)" />
-                <span className="dialogue-tag">Sibu, Sarawak</span>
-                <div className="dialogue-hover-btn">
-                  <span>{le?.eventsSection?.viewPhoto || "🔍 View Photo"}</span>
-                </div>
-              </div>
-              <div className="dialogue-card-body">
-                <h3>{le?.eventsSection?.photo1Title || "Alzheimer’s Care Project TTT Batch 2 (16/5/25 – 18/5/25)"}</h3>
-                <p>
-                  Participants from Kapit, Betong, and Sibu dedicated three days to learning, practicing,
-                  and preparing to serve their communities with evidence-based dementia care skills.
-                </p>
-                <span className="dialogue-date">📅 16–18 May 2025 · Sibu, Sarawak</span>
-              </div>
-            </article>
-
-            <article
-              className="dialogue-photo-card"
-              onClick={() =>
-                setLightboxData({
-                  image: dialogueImg2,
-                  title: "Living Impact & Growing Caregiver Support — Sibu, Sarawak",
-                  subtitle: "Sibu, Sarawak (16/5/25 – 18/5/25)",
-                  caption:
-                    "Although months have passed, the impact, memories, and lessons from Sibu remain very much alive. What was planted then has continued to grow, in the way trainers share their knowledge, in the way caregivers feel supported, and in the way communities begin to open their hearts toward dementia care. Batch 2 was not just an event in May; it is a living part of our journey, shaping what we do today and reminding us that every step matters in building a dementia-friendly Sarawak.",
-                  date: "16–18 May 2025",
-                })
-              }
-            >
-              <div className="dialogue-img-wrap">
-                <img src={dialogueImg2} alt="TTT Batch 2 Interactive Learning & Practice Sibu (16/5/25 - 18/5/25)" />
-                <span className="dialogue-tag">Sibu, Sarawak</span>
-                <div className="dialogue-hover-btn">
-                  <span>{le?.eventsSection?.viewPhoto || "🔍 View Photo"}</span>
-                </div>
-              </div>
-              <div className="dialogue-card-body">
-                <h3>{le?.eventsSection?.photo2Title || "Living Impact & Growing Caregiver Support"}</h3>
-                <p>
-                  Although months have passed, the impact, memories, and lessons from Sibu remain very much alive in the way trainers share their knowledge, caregivers feel supported, and communities open their hearts toward dementia care.
-                </p>
-                <span className="dialogue-date">📅 16–18 May 2025 · Sibu, Sarawak</span>
-              </div>
-            </article>
+            {outreachStories.map((story, sIdx) => {
+              const storyImg = resolveMediaImage(story.image, sIdx === 0 ? dialogueImg1 : dialogueImg2);
+              return (
+                <article
+                  key={story.id || sIdx}
+                  className="dialogue-photo-card"
+                  onClick={() =>
+                    setLightboxData({
+                      image: storyImg,
+                      title: story.title,
+                      subtitle: story.subtitle || `${story.location || 'Sarawak'} (${story.date || ''})`,
+                      caption: story.description,
+                      date: story.date,
+                    })
+                  }
+                >
+                  <div className="dialogue-img-wrap">
+                    <img src={storyImg} alt={story.title} />
+                    {story.location && <span className="dialogue-tag">{story.location}</span>}
+                    <div className="dialogue-hover-btn">
+                      <span>{le?.eventsSection?.viewPhoto || "🔍 View Photo"}</span>
+                    </div>
+                  </div>
+                  <div className="dialogue-card-body">
+                    <h3>{story.title}</h3>
+                    <p>{story.description}</p>
+                    <span className="dialogue-date">📅 {story.date}{story.location ? ` · ${story.location}` : ""}</span>
+                  </div>
+                </article>
+              );
+            })}
           </div>
 
           {/* Dialogue Three Core Pillars */}
           <div className="dialogue-pillars-grid">
-            <div className="dialogue-pillar-card">
-              <div className="pillar-icon">🌱</div>
-              <h4>{ev.pillar1Title || "Kapit, Betong & Sibu"}</h4>
-              <p>
-                {ev.pillar1Desc || "Uniting dedicated participants from across divisions who committed three days of intensive learning, roleplays, and community preparation."}
-              </p>
-            </div>
-            <div className="dialogue-pillar-card">
-              <div className="pillar-icon">🤝</div>
-              <h4>{ev.pillar2Title || "Enduring Grassroots Support"}</h4>
-              <p>
-                {ev.pillar2Desc || "What was planted in Sibu continues to grow in the way trainers share their knowledge and family caregivers feel genuinely supported."}
-              </p>
-            </div>
-            <div className="dialogue-pillar-card">
-              <div className="pillar-icon">🏛️</div>
-              <h4>{ev.pillar3Title || "A Living Journey"}</h4>
-              <p>
-                {ev.pillar3Desc || "Batch 2 is not just a past event; it is a living part of our journey shaping what we do today in building a dementia-friendly Sarawak."}
-              </p>
-            </div>
+            {outreachPillars.map((p, pIdx) => (
+              <div key={p.id || pIdx} className="dialogue-pillar-card">
+                <div className="pillar-icon">{p.icon || "🌱"}</div>
+                <h4>{p.title}</h4>
+                <p>{p.desc || p.description}</p>
+              </div>
+            ))}
           </div>
         </div>
       </section>
@@ -2572,7 +2733,7 @@ function EventsSection() {
                   onChange={(e) => setSelectedCity(e.target.value)}
                 >
                   <option>{ev.allCities || "All cities"}</option>
-                  {cities.map((c) => (
+                  {availableCities.map((c) => (
                     <option key={c} value={c}>{c}</option>
                   ))}
                 </select>
@@ -2659,72 +2820,103 @@ function EventsSection() {
           {/* Events Grid */}
           {filteredEvents.length > 0 ? (
             <div className="events-cards-grid">
-              {filteredEvents.map((event) => (
-                <article className="rich-event-card" key={event.id}>
-                  <div className="event-card-header">
-                    <div className="event-card-thumb-wrap">
-                      <img src={eventImage} alt="" className="event-card-thumb" />
-                      <div className="event-thumb-overlay" />
+              {filteredEvents.map((event) => {
+                const closed = isEventClosed(event);
+                return (
+                  <article className="rich-event-card" key={event.id}>
+                    <div className="event-card-header">
+                      <div className="event-card-thumb-wrap">
+                        <img src={event.poster || eventImage} alt="" className="event-card-thumb" />
+                        <div className="event-thumb-overlay" />
+                      </div>
+                      <div className="event-card-badges">
+                        <span className="event-type-badge">{event.type}</span>
+                        {closed ? (
+                          <span className="status-badge status-registration-closed">Registration Closed</span>
+                        ) : (
+                          <StatusBadge status={event.status} />
+                        )}
+                      </div>
                     </div>
-                    <div className="event-card-badges">
-                      <span className="event-type-badge">{event.type}</span>
-                      <StatusBadge status={event.status} />
-                    </div>
-                  </div>
 
-                  <div className="event-card-body">
-                    <h3 className="event-card-title">{event.title}</h3>
-                    <p className="event-card-desc">{event.description}</p>
+                    <div className="event-card-body">
+                      <h3 className="event-card-title">{event.title}</h3>
+                      <p className="event-card-desc">{event.description}</p>
 
-                    <div className="event-meta-list">
-                      <div className="event-meta-item">
-                        <span className="meta-icon">📅</span>
-                        <span>{event.date}</span>
-                      </div>
-                      <div className="event-meta-item">
-                        <span className="meta-icon">⏰</span>
-                        <span>{event.time}</span>
-                      </div>
-                      <div className="event-meta-item">
-                        <span className="meta-icon">📍</span>
-                        <span>{event.location}</span>
-                      </div>
-                      <div className="event-meta-item">
-                        <span className="meta-icon">🌐</span>
-                        <span>{event.language}</span>
-                      </div>
-                      {event.speaker && (
+                      <div className="event-meta-list">
                         <div className="event-meta-item">
-                          <span className="meta-icon">👤</span>
-                          <span>{event.speaker}</span>
+                          <span className="meta-icon">📅</span>
+                          <span>{event.date}</span>
                         </div>
-                      )}
+                        {event.time && (
+                          <div className="event-meta-item">
+                            <span className="meta-icon">⏰</span>
+                            <span>{event.time}</span>
+                          </div>
+                        )}
+                        {event.capacity && (
+                          <div className="event-meta-item">
+                            <span className="meta-icon">👥</span>
+                            <span>Capacity: {event.capacity} seats</span>
+                          </div>
+                        )}
+                        {(event.registrationDeadlineFormatted || event.registrationDeadline) && (
+                          <div className="event-meta-item">
+                            <span className="meta-icon">⏳</span>
+                            <span>Deadline: {event.registrationDeadlineFormatted || event.registrationDeadline}</span>
+                          </div>
+                        )}
+                        <div className="event-meta-item">
+                          <span className="meta-icon">📍</span>
+                          <span>{event.fullLocation || event.location || event.city}</span>
+                        </div>
+                        {(event.suitableFor || event.audience) && (
+                          <div className="event-meta-item">
+                            <span className="meta-icon">🎯</span>
+                            <span>Suitable for: {event.suitableFor || event.audience}</span>
+                          </div>
+                        )}
+                        <div className="event-meta-item">
+                          <span className="meta-icon">🌐</span>
+                          <span>{event.language}</span>
+                        </div>
+                        {event.speaker && (
+                          <div className="event-meta-item">
+                            <span className="meta-icon">👤</span>
+                            <span>{event.speaker}</span>
+                          </div>
+                        )}
+                      </div>
                     </div>
-                  </div>
 
-                  <div className="event-card-footer">
-                    {event.status === "upcoming" ? (
-                      <a
-                        href={event.registrationLink || "https://forms.google.com/"}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="event-register-btn"
+                    <div className="event-card-footer">
+                      {event.status === "cancelled" ? (
+                        <span className="event-completed-tag" style={{ background: "#fee2e2", color: "#991b1b", border: "1px solid #fecaca" }}>Cancelled</span>
+                      ) : event.status === "completed" ? (
+                        <span className="event-completed-tag">{ev.sessionCompleted || "Session Completed"}</span>
+                      ) : closed ? (
+                        <span className="event-completed-tag" style={{ background: "#fef3c7", color: "#92400e", border: "1px solid #fde68a" }}>Registration Closed</span>
+                      ) : (
+                        <a
+                          href={event.registrationLink || "https://forms.google.com/"}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="event-register-btn"
+                        >
+                          {ev.registerGoogleForm || "Register via Google Form ↗"}
+                        </a>
+                      )}
+                      <button
+                        type="button"
+                        className="event-details-btn"
+                        onClick={() => setSelectedActivity(event)}
                       >
-                        {ev.registerGoogleForm || "Register via Google Form ↗"}
-                      </a>
-                    ) : (
-                      <span className="event-completed-tag">{ev.sessionCompleted || "Session Completed"}</span>
-                    )}
-                    <button
-                      type="button"
-                      className="event-details-btn"
-                      onClick={() => setSelectedActivity(event)}
-                    >
-                      {ev.viewDetails || "View Details"}
-                    </button>
-                  </div>
-                </article>
-              ))}
+                        {ev.viewDetails || "View Details"}
+                      </button>
+                    </div>
+                  </article>
+                );
+              })}
             </div>
           ) : (
             <div className="events-empty-state">
@@ -2751,77 +2943,42 @@ function EventsSection() {
           </div>
 
           <div className="news-clippings-grid">
-            {/* News Card 1: Sin Chew Daily */}
-            <article
-              className="news-clipping-card"
-              onClick={() =>
-                setLightboxData({
-                  image: newsSinChew,
-                  title: "Malaysia Sin Chew Daily (马来西亚星洲日报)",
-                  subtitle: "Sarawak Regional Press Feature",
-                  caption:
-                    "Feature article reporting on the Rotary Club of Bintulu Central HopeCare project, highlighting dementia education, stigma reduction, and family caregiver workshops.",
-                  date: "Published Feature",
-                })
-              }
-            >
-              <div className="news-img-wrap">
-                <img src={newsSinChew} alt="Malaysia Sin Chew Daily Press Coverage" />
-                <div className="news-img-hover-overlay">
-                  <span>🔍 Read Newspaper Clipping</span>
-                </div>
-              </div>
-              <div className="news-card-body">
-                <div className="news-outlet-meta">
-                  <span className="news-outlet-tag">Malaysia Sin Chew Daily</span>
-                  <span className="news-lang-pill">中文报道</span>
-                </div>
-                <h3>Empowering Families &amp; Community Dementia Care in Sarawak</h3>
-                <p>
-                  In-depth reporting on the collaboration between Rotary Club of Bintulu Central,
-                  local clinicians, and ADFM trainers to establish support networks for elderly families.
-                </p>
-                <div className="news-action-bar">
-                  <span className="news-click-prompt">Click to open high-res newspaper clipping ↗</span>
-                </div>
-              </div>
-            </article>
-
-            {/* News Card 2: See Hua Daily News */}
-            <article
-              className="news-clipping-card"
-              onClick={() =>
-                setLightboxData({
-                  image: newsSeeHua,
-                  title: "See Hua Daily News (诗华日报)",
-                  subtitle: "Community News Coverage",
-                  caption:
-                    "Press coverage highlighting the launch of community dementia dialogues, Train-the-Trainer pathways, and resource distribution across Sarawak.",
-                  date: "Press Release",
-                })
-              }
-            >
-              <div className="news-img-wrap">
-                <img src={newsSeeHua} alt="See Hua Daily News Press Coverage" />
-                <div className="news-img-hover-overlay">
-                  <span>🔍 Read Newspaper Clipping</span>
-                </div>
-              </div>
-              <div className="news-card-body">
-                <div className="news-outlet-meta">
-                  <span className="news-outlet-tag">See Hua Daily News</span>
-                  <span className="news-lang-pill">Sarawak Press</span>
-                </div>
-                <h3>HopeCare Initiative: Bridging Gaps in Dementia Support</h3>
-                <p>
-                  Coverage detailing the expansion of dementia care education into secondary
-                  towns like Bintulu, Miri, and Sibu to prevent caregiver isolation.
-                </p>
-                <div className="news-action-bar">
-                  <span className="news-click-prompt">Click to open high-res newspaper clipping ↗</span>
-                </div>
-              </div>
-            </article>
+            {newsArticles.map((art, aIdx) => {
+              const artImg = resolveMediaImage(art.image, aIdx === 0 ? newsSinChew : newsSeeHua);
+              return (
+                <article
+                  key={art.id || aIdx}
+                  className="news-clipping-card"
+                  onClick={() =>
+                    setLightboxData({
+                      image: artImg,
+                      title: `${art.outlet || 'News Outlet'} (${art.mainTitle || art.title || 'Press Clipping'})`,
+                      subtitle: art.subtitle || "Sarawak Regional Press Feature",
+                      caption: art.intro || art.description || "Feature article reporting on the Rotary Club of Bintulu Central HopeCare project.",
+                      date: art.date || "Published Feature",
+                    })
+                  }
+                >
+                  <div className="news-img-wrap">
+                    <img src={artImg} alt={art.mainTitle || art.title || "Press Coverage"} />
+                    <div className="news-img-hover-overlay">
+                      <span>🔍 Read Newspaper Clipping</span>
+                    </div>
+                  </div>
+                  <div className="news-card-body">
+                    <div className="news-outlet-meta">
+                      <span className="news-outlet-tag">{art.outlet}</span>
+                      {art.langPill && <span className="news-lang-pill">{art.langPill}</span>}
+                    </div>
+                    <h3>{art.mainTitle || art.title}</h3>
+                    <p>{art.intro || art.description}</p>
+                    <div className="news-action-bar">
+                      <span className="news-click-prompt">Click to open high-res newspaper clipping ↗</span>
+                    </div>
+                  </div>
+                </article>
+              );
+            })}
           </div>
         </div>
       </section>
@@ -2897,35 +3054,24 @@ function MedicalCarousel({ trainers: carouselTrainers, onSelect, onViewAll }) {
   const isUserInteracting = useRef(false);
   const resumeTimeout = useRef(null);
 
-  const SCROLL_STEP = 220;
-
-  /* ---- Auto-scroll (slow drift) ---- */
+  /* ---- Auto-scroll (continuous smooth flow like animation effect) ---- */
   const startAuto = useCallback(() => {
     if (autoRef.current) return;
     autoRef.current = setInterval(() => {
       const el = trackRef.current;
       if (!el || isUserInteracting.current) return;
-      const maxScroll = el.scrollWidth - el.clientWidth;
-      if (maxScroll <= 0) return;
-      if (el.scrollLeft >= maxScroll - 2) {
-        el.scrollTo({ left: 0, behavior: "smooth" });
-      } else {
-        el.scrollLeft += 1;
+      el.scrollLeft += 1;
+      if (el.scrollLeft >= el.scrollWidth / 2) {
+        el.scrollLeft = 0;
       }
-    }, 28);
+    }, 16);
   }, []);
 
   const stopAuto = useCallback(() => {
-    clearInterval(autoRef.current);
-    autoRef.current = null;
-  }, []);
-
-  const pauseAndResume = useCallback(() => {
-    isUserInteracting.current = true;
-    clearTimeout(resumeTimeout.current);
-    resumeTimeout.current = setTimeout(() => {
-      isUserInteracting.current = false;
-    }, 3000);
+    if (autoRef.current) {
+      clearInterval(autoRef.current);
+      autoRef.current = null;
+    }
   }, []);
 
   useEffect(() => {
@@ -2940,46 +3086,86 @@ function MedicalCarousel({ trainers: carouselTrainers, onSelect, onViewAll }) {
   const scrollBy = useCallback((dir) => {
     const el = trackRef.current;
     if (!el) return;
-    pauseAndResume();
-    const maxScroll = el.scrollWidth - el.clientWidth;
-    if (dir > 0 && el.scrollLeft >= maxScroll - 15) {
-      el.scrollTo({ left: 0, behavior: "smooth" });
-    } else if (dir < 0 && el.scrollLeft <= 15) {
-      el.scrollTo({ left: maxScroll, behavior: "smooth" });
-    } else {
-      el.scrollBy({ left: dir * SCROLL_STEP, behavior: "smooth" });
+    isUserInteracting.current = true;
+    clearTimeout(resumeTimeout.current);
+    resumeTimeout.current = setTimeout(() => {
+      isUserInteracting.current = false;
+    }, 2500);
+
+    const card = el.querySelector(".ct-mc-card");
+    const step = card ? card.offsetWidth + 20 : 280;
+    const halfWidth = el.scrollWidth / 2;
+
+    if (dir < 0 && el.scrollLeft <= 10) {
+      el.scrollLeft += halfWidth;
+    } else if (dir > 0 && el.scrollLeft >= halfWidth - 10) {
+      el.scrollLeft -= halfWidth;
     }
-  }, [pauseAndResume]);
+
+    el.scrollBy({ left: dir * step, behavior: "smooth" });
+  }, []);
 
   /* ---- Drag (pointer events) ---- */
   const onPointerDown = useCallback((e) => {
     if (e.button !== 0) return;
     isDragging.current = true;
     hasDragged.current = false;
+    isUserInteracting.current = true;
+    clearTimeout(resumeTimeout.current);
     startX.current = e.clientX;
     startScroll.current = trackRef.current?.scrollLeft ?? 0;
-    pauseAndResume();
     trackRef.current?.setPointerCapture(e.pointerId);
-  }, [pauseAndResume]);
-
-  const onPointerMove = useCallback((e) => {
-    if (!isDragging.current) return;
-    const dx = e.clientX - startX.current;
-    if (Math.abs(dx) > 4) hasDragged.current = true;
-    if (trackRef.current) trackRef.current.scrollLeft = startScroll.current - dx;
   }, []);
 
-  const onPointerUp = useCallback(() => { isDragging.current = false; }, []);
+  const onPointerMove = useCallback((e) => {
+    if (!isDragging.current || !trackRef.current) return;
+    const dx = e.clientX - startX.current;
+    if (Math.abs(dx) > 4) hasDragged.current = true;
 
-  const onMouseEnter = useCallback(() => { isUserInteracting.current = true; }, []);
+    const el = trackRef.current;
+    const halfWidth = el.scrollWidth / 2;
+    let nextScroll = startScroll.current - dx;
+    if (halfWidth > 0) {
+      if (nextScroll >= halfWidth) {
+        nextScroll -= halfWidth;
+        startX.current = e.clientX;
+        startScroll.current = nextScroll;
+      } else if (nextScroll < 0) {
+        nextScroll += halfWidth;
+        startX.current = e.clientX;
+        startScroll.current = nextScroll;
+      }
+    }
+    el.scrollLeft = nextScroll;
+  }, []);
+
+  const onPointerUp = useCallback(() => {
+    isDragging.current = false;
+    setTimeout(() => { hasDragged.current = false; }, 50);
+    clearTimeout(resumeTimeout.current);
+    resumeTimeout.current = setTimeout(() => {
+      isUserInteracting.current = false;
+    }, 1500);
+  }, []);
+
+  const onMouseEnter = useCallback(() => {
+    isUserInteracting.current = true;
+    clearTimeout(resumeTimeout.current);
+  }, []);
+
   const onMouseLeave = useCallback(() => {
     if (!isDragging.current) {
       clearTimeout(resumeTimeout.current);
-      resumeTimeout.current = setTimeout(() => { isUserInteracting.current = false; }, 800);
+      resumeTimeout.current = setTimeout(() => {
+        isUserInteracting.current = false;
+      }, 300);
     }
   }, []);
 
-  const items = carouselTrainers;
+  if (!carouselTrainers || carouselTrainers.length === 0) return null;
+
+  // Duplicate the list to create a seamless infinite circular buffer
+  const items = [...carouselTrainers, ...carouselTrainers];
 
   return (
     <section className="ct-carousel-section">
@@ -2997,58 +3183,56 @@ function MedicalCarousel({ trainers: carouselTrainers, onSelect, onViewAll }) {
             <button type="button" className="ct-nav-btn" onClick={() => scrollBy(1)} aria-label="Next trainer">→</button>
           </div>
         </div>
-      </div>
 
-      <div className="ct-carousel-outer ct-mask">
-        <div
-          className="ct-carousel-track"
-          ref={trackRef}
-          onPointerDown={onPointerDown}
-          onPointerMove={onPointerMove}
-          onPointerUp={onPointerUp}
-          onPointerCancel={onPointerUp}
-          onMouseEnter={onMouseEnter}
-          onMouseLeave={onMouseLeave}
-          role="list"
-          aria-label="Medical professional trainers"
-        >
-          {items.map((t) => (
-            <div
-              key={`mc-${t.id}`}
-              className="ct-mc-card"
-              style={{ "--mc-color": t.badgeColor || "#0d716b" }}
-              role="listitem"
-            >
-              <div className="ct-mc-top-bar" aria-hidden="true" />
-              <div className="ct-mc-avatar-wrap">
-                <div className="ct-mc-avatar">
-                  <span className="ct-mc-initials">{t.initials}</span>
-                  <span className="ct-mc-verified" aria-hidden="true">✓</span>
+        <div className="ct-carousel-outer">
+          <div
+            className="ct-carousel-track"
+            ref={trackRef}
+            onPointerDown={onPointerDown}
+            onPointerMove={onPointerMove}
+            onPointerUp={onPointerUp}
+            onPointerCancel={onPointerUp}
+            onMouseEnter={onMouseEnter}
+            onMouseLeave={onMouseLeave}
+            role="list"
+            aria-label="Medical professional trainers"
+          >
+            {items.map((t, idx) => (
+              <div
+                key={`mc-${t.id}-${idx}`}
+                className="ct-mc-card"
+                style={{ "--mc-color": t.badgeColor || "#0d716b" }}
+                role="listitem"
+              >
+                <div className="ct-mc-top-bar" aria-hidden="true" />
+                <div className="ct-mc-avatar-wrap">
+                  <div className="ct-mc-avatar">
+                    <span className="ct-mc-initials">{t.initials}</span>
+                    <span className="ct-mc-verified" aria-hidden="true">✓</span>
+                  </div>
+                </div>
+                <div className="ct-mc-body">
+                  <span className="ct-mc-badge">{cs.clinicalFacilitator || "Clinical Facilitator"}</span>
+                  <strong className="ct-mc-name">{t.name}</strong>
+                  <span className="ct-mc-role">{t.role}</span>
+                  <span className="ct-mc-inst">{t.institution.split(",")[0]}</span>
+                </div>
+                <div className="ct-mc-footer">
+                  <button
+                    type="button"
+                    className="ct-mc-cta"
+                    onClick={() => !hasDragged.current && onSelect(t)}
+                    onPointerDown={(e) => e.stopPropagation()}
+                    aria-label={`View profile of ${t.name}`}
+                  >
+                    View profile →
+                  </button>
                 </div>
               </div>
-              <div className="ct-mc-body">
-                <span className="ct-mc-badge">{cs.clinicalFacilitator || "Clinical Facilitator"}</span>
-                <strong className="ct-mc-name">{t.name}</strong>
-                <span className="ct-mc-role">{t.role}</span>
-                <span className="ct-mc-inst">{t.institution.split(",")[0]}</span>
-              </div>
-              <div className="ct-mc-footer">
-                <button
-                  type="button"
-                  className="ct-mc-cta"
-                  onClick={() => !hasDragged.current && onSelect(t)}
-                  onPointerDown={(e) => e.stopPropagation()}
-                  aria-label={`View profile of ${t.name}`}
-                >
-                  View profile →
-                </button>
-              </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
-      </div>
 
-      <div className="section-container">
         <div className="ct-carousel-bottom">
           <button type="button" className="ct-view-all-btn" onClick={onViewAll}>View full directory →</button>
         </div>
@@ -3065,15 +3249,30 @@ function CertifiedTrainers() {
   const le = i18nData.learnEvents;
   const cs = le?.certifiedTrainersSection || {};
   const activities = usePublicActivities();
-  const [trainers, setTrainers] = useState(defaultTrainers);
+  const cmsContent = useLearnEventsContent();
+  const cmsTrainers = (cmsContent.certifiedTrainers?.trainersList && cmsContent.certifiedTrainers.trainersList.length > 0)
+    ? cmsContent.certifiedTrainers.trainersList
+    : defaultTrainers;
+  const [trainers, setTrainers] = useState(cmsTrainers);
   const [directoryError, setDirectoryError] = useState("");
+
+  useEffect(() => {
+    if (cmsContent.certifiedTrainers?.trainersList?.length > 0) {
+      setTrainers(cmsContent.certifiedTrainers.trainersList);
+    }
+  }, [cmsContent]);
+
   useEffect(() => {
     let alive = true;
     fetch('/api/trainers')
       .then(r => { if (!r.ok) throw new Error('Trainer directory unavailable'); return r.json(); })
       .then(rows => {
         if (alive && Array.isArray(rows) && rows.length > 0) {
-          setTrainers(rows.map(t => ({ ...t, category: 'certified-trainer', role: 'Certified Trainer', institution: 'RCBC', bio: t.short_profile, initials: t.name.split(' ').map(n => n[0]).join(''), photo: t.photo_url })));
+          // If public projection exists, overlay certified portal profiles
+          setTrainers(prev => {
+            const extra = rows.map(t => ({ ...t, category: 'medical-professional', role: 'Certified Trainer', institution: 'RCBC', bio: t.short_profile, initials: t.name.split(' ').map(n => n[0]).join(''), photo: t.photo_url }));
+            return [...prev, ...extra.filter(x => !prev.some(p => p.id === x.id || p.name === x.name))];
+          });
         }
       })
       .catch(e => { if (alive) setDirectoryError(e.message); });
@@ -3092,7 +3291,15 @@ function CertifiedTrainers() {
   const clinicalFacilitators = useMemo(() => trainers.filter((t) => t.category === "medical-professional"), [trainers]);
   const advisoryFacilitators = useMemo(() => trainers.filter((t) => t.category === "advisory-support"), [trainers]);
 
-  const getTrainerActivities = (trainerId) => activities.filter((a) => (a.trainerId === trainerId || a.trainers?.some(t => t.trainerId === trainerId)));
+  const getTrainerActivities = (trainer) => activities.filter((a) => {
+    const tid = typeof trainer === 'object' ? trainer?.id : trainer;
+    const tname = typeof trainer === 'object' ? trainer?.name?.toLowerCase().trim() : '';
+    if (a.trainerId && (a.trainerId === tid || String(a.trainerId) === String(tid))) return true;
+    if (a.trainers?.some(t => t.trainerId === tid || String(t.trainerId) === String(tid))) return true;
+    if (tname && a.trainers?.some(t => t.name && t.name.toLowerCase().trim() === tname)) return true;
+    if (tname && a.speaker && a.speaker.toLowerCase().includes(tname)) return true;
+    return false;
+  });
 
   const filteredTrainers = useMemo(() => trainers.filter((t) => {
     if (activeCategory !== "all" && t.category !== activeCategory) return false;
@@ -3252,7 +3459,7 @@ function CertifiedTrainers() {
           {filteredTrainers.length > 0 ? (
             <div className="trainer-profiles-grid">
               {filteredTrainers.map((t) => {
-                const trainerActivities = getTrainerActivities(t.id);
+                const trainerActivities = getTrainerActivities(t);
                 const upcomingCount = trainerActivities.filter((a) => a.status === "upcoming").length;
                 const pastCount = trainerActivities.filter((a) => a.status === "completed").length;
                 const isOpen = expandedTrainer === t.id;
@@ -3500,7 +3707,12 @@ function UpcomingCalendar() {
       if (typeFilter !== "All types" && a.type !== typeFilter) return false;
       if (modeFilter !== "All modes" && a.mode !== modeFilter) return false;
       if (cityFilter !== "All cities") {
-        const matchesCity = a.city === cityFilter || (a.location && a.location.toLowerCase().includes(cityFilter.toLowerCase()));
+        const sel = cityFilter.toLowerCase();
+        const matchesCity =
+          (a.city && a.city.toLowerCase() === sel) ||
+          (a.location && a.location.toLowerCase().includes(sel)) ||
+          (a.venue && a.venue.toLowerCase().includes(sel)) ||
+          (a.fullLocation && a.fullLocation.toLowerCase().includes(sel));
         if (!matchesCity) return false;
       }
       if (languageFilter !== "All languages" &&
@@ -3572,9 +3784,9 @@ function UpcomingCalendar() {
   }, [allCalendarEvents]);
 
   const calCities = useMemo(() => {
-    const set = new Set(cities);
+    const set = new Set(["Online", ...cities, "Sarikei", "Mukah", "Kapit", "Betong", "Sri Aman", "Limbang", "Serian"]);
     allCalendarEvents.forEach((a) => {
-      if (a.city && a.city !== "Online") set.add(a.city);
+      if (a.city?.trim()) set.add(a.city.trim());
     });
     return [...set].sort();
   }, [allCalendarEvents]);
@@ -3822,10 +4034,10 @@ function UpcomingCalendar() {
 
                 {/* Meta list */}
                 <dl className="uc-detail-meta">
-                  {selectedEvent.suitableFor && (
+                  {(selectedEvent.suitableFor || selectedEvent.audience) && (
                     <div className="uc-meta-row">
                       <dt>{le?.activityModal?.suitableFor || "Suitable for"}</dt>
-                      <dd>{selectedEvent.suitableFor}</dd>
+                      <dd>{selectedEvent.suitableFor || selectedEvent.audience}</dd>
                     </div>
                   )}
                   <div className="uc-meta-row">
@@ -3835,6 +4047,25 @@ function UpcomingCalendar() {
                       {selectedEvent.time && <><br /><span className="uc-meta-time">{selectedEvent.time}</span></>}
                     </dd>
                   </div>
+                  {selectedEvent.capacity && (
+                    <div className="uc-meta-row">
+                      <dt>Capacity</dt>
+                      <dd>{selectedEvent.capacity} seats</dd>
+                    </div>
+                  )}
+                  {(selectedEvent.registrationDeadlineFormatted || selectedEvent.registrationDeadline) && (
+                    <div className="uc-meta-row">
+                      <dt>Reg. Deadline</dt>
+                      <dd>
+                        {selectedEvent.registrationDeadlineFormatted || selectedEvent.registrationDeadline}
+                        {isEventClosed(selectedEvent) && (
+                          <span style={{ color: "#dc2626", fontWeight: 700, marginLeft: "0.4rem" }}>
+                            (Closed)
+                          </span>
+                        )}
+                      </dd>
+                    </div>
+                  )}
                   <div className="uc-meta-row">
                     <dt>{le?.activityModal?.mode || "Mode"}</dt>
                     <dd><ModeIcon mode={selectedEvent.mode} /></dd>
@@ -3881,6 +4112,10 @@ function UpcomingCalendar() {
                     <span className="uc-action-past">{le?.upcomingCalendarSection?.cancelled || "This activity has been cancelled."}</span>
                   ) : selectedEvent.status === "completed" ? (
                     <span className="uc-action-past">{le?.upcomingCalendarSection?.completed || "This session has been completed."}</span>
+                  ) : isEventClosed(selectedEvent) ? (
+                    <button type="button" className="uc-register-btn uc-register-btn-disabled" disabled style={{ background: "#fef3c7", color: "#92400e", border: "1px solid #fde68a", cursor: "not-allowed" }}>
+                      Registration Closed
+                    </button>
                   ) : selectedEvent.registrationLink != null ? (
                     <a
                       href={selectedEvent.registrationLink || "#"}
