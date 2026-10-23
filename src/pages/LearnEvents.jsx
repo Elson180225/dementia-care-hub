@@ -139,7 +139,7 @@ function usePublicActivities() {
               date: formatActivityDate(a.starts_at),
               time: formatActivityTime(a.starts_at),
               registrationLink: a.registration_link,
-              poster: a.poster_url,
+              poster: resolveMediaImage(a.poster_url, webinarImage),
               location: fullLoc,
               venue: venueVal,
               city: cityVal,
@@ -186,6 +186,17 @@ function resolveMediaImage(src, fallback) {
   if (typeof src === "object") return src;
   if (typeof src === "string") {
     if (src.startsWith("http://") || src.startsWith("https://") || src.startsWith("/api/files/")) return src;
+    if (src.includes("cataracts") || src.includes("Cataracts")) return cataractsPoster;
+    if (src.includes("alzheimers-101") || src.includes("Alzheimer's_101") || src.includes("Eye-Opening")) return alzheimers101Poster;
+    if (src.includes("early-detection") || src.includes("Early_Detection")) return earlyDetectionPoster;
+    if (src.includes("wellness") || src.includes("Embracing_Wellness")) return wellnessPoster;
+    if (src.includes("caregiver") || src.includes("Essential_Care")) return caregiverPoster;
+    if (src.includes("tooth-loss") || src.includes("Tooth_Loss")) return toothLossPoster;
+    if (src.includes("decisions") || src.includes("Suitable_Decision")) return decisionPoster;
+    if (src.includes("women") || src.includes("Peranan_Wanita")) return womenCarePoster;
+    if (src.includes("awareness") || src.includes("Awareness_Webinar")) return awarenessPoster;
+    if (src.includes("safe-home") || src.includes("Safe_Space")) return safeHomePoster;
+    if (src.includes("osteoporosis") || src.includes("OSTEOPOROSIS")) return osteoporosisPoster;
     if (src.includes("dcs-family")) return dcsFamilyPoster;
     if (src.includes("adfm")) return adfmPoster;
     if (src.includes("yearly-calendar") || src.includes("yearlyCalendar")) return yearlyCalendar2026Poster;
@@ -209,31 +220,33 @@ const imageMap = {
 };
 
 const onlineWebinars = [
-  { id: "webinar-alzheimers-101", title: "Alzheimer's 101: Eye-opening facts", type: "RCBC Webinar", status: "completed", date: "Past webinar", mode: "Online", language: "English", description: "A public introduction to Alzheimer’s disease and the facts families should know.", poster: alzheimers101Poster },
-  { id: "webinar-awareness", title: "Alzheimer's Awareness Webinar", type: "RCBC Webinar", status: "completed", date: "Past webinar", mode: "Online", language: "English", description: "An accessible session for building awareness and understanding in the community.", poster: awarenessPoster },
-  { id: "webinar-early-detection", title: "Early Detection & Monitoring of Dementia", type: "RCBC Webinar", status: "completed", date: "Past webinar", mode: "Online", language: "中文", description: "Information about recognising changes early and discussing concerns with a healthcare professional.", poster: earlyDetectionPoster },
-  { id: "webinar-wellness", title: "Embracing Wellness: Ageing with Dignity in Sarawak", type: "RCBC Webinar", status: "completed", date: "Past webinar", mode: "Online", language: "English", description: "A conversation about wellbeing, dignity, and support as people age.", poster: wellnessPoster },
-  { id: "webinar-care", title: "Essential Care: Practical Tips for Alzheimer’s Caregivers", type: "RCBC Webinar", status: "completed", date: "Past webinar", mode: "Online", language: "English", description: "Practical ideas for caregivers supporting everyday routines and care needs.", poster: caregiverPoster },
-  { id: "webinar-women", title: "Peranan Wanita Dalam Penjagaan Alzheimer", type: "RCBC Webinar", status: "completed", date: "Past webinar", mode: "Online", language: "Bahasa Melayu", description: "A Malay-language conversation about women’s roles and experiences in Alzheimer’s care.", poster: womenCarePoster },
-  { id: "webinar-safe-home", title: "Safe Space: Adapting the Home for Alzheimer’s Care", type: "RCBC Webinar", status: "completed", date: "Past webinar", mode: "Online", language: "English", description: "Ideas for making everyday home environments safer and more supportive.", poster: safeHomePoster },
-  { id: "webinar-decisions", title: "Making the Most Suitable Decision", type: "RCBC Webinar", status: "completed", date: "Past webinar", mode: "Online", language: "English", description: "A reflective session about making informed care decisions with families.", poster: decisionPoster },
-  { id: "webinar-cataracts", title: "A Practical Webinar on Cataracts", type: "RCBC Webinar", status: "completed", date: "Past webinar", mode: "Online", language: "English", description: "A practical health education session on cataracts and ageing.", poster: cataractsPoster },
-  { id: "webinar-tooth-loss", title: "Is Tooth Loss Really Part of Getting Older?", type: "RCBC Webinar", status: "completed", date: "Past webinar", mode: "Online", language: "English", description: "A public education session about oral health and ageing.", poster: toothLossPoster },
-  { id: "webinar-osteoporosis", title: "Silent but Serious: Understanding Osteoporosis", type: "RCBC Webinar", status: "completed", date: "Past webinar", mode: "Online", language: "English", description: "An educational session about osteoporosis prevention and awareness.", poster: osteoporosisPoster },
+  { id: "webinar-alzheimers-101", title: "Alzheimer's 101: Eye-opening facts", type: "RCBC Webinar", status: "completed", date: "15 Mar 2024", rawDate: "2024-03-15T09:00:00+08:00", mode: "Online", language: "English", description: "A public introduction to Alzheimer’s disease and the facts families should know.", poster: alzheimers101Poster },
+  { id: "webinar-awareness", title: "Alzheimer's Awareness Webinar", type: "RCBC Webinar", status: "completed", date: "18 May 2024", rawDate: "2024-05-18T10:00:00+08:00", mode: "Online", language: "English", description: "An accessible session for building awareness and understanding in the community.", poster: awarenessPoster },
+  { id: "webinar-early-detection", title: "Early Detection & Monitoring of Dementia", type: "RCBC Webinar", status: "completed", date: "20 Jul 2024", rawDate: "2024-07-20T14:00:00+08:00", mode: "Online", language: "中文", description: "Information about recognising changes early and discussing concerns with a healthcare professional.", poster: earlyDetectionPoster },
+  { id: "webinar-wellness", title: "Embracing Wellness: Ageing with Dignity in Sarawak", type: "RCBC Webinar", status: "completed", date: "21 Sep 2024", rawDate: "2024-09-21T10:00:00+08:00", mode: "Online", language: "English", description: "A conversation about wellbeing, dignity, and support as people age.", poster: wellnessPoster },
+  { id: "webinar-care", title: "Essential Care: Practical Tips for Alzheimer’s Caregivers", type: "RCBC Webinar", status: "completed", date: "16 Nov 2024", rawDate: "2024-11-16T10:00:00+08:00", mode: "Online", language: "English", description: "Practical ideas for caregivers supporting everyday routines and care needs.", poster: caregiverPoster },
+  { id: "webinar-women", title: "Peranan Wanita Dalam Penjagaan Alzheimer", type: "RCBC Webinar", status: "completed", date: "18 Jan 2025", rawDate: "2025-01-18T10:00:00+08:00", mode: "Online", language: "Bahasa Melayu", description: "A Malay-language conversation about women’s roles and experiences in Alzheimer’s care.", poster: womenCarePoster },
+  { id: "webinar-safe-home", title: "Safe Space: Adapting the Home for Alzheimer’s Care", type: "RCBC Webinar", status: "completed", date: "15 Mar 2025", rawDate: "2025-03-15T10:00:00+08:00", mode: "Online", language: "English", description: "Ideas for making everyday home environments safer and more supportive.", poster: safeHomePoster },
+  { id: "webinar-decisions", title: "Making the Most Suitable Decision", type: "RCBC Webinar", status: "completed", date: "17 May 2025", rawDate: "2025-05-17T10:00:00+08:00", mode: "Online", language: "English", description: "A reflective session about making informed care decisions with families.", poster: decisionPoster },
+  { id: "webinar-cataracts", title: "A Practical Webinar on Cataracts", type: "RCBC Webinar", status: "completed", date: "19 Jul 2025", rawDate: "2025-07-19T10:00:00+08:00", mode: "Online", language: "English", description: "A practical health education session on cataracts and ageing.", poster: cataractsPoster },
+  { id: "webinar-tooth-loss", title: "Is Tooth Loss Really Part of Getting Older?", type: "RCBC Webinar", status: "completed", date: "20 Sep 2025", rawDate: "2025-09-20T10:00:00+08:00", mode: "Online", language: "English", description: "A public education session about oral health and ageing.", poster: toothLossPoster },
+  { id: "webinar-osteoporosis", title: "Silent but Serious: Understanding Osteoporosis", type: "RCBC Webinar", status: "completed", date: "15 Nov 2025", rawDate: "2025-11-15T10:00:00+08:00", mode: "Online", language: "English", description: "An educational session about osteoporosis prevention and awareness.", poster: osteoporosisPoster },
 ];
 
 const trainerWebinars = [
   {
     id: "trainer-dcs-family",
-    title: "Basic Dementia Care Skill (Family) Course — DCS-Family",
-    type: "DCS-Family",
+    title: "Basic Dementia Care Skill (Family) Course — DCS-Family Online Webinar",
+    type: "CT Webinar",
     status: "upcoming",
     date: "16 May 2026",
-    time: "9:00 AM – 6:00 PM",
-    mode: "Physical",
-    location: "Hock Lee Hotel & Residence, Kuching",
+    time: "9:00 AM – 1:00 PM",
+    mode: "Online",
+    location: "Online",
+    venue: "Online",
+    city: "Online",
     language: "English / Bahasa Melayu / 中文",
-    description: "Foundation Dementia Care Course for family caregivers delivered by 12 ADFM-Certified Trainers. Covering 6 core modules, limited to 100 seats.",
+    description: "Online Foundation Dementia Care Course for family caregivers delivered by ADFM-Certified Trainers covering core person-centred care modules.",
     poster: dcsFamilyPoster,
   },
 ];
@@ -862,11 +875,11 @@ function OnlineEducation() {
 
   const rcbcWebinars = [
     ...activities.filter((item) => item.type === "RCBC Webinar" || (item.mode === "Online" && item.type !== "CT Webinar")),
-    ...onlineWebinars,
+    ...(activities.some((item) => item.type === "RCBC Webinar") ? [] : onlineWebinars),
   ];
   const ctWebinars = [
-    ...activities.filter((item) => item.type === "CT Webinar"),
-    ...trainerWebinars,
+    ...activities.filter((item) => (item.type === "CT Webinar" || item.type === "DCS-Family") && item.mode === "Online"),
+    ...trainerWebinars.filter((item) => item.mode === "Online"),
   ];
   const archiveResources = approvedList.map((resource) => ({ ...resource, status: "completed" }));
 
