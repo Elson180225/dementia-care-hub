@@ -879,7 +879,9 @@ function OnlineEducation() {
   ];
   const ctWebinars = [
     ...activities.filter((item) => (item.type === "CT Webinar" || item.type === "DCS-Family") && item.mode === "Online"),
-    ...trainerWebinars.filter((item) => item.mode === "Online"),
+    ...(activities.some((item) => (item.type === "CT Webinar" || item.type === "DCS-Family") && item.mode === "Online")
+      ? []
+      : trainerWebinars.filter((item) => item.mode === "Online")),
   ];
   const archiveResources = approvedList.map((resource) => ({ ...resource, status: "completed" }));
 
@@ -2382,6 +2384,29 @@ function EventsSection() {
         },
       ];
 
+  const outreachPillars = (eventsCms.communityOutreach?.pillars && eventsCms.communityOutreach.pillars.length > 0)
+    ? eventsCms.communityOutreach.pillars
+    : [
+        {
+          id: "pillar-1",
+          icon: "🌱",
+          title: ev.pillar1Title || "Kapit, Betong & Sibu",
+          desc: ev.pillar1Desc || "Uniting dedicated participants from across divisions who committed three days of intensive learning, roleplays, and community preparation.",
+        },
+        {
+          id: "pillar-2",
+          icon: "🤝",
+          title: ev.pillar2Title || "Enduring Grassroots Support",
+          desc: ev.pillar2Desc || "What was planted in Sibu continues to grow in the way trainers share their knowledge and family caregivers feel genuinely supported.",
+        },
+        {
+          id: "pillar-3",
+          icon: "🏛️",
+          title: ev.pillar3Title || "A Living Journey",
+          desc: ev.pillar3Desc || "Batch 2 is not just a past event; it is a living part of our journey shaping what we do today in building a dementia-friendly Sarawak.",
+        },
+      ];
+
   const newsArticles = (eventsCms.headlinesNews?.articles && eventsCms.headlinesNews.articles.length > 0)
     ? eventsCms.headlinesNews.articles
     : [
@@ -2652,27 +2677,13 @@ function EventsSection() {
 
           {/* Dialogue Three Core Pillars */}
           <div className="dialogue-pillars-grid">
-            <div className="dialogue-pillar-card">
-              <div className="pillar-icon">🌱</div>
-              <h4>{ev.pillar1Title || "Kapit, Betong & Sibu"}</h4>
-              <p>
-                {ev.pillar1Desc || "Uniting dedicated participants from across divisions who committed three days of intensive learning, roleplays, and community preparation."}
-              </p>
-            </div>
-            <div className="dialogue-pillar-card">
-              <div className="pillar-icon">🤝</div>
-              <h4>{ev.pillar2Title || "Enduring Grassroots Support"}</h4>
-              <p>
-                {ev.pillar2Desc || "What was planted in Sibu continues to grow in the way trainers share their knowledge and family caregivers feel genuinely supported."}
-              </p>
-            </div>
-            <div className="dialogue-pillar-card">
-              <div className="pillar-icon">🏛️</div>
-              <h4>{ev.pillar3Title || "A Living Journey"}</h4>
-              <p>
-                {ev.pillar3Desc || "Batch 2 is not just a past event; it is a living part of our journey shaping what we do today in building a dementia-friendly Sarawak."}
-              </p>
-            </div>
+            {outreachPillars.map((p, pIdx) => (
+              <div key={p.id || pIdx} className="dialogue-pillar-card">
+                <div className="pillar-icon">{p.icon || "🌱"}</div>
+                <h4>{p.title}</h4>
+                <p>{p.desc || p.description}</p>
+              </div>
+            ))}
           </div>
         </div>
       </section>

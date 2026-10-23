@@ -11,6 +11,13 @@ const BLANK_STORY = {
   image: "",
 };
 
+const BLANK_PILLAR = {
+  id: "",
+  icon: "🌱",
+  title: "",
+  desc: "",
+};
+
 const BLANK_ARTICLE = {
   id: "",
   outlet: "",
@@ -24,19 +31,25 @@ const BLANK_ARTICLE = {
 };
 
 export default function OutreachNewsAdmin({ content, onSave }) {
-  // Sub-tabs: "outreach" | "news"
+  // Sub-tabs: "outreach" | "pillars" | "news"
   const [activeSubTab, setActiveSubTab] = useState("outreach");
 
   // Editing modals
   const [editingStory, setEditingStory] = useState(null); // null or { values, isNew }
+  const [editingPillar, setEditingPillar] = useState(null); // null or { values, isNew }
   const [editingArticle, setEditingArticle] = useState(null); // null or { values, isNew }
-  const [deletingConfirm, setDeletingConfirm] = useState(null); // { type: 'story'|'article', id, title }
+  const [deletingConfirm, setDeletingConfirm] = useState(null); // { type: 'story'|'pillar'|'article', id, title }
   const [errors, setErrors] = useState({});
 
   // Search & Filter for Stories
   const [storySearch, setStorySearch] = useState("");
   const [storyPage, setStoryPage] = useState(1);
   const [storyPageSize, setStoryPageSize] = useState(10);
+
+  // Search & Filter for Pillars
+  const [pillarSearch, setPillarSearch] = useState("");
+  const [pillarPage, setPillarPage] = useState(1);
+  const [pillarPageSize, setPillarPageSize] = useState(10);
 
   // Search & Filter for News
   const [newsSearch, setNewsSearch] = useState("");
@@ -45,6 +58,7 @@ export default function OutreachNewsAdmin({ content, onSave }) {
 
   // Safe data extraction
   const stories = content?.events?.communityOutreach?.stories || [];
+  const pillars = content?.events?.communityOutreach?.pillars || [];
   const articles = content?.events?.headlinesNews?.articles || [];
 
   // Filtered stories
@@ -69,6 +83,28 @@ export default function OutreachNewsAdmin({ content, onSave }) {
     const start = (safeStoryPage - 1) * storyPageSize;
     return filteredStories.slice(start, start + storyPageSize);
   }, [filteredStories, safeStoryPage, storyPageSize]);
+
+  // Filtered pillars
+  const filteredPillars = useMemo(() => {
+    return pillars.filter((p) => {
+      if (pillarSearch.trim()) {
+        const q = pillarSearch.toLowerCase().trim();
+        const match =
+          p.title?.toLowerCase().includes(q) ||
+          p.desc?.toLowerCase().includes(q) ||
+          p.icon?.toLowerCase().includes(q);
+        if (!match) return false;
+      }
+      return true;
+    });
+  }, [pillars, pillarSearch]);
+
+  const totalPillarPages = Math.ceil(filteredPillars.length / pillarPageSize) || 1;
+  const safePillarPage = Math.min(pillarPage, totalPillarPages);
+  const pagedPillars = useMemo(() => {
+    const start = (safePillarPage - 1) * pillarPageSize;
+    return filteredPillars.slice(start, start + pillarPageSize);
+  }, [filteredPillars, safePillarPage, pillarPageSize]);
 
   // Filtered news
   const filteredArticles = useMemo(() => {
@@ -107,6 +143,23 @@ export default function OutreachNewsAdmin({ content, onSave }) {
     setEditingStory({
       isNew: true,
       values: { ...BLANK_STORY, id: `outreach-story-${Date.now()}` },
+    });
+  };
+
+  // Open Pillar Create/Edit
+  const openPillarEdit = (pl) => {
+    setErrors({});
+    setEditingPillar({
+      isNew: false,
+      values: JSON.parse(JSON.stringify(pl)),
+    });
+  };
+
+  const openPillarCreate = () => {
+    setErrors({});
+    setEditingPillar({
+      isNew: true,
+      values: { ...BLANK_PILLAR, id: `pillar-${Date.now()}` },
     });
   };
 
@@ -156,6 +209,35 @@ export default function OutreachNewsAdmin({ content, onSave }) {
     if (ok) setEditingStory(null);
   };
 
+  // Save Pillar
+  const handleSavePillar = async () => {
+    const v = editingPillar.values;
+    const errs = {};
+    if (!v.title?.trim()) errs.title = "Please enter the pillar title.";
+    if (!v.desc?.trim()) errs.desc = "Please enter the pillar description.";
+
+    if (Object.keys(errs).length > 0) {
+      setErrors(errs);
+      return;
+    }
+
+    const copy = JSON.parse(JSON.stringify(content));
+    if (!copy.events) copy.events = {};
+    if (!copy.events.communityOutreach) copy.events.communityOutreach = { stories: [], pillars: [] };
+    if (!Array.isArray(copy.events.communityOutreach.pillars)) copy.events.communityOutreach.pillars = [];
+
+    if (editingPillar.isNew) {
+      copy.events.communityOutreach.pillars.push(v);
+    } else {
+      const idx = copy.events.communityOutreach.pillars.findIndex((p) => p.id === v.id);
+      if (idx >= 0) copy.events.communityOutreach.pillars[idx] = v;
+      else copy.events.communityOutreach.pillars.push(v);
+    }
+
+    const ok = await onSave(copy);
+    if (ok) setEditingPillar(null);
+  };
+
   // Save News
   const handleSaveNews = async () => {
     const v = editingArticle.values;
@@ -196,6 +278,12 @@ export default function OutreachNewsAdmin({ content, onSave }) {
           (s) => s.id !== deletingConfirm.id
         );
       }
+    } else if (deletingConfirm.type === "pillar") {
+      if (copy.events?.communityOutreach?.pillars) {
+        copy.events.communityOutreach.pillars = copy.events.communityOutreach.pillars.filter(
+          (p) => p.id !== deletingConfirm.id
+        );
+      }
     } else if (deletingConfirm.type === "article") {
       if (copy.events?.headlinesNews?.articles) {
         copy.events.headlinesNews.articles = copy.events.headlinesNews.articles.filter(
@@ -227,6 +315,22 @@ export default function OutreachNewsAdmin({ content, onSave }) {
           }}
         >
           🗣️ Community Outreach Stories ({stories.length})
+        </button>
+        <button
+          type="button"
+          onClick={() => setActiveSubTab("pillars")}
+          style={{
+            padding: "0.6rem 1.25rem",
+            background: "none",
+            border: "none",
+            borderBottom: activeSubTab === "pillars" ? "3px solid #0d716b" : "3px solid transparent",
+            color: activeSubTab === "pillars" ? "#0d716b" : "#4b5563",
+            fontWeight: activeSubTab === "pillars" ? 700 : 500,
+            cursor: "pointer",
+            fontSize: "0.95rem",
+          }}
+        >
+          🏛️ Dialogue Core Pillars ({pillars.length})
         </button>
         <button
           type="button"
@@ -415,6 +519,174 @@ export default function OutreachNewsAdmin({ content, onSave }) {
                 className="tp-page-btn"
                 disabled={safeStoryPage >= totalStoryPages}
                 onClick={() => setStoryPage((p) => Math.min(totalStoryPages, p + 1))}
+              >
+                Next ›
+              </button>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* SUB-SECTION: DIALOGUE CORE PILLARS */}
+      {activeSubTab === "pillars" && (
+        <div>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem", flexWrap: "wrap", gap: "1rem" }}>
+            <div>
+              <h2 style={{ margin: 0, fontSize: "1.25rem" }}>Community Dialogue Core Pillars</h2>
+              <p style={{ margin: "0.25rem 0 0", color: "#61596a", fontSize: "0.9rem" }}>
+                Define the foundational pillars shown under the Community Outreach section on the main website.
+              </p>
+            </div>
+            <button
+              type="button"
+              className="tp-btn"
+              onClick={openPillarCreate}
+              style={{ minWidth: "160px", whiteSpace: "nowrap" }}
+            >
+              + Add Pillar
+            </button>
+          </div>
+
+          {/* Search */}
+          <div className="tp-filter-bar">
+            <input
+              type="text"
+              className="tp-search-input"
+              placeholder="🔍 Search pillars by title, icon or description..."
+              value={pillarSearch}
+              onChange={(e) => {
+                setPillarSearch(e.target.value);
+                setPillarPage(1);
+              }}
+              aria-label="Search pillars"
+            />
+            {pillarSearch.trim() !== "" && (
+              <button
+                type="button"
+                className="tp-btn tp-btn-ghost"
+                onClick={() => {
+                  setPillarSearch("");
+                  setPillarPage(1);
+                }}
+              >
+                Clear Search
+              </button>
+            )}
+          </div>
+
+          {/* Table Meta */}
+          <div className="tp-table-meta">
+            <div>
+              Showing <strong>{filteredPillars.length === 0 ? 0 : (safePillarPage - 1) * pillarPageSize + 1}</strong>–
+              <strong>{Math.min(safePillarPage * pillarPageSize, filteredPillars.length)}</strong> of{" "}
+              <strong>{filteredPillars.length}</strong> pillars
+            </div>
+            <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+              <label htmlFor="pillarPageSizeSelect" style={{ fontSize: "0.85rem", color: "#61596a" }}>
+                Rows:
+              </label>
+              <select
+                id="pillarPageSizeSelect"
+                value={pillarPageSize}
+                onChange={(e) => {
+                  setPillarPageSize(Number(e.target.value));
+                  setPillarPage(1);
+                }}
+                className="tp-select"
+                style={{ width: "auto", padding: "4px 8px", fontSize: "0.85rem" }}
+              >
+                <option value={5}>5</option>
+                <option value={10}>10</option>
+                <option value={20}>20</option>
+              </select>
+            </div>
+          </div>
+
+          {/* Pillars Table */}
+          {pagedPillars.length === 0 ? (
+            <div className="tp-empty-state">
+              <p style={{ color: "#61596a", margin: 0 }}>No dialogue pillars found.</p>
+            </div>
+          ) : (
+            <div className="tp-table-wrap">
+              <table className="tp-table">
+                <thead>
+                  <tr>
+                    <th style={{ width: "80px", textAlign: "center" }}>Icon</th>
+                    <th style={{ minWidth: "220px" }}>Pillar Title</th>
+                    <th style={{ minWidth: "320px" }}>Description</th>
+                    <th style={{ minWidth: "140px", textAlign: "right" }}>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {pagedPillars.map((pl) => (
+                    <tr key={pl.id}>
+                      <td style={{ textAlign: "center", fontSize: "1.5rem" }}>
+                        {pl.icon || "🌱"}
+                      </td>
+                      <td>
+                        <div style={{ fontWeight: 700, color: "#1f2937" }}>
+                          {pl.title}
+                        </div>
+                      </td>
+                      <td>
+                        <div style={{ fontSize: "0.88rem", color: "#4b5563", lineHeight: 1.4 }}>
+                          {pl.desc || pl.description}
+                        </div>
+                      </td>
+                      <td style={{ textAlign: "right" }}>
+                        <div style={{ display: "inline-flex", gap: "6px", justifyContent: "flex-end" }}>
+                          <button
+                            type="button"
+                            className="tp-btn tp-btn-ghost"
+                            style={{ minHeight: "34px", padding: "4px 10px", fontSize: "0.82rem" }}
+                            onClick={() => openPillarEdit(pl)}
+                          >
+                            Edit
+                          </button>
+                          <button
+                            type="button"
+                            className="tp-btn tp-btn-ghost"
+                            style={{ minHeight: "34px", padding: "4px 10px", fontSize: "0.82rem", color: "#b91c1c", borderColor: "#fca5a5" }}
+                            onClick={() => setDeletingConfirm({ type: "pillar", id: pl.id, title: pl.title })}
+                          >
+                            Delete
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+
+          {/* Pagination */}
+          {totalPillarPages > 1 && (
+            <div className="tp-pagination">
+              <button
+                type="button"
+                className="tp-page-btn"
+                disabled={safePillarPage <= 1}
+                onClick={() => setPillarPage((p) => Math.max(1, p - 1))}
+              >
+                ‹ Prev
+              </button>
+              {Array.from({ length: totalPillarPages }, (_, i) => i + 1).map((num) => (
+                <button
+                  key={num}
+                  type="button"
+                  className={`tp-page-btn ${num === safePillarPage ? "active" : ""}`}
+                  onClick={() => setPillarPage(num)}
+                >
+                  {num}
+                </button>
+              ))}
+              <button
+                type="button"
+                className="tp-page-btn"
+                disabled={safePillarPage >= totalPillarPages}
+                onClick={() => setPillarPage((p) => Math.min(totalPillarPages, p + 1))}
               >
                 Next ›
               </button>
@@ -728,6 +1000,102 @@ export default function OutreachNewsAdmin({ content, onSave }) {
                 onClick={handleSaveStory}
               >
                 {editingStory.isNew ? "Create Story" : "Save Changes"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* EDIT / CREATE PILLAR MODAL */}
+      {editingPillar && (
+        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.55)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 99999, padding: "1rem", overflowY: "auto" }}>
+          <div style={{ background: "#fff", borderRadius: "10px", maxWidth: "580px", width: "100%", maxHeight: "90vh", overflowY: "auto", padding: "1.75rem", boxShadow: "0 25px 50px -12px rgba(0,0,0,0.25)" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1.25rem", borderBottom: "1px solid #e5e7eb", paddingBottom: "0.75rem" }}>
+              <h3 style={{ margin: 0, color: "#0d716b" }}>
+                {editingPillar.isNew ? "Add Dialogue Core Pillar" : `Edit Pillar: ${editingPillar.values.title}`}
+              </h3>
+              <button
+                type="button"
+                className="tp-btn tp-btn-ghost"
+                onClick={() => setEditingPillar(null)}
+                style={{ minHeight: "32px", padding: "2px 8px" }}
+              >
+                ✕
+              </button>
+            </div>
+
+            <div style={{ display: "grid", gridTemplateColumns: "120px 1fr", gap: "1rem", marginBottom: "1rem" }}>
+              <div>
+                <label style={{ display: "block", fontWeight: 600, fontSize: "0.85rem", marginBottom: "0.25rem" }}>
+                  Icon Emoji
+                </label>
+                <input
+                  type="text"
+                  value={editingPillar.values.icon}
+                  onChange={(e) =>
+                    setEditingPillar({
+                      ...editingPillar,
+                      values: { ...editingPillar.values, icon: e.target.value },
+                    })
+                  }
+                  placeholder="🌱"
+                  style={{ width: "100%", padding: "0.5rem", textAlign: "center", fontSize: "1.25rem", borderRadius: "4px", border: "1px solid #ccc" }}
+                />
+              </div>
+
+              <div>
+                <label style={{ display: "block", fontWeight: 600, fontSize: "0.85rem", marginBottom: "0.25rem" }}>
+                  Pillar Title *
+                </label>
+                <input
+                  type="text"
+                  value={editingPillar.values.title}
+                  onChange={(e) =>
+                    setEditingPillar({
+                      ...editingPillar,
+                      values: { ...editingPillar.values, title: e.target.value },
+                    })
+                  }
+                  placeholder="e.g. Kapit, Betong & Sibu"
+                  style={{ width: "100%", padding: "0.5rem", borderRadius: "4px", border: errors.title ? "1px solid #dc2626" : "1px solid #ccc" }}
+                />
+                {errors.title && <div style={{ color: "#dc2626", fontSize: "0.78rem", marginTop: "2px" }}>{errors.title}</div>}
+              </div>
+            </div>
+
+            <div style={{ marginBottom: "1.25rem" }}>
+              <label style={{ display: "block", fontWeight: 600, fontSize: "0.85rem", marginBottom: "0.25rem" }}>
+                Pillar Description / Impact Narrative *
+              </label>
+              <textarea
+                rows={4}
+                value={editingPillar.values.desc}
+                onChange={(e) =>
+                  setEditingPillar({
+                    ...editingPillar,
+                    values: { ...editingPillar.values, desc: e.target.value },
+                  })
+                }
+                placeholder="Uniting dedicated participants from across divisions who committed three days of intensive learning..."
+                style={{ width: "100%", padding: "0.5rem", borderRadius: "4px", border: errors.desc ? "1px solid #dc2626" : "1px solid #ccc" }}
+              />
+              {errors.desc && <div style={{ color: "#dc2626", fontSize: "0.78rem", marginTop: "2px" }}>{errors.desc}</div>}
+            </div>
+
+            <div style={{ display: "flex", justifyContent: "flex-end", gap: "0.75rem", borderTop: "1px solid #e5e7eb", paddingTop: "1rem" }}>
+              <button
+                type="button"
+                className="tp-btn tp-btn-ghost"
+                onClick={() => setEditingPillar(null)}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                className="tp-btn"
+                onClick={handleSavePillar}
+              >
+                {editingPillar.isNew ? "Create Pillar" : "Save Changes"}
               </button>
             </div>
           </div>
