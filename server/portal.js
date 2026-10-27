@@ -16,7 +16,7 @@ export async function snapshot(user) {
  const admin=user.role==='admin';
  const profiles=(await pool.query('SELECT p.*,u.name,u.email FROM trainer_profiles p JOIN users u ON u.id=p.id WHERE $1 OR p.id=$2',[admin,user.id])).rows;
  const activities=(await pool.query(`SELECT a.*,coalesce(c.status,'none') AS completion_status,c.actual_venue,c.participants,c.actual_hours,c.admin_comment AS completion_comment,c.photos,
- coalesce((SELECT jsonb_agg(jsonb_build_object('trainerId',t.trainer_id,'role',t.role)) FROM activity_trainers t WHERE t.activity_id=a.id),'[]') AS trainers
+ coalesce((SELECT jsonb_agg(jsonb_build_object('trainerId',t.trainer_id,'role',t.role,'name',u.name)) FROM activity_trainers t LEFT JOIN users u ON u.id=t.trainer_id WHERE t.activity_id=a.id),'[]') AS trainers
  FROM activities a LEFT JOIN completions c ON c.activity_id=a.id
  WHERE $1 OR a.created_by=$2 OR EXISTS(SELECT 1 FROM activity_trainers t WHERE t.activity_id=a.id AND t.trainer_id=$2) ORDER BY a.starts_at DESC`,[admin,user.id])).rows;
  return {session:admin?null:{id:user.id},adminSession:admin?user:null,
@@ -42,7 +42,7 @@ export async function snapshot(user) {
 }
 export async function portalHandler(req,res,url,send) {
  if(req.method==='GET' && url.pathname==='/api/trainers') return send(res,200,(await pool.query('SELECT * FROM public_trainers')).rows);
- if(req.method==='GET' && url.pathname==='/api/activities') return send(res,200,(await pool.query("SELECT a.id,a.title,a.starts_at,a.type,a.mode,a.venue,a.city,a.language,a.audience,a.description,a.poster_url,CASE WHEN a.cancelled_at IS NULL THEN a.registration_link ELSE NULL END AS registration_link,a.status,a.cancelled_at,a.cancellation_reason,a.registration_deadline,a.capacity,coalesce((SELECT jsonb_agg(jsonb_build_object('trainerId',t.trainer_id,'role',t.role)) FROM activity_trainers t WHERE t.activity_id=a.id),'[]') AS trainers FROM activities a WHERE a.status IN ('published','completed','verified','archived') AND a.published_at IS NOT NULL")).rows);
+ if(req.method==='GET' && url.pathname==='/api/activities') return send(res,200,(await pool.query("SELECT a.id,a.title,a.starts_at,a.type,a.mode,a.venue,a.city,a.language,a.audience,a.description,a.poster_url,CASE WHEN a.cancelled_at IS NULL THEN a.registration_link ELSE NULL END AS registration_link,a.status,a.cancelled_at,a.cancellation_reason,a.registration_deadline,a.capacity,coalesce((SELECT jsonb_agg(jsonb_build_object('trainerId',t.trainer_id,'role',t.role,'name',u.name)) FROM activity_trainers t LEFT JOIN users u ON u.id=t.trainer_id WHERE t.activity_id=a.id),'[]') AS trainers FROM activities a WHERE a.status IN ('published','completed','verified','archived') AND a.published_at IS NOT NULL")).rows);
  const user=await currentUser(req); if(!user) fail('Please sign in',401);
  if(req.method==='GET' && url.pathname==='/api/portal/trainers') return send(res,200,(await pool.query("SELECT u.id,u.name,p.city,p.language FROM approved_trainer_accounts u JOIN trainer_profiles p ON p.id=u.id ORDER BY u.name")).rows);
  if(req.method==='GET' && url.pathname==='/api/portal') return send(res,200,await snapshot(user));
@@ -105,7 +105,7 @@ export async function portalHandler(req,res,url,send) {
   const existing=(await db.query('SELECT * FROM activities WHERE id=$1 FOR UPDATE',[id])).rows[0];
   if(existing && !admin && existing.created_by!==user.id) fail('Only the activity owner can edit this record',403);
   if(action.type==='ACTIVITY_SAVE') {
-   if(existing && (!['draft','returned',...(admin?['approved','published']:[])].includes(existing.status) || existing.cancelled_at)) fail('Activity cannot be edited in this state',409);
+   if(existing && !admin && (!['draft','returned'].includes(existing.status) || existing.cancelled_at)) fail('Activity cannot be edited in this state',409);
    const a=action.activity;
    validateLinks(a.posterUrl);
    await validateFileLinks(db,user,[a.posterUrl]);
@@ -120,6 +120,11 @@ export async function portalHandler(req,res,url,send) {
    if(a.registrationDeadline && new Date(a.registrationDeadline)>new Date(a.date)) fail('Registration deadline must be before the activity');
    if(a.capacity && (!Number.isInteger(Number(a.capacity)) || Number(a.capacity)<=0)) fail('Capacity must be a positive integer');
    await db.query("UPDATE activities SET registration_deadline=$2::timestamp AT TIME ZONE 'Asia/Kuala_Lumpur',capacity=$3,updated_at=now() WHERE id=$1",[id,a.registrationDeadline || null,a.capacity || null]);
+   if(admin && a.status && ['draft','submitted','approved','published','completed','verified','archived'].includes(a.status)) {
+    await db.query("UPDATE activities SET status=$2,published_at=CASE WHEN $2 IN ('published','completed','verified','archived') THEN COALESCE(published_at, now()) ELSE published_at END,updated_at=now() WHERE id=$1",[id,a.status]);
+   } else if(existing && ['completed','verified','archived'].includes(existing.status)) {
+    await db.query("UPDATE activities SET status=$2,published_at=COALESCE(published_at, now()),updated_at=now() WHERE id=$1",[id,existing.status]);
+   }
    if(a.trainers) {
     if(!Array.isArray(a.trainers) || (!admin && !a.trainers.length) || new Set(a.trainers.map(t=>t.trainerId)).size!==a.trainers.length || (!admin && !a.trainers.some(t=>t.trainerId===user.id))) fail('Assign distinct trainers and include yourself');
     const eligible=await db.query("SELECT id FROM approved_trainer_accounts WHERE id=ANY($1::uuid[])",[a.trainers.map(t=>t.trainerId)]);
@@ -132,6 +137,16 @@ export async function portalHandler(req,res,url,send) {
    if(admin) await logDecision(db,user,'activities',id,existing && existing.starts_at.toISOString()!==new Date(a.date+'+08:00').toISOString()?'rescheduled':'corrected','',existing?.status || null,existing?.status || 'draft');return;
   }
   if(!existing) fail('Activity not found',404);
+  if(action.type==='ACTIVITY_DELETE') {
+   if(!admin && (existing.created_by!==user.id || !['draft','returned'].includes(existing.status))) fail('Only draft activities can be deleted',403);
+   await db.query('DELETE FROM completions WHERE activity_id=$1',[id]);
+   await db.query('DELETE FROM evidence_records WHERE activity_id=$1',[id]);
+   await db.query('UPDATE cpd_records SET activity_id=NULL WHERE activity_id=$1',[id]);
+   await db.query('DELETE FROM activity_trainers WHERE activity_id=$1',[id]);
+   await db.query('DELETE FROM activities WHERE id=$1',[id]);
+   if(admin) await logDecision(db,user,'activities',id,'deleted','',existing.status,'deleted');
+   return;
+  }
   if(action.type==='ACTIVITY_SUBMIT') {
    if(!['draft','returned'].includes(existing.status)) fail('Activity is not editable',409);
    await db.query("UPDATE activities SET status='submitted',admin_comment='' WHERE id=$1",[id]); return;

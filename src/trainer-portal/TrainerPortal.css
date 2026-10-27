@@ -56,3 +56,16 @@ fieldset.tp-field legend { font-weight: 700; padding: 0 6px; }
 .tp-actions input, .tp-actions select { flex: 1 1 180px; width: auto; }
 .tp-toolbar { display: flex; gap: 16px; flex-wrap: wrap; align-items: end; margin: 16px 0; }
 .tp-toolbar .tp-field { margin: 0; min-width: 200px; }
+
+/* Activities Hub & Data Table Enhancements */
+.tp-filter-bar { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; background: #fff; border: 1px solid #e6dfe8; border-radius: 12px; padding: 14px 18px; margin: 16px 0 20px; }
+.tp-search-input { flex: 1 1 220px; min-height: 42px; padding: 8px 14px; border: 1px solid #877991; border-radius: 8px; font-size: 0.95rem; background: #fff; color: #28242b; }
+.tp-select-filter { min-height: 42px; padding: 8px 12px; border: 1px solid #877991; border-radius: 8px; font-size: 0.92rem; background: #fff; color: #28242b; }
+.tp-table-meta { display: flex; justify-content: space-between; align-items: center; margin: 16px 0 10px; flex-wrap: wrap; gap: 12px; font-size: 0.92rem; color: #61596a; }
+.tp-pagination { display: flex; align-items: center; justify-content: flex-end; gap: 6px; margin: 18px 0; flex-wrap: wrap; }
+.tp-page-btn { min-width: 36px; height: 36px; padding: 0 10px; border: 1px solid #877991; background: #fff; color: #51277d; border-radius: 6px; font-size: 0.88rem; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; }
+.tp-page-btn.active { background: #51277d; color: #fff; border-color: #51277d; }
+.tp-page-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.tp-badge-mode { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 0.78rem; font-weight: 700; }
+.tp-badge-online { background: #e0f2fe; color: #0369a1; }
+.tp-badge-physical { background: #dcfce7; color: #15803d; }

@@ -1,0 +1,565 @@
+{
+  "onlineEducation": {
+    "sectionHeader": {
+      "rcbcLabel": "RCBC annual webinar series",
+      "rcbcTitle": "Previous & future public education webinars",
+      "rcbcDesc": "The annual RCBC webinar brings dementia education to the public. Recordings from previous years are preserved as learning resources.",
+      "ctLabel": "Certified Trainer webinar",
+      "ctTitle": "Webinars hosted by ADFM certified trainers",
+      "ctDesc": "Sessions led by doctors and healthcare professionals certified under the Dementia Care Series (DCS-TTT) pathway.",
+      "upcomingTitle": "Upcoming Events & Topics",
+      "upcomingDesc": "Future sessions shaped around the questions that matter most to families, caregivers, and trainers.",
+      "approvedLabel": "Learning resources",
+      "approvedTitle": "Recordings, videos, Q&A and approved materials",
+      "approvedDesc": "Selected educational content from completed activities, preserved as ongoing learning resources. The archive grows as new activities are completed."
+    },
+    "upcomingTopics": [
+      {
+        "id": "topic-webinar-season-1-2026",
+        "month": "APR",
+        "day": "11",
+        "year": "2026",
+        "title": "Webinar – Season 1 (Alzheimer's Care Project)",
+        "date": "11 Apr 2026",
+        "time": "80 minutes",
+        "mode": "Online",
+        "location": "Online",
+        "language": "English / Bahasa Melayu",
+        "speaker": "RCBC & ADFM Specialists",
+        "suitableFor": "General public, families and caregivers",
+        "description": "Opening online education webinar for the 2026 Season under the Alzheimer's Care Project 'Finding the Missing Pieces'. Conducted primarily in English with Bahasa Malaysia support provided where appropriate.",
+        "image": "/src/assets/education/webinar-learning.jpg"
+      },
+      {
+        "id": "topic-dcs-family-2026",
+        "month": "MAY",
+        "day": "16",
+        "year": "2026",
+        "title": "Basic Dementia Care Skill (Family) Course — DCS-Family",
+        "date": "16 May 2026",
+        "time": "9:00 AM – 6:00 PM",
+        "mode": "Physical",
+        "location": "Hock Lee Hotel & Residence, Kuching",
+        "language": "English / Bahasa Melayu / 中文",
+        "speaker": "12 ADFM-Certified Trainers & Advisory Specialists",
+        "suitableFor": "Family caregivers, community helpers, and those interested in dementia care",
+        "description": "Foundation Dementia Care Course covering 6 core modules: Basic DCS, Person-Centred Care, Effective Communication, BPSD, Meaningful Activities, and Advance Care Planning. Limited to 100 seats only.",
+        "image": "/src/assets/education/dcs-family-poster.jpg"
+      },
+      {
+        "id": "topic-dcs-ttt-2026",
+        "month": "JUN",
+        "day": "26",
+        "year": "2026",
+        "title": "Dementia Care Skill – Train the Trainer Program — DCS-TTT",
+        "date": "26 Jun 2026",
+        "time": "9:00 AM – 5:00 PM (3-Day Program, 26–28 Jun 2026)",
+        "mode": "Physical",
+        "location": "Kuching",
+        "language": "English / Bahasa Melayu",
+        "speaker": "Dr. Tiong Ing Khieng & ADFM Training Team",
+        "suitableFor": "Healthcare professionals, nurses, therapists, community educators",
+        "description": "3-day Train-the-Trainer program in Kuching to train and certify healthcare educators and community champions across Sarawak under ADFM credentialing.",
+        "image": "/src/assets/education/adfm-poster.jpg"
+      }
+    ],
+    "approvedResources": [
+      {
+        "id": 101,
+        "title": "Understanding the Missing Pieces — Q&A Collection",
+        "type": "Q&A Document (4 Pages)",
+        "language": "English",
+        "duration": "4 pages",
+        "year": "2025",
+        "description": "Official Q&A resource addressing community questions and core caregiving support principles under the Alzheimer's Care Project.",
+        "videoUrl": "https://facebook.com/AlzheimersCarebyRCBC",
+        "qaFolder": "Understanding the Missing Pieces"
+      },
+      {
+        "id": 102,
+        "title": "Oral Health & Ageing Webinar — Q&A Reference Pack",
+        "type": "Q&A Document (14 Pages)",
+        "language": "English",
+        "duration": "14 pages",
+        "year": "2025",
+        "description": "Illustrated question-and-answer guide exploring dental care, tooth loss, and nutritional considerations for older adults and individuals living with dementia.",
+        "videoUrl": "https://facebook.com/AlzheimersCarebyRCBC",
+        "qaFolder": "Oral Health Webinar"
+      },
+      {
+        "id": 103,
+        "title": "Prevention & Early Detection of Dementia — Q&A Guide",
+        "type": "Q&A Document (5 Pages)",
+        "language": "中文",
+        "duration": "5 pages",
+        "year": "2025",
+        "description": "Comprehensive Chinese-language Q&A document on recognizing memory changes early, healthcare consultation pathways, and family guidance.",
+        "videoUrl": "https://facebook.com/AlzheimersCarebyRCBC",
+        "qaFolder": "Prevention&Early Detection (Chinese)"
+      }
+    ]
+  },
+  "physicalEducation": {
+    "programmes": [
+      {
+        "id": "dcs-family",
+        "code": "DCS-Family",
+        "trackNumber": "Track 01",
+        "title": "Basic Dementia Care Skill (Family) Course",
+        "roleCategory": "Family Caregivers, Relatives & Community Helpers",
+        "badge": "Open for Registration",
+        "shortIntro": "To shift the daily caregiving focus away from rigid clinical routines and toward protecting personal dignity, emotional connection, and managing the progressive changes of dementia without burning out.",
+        "suitableFor": "Family caregivers, relatives, community helpers, and those interested in or planning to further develop in dementia care.",
+        "description": "Foundation Dementia Care Course for Family Caregivers covering 6 core modules, delivered by 12 ADFM-Certified Trainers with public healthcare experience. Pre-requisite for ADFM DCS-TTT certification. Limited to 100 seats only (subsidized from RM1,200 to RM120/pax). CPD points available.",
+        "mode": "In-Person Physical Workshop",
+        "sessions": "1 Full Day (9:00 AM – 6:00 PM)",
+        "language": "English (with Malay & Chinese support where helpful)",
+        "location": "Hock Lee Hotel & Residence, Kuching",
+        "schedule": {
+          "date": "16 May 2026",
+          "time": "9:00 AM – 6:00 PM",
+          "label": "Scheduled Intake"
+        },
+        "image": "/src/assets/education/dcs-family-poster.jpg",
+        "highlights": [
+          "Module 1 – Basic DCS: Understanding Dementia",
+          "Module 2 – Impact of Dementia & Person-Centred Care",
+          "Module 3 – Effective Communication",
+          "Module 4 – Behavioural & Psychological Symptoms of Dementia (BPSD)",
+          "Module 5 – Meaningful Activities & Engagement",
+          "Module 6 – Legal, Ethical Issues & Advance Care Planning"
+        ],
+        "buttonLabel": "Register for DCS-Family"
+      },
+      {
+        "id": "dcs-ttt",
+        "code": "DCS-TTT",
+        "trackNumber": "Track 02",
+        "title": "Dementia Care Skill — Train the Trainer Program",
+        "roleCategory": "Healthcare Professionals, Expert Educators & Senior Volunteers",
+        "badge": "By Application & Review",
+        "shortIntro": "The Train-the-Trainer (TTT) framework equipping and certifying healthcare professionals so they are equipped to deliver community DCS courses across Sarawak.",
+        "suitableFor": "Selected healthcare professionals (nurses, therapists, medical officers), certified educators, and senior community volunteers.",
+        "description": "An intensive 3-day certification curriculum under ADFM credentialing. Across 2024–2025, 4 cohorts have trained 68 frontline healthcare personnel across Kuching, Sibu, Bintulu and Miri to lead grassroots education.",
+        "mode": "Physical 3-Day Intensive Cohort",
+        "sessions": "3 Days (9:00 AM – 5:00 PM)",
+        "language": "English (with Bahasa Malaysia support provided where appropriate)",
+        "location": "Kuching",
+        "schedule": {
+          "date": "26–28 Jun 2026",
+          "time": "9:00 AM – 5:00 PM (3-Day Program)",
+          "label": "Upcoming 2026 Cohort"
+        },
+        "image": "/src/assets/education/adfm-poster.jpg",
+        "highlights": [
+          "Comprehensive mastery of the community DCS curriculum & clinical nuances",
+          "Adult education techniques, group facilitation & interactive roleplays",
+          "Supervised mock teaching and clinical assessment under ADFM guidance",
+          "Accreditation as ADFM Certified Trainer listed in the public directory"
+        ],
+        "buttonLabel": "Apply for TTT Pathway"
+      },
+      {
+        "id": "dcs-care-worker",
+        "code": "DCS-Care Worker",
+        "trackNumber": "Track 03",
+        "title": "Dementia Care Series — Care Worker",
+        "roleCategory": "Professional Direct-Care Staff, Nursing Home Employees & Care Aides",
+        "badge": "Future Track • Priority Waitlist",
+        "shortIntro": "A comprehensive workshop focused on building formal clinical competency. It establishes standard protocols for managing BPSD (Behavioral and Psychological Symptoms of Dementia), interpreting distress as communication, and mastering safe, person-centered physical handling.",
+        "suitableFor": "Professional direct-care staff, nursing home employees, paid home nurses, assisted living attendants, and community health volunteers.",
+        "description": "A rigorous, hands-on clinical training track crafted for institutional and community direct-care teams. Standardises compassionate clinical care, person-centred dementia support, and injury-free mobility assistance.",
+        "mode": "Physical 2-Day Intensive Hands-on Workshop",
+        "sessions": "Intensive 2-Day Track (16 hours clinical practice)",
+        "language": "English / Bahasa Malaysia",
+        "location": "Kuching & Regional Healthcare Venues (To be announced)",
+        "schedule": {
+          "date": "Future Track",
+          "time": "9:00 AM – 5:00 PM (2-Day Intensive)",
+          "label": "Planned Cohort"
+        },
+        "image": "/src/assets/education/Group_Photo_2.jpg",
+        "highlights": [
+          "Standard protocols for BPSD assessment & non-pharmacological de-escalation",
+          "Interpreting behavioural distress, agitation, and resistance as communication",
+          "Mastering safe, person-centred transfers & physical handling ergonomics",
+          "Institutional care dignity standards & care-plan documentation"
+        ],
+        "buttonLabel": "Join Priority Waitlist / Express Interest"
+      }
+    ]
+  },
+  "events": {
+    "roadmap": [
+      {
+        "id": "2026-half-1",
+        "editionLabel": "2026 (1st Half)",
+        "title": "1st Half Yearly Activity Calendar: \"Finding The Missing Pieces\"",
+        "theme": "Finding The Missing Pieces",
+        "period": "January 2026 – June 2026",
+        "intro": "Official calendar published by Rotary Club of Bintulu Central and ADFM, featuring key public webinars and dementia care skills training.",
+        "image": "/src/assets/education/yearly-calendar-2026.jpg",
+        "highlights": [
+          {
+            "num": "01",
+            "phase": "11 April 2026",
+            "title": "Webinar – Season 1 (Online)",
+            "desc": "Online interactive session (80 minutes) focusing on understanding dementia and finding the missing pieces of community care.",
+            "tag": "Webinar",
+            "dotClass": "dot-1"
+          },
+          {
+            "num": "02",
+            "phase": "16 May 2026",
+            "title": "Basic Dementia Care Skill (Family) Course (DCS-Family)",
+            "desc": "Full-day training (9:00 AM – 6:00 PM) at Hock Lee Hotel & Residence, Kuching, equipping 100 family caregivers with practical bedside care skills.",
+            "tag": "Kuching",
+            "dotClass": "dot-2"
+          },
+          {
+            "num": "03",
+            "phase": "26 – 28 June 2026",
+            "title": "Dementia Care Skill – Train the Trainer Program (DCS-TTT)",
+            "desc": "Three-day comprehensive Train-the-Trainer program in Kuching to expand the cadre of certified ADFM trainers across Sarawak.",
+            "tag": "TTT Program",
+            "dotClass": "dot-3"
+          }
+        ]
+      },
+      {
+        "id": "2024-2025-ttt",
+        "editionLabel": "2024–2025 Milestones",
+        "title": "DCS-TTT State-Wide Rollout: \"68 Healthcare Workers Trained\"",
+        "theme": "Empowering Sarawak Healthcare Frontliners",
+        "period": "November 2024 – November 2025",
+        "intro": "Four completed cohorts of Dementia Care Skill Train-the-Trainer (DCS-TTT) programs across Sarawak documented in See Hua and Sin Chew Daily news.",
+        "image": "/src/assets/education/yearly-calendar-2026.jpg",
+        "highlights": [
+          {
+            "num": "01",
+            "phase": "Nov 2024 & May 2025",
+            "title": "Cohorts 1 & 2: Kuching & Sibu",
+            "desc": "First 18 medical personnel trained in Kuching, followed by Cohort 2 in Sibu to build regional dementia care competence.",
+            "tag": "Kuching & Sibu",
+            "dotClass": "dot-1"
+          },
+          {
+            "num": "02",
+            "phase": "16 August 2025",
+            "title": "Cohort 3 & Bintulu Community Dialogue",
+            "desc": "DCS-TTT training in Bintulu paired with a large-scale public dialogue on dementia at Bintulu Civic Centre with local community leaders.",
+            "tag": "Bintulu",
+            "dotClass": "dot-2"
+          },
+          {
+            "num": "03",
+            "phase": "November 2025",
+            "title": "Cohort 4: Miri (68 Total Certified)",
+            "desc": "Final cohort of the initial phase conducted in Miri, successfully certifying 68 doctors, nurses, and allied healthcare professionals.",
+            "tag": "Miri",
+            "dotClass": "dot-3"
+          }
+        ]
+      },
+      {
+        "id": "adfm-curriculum",
+        "editionLabel": "ADFM & Rotary Framework",
+        "title": "Community Support Ecosystem: \"Structured Care Pathways\"",
+        "theme": "Certified Training & Public Advocacy",
+        "period": "Ongoing Initiative",
+        "intro": "Collaborative mission between Rotary Club of Bintulu Central and Alzheimer’s Disease Foundation Malaysia (ADFM) to deliver certified dementia care education.",
+        "image": "/src/assets/education/yearly-calendar-2026.jpg",
+        "highlights": [
+          {
+            "num": "01",
+            "phase": "ADFM Certified Trainers",
+            "title": "9 Certified Trainers & 3 QA/QC Specialists",
+            "desc": "Multidisciplinary team of certified clinical trainers delivering evidence-based dementia care modules with official CPD accreditation.",
+            "tag": "Faculty",
+            "dotClass": "dot-1"
+          },
+          {
+            "num": "02",
+            "phase": "DCS-Family Curriculum",
+            "title": "6 Core Modules for Family Caregivers",
+            "desc": "From understanding neurocognitive disorders and communication to behaviour management, daily living activities, and caregiver self-care.",
+            "tag": "Curriculum",
+            "dotClass": "dot-2"
+          },
+          {
+            "num": "03",
+            "phase": "Community & Dialect Outreach",
+            "title": "Multilingual Community Dialogues",
+            "desc": "Engaging local Sarawakian families in English, Bahasa Melayu, and Chinese dialects to eliminate stigma and foster supportive networks.",
+            "tag": "Outreach",
+            "dotClass": "dot-3"
+          }
+        ]
+      },
+      {
+        "id": "roadmap-1792743447694",
+        "editionLabel": "2027",
+        "title": "Fun Run ",
+        "theme": "Charity Fun Run ",
+        "period": "16th February 2027",
+        "intro": "ARE YOU Ready?!",
+        "image": "/api/files/6f0c0268-9672-47ab-abe5-87abc0bd3020",
+        "highlights": [],
+        "poster": "/api/files/6f0c0268-9672-47ab-abe5-87abc0bd3020"
+      }
+    ],
+    "communityOutreach": {
+      "eyebrow": "Community Outreach",
+      "mainTitle": "Alzheimer’s Care Project: TTT Batch 2 in Sibu",
+      "intro": "Back in May, our Batch 2 TTT in Sibu brought together a group of passionate participants from Kapit, Betong, and Sibu, who dedicated three days to learning, practicing, and preparing to serve their communities.",
+      "stories": [
+        {
+          "id": "outreach-story-1",
+          "title": "Alzheimer’s Care Project TTT Batch 2 (16/5/25 – 18/5/25)",
+          "subtitle": "Sibu, Sarawak (16/5/25 – 18/5/25)",
+          "date": "16–18 May 2025",
+          "location": "Sibu, Sarawak",
+          "description": "Participants from Kapit, Betong, and Sibu dedicated three days to learning, practicing, and preparing to serve their communities with evidence-based dementia care skills.",
+          "image": "/src/assets/education/dialogue-1.jpg"
+        },
+        {
+          "id": "outreach-story-2",
+          "title": "Living Impact & Growing Caregiver Support",
+          "subtitle": "Sibu, Sarawak (16/5/25 – 18/5/25)",
+          "date": "16–18 May 2025",
+          "location": "Sibu, Sarawak",
+          "description": "Although months have passed, the impact, memories, and lessons from Sibu remain very much alive in the way trainers share their knowledge, caregivers feel supported, and communities open their hearts toward dementia care.",
+          "image": "/src/assets/education/dialogue-2.jpg"
+        }
+      ],
+      "pillars": [
+        {
+          "id": "pillar-1792745461478",
+          "icon": "👻",
+          "title": "Happy Children Day ",
+          "desc": "Save the children"
+        }
+      ]
+    },
+    "headlinesNews": {
+      "eyebrow": "Media & News Highlights",
+      "mainTitle": "Sarawak Dementia Care in the Headlines",
+      "intro": "Documented press coverage and regional newspaper clippings spotlighting the Rotary Club of Bintulu Central and ADFM dementia education initiative.",
+      "articles": [
+        {
+          "id": "news-sin-chew",
+          "outlet": "Malaysia Sin Chew Daily",
+          "langPill": "中文报道",
+          "subtitle": "Sarawak Regional Press Feature",
+          "mainTitle": "Empowering Families & Community Dementia Care in Sarawak",
+          "intro": "In-depth reporting on the collaboration between Rotary Club of Bintulu Central, local clinicians, and ADFM trainers to establish support networks for elderly families.",
+          "category": "Press Feature",
+          "date": "Published Feature",
+          "image": "/src/assets/education/news-sinchew.jpg"
+        },
+        {
+          "id": "news-see-hua",
+          "outlet": "See Hua Daily News",
+          "langPill": "Sarawak Press",
+          "subtitle": "Community News Coverage",
+          "mainTitle": "HopeCare Initiative: Bridging Gaps in Dementia Support",
+          "intro": "Coverage detailing the expansion of dementia care education into secondary towns like Bintulu, Miri, and Sibu to prevent caregiver isolation.",
+          "category": "Press Release",
+          "date": "Press Release",
+          "image": "/src/assets/education/news-seehua.jpg"
+        }
+      ]
+    }
+  },
+  "certifiedTrainers": {
+    "hero": {
+      "eyebrow": "RCBC & ADFM Certified",
+      "title": "Meet your facilitators.",
+      "subtitle": "Experienced medical professionals certified under the Dementia Care Series (DCS-TTT) framework — bringing real caregiving knowledge to every session."
+    },
+    "trainersList": [
+      {
+        "id": 1,
+        "name": "Dr. Mohd Asri Bin Mohd Aris",
+        "role": "Medical Officer",
+        "category": "medical-professional",
+        "institution": "Klinik Kesihatan Batu Kawa (KK Batu Kawa)",
+        "city": "Kuching",
+        "language": "Bahasa Malaysia, English, Sarawak Malay",
+        "initials": "MA",
+        "badgeColor": "#0d716b",
+        "avatarUrl": "",
+        "bio": "Medical Officer at Klinik Kesihatan Batu Kawa. Certified in the ADFM DCS-TTT framework, specializing in primary care dementia education, family counseling, and clinic referral pathways."
+      },
+      {
+        "id": 2,
+        "name": "Dr. Idda Syafarina Binti Albar",
+        "role": "Medical Officer (UD43)",
+        "category": "medical-professional",
+        "institution": "KKTP, Klinik Kesihatan Tanah Putih",
+        "city": "Kuching",
+        "language": "Bahasa Malaysia, English",
+        "initials": "IS",
+        "badgeColor": "#0284c7",
+        "avatarUrl": "",
+        "bio": "Senior Medical Officer (UD43) at KK Tanah Putih. Dedicated to bridging community health clinics with elderly caregiver networks, conducting dementia education workshops, and managing chronic care integration."
+      },
+      {
+        "id": 3,
+        "name": "Catherine Suhani Bt Sulaiman",
+        "role": "Health Assistant (PPK U11)",
+        "category": "medical-professional",
+        "institution": "Klinik Kesihatan Kota Samarahan",
+        "city": "Kota Samarahan",
+        "language": "Bahasa Malaysia, Sarawak Malay, Iban",
+        "initials": "CS",
+        "badgeColor": "#d97706",
+        "avatarUrl": "",
+        "bio": "Health Assistant at KK Kota Samarahan. Certified DCS facilitator with deep grassroots community outreach experience, facilitating bilingual caregiver dialogues and practical hands-on care sessions."
+      },
+      {
+        "id": 4,
+        "name": "Patricia Nawai anak Wilfred Ellie",
+        "role": "Nursing Sister (U32)",
+        "category": "medical-professional",
+        "institution": "Pre Hospital Care, Hospital Sentosa",
+        "city": "Kuching",
+        "language": "English, Bahasa Malaysia, Iban",
+        "initials": "PN",
+        "badgeColor": "#7c3aed",
+        "avatarUrl": "",
+        "bio": "Nursing Sister at Hospital Sentosa. Extensive background in geriatric emergency triage, physical transfer mechanics, and managing dementia-related agitation with person-centered empathy."
+      },
+      {
+        "id": 5,
+        "name": "Pearly Chai Sing Yee",
+        "role": "Physiotherapist (U29)",
+        "category": "medical-professional",
+        "institution": "Sarawak General Hospital (SGH)",
+        "city": "Kuching",
+        "language": "English, 中文 (Mandarin), Bahasa Malaysia",
+        "initials": "PC",
+        "badgeColor": "#059669",
+        "avatarUrl": "",
+        "bio": "Physiotherapist at SGH specializing in geriatric mobility maintenance, falls prevention strategies, and gentle restorative physical therapy tailored for individuals living with neurocognitive disorders."
+      },
+      {
+        "id": 6,
+        "name": "Dr. Sharon Lau",
+        "role": "Medical Officer",
+        "category": "medical-professional",
+        "institution": "Department of Psychiatry, SGH",
+        "city": "Kuching",
+        "language": "English, 中文, Bahasa Malaysia",
+        "initials": "SL",
+        "badgeColor": "#dc2626",
+        "avatarUrl": "",
+        "bio": "Medical Officer at Sarawak General Hospital's Department of Psychiatry & Mental Health. Facilitates DCS workshops in multilingual settings, focusing on behavioral distress management and psychiatric support."
+      },
+      {
+        "id": 7,
+        "name": "Nur Atiqah Binti Morshidi",
+        "role": "Occupational Therapist",
+        "category": "medical-professional",
+        "institution": "Klinik Kesihatan Petra Jaya",
+        "city": "Kuching",
+        "language": "Bahasa Malaysia, English",
+        "initials": "NA",
+        "badgeColor": "#ea580c",
+        "avatarUrl": "",
+        "bio": "Certified Occupational Therapist specializing in cognitive stimulation activities, adaptive home modifications, and sensory integration for individuals experiencing memory decline."
+      },
+      {
+        "id": 8,
+        "name": "Jenny Kong",
+        "role": "Clinical Psychologist",
+        "category": "medical-professional",
+        "institution": "Private Practice & RCBC Consultant",
+        "city": "Kuching",
+        "language": "English, 中文 (Mandarin), Hakka",
+        "initials": "JK",
+        "badgeColor": "#4f46e5",
+        "avatarUrl": "",
+        "bio": "Consultant Psychologist conducting caregiver emotional resilience workshops, burnout prevention groups, and psychological debriefing for families navigating progressive dementia diagnoses."
+      },
+      {
+        "id": 9,
+        "name": "Sr. Lily Wong",
+        "role": "Nurse Educator",
+        "category": "medical-professional",
+        "institution": "Community Nursing College Kuching",
+        "city": "Kuching",
+        "language": "English, Bahasa Malaysia, Foochow",
+        "initials": "LW",
+        "badgeColor": "#0891b2",
+        "avatarUrl": "",
+        "bio": "Senior Nurse Educator leading hands-on DCS physical transfer, incontinence care, and palliative comfort skills training for community health attendants and family caregivers across Sarawak."
+      },
+      {
+        "id": 10,
+        "name": "Dr. Tiong Ing Khieng",
+        "role": "President, ADFM & Senior Consultant",
+        "category": "advisory-support",
+        "institution": "Alzheimer’s Disease Foundation Malaysia (ADFM)",
+        "city": "Kuala Lumpur & Regional Advisory",
+        "language": "English, Bahasa Malaysia, 中文",
+        "initials": "TI",
+        "badgeColor": "#0f766e",
+        "avatarUrl": "",
+        "bio": "President of ADFM and clinical lead for the national DCS-TTT curriculum. Directs training standards, trainer credentialing examinations, and nationwide dementia advocacy partnerships with Rotary Clubs."
+      },
+      {
+        "id": 11,
+        "name": "Dr. Teh Kok Keng",
+        "role": "Geriatric Medicine & Internal Medicine Specialist",
+        "category": "advisory-support",
+        "institution": "Pusat Jantung Sarawak & Sarawak General Hospital",
+        "city": "Kota Samarahan",
+        "language": "English, 中文 (Mandarin), Bahasa Malaysia",
+        "initials": "TK",
+        "badgeColor": "#1e3a8a",
+        "avatarUrl": "",
+        "bio": "Consultant Geriatrician and Internal Medicine Specialist at Sarawak Heart Centre and SGH. Provides clinical advisory governance for the DCS-TTT certification syllabus and state-wide geriatric guidelines."
+      },
+      {
+        "id": 12,
+        "name": "Dr. Ling Jia Nee",
+        "role": "Consultant Geriatrician",
+        "category": "advisory-support",
+        "institution": "Sarawak General Hospital (SGH)",
+        "city": "Kuching",
+        "language": "English, 中文 (Mandarin), Bahasa Malaysia",
+        "initials": "LJ",
+        "badgeColor": "#9333ea",
+        "avatarUrl": "",
+        "bio": "Consultant Geriatrician at Sarawak General Hospital. Master clinical advisor overseeing complex BPSD protocols, ethical caregiving frameworks, and academic evaluation for the RCBC HopeCare initiative."
+      },
+      {
+        "id": "trainer-1792743066214",
+        "name": "LOI MING HUI",
+        "role": "Supervisor",
+        "institution": "Swinburne University of Technology Sarawak Campus",
+        "city": "Kuching",
+        "language": "English / Bahasa Melayu / Chinese",
+        "category": "medical-professional",
+        "bio": "",
+        "avatarUrl": "/api/files/c93af02c-4ea9-4c9b-b9f5-27427fc60f42",
+        "badgeColor": "#0d716b",
+        "initials": ""
+      },
+      {
+        "id": "trainer-1792743361135",
+        "name": "Terence Teo",
+        "role": "Medical Officer / Dementia Trainer",
+        "institution": "Sarawak General Hospital, Kuching",
+        "city": "Kuching",
+        "language": "English / Bahasa Melayu",
+        "category": "advisory-support",
+        "bio": "",
+        "avatarUrl": "",
+        "badgeColor": "#0d716b",
+        "initials": "TT"
+      }
+    ]
+  }
+}

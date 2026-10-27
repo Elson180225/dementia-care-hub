@@ -44,6 +44,7 @@ import ReviewQueue from "./admin/pages/ReviewQueue";
 import Records from "./admin/pages/Records";
 import Users from "./admin/pages/Users";
 import Contribution from "./admin/pages/Contribution";
+import LearnEventsCMS from "./admin/pages/LearnEventsCMS";
 
 // The Admin Dashboard is a back-office area, so it hides the public site header and footer.
 function PublicOnly({ children }) {
@@ -293,9 +294,10 @@ function App() {
 
 <Route path="/admin" element={<AdminLayout />}>
   <Route index element={<AdminOverview />} />
+  <Route path="learn-events" element={<LearnEventsCMS />} />
   <Route path="review" element={<ReviewQueue />} />
   <Route path="contribution" element={<Contribution />} />
-  <Route path="activities" element={<TrainerActivities admin />} />
+  <Route path="activities" element={<LearnEventsCMS />} />
   <Route path="conducted" element={<Conducted admin />} />
   <Route path="records" element={<Records />} />
   <Route path="users" element={<Users />} />
