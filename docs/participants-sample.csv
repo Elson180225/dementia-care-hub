@@ -1,0 +1,6 @@
+Full Name,Email Address,Contact Number
+Alice Example,alice@example.com,123456789
+"Tan, Mei",mei@example.com,198765432
+Duplicate Alice,ALICE@example.com,123456789
+Missing Email,,111111111
+Invalid Email,not-an-email,222222222

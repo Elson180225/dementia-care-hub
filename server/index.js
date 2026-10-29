@@ -11,6 +11,7 @@ import { managementHandler } from './management.js';
 import { publicRecordsHandler } from './public-records.js';
 import { learnEventsContentHandler } from './learn-events-content.js';
 import { createHash } from 'node:crypto';
+import { participantsHandler } from './participants.js';
 
 const port = Number(process.env.API_PORT || 3001);
 const handleEnquiry = enquiryHandler({persist:async data=>{
@@ -33,6 +34,7 @@ const server = createServer(async (req, res) => {
   const url = new URL(req.url, `http://${req.headers.host || 'localhost'}`);
   if(url.pathname==='/api/uploads' || url.pathname.startsWith('/api/files/')) return await filesHandler(req,res,url,sendJson);
   if(url.pathname==='/api/admin/learn-events-content' || url.pathname==='/api/public/learn-events-content') return await learnEventsContentHandler(req,res,url,sendJson);
+  if(url.pathname==='/api/admin/participants') return await participantsHandler(req,res,url,sendJson);
   if(url.pathname.startsWith('/api/admin/')) return await managementHandler(req,res,url,sendJson);
   if(url.pathname.startsWith('/api/public/')) return await publicRecordsHandler(req,res,url,sendJson);
   if(url.pathname.startsWith('/api/auth/')) return await authHandler(req,res,url.pathname,sendJson);
