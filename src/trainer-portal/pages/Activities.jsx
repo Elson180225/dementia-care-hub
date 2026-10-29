@@ -1,4 +1,5 @@
 import UploadField from "../UploadField";
+import { Link } from "react-router-dom";
 import { useEffect, useMemo, useState } from "react";
 import { useTrainer } from "../TrainerContext";
 import { ACTIVITY_TYPES, LANGUAGES, MODES, STATUS_LABEL } from "../constants";
@@ -814,6 +815,7 @@ export default function Activities({
 
                     <td style={{ textAlign: "right" }}>
                       <div style={{ display: "inline-flex", gap: "6px", flexWrap: "wrap", justifyContent: "flex-end" }}>
+                        {admin && <Link className="tp-btn tp-btn-ghost" to={'/admin/participants?activity='+a.id}>Participants</Link>}
                         {(admin ||
                           (!a.cancelledAt &&
                             ["draft", "returned"].includes(a.status) &&

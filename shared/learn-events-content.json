@@ -5,12 +5,12 @@
       "rcbcTitle": "Previous & future public education webinars",
       "rcbcDesc": "The annual RCBC webinar brings dementia education to the public. Recordings from previous years are preserved as learning resources.",
       "ctLabel": "Certified Trainer webinar",
-      "ctTitle": "Webinars hosted by ADFM certified trainers",
+      "ctTitle": "DCS-Family webinar",
       "ctDesc": "Sessions led by doctors and healthcare professionals certified under the Dementia Care Series (DCS-TTT) pathway.",
-      "upcomingTitle": "Upcoming Events & Topics",
+      "upcomingTitle": "Upcoming Event ",
       "upcomingDesc": "Future sessions shaped around the questions that matter most to families, caregivers, and trainers.",
       "approvedLabel": "Learning resources",
-      "approvedTitle": "Recordings, videos, Q&A and approved materials",
+      "approvedTitle": "Approved Learning materialssss",
       "approvedDesc": "Selected educational content from completed activities, preserved as ongoing learning resources. The archive grows as new activities are completed."
     },
     "upcomingTopics": [
@@ -61,6 +61,24 @@
         "suitableFor": "Healthcare professionals, nurses, therapists, community educators",
         "description": "3-day Train-the-Trainer program in Kuching to train and certify healthcare educators and community champions across Sarawak under ADFM credentialing.",
         "image": "/src/assets/education/adfm-poster.jpg"
+      },
+      {
+        "id": "topic-1793265675178",
+        "title": "Dementia Workshop",
+        "month": "FEB",
+        "day": "5",
+        "year": "2027",
+        "date": "5 Feb 2027",
+        "time": "7.00 AM",
+        "mode": "Online",
+        "location": "Online",
+        "language": "English / Bahasa Melayu",
+        "speaker": "RCBC & ADFM Specialists",
+        "suitableFor": "Students and Caregivers",
+        "description": "Know how to take care elderly who has dementia\n\n",
+        "image": "/api/files/b63d96c9-887c-4c9b-bdea-401f24451cbf",
+        "registrationLink": "https://docs.google.com/forms/d/e/1FAIpQLSeFwm4EB9iez8ZCf8ETo4c1317hh27FZyewWfk5Eay3PL5Tfg/viewform?usp=header",
+        "dateISO": "2027-02-05"
       }
     ],
     "approvedResources": [
@@ -73,7 +91,8 @@
         "year": "2025",
         "description": "Official Q&A resource addressing community questions and core caregiving support principles under the Alzheimer's Care Project.",
         "videoUrl": "https://facebook.com/AlzheimersCarebyRCBC",
-        "qaFolder": "Understanding the Missing Pieces"
+        "qaFolder": "",
+        "qaUrl": "https://Google.com"
       },
       {
         "id": 102,
