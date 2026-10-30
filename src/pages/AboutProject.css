@@ -1,4 +1,5 @@
-.about-page { color: #28242b; background: #fff; line-height: 1.7; font-size: 1.125rem; }
+.about-page {
+  /* Keep public-facing text comfortable to read, especially for older visitors. */ color: #28242b; background: #fff; line-height: 1.7; font-size: 1.125rem; }
 .about-container { width: min(90%, 1160px); margin: auto; }
 
 .about-hero { padding: 72px 0; background: linear-gradient(135deg, #45206d, #5d2f91); color: #fff; }
@@ -32,7 +33,7 @@
 .about-journey h3 { margin: 4px 0; }
 .about-journey p { margin: 0; }
 .about-phase { font-weight: 800; color: #51277d; letter-spacing: .04em; }
-.about-badge { display: inline-block; margin-top: 12px; padding: 4px 12px; background: #51277d; color: #fff; border-radius: 999px; font-size: .9rem; font-weight: 700; }
+.about-badge { display: inline-block; margin-top: 12px; padding: 4px 12px; background: #51277d; color: #fff; border-radius: 999px; font-size: 1rem; font-weight: 700; }
 
 .about-people { list-style: none; margin: 16px 0 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 16px; }
 .about-people li { padding: 16px 18px; border: 1px solid #e6dfe8; border-radius: 12px; }

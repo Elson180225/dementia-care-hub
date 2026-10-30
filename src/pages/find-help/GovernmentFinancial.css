@@ -21,6 +21,7 @@
 ============================================================ */
 
 .government-page {
+  /* Text sizes were adjusted so older visitors can read the page more comfortably. */
   width: 100%;
 
   background: #ffffff;
@@ -59,7 +60,7 @@
 
   color: #ffd66f;
 
-  font-size: 14px;
+  font-size: 17px;
   font-weight: 800;
 
   letter-spacing: 0.11em;
@@ -162,7 +163,7 @@
   color:
     var(--gf-purple);
 
-  font-size: 12px;
+  font-size: 16px;
 
   font-weight: 800;
 
@@ -218,7 +219,7 @@
   color:
     var(--gf-purple);
 
-  font-size: 12px;
+  font-size: 16px;
 
   font-weight: 800;
 
@@ -309,7 +310,7 @@
   color:
     var(--gf-text);
 
-  font-size: 15px;
+  font-size: 17px;
 }
 
 .government-toolbar select {
@@ -367,7 +368,7 @@
   color:
     #7e7681;
 
-  font-size: 14px;
+  font-size: 17px;
 }
 
 .government-result-count strong {
@@ -435,7 +436,7 @@
   color:
     var(--gf-purple);
 
-  font-size: 10px;
+  font-size: 15px;
 
   font-weight: 800;
 
@@ -448,7 +449,7 @@
   color:
     #827984;
 
-  font-size: 12px;
+  font-size: 16px;
 
   font-weight: 700;
 }
@@ -487,7 +488,7 @@
   color:
     #8e8491;
 
-  font-size: 9px;
+  font-size: 14px;
 
   font-weight: 800;
 
@@ -504,7 +505,7 @@
   color:
     #473d4a;
 
-  font-size: 13px;
+  font-size: 16px;
 }
 
 .government-summary {
@@ -514,7 +515,7 @@
   color:
     var(--gf-soft);
 
-  font-size: 15px;
+  font-size: 17px;
 
   line-height: 1.65;
 }
@@ -549,7 +550,7 @@
   color:
     var(--gf-purple);
 
-  font-size: 10px;
+  font-size: 15px;
 
   font-weight: 800;
 
@@ -565,7 +566,7 @@
   color:
     var(--gf-soft);
 
-  font-size: 12px;
+  font-size: 16px;
 
   line-height: 1.55;
 }
@@ -596,7 +597,7 @@
   color:
     #918894;
 
-  font-size: 9px;
+  font-size: 14px;
 
   font-weight: 800;
 
@@ -614,7 +615,7 @@
   color:
     #423a45;
 
-  font-size: 12px;
+  font-size: 16px;
 
   line-height: 1.45;
 
@@ -655,7 +656,7 @@
 
   border-radius: 20px;
 
-  font-size: 9px;
+  font-size: 14px;
 
   font-weight: 800;
 
@@ -803,7 +804,7 @@
   color:
     var(--gf-purple);
 
-  font-size: 11px;
+  font-size: 15px;
 
   font-weight: 800;
 }
@@ -826,7 +827,7 @@
   color:
     var(--gf-soft);
 
-  font-size: 14px;
+  font-size: 17px;
 
   line-height: 1.65;
 }
@@ -872,7 +873,7 @@
   color:
     var(--gf-purple);
 
-  font-size: 11px;
+  font-size: 15px;
 
   font-weight: 800;
 
@@ -923,7 +924,7 @@
   color:
     #514957;
 
-  font-size: 12px;
+  font-size: 16px;
 
   font-weight: 700;
 }
@@ -964,7 +965,7 @@
   color:
     var(--gf-purple);
 
-  font-size: 12px;
+  font-size: 16px;
 
   font-weight: 800;
 
@@ -989,6 +990,7 @@
    TABLET
 ============================================================ */
 
+/* Keep the same readable type scale on smaller screens. */
 @media (max-width: 950px) {
   .government-toolbar {
     grid-template-columns:

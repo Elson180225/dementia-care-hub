@@ -42,7 +42,8 @@
 }
 
 .header-container {
-  width: min(94%, 1280px);
+  /* Give the larger navigation labels a little more room. */
+  width: min(96%, 1360px);
 
   margin: 0 auto;
 }
@@ -69,7 +70,7 @@
 
   color: #4f686a;
 
-  font-size: 14px;
+  font-size: 16px;
 }
 
 .top-actions {
@@ -84,7 +85,7 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  font-size: 12px;
+  font-size: 15px;
   font-weight: 700;
   white-space: nowrap;
 }
@@ -172,7 +173,7 @@
 
   color: #17383a;
 
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 600;
 
   transition:
@@ -248,7 +249,7 @@
 
   padding: 8px 10px;
 
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 500;
 
   cursor: pointer;
@@ -378,7 +379,7 @@
 .brand-text strong {
   color: #17383a;
 
-  font-size: 18px;
+  font-size: 20px;
   font-weight: 750;
 }
 
@@ -387,7 +388,7 @@
 
   color: #6f8082;
 
-  font-size: 12px;
+  font-size: 15px;
   font-weight: 500;
 
   letter-spacing: 0.02em;
@@ -427,7 +428,7 @@
 
   text-decoration: none;
 
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 650;
 
   white-space: nowrap;
@@ -459,7 +460,7 @@
 }
 
 .nav-link span {
-  font-size: 12px;
+  font-size: 14px;
 
   opacity: 0.75;
 }
@@ -524,7 +525,7 @@
 
   text-decoration: none;
 
-  font-size: 15px;
+  font-size: 17px;
   font-weight: 550;
 
   background: #f6faf9;
@@ -567,7 +568,7 @@
 
   text-decoration: none;
 
-  font-size: 14px;
+  font-size: 17px;
   font-weight: 700;
 
   white-space: nowrap;
@@ -710,7 +711,7 @@
 
     text-decoration: none;
 
-    font-size: 16px;
+    font-size: 18px;
     font-weight: 700;
 
     cursor: pointer;
@@ -746,7 +747,7 @@
 
     text-decoration: none;
 
-    font-size: 15px;
+    font-size: 17px;
     font-weight: 500;
   }
 
@@ -785,7 +786,7 @@
   .utility-nav {
     margin-right: auto;
     gap: 6px;
-    font-size: 11px;
+    font-size: 16px;
   }
 
   .top-actions .animated-search-button {
@@ -806,11 +807,11 @@
   }
 
   .top-actions .animated-search-text {
-    font-size: 13px;
+    font-size: 17px;
   }
 
   .language-wrapper > button {
-    font-size: 13px;
+    font-size: 17px;
 
     padding: 7px 8px;
   }
@@ -833,11 +834,11 @@
   }
 
   .brand-text strong {
-    font-size: 15px;
+    font-size: 17px;
   }
 
   .brand-text span {
-    font-size: 11px;
+    font-size: 16px;
   }
 
   .support-btn {
@@ -862,7 +863,7 @@
   }
 
   .brand-text strong {
-    font-size: 14px;
+    font-size: 16px;
   }
 
   .brand-logo {
