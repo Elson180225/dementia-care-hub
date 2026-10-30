@@ -1,7 +1,18 @@
+/* Basic reset so spacing and element sizes behave consistently */
 *,
 *::before,
 *::after {
   box-sizing: border-box;
+}
+
+/* 
+   Increase the base font slightly.
+   This makes rem-based text across the website easier to read,
+   especially for older users.
+*/
+html {
+  font-size: 18px;
+  scroll-behavior: smooth;
 }
 
 html,
@@ -13,49 +24,90 @@ body,
   min-height: 100%;
 }
 
+/* Main text settings for the whole site */
+body {
+  font-size: 1rem;
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* Form controls should use the same readable font size as the page */
 button,
 input,
 select,
 textarea {
   font: inherit;
+  font-size: 1rem;
 }
 
+/* Remove the blue tap highlight on mobile devices */
 button,
 a {
   -webkit-tap-highlight-color: transparent;
 }
 
+/* Keep links using the surrounding text colour unless styled elsewhere */
 a {
   color: inherit;
 }
 
+/* Prevent images from overflowing their containers */
 img {
   max-width: 100%;
   display: block;
 }
 
+/* Give paragraphs and list items more breathing room */
+p,
+li {
+  line-height: 1.65;
+}
+
+/* Avoid very tiny helper text */
+small {
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+/* Main page spacing used by most content pages */
 .page {
   min-height: 65vh;
   padding: 72px 0;
 }
 
+/* Keeps page content centred and prevents very long text lines */
 .page-container {
   width: min(90%, 1200px);
   margin: 0 auto;
 }
 
+/* Main page heading */
 .page h1 {
   max-width: 850px;
   margin: 0 0 24px;
 
-  font-size: clamp(2rem, 5vw, 4rem);
-  line-height: 1.1;
+  font-size: clamp(2.4rem, 5vw, 4rem);
+  line-height: 1.15;
 }
 
+/* Section heading */
+.page h2 {
+  font-size: clamp(1.8rem, 3vw, 2.4rem);
+  line-height: 1.25;
+}
+
+/* Smaller section heading */
+.page h3 {
+  font-size: clamp(1.35rem, 2vw, 1.65rem);
+  line-height: 1.3;
+}
+
+/* Small label shown above some page headings */
 .eyebrow {
   margin-bottom: 14px;
 
-  font-size: 0.95rem;
+  font-size: 1rem;
   font-weight: 700;
 
   text-transform: uppercase;
@@ -64,16 +116,37 @@ img {
   color: #087b78;
 }
 
+/* Intro text under the main page heading */
 .page-intro {
-  max-width: 720px;
+  max-width: 760px;
 
-  font-size: 1.2rem;
+  font-size: 1.25rem;
   line-height: 1.7;
 
   color: #496466;
 }
 
+/* Clear keyboard focus state for accessibility */
 :focus-visible {
   outline: 3px solid #155e75;
   outline-offset: 4px;
+}
+
+/* Slightly reduce the base size on smaller screens */
+@media (max-width: 768px) {
+  html {
+    font-size: 17px;
+  }
+
+  .page {
+    padding: 56px 0;
+  }
+
+  .page h1 {
+    font-size: clamp(2rem, 9vw, 2.8rem);
+  }
+
+  .page-intro {
+    font-size: 1.15rem;
+  }
 }

@@ -1,4 +1,5 @@
 .understand-page {
+  /* Keep public-facing text comfortable to read, especially for older visitors. */
   color: #203b35;
   background: #fff;
   line-height: 1.65;
@@ -21,7 +22,7 @@
 .understand-eyebrow {
   margin: 0 0 10px;
   color: #b36b2c;
-  font-size: 0.78rem;
+  font-size: 1rem;
   font-weight: 800;
   letter-spacing: 0.12em;
   text-transform: uppercase;
@@ -122,14 +123,14 @@
   white-space: nowrap;
 }
 .understand-contents-inner span {
-  font-size: 0.82rem;
+  font-size: 1rem;
   font-weight: 800;
   color: #71837b;
 }
 .understand-contents a {
   color: #20584e;
   text-decoration: none;
-  font-size: 0.9rem;
+  font-size: 1rem;
   font-weight: 700;
 }
 .understand-contents a:hover {
@@ -179,7 +180,7 @@
   border-radius: 10px;
   background: #e7f2eb;
   color: #2a6a58;
-  font-size: 0.85rem;
+  font-size: 1rem;
   font-weight: 900;
 }
 .understand-info-card h3 {
@@ -190,7 +191,7 @@
 .understand-info-card p {
   margin: 0;
   color: #5b6f66;
-  font-size: 0.94rem;
+  font-size: 1rem;
   line-height: 1.7;
 }
 .understand-info-card.featured {
@@ -330,7 +331,7 @@
   border-radius: 9px;
   background: #e9f3ed;
   color: #236252;
-  font-size: 0.78rem;
+  font-size: 1rem;
 }
 .understand-options {
   display: flex;
@@ -348,7 +349,7 @@
   color: #496158;
   background: #fff;
   cursor: pointer;
-  font-size: 0.92rem;
+  font-size: 1rem;
 }
 .understand-options label.selected {
   border-color: #287564;
@@ -362,7 +363,7 @@
 .understand-form-hint {
   margin: 12px 0 0;
   color: #6a7c73;
-  font-size: 0.86rem;
+  font-size: 1rem;
 }
 .understand-disclaimer {
   margin: 26px 0 0;
@@ -370,7 +371,7 @@
   border-radius: 8px;
   background: #fff5df;
   color: #6d542b;
-  font-size: 0.9rem;
+  font-size: 1rem;
   line-height: 1.65;
 }
 .understand-result {
@@ -591,7 +592,7 @@
   padding-bottom: 1rem;
 }
 .understand-language-bar label {
-  font-size: 0.9rem;
+  font-size: 1rem;
   font-weight: 600;
   color: #314b41;
 }

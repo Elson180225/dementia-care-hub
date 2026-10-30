@@ -47,6 +47,8 @@ html {
 body {
   overflow-x: hidden;
 
+  /* Keep normal text comfortably readable for older visitors. */
+
   font-family:
     Arial,
     Helvetica,
@@ -149,7 +151,7 @@ img {
 
   color: #ffd66f;
 
-  font-size: 14px;
+  font-size: 18px;
   font-weight: 800;
 
   letter-spacing: 0.11em;
@@ -194,7 +196,7 @@ img {
   color:
     rgba(255, 255, 255, 0.9);
 
-  font-size: 16px;
+  font-size: 18px;
   font-weight: 700;
 
   letter-spacing: 0.04em;
@@ -268,7 +270,7 @@ img {
 
   text-decoration: none;
 
-  font-size: 16px;
+  font-size: 18px;
   font-weight: 700;
 
   transition:
@@ -350,7 +352,7 @@ img {
 
   color: #ffffff;
 
-  font-size: 15px;
+  font-size: 18px;
 }
 
 .hero-help-line a {
@@ -362,7 +364,7 @@ img {
 
   text-decoration: none;
 
-  font-size: 14px;
+  font-size: 17px;
   font-weight: 700;
 }
 
@@ -393,7 +395,7 @@ img {
   color:
     rgba(93, 47, 145, 0.42);
 
-  font-size: 13px;
+  font-size: 18px;
   font-weight: 800;
 
   letter-spacing: 0.12em;
@@ -406,7 +408,7 @@ img {
 
   color: var(--purple);
 
-  font-size: 14px;
+  font-size: 18px;
   font-weight: 800;
 
   letter-spacing: 0.11em;
@@ -609,7 +611,7 @@ img {
 .visitor-card-number {
   color: var(--purple);
 
-  font-size: 13px;
+  font-size: 18px;
   font-weight: 800;
 
   letter-spacing: 0.09em;
@@ -711,7 +713,7 @@ img {
 
   color: var(--text-soft);
 
-  font-size: 17px;
+  font-size: 18px;
 
   line-height: 1.7;
 }
@@ -735,7 +737,7 @@ img {
 
   color: var(--purple);
 
-  font-size: 16px;
+  font-size: 18px;
   font-weight: 800;
 }
 
@@ -764,7 +766,7 @@ img {
 
   color: #7b747d;
 
-  font-size: 15px;
+  font-size: 18px;
 }
 
 /* ============================================================
@@ -816,7 +818,8 @@ img {
 
 @media (max-width: 700px) {
   body {
-    font-size: 17px;
+    /* Keep mobile text readable without forcing users to zoom. */
+    font-size: 18px;
   }
 
   .section-container {
@@ -850,7 +853,7 @@ img {
   }
 
   .hero-phase-line {
-    font-size: 15px;
+    font-size: 17px;
 
     flex-wrap: wrap;
   }
@@ -860,7 +863,7 @@ img {
   }
 
   .hero-description {
-    font-size: 17px;
+    font-size: 18px;
 
     line-height: 1.65;
   }
@@ -913,7 +916,7 @@ img {
   }
 
   .hero-description {
-    font-size: 16px;
+    font-size: 17px;
   }
 
   .visitor-card h3 {

@@ -20,6 +20,7 @@
 ========================================================= */
 
 .rf-page {
+  /* Text sizes were adjusted so older visitors can read the page more comfortably. */
   width: 100%;
 
   color:
@@ -137,7 +138,7 @@
   color:
     var(--rf-purple);
 
-  font-size: 12px;
+  font-size: 16px;
 
   font-weight: 900;
 
@@ -287,7 +288,7 @@
   border-radius:
     50%;
 
-  font-size: 12px;
+  font-size: 16px;
 
   font-weight: 900;
 }
@@ -296,7 +297,7 @@
   margin:
     8px 0 0;
 
-  font-size: 11px;
+  font-size: 15px;
 
   font-weight: 800;
 }
@@ -370,7 +371,7 @@
   color:
     #958c99;
 
-  font-size: 12px;
+  font-size: 16px;
 
   font-weight: 800;
 }
@@ -402,7 +403,7 @@
   color:
     var(--rf-purple);
 
-  font-size: 11px;
+  font-size: 15px;
 
   font-weight: 900;
 
@@ -443,7 +444,7 @@
   color:
     var(--rf-soft);
 
-  font-size: 16px;
+  font-size: 18px;
 
   line-height: 1.7;
 }
@@ -521,7 +522,7 @@
 }
 
 .rf-need-number {
-  font-size: 10px;
+  font-size: 15px;
 
   font-weight: 900;
 
@@ -590,7 +591,7 @@
 
   line-height: 1.55;
 
-  font-size: 14px;
+  font-size: 17px;
 }
 
 .rf-need-card:hover p {
@@ -616,7 +617,7 @@
   color:
     var(--rf-purple);
 
-  font-size: 12px;
+  font-size: 16px;
 }
 
 .rf-need-card:hover
@@ -718,7 +719,7 @@
   color:
     #a196a5;
 
-  font-size: 10px;
+  font-size: 15px;
 
   font-weight: 900;
 }
@@ -911,7 +912,7 @@
   color:
     #968c99;
 
-  font-size: 9px;
+  font-size: 14px;
 
   font-weight: 900;
 
@@ -937,7 +938,7 @@
   color:
     var(--rf-purple);
 
-  font-size: 12px;
+  font-size: 16px;
 }
 
 .rf-trail button {
@@ -993,7 +994,7 @@
   color:
     #cfaee0;
 
-  font-size: 11px;
+  font-size: 15px;
 
   font-weight: 900;
 
@@ -1069,7 +1070,7 @@
       0.66
     );
 
-  font-size: 11px;
+  font-size: 15px;
 
   text-transform:
     uppercase;
@@ -1118,7 +1119,7 @@
   color:
     #d2aedf;
 
-  font-size: 11px;
+  font-size: 15px;
 
   font-weight: 900;
 }
@@ -1131,7 +1132,7 @@
   color:
     #dfc5e8;
 
-  font-size: 9px;
+  font-size: 14px;
 
   font-weight: 900;
 
@@ -1201,7 +1202,7 @@
   border-radius:
     20px;
 
-  font-size: 8px;
+  font-size: 14px;
 
   font-weight: 900;
 
@@ -1278,7 +1279,7 @@
   color:
     #d9b7e4;
 
-  font-size: 12px;
+  font-size: 16px;
 
   font-weight: 900;
 }
@@ -1289,7 +1290,7 @@
   color:
     #d9b7e4;
 
-  font-size: 9px;
+  font-size: 14px;
 
   font-weight: 900;
 
@@ -1477,7 +1478,7 @@
   color:
     var(--rf-purple);
 
-  font-size: 11px;
+  font-size: 15px;
 
   font-weight: 900;
 
@@ -1542,7 +1543,7 @@
   color:
     var(--rf-purple);
 
-  font-size: 9px;
+  font-size: 14px;
 
   font-weight: 900;
 }
@@ -1567,7 +1568,7 @@
   color:
     var(--rf-soft);
 
-  font-size: 13px;
+  font-size: 16px;
 
   line-height: 1.55;
 }
@@ -1642,7 +1643,7 @@
   color:
     var(--rf-purple);
 
-  font-size: 11px;
+  font-size: 15px;
 
   font-weight: 900;
 
@@ -1669,6 +1670,7 @@
    TABLET
 ========================================================= */
 
+/* Keep the same readable type scale on smaller screens. */
 @media (max-width: 950px) {
   .rf-intro::before {
     width: 27%;
@@ -1745,7 +1747,7 @@
   }
 
   .rf-progress-item p {
-    font-size: 9px;
+    font-size: 14px;
   }
 
   .rf-needs-grid,
