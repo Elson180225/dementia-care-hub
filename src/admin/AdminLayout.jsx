@@ -6,6 +6,7 @@ import "../trainer-portal/TrainerPortal.css";
 const links = [
   ["/admin", "Overview", true],
   ["/admin/learn-events", "Learn & Events Hub"],
+  ["/admin/participants", "Workshop participants"],
   ["/admin/review", "Review queue"],
   ["/admin/contribution", "Trainer contribution"],
   ["/admin/conducted", "Completion records"],

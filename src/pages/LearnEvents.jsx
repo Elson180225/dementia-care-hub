@@ -1,5 +1,7 @@
 import PublishedRecords from "../components/PublishedRecords";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { orderWebinars, publicLink, resourceQaFolder, topicDateFields } from '../../shared/online-education';
+import { onlineHeadingText } from '../../shared/online-headings';
 import { createPortal } from "react-dom";
 import { Link, useLocation } from "react-router-dom";
 import { useLanguage } from "../i18n/LanguageContext";
@@ -168,7 +170,7 @@ function useLearnEventsContent() {
   const [content, setContent] = useState(defaultCmsContent);
   useEffect(() => {
     let active = true;
-    fetch('/api/public/learn-events-content')
+    const refresh = () => fetch('/api/public/learn-events-content', {cache:'no-store'})
       .then(r => { if (!r.ok) throw new Error('CMS unavailable'); return r.json(); })
       .then(data => {
         if (active && data && typeof data === 'object' && Object.keys(data).length > 0) {
@@ -176,7 +178,9 @@ function useLearnEventsContent() {
         }
       })
       .catch(() => { });
-    return () => { active = false; };
+    refresh();
+    window.addEventListener('focus',refresh);
+    return () => { active = false; window.removeEventListener('focus',refresh); };
   }, []);
   return content;
 }
@@ -274,6 +278,7 @@ function getQaImages(folderName, fallback) {
 qaResources[0].images = getQaImages("Oral Health Webinar", qaResources[0].images);
 qaResources[1].images = getQaImages("Prevention&Early Detection (Chinese)", qaResources[1].images);
 qaResources[2].images = getQaImages("Understanding the Missing Pieces", qaResources[2].images);
+qaResources.forEach(resource => { resource.pages = resource.images.length; });
 
 const plannedTopicsList = [
   {
@@ -547,10 +552,9 @@ function ActivityModal({ activity, onClose }) {
             <button type="button" disabled className="activity-action-btn" style={{ opacity: 0.7, cursor: "not-allowed", background: "#fef3c7", color: "#92400e", border: "1px solid #fde68a" }}>
               Registration Closed
             </button>
-          ) : activity.registrationLink !== undefined &&
-            activity.registrationLink !== null ? (
+          ) : publicLink(activity.registrationLink) ? (
             <a
-              href={activity.registrationLink || "#"}
+              href={publicLink(activity.registrationLink)}
               target="_blank"
               rel="noreferrer"
               className="activity-action-btn activity-action-register"
@@ -855,13 +859,13 @@ function pageItems(items, filters, page) {
    SECTION 1: ONLINE EDUCATION
    ================================================================ */
 function OnlineEducation() {
-  const { t } = useLanguage();
-  const le = t.learnEvents;
+  const { t, language } = useLanguage();
   const activities = usePublicActivities();
   const cmsContent = useLearnEventsContent();
   const onlineCms = cmsContent.onlineEducation || {};
-  const upcomingTopics = (onlineCms.upcomingTopics && onlineCms.upcomingTopics.length > 0) ? onlineCms.upcomingTopics : plannedTopicsList;
-  const approvedList = (onlineCms.approvedResources && onlineCms.approvedResources.length > 0) ? onlineCms.approvedResources : learningResources;
+  const le = onlineHeadingText(t.learnEvents,onlineCms.sectionHeader,language);
+  const upcomingTopics = orderWebinars((onlineCms.upcomingTopics ?? plannedTopicsList).map(topic => ({...topic,...topicDateFields(topic.dateISO || topic.date)})));
+  const approvedList = onlineCms.approvedResources ?? learningResources;
   const [selected, setSelected] = useState(null);
   const [selectedQa, setSelectedQa] = useState(null);
   const defaultFilters = { query: "", language: "All", timing: "All" };
@@ -885,8 +889,8 @@ function OnlineEducation() {
   ];
   const archiveResources = approvedList.map((resource) => ({ ...resource, status: "completed" }));
 
-  const publicResults = pageItems(rcbcWebinars, publicFilters, publicPage);
-  const trainerResults = pageItems(ctWebinars, trainerFilters, trainerPage);
+  const publicResults = pageItems(orderWebinars(rcbcWebinars), publicFilters, publicPage);
+  const trainerResults = pageItems(orderWebinars(ctWebinars), trainerFilters, trainerPage);
   const resourceResults = pageItems(archiveResources, resourceFilters, resourcePage);
 
   return (
@@ -1196,14 +1200,12 @@ function OnlineEducation() {
             />
           ) : (
             <div className="resource-grid">
-              {resourceResults.items.map((r, index) => {
-                const matchedQa =
-                  qaResources[r.qaIndex !== undefined ? r.qaIndex : index % qaResources.length] ||
-                  qaResources[0];
-                const videoTargetUrl =
-                  r.videoUrl ||
-                  r.url ||
-                  "https://www.facebook.com/rotarybintulucentral";
+              {resourceResults.items.map((r) => {
+                const folder = resourceQaFolder(r);
+                const images = folder ? getQaImages(folder, []) : [];
+                const matchedQa = images.length ? {title:r.title, language:r.language, images, pages:images.length} : null;
+                const qaUrl = publicLink(r.qaUrl);
+                const videoTargetUrl = publicLink(r.videoUrl || r.url);
 
                 return (
                   <article className="resource-card" key={r.id}>
@@ -1219,7 +1221,7 @@ function OnlineEducation() {
                     </div>
 
                     <div className="resource-card-actions">
-                      <a
+                      {videoTargetUrl && <a
                         className="resource-action-btn resource-btn-video"
                         href={videoTargetUrl}
                         target="_blank"
@@ -1230,9 +1232,9 @@ function OnlineEducation() {
                           <path d="M8 5v14l11-7z" />
                         </svg>
                         Watch recording ↗
-                      </a>
+                      </a>}
 
-                      <button
+                      {qaUrl ? <a className="resource-action-btn resource-btn-qa" href={qaUrl} target="_blank" rel="noreferrer">Review Q&amp;A ↗</a> : matchedQa ? <button
                         type="button"
                         className="resource-action-btn resource-btn-qa"
                         onClick={() => setSelectedQa(matchedQa)}
@@ -1244,7 +1246,7 @@ function OnlineEducation() {
                           <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21" />
                         </svg>
                         Review Q&amp;A →
-                      </button>
+                      </button> : <span>Q&amp;A material not yet available</span>}
                     </div>
                   </article>
                 );

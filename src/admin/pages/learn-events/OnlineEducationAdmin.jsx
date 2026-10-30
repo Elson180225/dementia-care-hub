@@ -1,6 +1,8 @@
 import { useState, useMemo } from "react";
 import Activities from "../../../trainer-portal/pages/Activities";
 import UploadField from "../../../trainer-portal/UploadField";
+import PageTextEditor from './PageTextEditor';
+import { publicLink, qaFolders, topicDate, topicDateFields } from '../../../../shared/online-education';
 
 const BLANK_TOPIC = {
   id: "",
@@ -17,6 +19,7 @@ const BLANK_TOPIC = {
   suitableFor: "General public, families and caregivers",
   description: "",
   image: "",
+  registrationLink: "",
 };
 
 const BLANK_RESOURCE = {
@@ -29,6 +32,7 @@ const BLANK_RESOURCE = {
   description: "",
   videoUrl: "",
   qaFolder: "",
+  qaUrl: "",
 };
 
 export default function OnlineEducationAdmin({ content, onSave }) {
@@ -40,10 +44,6 @@ export default function OnlineEducationAdmin({ content, onSave }) {
   const [topicErrors, setTopicErrors] = useState({});
   const [resourceErrors, setResourceErrors] = useState({});
 
-  // Headers editing state
-  const initialHeaders = content?.onlineEducation?.sectionHeader || {};
-  const [headersState, setHeadersState] = useState(initialHeaders);
-  const [headerSaving, setHeaderSaving] = useState(false);
 
   // Filter & Search states for Topics
   const [topicSearch, setTopicSearch] = useState("");
@@ -125,6 +125,8 @@ export default function OnlineEducationAdmin({ content, onSave }) {
     if (!v.month?.trim()) errs.month = "Month code (e.g. APR) is required.";
     if (!v.day?.trim()) errs.day = "Day (e.g. 11) is required.";
     if (!v.date?.trim()) errs.date = "Full date string is required.";
+    if (!topicDate(v.dateISO || v.date)) errs.date = 'Choose a valid event date.';
+    if (v.registrationLink?.trim() && !publicLink(v.registrationLink)) errs.registrationLink = 'Enter a valid HTTP or HTTPS registration link.';
     if (!v.description?.trim()) errs.description = "Description is required.";
     return errs;
   }
@@ -136,7 +138,7 @@ export default function OnlineEducationAdmin({ content, onSave }) {
 
     const copy = JSON.parse(JSON.stringify(content));
     const currentTopics = copy.onlineEducation?.upcomingTopics || [];
-    const topicVal = { ...editingTopic.values };
+    const topicVal = { ...editingTopic.values, ...topicDateFields(editingTopic.values.dateISO || editingTopic.values.date), registrationLink: editingTopic.values.registrationLink?.trim() || '' };
 
     if (editingTopic.isNew) {
       if (!topicVal.id) topicVal.id = `topic-${Date.now()}`;
@@ -171,6 +173,7 @@ export default function OnlineEducationAdmin({ content, onSave }) {
     if (!v.type?.trim()) errs.type = "Resource type is required.";
     if (!v.year || isNaN(Number(v.year))) errs.year = "Valid 4-digit year is required.";
     if (!v.description?.trim()) errs.description = "Description is required.";
+    for (const key of ['videoUrl','qaUrl']) if (v[key]?.trim() && !publicLink(v[key])) errs[key] = 'Enter a valid HTTP or HTTPS link.';
     return errs;
   }
 
@@ -209,15 +212,6 @@ export default function OnlineEducationAdmin({ content, onSave }) {
     setDeletingConfirm(null);
   }
 
-  // HEADERS SAVE
-  async function handleSaveHeaders() {
-    setHeaderSaving(true);
-    const copy = JSON.parse(JSON.stringify(content));
-    if (!copy.onlineEducation) copy.onlineEducation = {};
-    copy.onlineEducation.sectionHeader = headersState;
-    await onSave(copy);
-    setHeaderSaving(false);
-  }
 
   // ==========================================
   // RENDER: EDITING TOPIC VIEW
@@ -248,6 +242,7 @@ export default function OnlineEducationAdmin({ content, onSave }) {
         </div>
 
         <div className="tp-card">
+          <div className="tp-field"><label htmlFor="topic-registration">Registration link (optional)</label><input id="topic-registration" type="url" placeholder="https://forms.gle/..." value={v.registrationLink || ''} aria-invalid={Boolean(topicErrors.registrationLink)} onChange={e=>setEditingTopic({...editingTopic,values:{...v,registrationLink:e.target.value}})}/><small>Visitors can register from the event details. Leave blank until registration is available.</small>{topicErrors.registrationLink && <small className="tp-error">{topicErrors.registrationLink}</small>}</div>
           <div className="tp-field">
             <label htmlFor="topic-title">
               Topic / Webinar Title <span style={{ color: "#a12121" }}>*</span>
@@ -271,7 +266,8 @@ export default function OnlineEducationAdmin({ content, onSave }) {
               <input
                 id="topic-month"
                 type="text"
-                placeholder="e.g. APR, MAY"
+                readOnly
+                placeholder="Generated from event date"
                 value={v.month}
                 aria-invalid={Boolean(topicErrors.month)}
                 onChange={(e) => setEditingTopic({ ...editingTopic, values: { ...v, month: e.target.value.toUpperCase() } })}
@@ -286,7 +282,8 @@ export default function OnlineEducationAdmin({ content, onSave }) {
               <input
                 id="topic-day"
                 type="text"
-                placeholder="e.g. 11, 16"
+                readOnly
+                placeholder="Generated from event date"
                 value={v.day}
                 aria-invalid={Boolean(topicErrors.day)}
                 onChange={(e) => setEditingTopic({ ...editingTopic, values: { ...v, day: e.target.value } })}
@@ -299,7 +296,8 @@ export default function OnlineEducationAdmin({ content, onSave }) {
               <input
                 id="topic-year"
                 type="text"
-                placeholder="e.g. 2026"
+                readOnly
+                placeholder="Generated from event date"
                 value={v.year || ""}
                 onChange={(e) => setEditingTopic({ ...editingTopic, values: { ...v, year: e.target.value } })}
               />
@@ -320,15 +318,14 @@ export default function OnlineEducationAdmin({ content, onSave }) {
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
             <div className="tp-field">
               <label htmlFor="topic-date">
-                Full Display Date <span style={{ color: "#a12121" }}>*</span>
+                Event date <span style={{ color: "#a12121" }}>*</span>
               </label>
               <input
                 id="topic-date"
-                type="text"
-                placeholder="e.g. 11 Apr 2026"
-                value={v.date}
+                type="date"
+                value={topicDate(v.dateISO || v.date)}
                 aria-invalid={Boolean(topicErrors.date)}
-                onChange={(e) => setEditingTopic({ ...editingTopic, values: { ...v, date: e.target.value } })}
+                onChange={(e) => setEditingTopic({ ...editingTopic, values: { ...v, ...(e.target.value ? topicDateFields(e.target.value) : {date:'',dateISO:'',month:'',day:'',year:''}) } })}
               />
               {topicErrors.date && <small className="tp-error">{topicErrors.date}</small>}
             </div>
@@ -561,22 +558,23 @@ export default function OnlineEducationAdmin({ content, onSave }) {
                 onChange={(e) => setEditingResource({ ...editingResource, values: { ...v, videoUrl: e.target.value } })}
               />
               <small>Clicking "Watch recording ↗" on the website will open this direct URL.</small>
+              {resourceErrors.videoUrl && <small className="tp-error">{resourceErrors.videoUrl}</small>}
             </div>
 
             <div className="tp-field">
-              <label htmlFor="res-qafolder">Q&amp;A Document Folder / Key</label>
-              <input
+              <label htmlFor="res-qafolder">Existing Q&amp;A image collection (optional)</label>
+              <select
                 id="res-qafolder"
-                type="text"
-                placeholder="e.g. Understanding the Missing Pieces"
                 value={v.qaFolder || ""}
                 onChange={(e) => setEditingResource({ ...editingResource, values: { ...v, qaFolder: e.target.value } })}
-              />
-              <small>Matches folder name in Q&amp;A viewer modal.</small>
+              ><option value="">No image collection</option>{qaFolders.map(folder=><option key={folder} value={folder}>{folder}</option>)}</select>
+              <small>Uses an existing website image collection. A Q&amp;A link below takes priority.</small>
             </div>
           </div>
 
           <div className="tp-field">
+            <label htmlFor="res-qa-url">Q&amp;A document link (optional)</label><input id="res-qa-url" type="url" value={v.qaUrl || ''} placeholder="https://... (public PDF or shared document)" aria-invalid={Boolean(resourceErrors.qaUrl)} onChange={e=>setEditingResource({...editingResource,values:{...v,qaUrl:e.target.value}})}/><small>Use a publicly accessible document link. It opens in a new tab; no folder edits are needed.</small>{resourceErrors.qaUrl && <small className="tp-error">{resourceErrors.qaUrl}</small>}
+          </div><div className="tp-field">
             <label htmlFor="res-description">
               Description <span style={{ color: "#a12121" }}>*</span>
             </label>
@@ -681,7 +679,7 @@ export default function OnlineEducationAdmin({ content, onSave }) {
               transition: "all 0.15s ease",
             }}
           >
-            ⚙️ Section Headers
+            ⚙️ Page titles &amp; descriptions
           </button>
         </div>
 
@@ -882,6 +880,7 @@ export default function OnlineEducationAdmin({ content, onSave }) {
                     <th style={{ minWidth: "240px" }}>Title &amp; Topic Details</th>
                     <th style={{ minWidth: "140px" }}>Mode &amp; Location</th>
                     <th style={{ minWidth: "160px" }}>Language &amp; Speaker</th>
+                    <th>Registration link</th>
                     <th style={{ minWidth: "130px", textAlign: "right" }}>Actions</th>
                   </tr>
                 </thead>
@@ -921,6 +920,7 @@ export default function OnlineEducationAdmin({ content, onSave }) {
                           👤 {t.speaker}
                         </div>
                       </td>
+                      <td>{publicLink(t.registrationLink) ? <a href={publicLink(t.registrationLink)} target="_blank" rel="noreferrer">Open registration ↗</a> : 'Not added'}</td>
                       <td style={{ textAlign: "right", whiteSpace: "nowrap" }}>
                         <button
                           type="button"
@@ -1088,7 +1088,7 @@ export default function OnlineEducationAdmin({ content, onSave }) {
                     <th style={{ width: "90px" }}>Year</th>
                     <th style={{ minWidth: "260px" }}>Resource Title &amp; Overview</th>
                     <th style={{ minWidth: "150px" }}>Format &amp; Extent</th>
-                    <th style={{ minWidth: "160px" }}>Video / Direct Link</th>
+                    <th style={{ minWidth: "160px" }}>Recording / Q&amp;A</th>
                     <th style={{ minWidth: "130px", textAlign: "right" }}>Actions</th>
                   </tr>
                 </thead>
@@ -1129,6 +1129,7 @@ export default function OnlineEducationAdmin({ content, onSave }) {
                         ) : (
                           <span style={{ fontSize: "0.8rem", color: "#9ca3af" }}>No video link</span>
                         )}
+                        <div>{publicLink(r.qaUrl) ? <a href={publicLink(r.qaUrl)} target="_blank" rel="noreferrer">Review Q&amp;A ↗</a> : r.qaFolder ? `Image collection: ${r.qaFolder}` : 'No Q&A material'}</div>
                       </td>
                       <td style={{ textAlign: "right", whiteSpace: "nowrap" }}>
                         <button
@@ -1192,174 +1193,7 @@ export default function OnlineEducationAdmin({ content, onSave }) {
         </div>
       )}
 
-      {/* SUB-SECTION 4: SECTION HEADERS & DESCRIPTIONS */}
-      {subSection === "headers" && (
-        <div className="tp-card">
-          <div style={{ marginBottom: "1.5rem" }}>
-            <h2 style={{ margin: 0, color: "#45206d" }}>⚙️ Online Education Section Titles &amp; Intros</h2>
-            <p style={{ margin: "0.25rem 0 0", color: "#61596a", fontSize: "0.95rem" }}>
-              Customize the section labels, headlines, and introductory paragraphs displayed on the public website's Online Education page.
-            </p>
-          </div>
-
-          <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
-            {/* RCBC Webinars Section */}
-            <div style={{ background: "#f9fafb", border: "1px solid #e5e7eb", borderRadius: "10px", padding: "1.25rem" }}>
-              <h3 style={{ margin: "0 0 0.75rem", color: "#0d716b", fontSize: "1.05rem" }}>
-                1. RCBC Public Webinar Series (Previous &amp; Future Public Education Webinars)
-              </h3>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 2fr", gap: "1rem", marginBottom: "0.75rem" }}>
-                <div className="tp-field" style={{ margin: 0 }}>
-                  <label htmlFor="h-rcbc-label">Badge Label</label>
-                  <input
-                    id="h-rcbc-label"
-                    type="text"
-                    value={headersState.rcbcLabel || ""}
-                    placeholder="e.g. RCBC annual webinar series"
-                    onChange={(e) => setHeadersState({ ...headersState, rcbcLabel: e.target.value })}
-                  />
-                </div>
-                <div className="tp-field" style={{ margin: 0 }}>
-                  <label htmlFor="h-rcbc-title">Main Headline Title</label>
-                  <input
-                    id="h-rcbc-title"
-                    type="text"
-                    value={headersState.rcbcTitle || ""}
-                    placeholder="e.g. Previous & future public education webinars"
-                    onChange={(e) => setHeadersState({ ...headersState, rcbcTitle: e.target.value })}
-                  />
-                </div>
-              </div>
-              <div className="tp-field" style={{ margin: 0 }}>
-                <label htmlFor="h-rcbc-desc">Section Description</label>
-                <textarea
-                  id="h-rcbc-desc"
-                  rows={2}
-                  value={headersState.rcbcDesc || ""}
-                  placeholder="Introductory text describing the annual RCBC public webinars..."
-                  onChange={(e) => setHeadersState({ ...headersState, rcbcDesc: e.target.value })}
-                />
-              </div>
-            </div>
-
-            {/* Certified Trainer Webinars Section */}
-            <div style={{ background: "#f9fafb", border: "1px solid #e5e7eb", borderRadius: "10px", padding: "1.25rem" }}>
-              <h3 style={{ margin: "0 0 0.75rem", color: "#0d716b", fontSize: "1.05rem" }}>
-                2. Certified Trainer Webinars Series
-              </h3>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 2fr", gap: "1rem", marginBottom: "0.75rem" }}>
-                <div className="tp-field" style={{ margin: 0 }}>
-                  <label htmlFor="h-ct-label">Badge Label</label>
-                  <input
-                    id="h-ct-label"
-                    type="text"
-                    value={headersState.ctLabel || ""}
-                    placeholder="e.g. Certified Trainer webinar"
-                    onChange={(e) => setHeadersState({ ...headersState, ctLabel: e.target.value })}
-                  />
-                </div>
-                <div className="tp-field" style={{ margin: 0 }}>
-                  <label htmlFor="h-ct-title">Main Headline Title</label>
-                  <input
-                    id="h-ct-title"
-                    type="text"
-                    value={headersState.ctTitle || ""}
-                    placeholder="e.g. Webinars hosted by ADFM certified trainers"
-                    onChange={(e) => setHeadersState({ ...headersState, ctTitle: e.target.value })}
-                  />
-                </div>
-              </div>
-              <div className="tp-field" style={{ margin: 0 }}>
-                <label htmlFor="h-ct-desc">Section Description</label>
-                <textarea
-                  id="h-ct-desc"
-                  rows={2}
-                  value={headersState.ctDesc || ""}
-                  placeholder="Introductory text describing webinars led by certified trainers..."
-                  onChange={(e) => setHeadersState({ ...headersState, ctDesc: e.target.value })}
-                />
-              </div>
-            </div>
-
-            {/* Looking Ahead Section */}
-            <div style={{ background: "#f9fafb", border: "1px solid #e5e7eb", borderRadius: "10px", padding: "1.25rem" }}>
-              <h3 style={{ margin: "0 0 0.75rem", color: "#0d716b", fontSize: "1.05rem" }}>
-                3. Looking Ahead (Upcoming Events &amp; Topics)
-              </h3>
-              <div className="tp-field" style={{ margin: "0 0 0.75rem" }}>
-                <label htmlFor="h-up-title">Headline Title</label>
-                <input
-                  id="h-up-title"
-                  type="text"
-                  value={headersState.upcomingTitle || ""}
-                  placeholder="e.g. Upcoming Events & Topics"
-                  onChange={(e) => setHeadersState({ ...headersState, upcomingTitle: e.target.value })}
-                />
-              </div>
-              <div className="tp-field" style={{ margin: 0 }}>
-                <label htmlFor="h-up-desc">Section Description</label>
-                <textarea
-                  id="h-up-desc"
-                  rows={2}
-                  value={headersState.upcomingDesc || ""}
-                  placeholder="Introductory text describing preview topics..."
-                  onChange={(e) => setHeadersState({ ...headersState, upcomingDesc: e.target.value })}
-                />
-              </div>
-            </div>
-
-            {/* Approved Learning Resources Section */}
-            <div style={{ background: "#f9fafb", border: "1px solid #e5e7eb", borderRadius: "10px", padding: "1.25rem" }}>
-              <h3 style={{ margin: "0 0 0.75rem", color: "#0d716b", fontSize: "1.05rem" }}>
-                4. Approved Learning Resources (Recordings &amp; Q&amp;A Viewer)
-              </h3>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 2fr", gap: "1rem", marginBottom: "0.75rem" }}>
-                <div className="tp-field" style={{ margin: 0 }}>
-                  <label htmlFor="h-app-label">Badge Label</label>
-                  <input
-                    id="h-app-label"
-                    type="text"
-                    value={headersState.approvedLabel || ""}
-                    placeholder="e.g. Learning resources"
-                    onChange={(e) => setHeadersState({ ...headersState, approvedLabel: e.target.value })}
-                  />
-                </div>
-                <div className="tp-field" style={{ margin: 0 }}>
-                  <label htmlFor="h-app-title">Main Headline Title</label>
-                  <input
-                    id="h-app-title"
-                    type="text"
-                    value={headersState.approvedTitle || ""}
-                    placeholder="e.g. Recordings, videos, Q&A and approved materials"
-                    onChange={(e) => setHeadersState({ ...headersState, approvedTitle: e.target.value })}
-                  />
-                </div>
-              </div>
-              <div className="tp-field" style={{ margin: 0 }}>
-                <label htmlFor="h-app-desc">Section Description</label>
-                <textarea
-                  id="h-app-desc"
-                  rows={2}
-                  value={headersState.approvedDesc || ""}
-                  placeholder="Introductory text describing permanent learning resources and Q&A archives..."
-                  onChange={(e) => setHeadersState({ ...headersState, approvedDesc: e.target.value })}
-                />
-              </div>
-            </div>
-          </div>
-
-          <div className="tp-actions" style={{ marginTop: "1.75rem" }}>
-            <button
-              type="button"
-              className="tp-btn"
-              disabled={headerSaving}
-              onClick={handleSaveHeaders}
-            >
-              {headerSaving ? "Saving..." : "💾 Save Section Headers"}
-            </button>
-          </div>
-        </div>
-      )}
+      {subSection === "headers" && <PageTextEditor content={content} onSave={onSave} />}
     </div>
   );
 }

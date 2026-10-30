@@ -3,6 +3,7 @@ import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { body, currentUser, fail } from './auth.js';
 import { isAllowedOrigin } from './origin.js';
+import { publicLink, topicDateFields } from '../shared/online-education.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const CONTENT_FILE = resolve(__dirname, '../shared/learn-events-content.json');
@@ -24,6 +25,15 @@ export async function getLearnEventsData() {
 export async function saveLearnEventsData(data) {
   if (!data || typeof data !== 'object') {
     fail('Invalid content data structure', 400);
+  }
+  for (const topic of data.onlineEducation?.upcomingTopics || []) {
+    if (topic.registrationLink && !publicLink(topic.registrationLink)) fail('Registration link must be a valid HTTP or HTTPS URL.');
+    const fields = topicDateFields(topic.dateISO || topic.date);
+    if (!fields.dateISO) fail('Each upcoming topic needs a valid date.');
+    Object.assign(topic, fields);
+  }
+  for (const resource of data.onlineEducation?.approvedResources || []) {
+    for (const key of ['videoUrl','qaUrl']) if (resource[key] && !publicLink(resource[key])) fail('Recording and Q&A links must be valid HTTP or HTTPS URLs.');
   }
   const jsonStr = JSON.stringify(data, null, 2);
   await writeFile(CONTENT_FILE, jsonStr, 'utf-8');
