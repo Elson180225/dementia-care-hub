@@ -244,10 +244,13 @@ function UnderstandDementia() {
     ...understandingDementiaContent,
     ...rawT,
     commonTypes: rawT.commonTypes || understandingDementiaContent.commonTypes,
-    commonTypesTitle: rawT.commonTypesTitle || understandingDementiaContent.commonTypesTitle,
-    commonTypesIntro: rawT.commonTypesIntro || understandingDementiaContent.commonTypesIntro,
+    commonTypesTitle:
+      rawT.commonTypesTitle || understandingDementiaContent.commonTypesTitle,
+    commonTypesIntro:
+      rawT.commonTypesIntro || understandingDementiaContent.commonTypesIntro,
     riskTitle: rawT.riskTitle || understandingDementiaContent.riskTitle,
-    riskDescription: rawT.riskDescription || understandingDementiaContent.riskDescription,
+    riskDescription:
+      rawT.riskDescription || understandingDementiaContent.riskDescription,
     faqs: (rawT.faqs || understandingDementiaContent.faqs).map((faq, idx) => ({
       ...understandingDementiaContent.faqs[idx],
       ...faq,
@@ -321,7 +324,6 @@ function UnderstandDementia() {
           <div className="understand-section-heading">
             <p className="understand-eyebrow">{t.basics}</p>
             <h2>{t.whatIs}</h2>
-            <p>{t.overviewIntro}</p>
           </div>
           <div className="understand-info-grid">
             {t.overviewCards.map((card, index) => (
@@ -579,13 +581,12 @@ function UnderstandDementia() {
                 </summary>
                 <p>
                   {faq.a}{" "}
-                  {faq.link?.href && (
-                    faq.link.href.startsWith("#") ? (
+                  {faq.link?.href &&
+                    (faq.link.href.startsWith("#") ? (
                       <a href={faq.link.href}>{faq.link.label} →</a>
                     ) : (
                       <Link to={faq.link.href}>{faq.link.label} →</Link>
-                    )
-                  )}
+                    ))}
                 </p>
               </details>
             ))}
