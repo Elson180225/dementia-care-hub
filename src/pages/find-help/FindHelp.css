@@ -19,8 +19,6 @@
 .find-help-page {
   width: 100%;
 
-  /* Keep the Find Help section easy to read for older visitors. */
-
   background: #ffffff;
 
   color: var(--fh-text);
@@ -54,7 +52,7 @@
 
   color: var(--color-gold-300);
 
-  font-size: 16px;
+  font-size: 14px;
   font-weight: 800;
 
   letter-spacing: 0.12em;
@@ -108,7 +106,7 @@
 
   color: var(--fh-purple);
 
-  font-size: 16px;
+  font-size: 13px;
   font-weight: 800;
 
   letter-spacing: 0.1em;
@@ -310,7 +308,7 @@
 
   color: var(--fh-soft);
 
-  font-size: 18px;
+  font-size: 16px;
 
   line-height: 1.68;
 }
@@ -322,7 +320,6 @@
 
   color: var(--fh-purple);
 
-  font-size: 17px;
   font-weight: 800;
 }
 
@@ -350,7 +347,7 @@
 
   text-decoration: none;
 
-  font-size: 17px;
+  font-size: 13px;
 
   font-weight: 700;
 
@@ -417,7 +414,7 @@
 .find-help-area-grid a > span {
   color: var(--fh-purple);
 
-  font-size: 16px;
+  font-size: 12px;
 
   font-weight: 800;
 }
@@ -438,7 +435,7 @@
 
   color: var(--fh-soft);
 
-  font-size: 18px;
+  font-size: 16px;
 
   line-height: 1.65;
 }
@@ -500,7 +497,7 @@
 
   color: var(--fh-purple);
 
-  font-size: 16px;
+  font-size: 12px;
 
   font-weight: 800;
 
@@ -527,7 +524,6 @@
 
   color: var(--fh-soft);
 
-  font-size: 18px;
   line-height: 1.7;
 }
 
@@ -546,7 +542,6 @@
 /* MOBILE */
 
 @media (max-width: 700px) {
-  /* Keep the text readable on smaller screens too. */
   .find-help-hero {
     padding: 90px 0 70px;
   }
@@ -619,7 +614,7 @@
   .find-help-planning-card > span {
     color: var(--fh-purple);
 
-    font-size: 16px;
+    font-size: 12px;
 
     font-weight: 800;
 
@@ -649,7 +644,6 @@
 
     color: var(--fh-soft);
 
-    font-size: 18px;
     line-height: 1.7;
   }
 

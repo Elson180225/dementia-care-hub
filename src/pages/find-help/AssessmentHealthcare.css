@@ -20,7 +20,6 @@
 ============================================================ */
 
 .assessment-page {
-  /* Text sizes were adjusted so older visitors can read the page more comfortably. */
   width: 100%;
 
   background: #ffffff;
@@ -41,7 +40,7 @@
 
   color: var(--ah-purple);
 
-  font-size: 16px;
+  font-size: 12px;
 
   font-weight: 800;
 
@@ -74,7 +73,7 @@
 
   color: var(--color-gold-300);
 
-  font-size: 16px;
+  font-size: 13px;
 
   font-weight: 800;
 
@@ -200,7 +199,7 @@
 .assessment-journey-grid span {
   color: var(--ah-purple);
 
-  font-size: 15px;
+  font-size: 11px;
 
   font-weight: 800;
 }
@@ -223,7 +222,7 @@
 
   color: var(--ah-soft);
 
-  font-size: 16px;
+  font-size: 13px;
 
   line-height: 1.55;
 }
@@ -303,7 +302,7 @@
 .assessment-progress-box small {
   color: var(--ah-soft);
 
-  font-size: 16px;
+  font-size: 12px;
 }
 
 .assessment-progress-track {
@@ -398,7 +397,7 @@
 
   color: #ffffff;
 
-  font-size: 16px;
+  font-size: 13px;
 
   font-weight: 900;
 }
@@ -413,7 +412,7 @@
 .assessment-check-item strong {
   color: var(--ah-text);
 
-  font-size: 18px;
+  font-size: 16px;
 }
 
 .assessment-check-item p {
@@ -442,7 +441,7 @@
 .assessment-provider-heading > div > span {
   color: var(--ah-purple);
 
-  font-size: 15px;
+  font-size: 11px;
 
   font-weight: 800;
 
@@ -529,7 +528,7 @@
 .assessment-pathway-intro > span {
   color: var(--ah-purple);
 
-  font-size: 15px;
+  font-size: 10px;
 
   font-weight: 800;
 
@@ -586,7 +585,7 @@
 .assessment-flow span {
   color: var(--ah-purple);
 
-  font-size: 15px;
+  font-size: 10px;
 
   font-weight: 800;
 }
@@ -601,7 +600,7 @@
     "Times New Roman",
     serif;
 
-  font-size: 18px;
+  font-size: 17px;
 }
 
 .assessment-flow p {
@@ -609,7 +608,7 @@
 
   color: var(--ah-soft);
 
-  font-size: 16px;
+  font-size: 12px;
 
   line-height: 1.55;
 }
@@ -688,7 +687,7 @@
 
   color: var(--ah-soft);
 
-  font-size: 16px;
+  font-size: 13px;
 }
 
 .assessment-provider-count strong {
@@ -728,7 +727,7 @@
 
   color: var(--color-purple-600);
 
-  font-size: 15px;
+  font-size: 10px;
 
   font-weight: 800;
 
@@ -783,7 +782,7 @@ span:first-child {
 
   color: var(--color-purple-600);
 
-  font-size: 14px;
+  font-size: 9px;
 
   font-weight: 800;
 
@@ -798,7 +797,7 @@ span:first-child {
 
   color: var(--color-purple-700);
 
-  font-size: 16px;
+  font-size: 13px;
 
   line-height: 1.5;
 
@@ -836,7 +835,7 @@ span:first-child {
 
   color: var(--ah-purple-dark);
 
-  font-size: 15px;
+  font-size: 10px;
 }
 
 .assessment-provider-footer {
@@ -875,7 +874,7 @@ span:first-child {
 
   color: var(--color-purple-600);
 
-  font-size: 14px;
+  font-size: 9px;
 
   font-weight: 800;
 
@@ -885,7 +884,7 @@ span:first-child {
 .assessment-provider-footer small {
   color: var(--color-purple-600);
 
-  font-size: 15px;
+  font-size: 10px;
 }
 
 .assessment-provider-footer > a {
@@ -897,7 +896,7 @@ span:first-child {
 
   color: var(--ah-purple);
 
-  font-size: 16px;
+  font-size: 13px;
 
   font-weight: 800;
 
@@ -978,7 +977,7 @@ span:first-child {
 .assessment-related-grid > a > span {
   color: var(--ah-purple);
 
-  font-size: 15px;
+  font-size: 10px;
 
   font-weight: 800;
 }
@@ -1003,7 +1002,7 @@ span:first-child {
 
   color: var(--ah-soft);
 
-  font-size: 16px;
+  font-size: 13px;
 
   line-height: 1.55;
 }
@@ -1020,7 +1019,7 @@ span:first-child {
 
   color: var(--ah-purple);
 
-  font-size: 16px;
+  font-size: 12px;
 }
 
 .assessment-related-grid > a:hover strong {
@@ -1078,7 +1077,7 @@ span:first-child {
 .assessment-boundary-box strong {
   color: var(--ah-purple);
 
-  font-size: 15px;
+  font-size: 11px;
 
   font-weight: 800;
 
@@ -1101,7 +1100,6 @@ span:first-child {
    TABLET
 ============================================================ */
 
-/* Keep the same readable type scale on smaller screens. */
 @media (max-width: 1000px) {
   .assessment-journey-grid {
     grid-template-columns:

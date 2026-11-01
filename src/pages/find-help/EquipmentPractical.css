@@ -22,7 +22,6 @@
 ========================================================= */
 
 .equipment-page {
-  /* Text sizes were adjusted so older visitors can read the page more comfortably. */
   width: 100%;
 
   color: var(--eq-text);
@@ -76,7 +75,7 @@
 
   color: var(--color-gold-300);
 
-  font-size: 16px;
+  font-size: 13px;
 
   font-weight: 800;
 
@@ -344,7 +343,7 @@
 ========================================================= */
 
 .equipment-moving-number {
-  font-size: 15px;
+  font-size: 11px;
 
   font-weight: 900;
 
@@ -454,7 +453,7 @@ button.equipment-dot-active {
 
   color: var(--color-purple-600);
 
-  font-size: 15px;
+  font-size: 10px;
 
   font-weight: 700;
 
@@ -489,7 +488,7 @@ button.equipment-dot-active {
   color:
     var(--eq-purple);
 
-  font-size: 16px;
+  font-size: 12px;
 
   font-weight: 900;
 
@@ -519,7 +518,7 @@ button.equipment-dot-active {
 
   color: var(--eq-soft);
 
-  font-size: 18px;
+  font-size: 17px;
 
   line-height: 1.7;
 }
@@ -577,7 +576,7 @@ button:hover {
   color:
     var(--eq-purple);
 
-  font-size: 15px;
+  font-size: 11px;
 
   font-weight: 900;
 }
@@ -606,7 +605,7 @@ button:hover
 
   color: var(--eq-soft);
 
-  font-size: 17px;
+  font-size: 14px;
 
   line-height: 1.6;
 }
@@ -631,7 +630,7 @@ strong {
   color:
     var(--eq-purple);
 
-  font-size: 16px;
+  font-size: 12px;
 }
 
 .equipment-needs-grid
@@ -786,7 +785,7 @@ strong {
     "Times New Roman",
     serif;
 
-  font-size: 18px;
+  font-size: 17px;
 }
 
 .equipment-sidebar-note p {
@@ -794,7 +793,7 @@ strong {
 
   color: var(--eq-soft);
 
-  font-size: 16px;
+  font-size: 13px;
 
   line-height: 1.6;
 }
@@ -821,7 +820,7 @@ span {
   color:
     var(--eq-purple);
 
-  font-size: 15px;
+  font-size: 11px;
 
   font-weight: 900;
 
@@ -848,7 +847,7 @@ h2 {
   color:
     var(--eq-purple);
 
-  font-size: 16px;
+  font-size: 13px;
 }
 
 .equipment-resource-list {
@@ -917,7 +916,7 @@ h2 {
   color:
     var(--eq-purple);
 
-  font-size: 15px;
+  font-size: 10px;
 
   font-weight: 900;
 
@@ -1021,7 +1020,7 @@ p {
   color:
     var(--eq-purple);
 
-  font-size: 15px;
+  font-size: 10px;
 
   font-weight: 900;
 
@@ -1041,7 +1040,7 @@ p {
 
   color: var(--color-neutral-700);
 
-  font-size: 16px;
+  font-size: 13px;
 }
 
 .equipment-source-panel p {
@@ -1049,7 +1048,7 @@ p {
 
   color: var(--eq-soft);
 
-  font-size: 16px;
+  font-size: 13px;
 
   line-height: 1.6;
 }
@@ -1067,7 +1066,7 @@ p {
 
   color: var(--color-gold-700);
 
-  font-size: 14px;
+  font-size: 9px;
 
   font-weight: 900;
 
@@ -1105,7 +1104,7 @@ p {
 
   border-radius: 20px;
 
-  font-size: 14px;
+  font-size: 9px;
 
   font-weight: 900;
 
@@ -1153,7 +1152,7 @@ p {
 > span {
   color: var(--color-purple-300);
 
-  font-size: 15px;
+  font-size: 11px;
 
   font-weight: 900;
 
@@ -1221,7 +1220,7 @@ strong {
       0.82
     );
 
-  font-size: 18px;
+  font-size: 16px;
 
   line-height: 1.55;
 }
@@ -1282,7 +1281,7 @@ strong {
   color:
     var(--eq-purple);
 
-  font-size: 15px;
+  font-size: 11px;
 
   font-weight: 900;
 
@@ -1305,7 +1304,6 @@ strong {
    TABLET
 ========================================================= */
 
-/* Keep the same readable type scale on smaller screens. */
 @media (max-width: 1000px) {
   .equipment-hero {
     grid-template-columns:

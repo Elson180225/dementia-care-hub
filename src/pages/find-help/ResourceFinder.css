@@ -20,7 +20,6 @@
 ========================================================= */
 
 .rf-page {
-  /* Text sizes were adjusted so older visitors can read the page more comfortably. */
   width: 100%;
 
   color:
@@ -138,7 +137,7 @@
   color:
     var(--rf-purple);
 
-  font-size: 16px;
+  font-size: 12px;
 
   font-weight: 900;
 
@@ -288,7 +287,7 @@
   border-radius:
     50%;
 
-  font-size: 16px;
+  font-size: 12px;
 
   font-weight: 900;
 }
@@ -297,7 +296,7 @@
   margin:
     8px 0 0;
 
-  font-size: 15px;
+  font-size: 11px;
 
   font-weight: 800;
 }
@@ -371,7 +370,7 @@
   color:
     var(--color-purple-600);
 
-  font-size: 16px;
+  font-size: 12px;
 
   font-weight: 800;
 }
@@ -403,7 +402,7 @@
   color:
     var(--rf-purple);
 
-  font-size: 15px;
+  font-size: 11px;
 
   font-weight: 900;
 
@@ -444,7 +443,7 @@
   color:
     var(--rf-soft);
 
-  font-size: 18px;
+  font-size: 16px;
 
   line-height: 1.7;
 }
@@ -522,7 +521,7 @@
 }
 
 .rf-need-number {
-  font-size: 15px;
+  font-size: 10px;
 
   font-weight: 900;
 
@@ -591,7 +590,7 @@
 
   line-height: 1.55;
 
-  font-size: 17px;
+  font-size: 14px;
 }
 
 .rf-need-card:hover p {
@@ -617,7 +616,7 @@
   color:
     var(--rf-purple);
 
-  font-size: 16px;
+  font-size: 12px;
 }
 
 .rf-need-card:hover
@@ -719,7 +718,7 @@
   color:
     var(--color-purple-600);
 
-  font-size: 15px;
+  font-size: 10px;
 
   font-weight: 900;
 }
@@ -912,7 +911,7 @@
   color:
     var(--color-purple-600);
 
-  font-size: 14px;
+  font-size: 9px;
 
   font-weight: 900;
 
@@ -938,7 +937,7 @@
   color:
     var(--rf-purple);
 
-  font-size: 16px;
+  font-size: 12px;
 }
 
 .rf-trail button {
@@ -994,7 +993,7 @@
   color:
     var(--color-purple-300);
 
-  font-size: 15px;
+  font-size: 11px;
 
   font-weight: 900;
 
@@ -1070,7 +1069,7 @@
       0.66
     );
 
-  font-size: 15px;
+  font-size: 11px;
 
   text-transform:
     uppercase;
@@ -1119,7 +1118,7 @@
   color:
     var(--color-purple-300);
 
-  font-size: 15px;
+  font-size: 11px;
 
   font-weight: 900;
 }
@@ -1132,7 +1131,7 @@
   color:
     var(--color-purple-300);
 
-  font-size: 14px;
+  font-size: 9px;
 
   font-weight: 900;
 
@@ -1202,7 +1201,7 @@
   border-radius:
     20px;
 
-  font-size: 14px;
+  font-size: 8px;
 
   font-weight: 900;
 
@@ -1279,7 +1278,7 @@
   color:
     var(--color-purple-300);
 
-  font-size: 16px;
+  font-size: 12px;
 
   font-weight: 900;
 }
@@ -1290,7 +1289,7 @@
   color:
     var(--color-purple-300);
 
-  font-size: 14px;
+  font-size: 9px;
 
   font-weight: 900;
 
@@ -1478,7 +1477,7 @@
   color:
     var(--rf-purple);
 
-  font-size: 15px;
+  font-size: 11px;
 
   font-weight: 900;
 
@@ -1543,7 +1542,7 @@
   color:
     var(--rf-purple);
 
-  font-size: 14px;
+  font-size: 9px;
 
   font-weight: 900;
 }
@@ -1568,7 +1567,7 @@
   color:
     var(--rf-soft);
 
-  font-size: 16px;
+  font-size: 13px;
 
   line-height: 1.55;
 }
@@ -1643,7 +1642,7 @@
   color:
     var(--rf-purple);
 
-  font-size: 15px;
+  font-size: 11px;
 
   font-weight: 900;
 
@@ -1670,7 +1669,6 @@
    TABLET
 ========================================================= */
 
-/* Keep the same readable type scale on smaller screens. */
 @media (max-width: 950px) {
   .rf-intro::before {
     width: 27%;
@@ -1747,7 +1745,7 @@
   }
 
   .rf-progress-item p {
-    font-size: 14px;
+    font-size: 9px;
   }
 
   .rf-needs-grid,

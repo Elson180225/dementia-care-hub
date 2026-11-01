@@ -1,10 +1,5 @@
 .caregiver-page {
-<<<<<<< HEAD
-  /* Keep public-facing text comfortable to read, especially for older visitors. */
-  color: #233b34;
-=======
   color: var(--color-neutral-800);
->>>>>>> origin/main
   background: #fff;
   font-family: inherit;
 }
@@ -22,13 +17,8 @@
   line-height: 1.7;
 }
 .caregiver-eyebrow {
-<<<<<<< HEAD
-  color: #bd7730;
-  font-size: 1rem;
-=======
   color: var(--color-gold-700);
   font-size: 0.79rem;
->>>>>>> origin/main
   font-weight: 800;
   letter-spacing: 0.15em;
   text-transform: uppercase;
@@ -126,7 +116,7 @@
   padding: 18px 22px;
   border-radius: 14px;
   box-shadow: 0 12px 30px #062e2538;
-  font-size: 1rem;
+  font-size: 0.91rem;
   font-weight: 750;
   line-height: 1.5;
 }
@@ -151,13 +141,8 @@
   white-space: nowrap;
 }
 .caregiver-on-page-inner > span {
-<<<<<<< HEAD
-  color: #87978d;
-  font-size: 1rem;
-=======
   color: var(--color-neutral-600);
   font-size: 0.76rem;
->>>>>>> origin/main
   font-weight: 900;
   letter-spacing: 0.12em;
 }
@@ -165,7 +150,7 @@
   color: var(--color-purple-600);
   font-weight: 750;
   text-decoration: none;
-  font-size: 1rem;
+  font-size: 0.94rem;
 }
 .caregiver-on-page a:hover {
   text-decoration: underline;
@@ -251,25 +236,15 @@
 }
 .caregiver-pathway-card p {
   margin: 0;
-<<<<<<< HEAD
-  color: #5c7166;
-  font-size: 1rem;
-=======
   color: var(--color-neutral-500);
   font-size: 0.96rem;
->>>>>>> origin/main
   line-height: 1.65;
 }
 .caregiver-card-action {
   margin-top: auto;
   padding-top: 25px;
-<<<<<<< HEAD
-  color: #235c4b;
-  font-size: 1rem;
-=======
   color: var(--color-purple-600);
   font-size: 0.88rem;
->>>>>>> origin/main
   font-weight: 850;
 }
 .caregiver-section-heading {
@@ -350,7 +325,7 @@
   font-size: 1rem;
 }
 .caregiver-guidance-option-text small {
-  font-size: 1rem;
+  font-size: 0.84rem;
   line-height: 1.4;
   color: var(--color-neutral-600);
 }
@@ -373,13 +348,8 @@
   box-shadow: 0 15px 45px #1544330b;
 }
 .caregiver-detail-label {
-<<<<<<< HEAD
-  color: #b47731;
-  font-size: 1rem;
-=======
   color: var(--color-gold-700);
   font-size: 0.77rem;
->>>>>>> origin/main
   font-weight: 900;
   letter-spacing: 0.13em;
 }
@@ -436,7 +406,7 @@
   border-radius: 50%;
   width: 23px;
   height: 23px;
-  font-size: 1rem;
+  font-size: 0.78rem;
   font-weight: 900;
 }
 .caregiver-detail-note {
@@ -447,7 +417,7 @@
   padding: 16px 18px;
   color: #685540;
   line-height: 1.6;
-  font-size: 1rem;
+  font-size: 0.92rem;
 }
 .caregiver-crosslink,
 .caregiver-listing-note {
@@ -467,13 +437,8 @@
 .caregiver-crosslink p,
 .caregiver-listing-note p {
   margin: 5px 0 0;
-<<<<<<< HEAD
-  color: #536f60;
-  font-size: 1rem;
-=======
   color: var(--color-neutral-600);
   font-size: 0.95rem;
->>>>>>> origin/main
 }
 .caregiver-crosslink a,
 .caregiver-listing-note a {
@@ -484,7 +449,7 @@
   color: #fff;
   text-decoration: none;
   font-weight: 850;
-  font-size: 1rem;
+  font-size: 0.93rem;
 }
 .caregiver-crosslink a:hover,
 .caregiver-listing-note a:hover {
@@ -512,15 +477,9 @@
 .caregiver-status {
   align-self: flex-start;
   border-radius: 30px;
-<<<<<<< HEAD
-  background: #f6d8a5;
-  color: #674718;
-  font-size: 1rem;
-=======
   background: var(--color-gold-300);
   color: var(--color-gold-800);
   font-size: 0.73rem;
->>>>>>> origin/main
   font-weight: 900;
   padding: 8px 12px;
   letter-spacing: 0.035em;
@@ -531,13 +490,8 @@
 }
 .caregiver-training-step {
   font-weight: 900;
-<<<<<<< HEAD
-  color: #b0d2c3;
-  font-size: 1rem;
-=======
   color: var(--color-purple-300);
   font-size: 0.77rem;
->>>>>>> origin/main
   letter-spacing: 0.13em;
   margin-top: 30px;
 }
@@ -567,7 +521,7 @@
   color: var(--color-neutral-100);
 }
 .caregiver-training-footnote {
-  font-size: 1rem;
+  font-size: 0.88rem;
   font-weight: 750;
   margin-top: auto !important;
 }
@@ -600,13 +554,8 @@
   border-radius: 13px;
 }
 .caregiver-training-path strong {
-<<<<<<< HEAD
-  color: #6a7f71;
-  font-size: 1rem;
-=======
   color: var(--color-neutral-600);
   font-size: 0.91rem;
->>>>>>> origin/main
 }
 .caregiver-training-path span:not(.caregiver-path-arrow) {
   font-weight: 850;
@@ -655,13 +604,13 @@
 }
 .caregiver-preview-tag {
   font-weight: 900;
-  font-size: 1rem;
+  font-size: 0.72rem;
   letter-spacing: 0.11em;
   color: var(--color-gold-700);
   margin-bottom: 7px;
 }
 .caregiver-verification-preview label {
-  font-size: 1rem;
+  font-size: 0.87rem;
   font-weight: 800;
 }
 .caregiver-verification-preview input {
@@ -687,13 +636,8 @@
 }
 .caregiver-disclaimer {
   margin: 20px 0 0;
-<<<<<<< HEAD
-  color: #6b776e;
-  font-size: 1rem;
-=======
   color: var(--color-neutral-500);
   font-size: 0.86rem;
->>>>>>> origin/main
   line-height: 1.7;
 }
 .caregiver-directory {
@@ -716,16 +660,11 @@
 }
 .caregiver-directory-head p {
   margin: 0;
-<<<<<<< HEAD
-  color: #607366;
-  font-size: 1rem;
-=======
   color: var(--color-neutral-500);
   font-size: 0.93rem;
->>>>>>> origin/main
 }
 .caregiver-directory-count {
-  font-size: 1rem;
+  font-size: 0.82rem;
   font-weight: 850;
   background: var(--color-neutral-100);
   color: var(--color-purple-600);
@@ -741,13 +680,8 @@
 .caregiver-filter-grid label {
   display: grid;
   gap: 9px;
-<<<<<<< HEAD
-  color: #3d5747;
-  font-size: 1rem;
-=======
   color: var(--color-neutral-700);
   font-size: 0.87rem;
->>>>>>> origin/main
   font-weight: 800;
 }
 .caregiver-filter-grid input,
@@ -757,13 +691,8 @@
   border: 1px solid var(--color-neutral-200);
   border-radius: 8px;
   background: #fff;
-<<<<<<< HEAD
-  color: #294a3a;
-  font-size: 1rem;
-=======
   color: var(--color-purple-600);
   font-size: 0.94rem;
->>>>>>> origin/main
 }
 .caregiver-filter-footer {
   display: flex;
@@ -777,13 +706,8 @@
   display: flex;
   align-items: center;
   gap: 8px;
-<<<<<<< HEAD
-  font-size: 1rem;
-  color: #4a6454;
-=======
   font-size: 0.91rem;
   color: var(--color-neutral-600);
->>>>>>> origin/main
   cursor: pointer;
 }
 .caregiver-filter-check input {
@@ -844,13 +768,8 @@
 }
 .caregiver-result-card p {
   margin: 5px 0;
-<<<<<<< HEAD
-  color: #54705f;
-  font-size: 1rem;
-=======
   color: var(--color-neutral-600);
   font-size: 0.92rem;
->>>>>>> origin/main
 }
 .caregiver-result-card a {
   display: inline-block;
@@ -859,7 +778,7 @@
   font-weight: 850;
 }
 .caregiver-result-approved {
-  font-size: 1rem;
+  font-size: 0.72rem;
   font-weight: 900;
   color: var(--color-purple-600);
   text-transform: uppercase;
@@ -951,10 +870,10 @@
   color: var(--color-purple-600);
   border-radius: 50%;
   font-weight: 900;
-  font-size: 1rem;
+  font-size: 0.85rem;
 }
 .caregiver-volunteer-small {
-  font-size: 1rem;
+  font-size: 0.87rem;
   margin-bottom: 0;
 }
 .caregiver-volunteer-small a {
