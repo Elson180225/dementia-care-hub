@@ -194,7 +194,8 @@ function CaregiverSupport() {
   const currentGuidanceTopics = cs.guidanceTopics || guidanceTopics;
 
   const topic =
-    currentGuidanceTopics.find((item) => item.id === activeTopic) ?? currentGuidanceTopics[0];
+    currentGuidanceTopics.find((item) => item.id === activeTopic) ??
+    currentGuidanceTopics[0];
   const availableLanguages = useMemo(
     () =>
       [
@@ -243,12 +244,8 @@ function CaregiverSupport() {
         <div className="caregiver-container caregiver-hero-grid">
           <div className="caregiver-hero-copy">
             <p className="caregiver-eyebrow">{cs.eyebrow}</p>
-            <h1 id="caregiver-title">
-              {cs.title}
-            </h1>
-            <p className="caregiver-hero-intro">
-              {cs.lead}
-            </p>
+            <h1 id="caregiver-title">{cs.title}</h1>
+            <p className="caregiver-hero-intro">{cs.lead}</p>
             <div className="caregiver-hero-actions">
               <a
                 className="caregiver-button caregiver-button-cream"
@@ -268,7 +265,9 @@ function CaregiverSupport() {
               className="caregiver-hero-image"
             />
             <div className="caregiver-hero-image-caption">
-              <span aria-hidden="true">✦</span> {cs.caption || "Practical care. Shared understanding. Stronger communities."}
+              <span aria-hidden="true">✦</span>{" "}
+              {cs.caption ||
+                "Practical care. Shared understanding. Stronger communities."}
             </div>
           </div>
         </div>
@@ -288,40 +287,48 @@ function CaregiverSupport() {
         <div className="caregiver-container">
           <div className="caregiver-intro-head">
             <div>
-              <p className="caregiver-eyebrow">{cs.startingPointKicker || "Find your starting point"}</p>
-              <h2>{cs.startingPointHeading || "What kind of support do you need today?"}</h2>
+              <p className="caregiver-eyebrow">
+                {cs.startingPointKicker || "Find your starting point"}
+              </p>
+              <h2>
+                {cs.startingPointHeading ||
+                  "What kind of support do you need today?"}
+              </h2>
             </div>
             <p>
-              {cs.startingPointSub || "Choose a pathway to learn practical skills, connect with others or give your time to the community."}
+              {cs.startingPointSub ||
+                "Choose a pathway to learn practical skills, connect with others or give your time to the community."}
             </p>
           </div>
           <div className="caregiver-pathway-grid">
-            {(cs.pathways || [
-              {
-                number: "01",
-                title: "Caregiver Guidance",
-                text: "Everyday advice for caring for someone at home.",
-                target: "guidance",
-              },
-              {
-                number: "02",
-                title: "Caregiver Training",
-                text: "Learn about DCS–Family and the future DCS–Worker pathway.",
-                target: "training",
-              },
-              {
-                number: "03",
-                title: "Support Groups",
-                text: "Find published groups by city, language and volunteer availability.",
-                target: "support-groups",
-              },
-              {
-                number: "04",
-                title: "Volunteer",
-                text: "Discover ways to contribute through organisations.",
-                target: "volunteer",
-              },
-            ]).map((item) => (
+            {(
+              cs.pathways || [
+                {
+                  number: "01",
+                  title: "Caregiver Guidance",
+                  text: "Everyday advice for caring for someone at home.",
+                  target: "guidance",
+                },
+                {
+                  number: "02",
+                  title: "Caregiver Training",
+                  text: "Learn about DCS–Family and the future DCS–Worker pathway.",
+                  target: "training",
+                },
+                {
+                  number: "03",
+                  title: "Support Groups",
+                  text: "Find published groups by city, language and volunteer availability.",
+                  target: "support-groups",
+                },
+                {
+                  number: "04",
+                  title: "Volunteer",
+                  text: "Discover ways to contribute through organisations.",
+                  target: "volunteer",
+                },
+              ]
+            ).map((item) => (
               <a
                 className="caregiver-pathway-card"
                 key={item.number}
@@ -334,7 +341,8 @@ function CaregiverSupport() {
                 <h3>{item.title}</h3>
                 <p>{item.text}</p>
                 <span className="caregiver-card-action">
-                  {cs.exploreSection || "Explore section"} <span aria-hidden="true">→</span>
+                  {cs.exploreSection || "Explore section"}{" "}
+                  <span aria-hidden="true">→</span>
                 </span>
               </a>
             ))}
@@ -350,7 +358,10 @@ function CaregiverSupport() {
           <SectionHeading
             eyebrow={cs.guidanceKicker || "01 / Practical Guidance"}
             title={cs.guidanceTitle || "Practical support for everyday care"}
-            description={cs.guidanceIntro || "Choose a topic to explore ideas you can adapt to the needs, preferences and abilities of the person you support."}
+            description={
+              cs.guidanceIntro ||
+              "Choose a topic to explore ideas you can adapt to the needs, preferences and abilities of the person you support."
+            }
           />
           <div className="caregiver-guidance-layout">
             <div
@@ -403,21 +414,25 @@ function CaregiverSupport() {
                 ))}
               </ul>
               <div className="caregiver-detail-note">
-                {cs.guidanceDisclaimer || "Every person is different. Adapt these general tips to their situation, and consult a qualified professional when needed."}
+                {cs.guidanceDisclaimer ||
+                  "Every person is different. Adapt these general tips to their situation, and consult a qualified professional when needed."}
               </div>
             </article>
           </div>
           <div className="caregiver-crosslink">
             <div>
               <strong>
-                {cs.crosslinkTitle || "Need professional services or practical equipment?"}
+                {cs.crosslinkTitle ||
+                  "Need professional services or practical equipment?"}
               </strong>
               <p>
-                {cs.crosslinkText || "Healthcare assessments, respite care, residential facilities and equipment directories belong in Find Help & Support."}
+                {cs.crosslinkText ||
+                  "Healthcare assessments, respite care, residential facilities and equipment directories belong in Find Help & Support."}
               </p>
             </div>
             <Link to="/find-help">
-              {cs.crosslinkBtn || "Find Help & Support"} <span aria-hidden="true">→</span>
+              {cs.crosslinkBtn || "Find Help & Support"}{" "}
+              <span aria-hidden="true">→</span>
             </Link>
           </div>
         </div>
@@ -428,55 +443,73 @@ function CaregiverSupport() {
           <SectionHeading
             eyebrow={cs.trainingKicker || "02 / Caregiver Training"}
             title={cs.trainingTitle || "Dementia Care Training"}
-            description={cs.trainingIntro || "The DCS training pathway supports family caregiving now, with a further worker-focused programme planned for the future."}
+            description={
+              cs.trainingIntro ||
+              "The DCS training pathway supports family caregiving now, with a further worker-focused programme planned for the future."
+            }
           />
           <div className="caregiver-training-grid">
             <article className="caregiver-training-card caregiver-training-current">
-              <span className="caregiver-status">{cs.currentProgram || "Current programme"}</span>
-              <span className="caregiver-training-step">{cs.step1 || "STEP 01"}</span>
+              <span className="caregiver-status">
+                {cs.currentProgram || "Current programme"}
+              </span>
+              <span className="caregiver-training-step">
+                {cs.step1 || "STEP 01"}
+              </span>
               <h3>{cs.dcsFamilyTitle || "DCS–Family"}</h3>
               <p>
-                {cs.dcsFamilyDesc || "Designed for family members and individuals learning to care for someone in their own family."}
+                {cs.dcsFamilyDesc ||
+                  "Designed for family members and individuals learning to care for someone in their own family."}
               </p>
               <ul>
-                {(cs.dcsFamilyBullets || [
-                  "Knowledge and practical understanding for family caregiving",
-                  "Certificate upon completion according to programme requirements",
-                  "CPD points according to the applicable programme arrangement",
-                ]).map((b, i) => (
+                {(
+                  cs.dcsFamilyBullets || [
+                    "Knowledge and practical understanding for family caregiving",
+                    "Certificate upon completion according to programme requirements",
+                    "CPD points according to the applicable programme arrangement",
+                  ]
+                ).map((b, i) => (
                   <li key={i}>{b}</li>
                 ))}
               </ul>
               <p className="caregiver-training-footnote">
-                {cs.dcsFamilyFootnote || "This is not a professional caregiver qualification."}
+                {cs.dcsFamilyFootnote ||
+                  "This is not a professional caregiver qualification."}
               </p>
               <Link
                 className="caregiver-text-action"
                 to="/learn-events/upcoming-calendar"
               >
-                {cs.viewClasses || "View upcoming classes"} <span aria-hidden="true">↗</span>
+                {cs.viewClasses || "View upcoming classes"}{" "}
+                <span aria-hidden="true">↗</span>
               </Link>
             </article>
             <article className="caregiver-training-card caregiver-training-future">
               <span className="caregiver-status caregiver-status-muted">
                 {cs.plannedFuture || "Planned for the future"}
               </span>
-              <span className="caregiver-training-step">{cs.step2 || "STEP 02"}</span>
+              <span className="caregiver-training-step">
+                {cs.step2 || "STEP 02"}
+              </span>
               <h3>{cs.dcsWorkerTitle || "DCS–Worker"}</h3>
               <p>
-                {cs.dcsWorkerDesc || "A planned progression for people interested in developing skills to care for others."}
+                {cs.dcsWorkerDesc ||
+                  "A planned progression for people interested in developing skills to care for others."}
               </p>
               <ul>
-                {(cs.dcsWorkerBullets || [
-                  "DCS–Family completion is the prerequisite",
-                  "Greater emphasis on practical, hands-on caregiving skills",
-                  "Certificate and CPD points subject to programme requirements and arrangements",
-                ]).map((b, i) => (
+                {(
+                  cs.dcsWorkerBullets || [
+                    "DCS–Family completion is the prerequisite",
+                    "Greater emphasis on practical, hands-on caregiving skills",
+                    "Certificate and CPD points subject to programme requirements and arrangements",
+                  ]
+                ).map((b, i) => (
                   <li key={i}>{b}</li>
                 ))}
               </ul>
               <p className="caregiver-training-footnote">
-                {cs.dcsWorkerFootnote || "DCS–Worker is not yet listed as an available course."}
+                {cs.dcsWorkerFootnote ||
+                  "DCS–Worker is not yet listed as an available course."}
               </p>
             </article>
           </div>
@@ -492,10 +525,13 @@ function CaregiverSupport() {
           </div>
           <div className="caregiver-verification" id="certificate-verification">
             <div className="caregiver-verification-intro">
-              <p className="caregiver-eyebrow">{cs.checkCertEyebrow || "Certificate Verification"}</p>
+              <p className="caregiver-eyebrow">
+                {cs.checkCertEyebrow || "Certificate Verification"}
+              </p>
               <h3>{cs.checkCertTitle || "Check a DCS certificate"}</h3>
               <p>
-                {cs.checkCertDesc || "Verify a DCS programme certificate using the participant's name and certificate reference through the existing secure verification page."}
+                {cs.checkCertDesc ||
+                  "Verify a DCS programme certificate using the participant's name and certificate reference through the existing secure verification page."}
               </p>
             </div>
             <div className="caregiver-verification-preview">
@@ -503,21 +539,25 @@ function CaregiverSupport() {
                 {cs.certVerificationTag || "CERTIFICATE VERIFICATION"}
               </span>
               <p>
-                {cs.certReadyPrompt || "Have the name shown on the certificate and the certificate reference ready."}
+                {cs.certReadyPrompt ||
+                  "Have the name shown on the certificate and the certificate reference ready."}
               </p>
               <Link
                 className="caregiver-button caregiver-button-green"
                 to="/caregiver-support/verify-certificate"
               >
-                {cs.verifyCertBtn || "Verify a certificate"} <span aria-hidden="true">↗</span>
+                {cs.verifyCertBtn || "Verify a certificate"}{" "}
+                <span aria-hidden="true">↗</span>
               </Link>
               <small>
-                {cs.certNotice || "Only programme completion is verified; this is not a professional licence."}
+                {cs.certNotice ||
+                  "Only programme completion is verified; this is not a professional licence."}
               </small>
             </div>
           </div>
           <p className="caregiver-disclaimer">
-            {cs.certDisclaimer || "Certificate verification confirms completion of the stated DCS programme only. It is not professional licensing, an employment endorsement, a guarantee of service quality or a recommendation by RCBC."}
+            {cs.certDisclaimer ||
+              "Certificate verification confirms completion of the stated DCS programme only. It is not professional licensing, an employment endorsement, a guarantee of service quality or a recommendation by RCBC."}
           </p>
         </div>
       </section>
@@ -530,19 +570,24 @@ function CaregiverSupport() {
           <SectionHeading
             eyebrow={cs.supportGroupsKicker || "03 / Support Groups"}
             title={cs.supportGroupsTitle || "Connection makes a difference"}
-            description={cs.supportGroupsIntro || "Find published support groups by city, language and volunteer availability. Only records approved for publication appear here."}
+            description={
+              cs.supportGroupsIntro ||
+              "Find community support groups by city and language, including groups that welcome volunteers."
+            }
           />
           <div className="caregiver-directory">
             <div className="caregiver-directory-head">
               <div>
                 <h3>{cs.findSupportGroup || "Find a support group"}</h3>
-                <p>{cs.searchApproved || "Search the approved group directory."}</p>
+                <p>
+                  {cs.searchApproved || "Search the approved group directory."}
+                </p>
               </div>
               <span className="caregiver-directory-count">
                 {groupsLoading
-                  ? (cs.loadingGroups || "Loading groups…")
+                  ? cs.loadingGroups || "Loading groups…"
                   : groupsError
-                    ? (cs.unavailable || "Unavailable")
+                    ? cs.unavailable || "Unavailable"
                     : `${filteredGroups.length} ${cs.listingsCount || "listings"}`}
               </span>
             </div>
@@ -629,7 +674,9 @@ function CaregiverSupport() {
                       {group.accepting_volunteers ? "Yes" : "No"}
                     </p>
                     {group.email && (
-                      <a href={`mailto:${group.email}`}>{cs.emailOrganisation || "Email organisation"}</a>
+                      <a href={`mailto:${group.email}`}>
+                        {cs.emailOrganisation || "Email organisation"}
+                      </a>
                     )}
                     {group.website && /^https?:\/\//i.test(group.website) && (
                       <a
@@ -650,13 +697,15 @@ function CaregiverSupport() {
                 </span>
                 <h4>
                   {supportGroups.length === 0
-                    ? (cs.emptyComingSoon || "No published support groups yet")
-                    : (cs.emptyNoMatch || "No groups match these filters")}
+                    ? cs.emptyComingSoon || "No published support groups yet"
+                    : cs.emptyNoMatch || "No groups match these filters"}
                 </h4>
                 <p>
                   {supportGroups.length === 0
-                    ? (cs.emptyComingSoonDesc || "There are no support-group listings currently published in the directory.")
-                    : (cs.emptyNoMatchDesc || "Try another city or language, or clear the volunteer filter.")}
+                    ? cs.emptyComingSoonDesc ||
+                      "There are no support-group listings currently published in the directory."
+                    : cs.emptyNoMatchDesc ||
+                      "Try another city or language, or clear the volunteer filter."}
                 </p>
                 {supportGroups.length > 0 && (
                   <button
@@ -672,9 +721,12 @@ function CaregiverSupport() {
           </div>
           <div className="caregiver-listing-note">
             <div>
-              <strong>{cs.partOfGroup || "Are you part of a support group or NGO?"}</strong>
+              <strong>
+                {cs.partOfGroup || "Are you part of a support group or NGO?"}
+              </strong>
               <p>
-                {cs.partOfGroupDesc || "Organisations can contact the project team about listing their group. Submissions are reviewed and require admin approval before publication."}
+                {cs.partOfGroupDesc ||
+                  "Does your organisation offer a dementia support group? Contact the project team to ask about being listed in this directory. Listings are reviewed before publication."}
               </p>
             </div>
             <Link to="/about/contact">
@@ -682,7 +734,8 @@ function CaregiverSupport() {
             </Link>
           </div>
           <p className="caregiver-disclaimer">
-            {cs.groupDisclaimer || "A reviewed listing means basic information has been checked against platform requirements. Listing does not mean RCBC endorses, recommends or guarantees an organisation."}
+            {cs.groupDisclaimer ||
+              "A reviewed listing means basic information has been checked against platform requirements. Listing does not mean RCBC endorses, recommends or guarantees an organisation."}
           </p>
         </div>
       </section>
@@ -692,7 +745,10 @@ function CaregiverSupport() {
           <SectionHeading
             eyebrow={cs.volunteerKicker || "04 / Volunteer"}
             title={cs.volunteerTitle || "Support the Project"}
-            description={cs.volunteerIntro || "Volunteers connect directly with participating community organisations. Each receiving organisation manages its own applications, orientation and supervision."}
+            description={
+              cs.volunteerIntro ||
+              "Volunteers connect directly with participating community organisations. Each receiving organisation manages its own applications, orientation and supervision."
+            }
           />
           <div className="caregiver-volunteer-layout">
             <div
@@ -712,7 +768,10 @@ function CaregiverSupport() {
                   <span className="caregiver-number">
                     {String(index + 1).padStart(2, "0")}
                   </span>
-                  <span>{(cs.volunteerTypes && cs.volunteerTypes[index]?.title) || item.title}</span>
+                  <span>
+                    {(cs.volunteerTypes && cs.volunteerTypes[index]?.title) ||
+                      item.title}
+                  </span>
                   <span aria-hidden="true">↗</span>
                 </button>
               ))}
@@ -725,14 +784,24 @@ function CaregiverSupport() {
               <span className="caregiver-detail-label">
                 {cs.volunteerHeader || "VOLUNTEER WITH AN ORGANISATION"}
               </span>
-              <h3>{(cs.volunteerTypes && cs.volunteerTypes[selectedVolunteer]?.title) || volunteerTypes[selectedVolunteer].title}</h3>
-              <p>{(cs.volunteerTypes && cs.volunteerTypes[selectedVolunteer]?.description) || volunteerTypes[selectedVolunteer].description}</p>
+              <h3>
+                {(cs.volunteerTypes &&
+                  cs.volunteerTypes[selectedVolunteer]?.title) ||
+                  volunteerTypes[selectedVolunteer].title}
+              </h3>
+              <p>
+                {(cs.volunteerTypes &&
+                  cs.volunteerTypes[selectedVolunteer]?.description) ||
+                  volunteerTypes[selectedVolunteer].description}
+              </p>
               <ol className="caregiver-volunteer-steps">
-                {(cs.volunteerSteps || [
-                  "Find a relevant organisation or opportunity.",
-                  "Contact or apply directly to the receiving organisation.",
-                  "The organisation handles acceptance, role arrangements, orientation and supervision.",
-                ]).map((step, i) => (
+                {(
+                  cs.volunteerSteps || [
+                    "Find a relevant organisation or opportunity.",
+                    "Contact or apply directly to the receiving organisation.",
+                    "The organisation handles acceptance, role arrangements, orientation and supervision.",
+                  ]
+                ).map((step, i) => (
                   <li key={i}>{step}</li>
                 ))}
               </ol>
@@ -741,10 +810,12 @@ function CaregiverSupport() {
                 className="caregiver-button caregiver-button-green"
                 onClick={findVolunteerGroups}
               >
-                {cs.findVolunteerGroupsBtn || "Find groups accepting volunteers →"}
+                {cs.findVolunteerGroupsBtn ||
+                  "Find groups accepting volunteers →"}
               </button>
               <p className="caregiver-volunteer-small">
-                {cs.volunteerSmallText || "Facility and service directories remain under"}{" "}
+                {cs.volunteerSmallText ||
+                  "Facility and service directories remain under"}{" "}
                 <Link to="/find-help/support-services">
                   {cs.findHelpBtn || "Find Help & Support"}
                 </Link>
@@ -755,12 +826,14 @@ function CaregiverSupport() {
           <div className="caregiver-volunteer-terms">
             <h3>{cs.beforeYouVolunteer || "Before you volunteer"}</h3>
             <ul>
-              {(cs.volunteerTerms || [
-                "Volunteering is primarily unpaid. Personal costs are outside RCBC's responsibility unless separately agreed with the organisation.",
-                "The receiving organisation decides on onboarding, orientation, safety requirements and suitability for a role.",
-                "When applying, you may be asked for contact details, location, languages, interests, availability, optional experience and a basic declaration of physical suitability for the activity.",
-                "RCBC does not employ, assign or pay volunteers through this platform, or arrange private one-to-one caregiving placements.",
-              ]).map((term, i) => (
+              {(
+                cs.volunteerTerms || [
+                  "Volunteering is primarily unpaid. Personal costs are outside RCBC's responsibility unless separately agreed with the organisation.",
+                  "The receiving organisation decides on onboarding, orientation, safety requirements and suitability for a role.",
+                  "When applying, you may be asked for contact details, location, languages, interests, availability, optional experience and a basic declaration of physical suitability for the activity.",
+                  "RCBC does not employ, assign or pay volunteers through this platform, or arrange private one-to-one caregiving placements.",
+                ]
+              ).map((term, i) => (
                 <li key={i}>{term}</li>
               ))}
             </ul>
@@ -771,14 +844,19 @@ function CaregiverSupport() {
       <section className="caregiver-final-cta">
         <div className="caregiver-container caregiver-final-cta-inner">
           <div>
-            <p className="caregiver-eyebrow">{cs.stillLookingEyebrow || "Still looking for something?"}</p>
+            <p className="caregiver-eyebrow">
+              {cs.stillLookingEyebrow || "Still looking for something?"}
+            </p>
             <h2>{cs.stillLookingTitle || "Support is a shared journey."}</h2>
             <p>
-              {cs.stillLookingDesc || "Explore professional services, equipment and additional learning resources, or get in touch with the project team."}
+              {cs.stillLookingDesc ||
+                "Explore professional services, equipment and additional learning resources, or get in touch with the project team."}
             </p>
           </div>
           <div className="caregiver-final-actions">
-            <Link to="/find-help">{cs.findHelpBtn || "Find Help & Support →"}</Link>
+            <Link to="/find-help">
+              {cs.findHelpBtn || "Find Help & Support →"}
+            </Link>
             <Link to="/about/contact">{cs.contactUsBtn || "Contact Us →"}</Link>
           </div>
         </div>
