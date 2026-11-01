@@ -4,6 +4,11 @@
   box-sizing: border-box;
 }
 
+html {
+  font-size: 18px;
+  scroll-behavior: smooth;
+}
+
 html,
 body,
 #root {
@@ -13,11 +18,19 @@ body,
   min-height: 100%;
 }
 
+body {
+  font-size: 1rem;
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
 button,
 input,
 select,
 textarea {
   font: inherit;
+  font-size: 1rem;
 }
 
 button,
@@ -55,7 +68,7 @@ img {
 .eyebrow {
   margin-bottom: 14px;
 
-  font-size: 0.95rem;
+  font-size: 1rem;
   font-weight: 700;
 
   text-transform: uppercase;
@@ -76,4 +89,11 @@ img {
 :focus-visible {
   outline: 3px solid #155e75;
   outline-offset: 4px;
+}
+
+
+@media (max-width: 768px) {
+  html {
+    font-size: 17px;
+  }
 }

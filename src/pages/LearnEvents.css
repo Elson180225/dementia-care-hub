@@ -106,7 +106,7 @@
 .tag {
   display: inline-block;
   color: var(--color-gold-700);
-  font-size: 0.75rem;
+  font-size: 0.9rem;
   font-weight: 800;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -117,7 +117,7 @@
   display: inline-block;
   padding: 3px 10px;
   border-radius: 20px;
-  font-size: 0.72rem;
+  font-size: 0.9rem;
   font-weight: 700;
   letter-spacing: 0.05em;
   text-transform: uppercase;
@@ -148,7 +148,7 @@
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  font-size: 0.8rem;
+  font-size: 0.9rem;
   font-weight: 600;
 }
 
@@ -210,7 +210,7 @@
   border-radius: 50%;
   background: #fff;
   color: var(--color-purple-600);
-  font-size: 0.85rem;
+  font-size: 0.9rem;
 }
 
 .activity-card-body {
@@ -241,7 +241,7 @@
   flex-wrap: wrap;
   gap: 10px 16px;
   margin-top: 12px;
-  font-size: 0.85rem;
+  font-size: 0.9rem;
   font-weight: 600;
   color: var(--color-neutral-500);
 }
@@ -250,7 +250,7 @@
   display: block;
   margin-top: 10px;
   color: var(--color-neutral-600);
-  font-size: 0.78rem;
+  font-size: 0.9rem;
 }
 
 /* ================================================================
@@ -284,7 +284,7 @@
   display: inline-block;
   padding: 3px 10px;
   border-radius: 20px;
-  font-size: 0.7rem;
+  font-size: 0.9rem;
   font-weight: 700;
   text-transform: uppercase;
   margin-bottom: 10px;
@@ -343,14 +343,14 @@
   display: inline-block;
   padding: 4px 12px;
   border-radius: 20px;
-  font-size: 0.72rem;
+  font-size: 0.9rem;
   font-weight: 700;
   background: var(--color-neutral-100);
   color: var(--color-purple-600);
 }
 
 .resource-year {
-  font-size: 0.85rem;
+  font-size: 0.9rem;
   font-weight: 700;
   color: var(--color-neutral-600);
 }
@@ -369,7 +369,7 @@
 .resource-meta {
   display: flex;
   gap: 16px;
-  font-size: 0.85rem;
+  font-size: 0.9rem;
   color: var(--color-neutral-600);
   margin-bottom: 16px;
 }
@@ -392,7 +392,7 @@
   min-height: 42px;
   padding: 0 16px;
   border-radius: 9px;
-  font-size: 0.88rem;
+  font-size: 0.9rem;
   font-weight: 700;
   text-decoration: none;
   cursor: pointer;
@@ -510,7 +510,7 @@
 }
 
 .tab-track-badge {
-  font-size: 0.74rem;
+  font-size: 0.9rem;
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.06em;
@@ -531,7 +531,7 @@
 }
 
 .tab-status-chip {
-  font-size: 0.72rem;
+  font-size: 0.9rem;
   font-weight: 700;
   color: var(--color-neutral-600);
 }
@@ -546,7 +546,7 @@
 
 .tab-card-subtitle {
   margin: 0;
-  font-size: 0.88rem;
+  font-size: 0.9rem;
   color: var(--color-neutral-600);
   line-height: 1.4;
   flex: 1;
@@ -612,7 +612,7 @@
 }
 
 .stage-track-pill {
-  font-size: 0.78rem;
+  font-size: 0.9rem;
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -633,7 +633,7 @@
 }
 
 .stage-role-pill {
-  font-size: 0.85rem;
+  font-size: 0.9rem;
   font-weight: 600;
   color: var(--color-neutral-700);
   background: var(--color-neutral-100);
@@ -642,7 +642,7 @@
 }
 
 .stage-status-pill {
-  font-size: 0.78rem;
+  font-size: 0.9rem;
   font-weight: 700;
   color: var(--color-purple-600);
   border: 1px solid var(--color-purple-300);
@@ -796,7 +796,7 @@
   background: var(--color-gold-600);
   color: #ffffff;
   font-weight: 800;
-  font-size: 0.82rem;
+  font-size: 0.9rem;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -811,7 +811,7 @@
 
 .stage-step-row p {
   margin: 2px 0 0;
-  font-size: 0.84rem;
+  font-size: 0.9rem;
   color: var(--color-neutral-600);
   line-height: 1.4;
 }
@@ -920,7 +920,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 0.82rem;
+  font-size: 0.9rem;
   font-weight: 700;
   color: var(--color-neutral-500);
   text-transform: uppercase;
@@ -952,7 +952,7 @@
   display: inline-block;
   padding: 3px 10px;
   border-radius: 14px;
-  font-size: 0.78rem;
+  font-size: 0.9rem;
   font-weight: 700;
   background: var(--color-neutral-200);
   color: var(--color-purple-600);
@@ -1011,7 +1011,7 @@
 }
 
 .spec-schedule-value span {
-  font-size: 0.88rem;
+  font-size: 0.9rem;
   color: var(--color-neutral-700);
   font-weight: 500;
 }
@@ -1019,7 +1019,7 @@
 .spec-calendar-badge {
   display: inline-block;
   margin-top: 4px;
-  font-size: 0.74rem;
+  font-size: 0.9rem;
   color: var(--color-purple-600);
   background: var(--color-neutral-100);
   padding: 2px 8px;
@@ -1045,7 +1045,7 @@
 
 .stage-media-caption {
   padding: 10px 14px;
-  font-size: 0.82rem;
+  font-size: 0.9rem;
   color: var(--color-neutral-600);
   line-height: 1.45;
   background: #ffffff;
@@ -1095,7 +1095,7 @@
   display: inline-block;
   padding: 4px 10px;
   border-radius: 14px;
-  font-size: 0.74rem;
+  font-size: 0.9rem;
   font-weight: 800;
   background: var(--color-neutral-100);
   color: var(--color-purple-600);
@@ -1120,7 +1120,7 @@
   border-radius: 10px;
   padding: 12px 16px;
   margin-bottom: 20px;
-  font-size: 0.88rem;
+  font-size: 0.9rem;
   color: var(--color-purple-600);
   display: flex;
   flex-direction: column;
@@ -1141,7 +1141,7 @@
 }
 
 .program-modal-form label {
-  font-size: 0.82rem;
+  font-size: 0.9rem;
   font-weight: 700;
   color: var(--color-purple-600);
   text-transform: uppercase;
@@ -1238,7 +1238,7 @@
   border: 1px solid var(--color-neutral-200);
   border-radius: 8px;
   padding: 12px 16px;
-  font-size: 0.88rem;
+  font-size: 0.9rem;
   color: var(--color-neutral-600);
   text-align: left;
 }
@@ -1300,7 +1300,7 @@
   border-radius: 50%;
   background: #fff;
   color: var(--color-purple-600);
-  font-size: 0.68rem;
+  font-size: 0.9rem;
 }
 
 /* ================================================================
@@ -1524,7 +1524,7 @@
 }
 
 .activity-details dt {
-  font-size: 0.75rem;
+  font-size: 0.9rem;
   color: var(--color-neutral-600);
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -1594,7 +1594,7 @@
 }
 
 .activity-action-btn small {
-  font-size: 0.72rem;
+  font-size: 0.9rem;
   font-weight: 400;
   opacity: 0.85;
 }
@@ -1651,7 +1651,7 @@
 }
 
 .trainer-cert-ref {
-  font-size: 0.82rem;
+  font-size: 0.9rem;
   color: var(--color-neutral-600);
   font-weight: 600;
 }
@@ -1701,7 +1701,7 @@
 }
 
 .trainer-stats small {
-  font-size: 0.75rem;
+  font-size: 0.9rem;
   color: var(--color-neutral-600);
 }
 
@@ -1734,7 +1734,7 @@
 
 .trainer-activity-title {
   flex: 1;
-  font-size: 0.88rem;
+  font-size: 0.9rem;
   font-weight: 600;
   color: var(--color-neutral-700);
 }
@@ -1824,7 +1824,7 @@
 }
 
 .uc-filter-label {
-  font-size: 0.76rem;
+  font-size: 0.9rem;
   font-weight: 700;
   color: var(--color-purple-400);
   text-transform: uppercase;
@@ -1833,7 +1833,7 @@
 }
 
 .uc-filter-select {
-  font-size: 0.84rem;
+  font-size: 0.9rem;
   color: var(--color-neutral-900);
   border: 1.5px solid var(--color-neutral-200);
   border-radius: 8px;
@@ -1861,7 +1861,7 @@
   border: 1.5px solid var(--color-neutral-200);
   background: transparent;
   color: var(--color-purple-400);
-  font-size: 0.8rem;
+  font-size: 0.9rem;
   font-weight: 600;
   cursor: pointer;
   font-family: inherit;
@@ -1876,7 +1876,7 @@
 
 .uc-event-count {
   margin-left: auto;
-  font-size: 0.8rem;
+  font-size: 0.9rem;
   font-weight: 600;
   color: var(--color-neutral-600);
   white-space: nowrap;
@@ -1954,7 +1954,7 @@
   border: 1.5px solid var(--color-neutral-200);
   background: var(--color-neutral-50);
   color: var(--color-purple-600);
-  font-size: 0.8rem;
+  font-size: 0.9rem;
   font-weight: 700;
   cursor: pointer;
   font-family: inherit;
@@ -1978,7 +1978,7 @@
 .uc-day-label {
   padding: 8px 4px;
   text-align: center;
-  font-size: 0.72rem;
+  font-size: 0.9rem;
   font-weight: 800;
   color: var(--color-purple-600);
   text-transform: uppercase;
@@ -2047,7 +2047,7 @@
 }
 
 .uc-cell-event-title {
-  font-size: 0.68rem;
+  font-size: 0.9rem;
   font-weight: 600;
   line-height: 1.2;
   color: var(--color-purple-600);
@@ -2062,7 +2062,7 @@
 }
 
 .uc-cell-extra-badge {
-  font-size: 0.62rem;
+  font-size: 0.9rem;
   font-weight: 700;
   color: var(--color-purple-600);
   background: rgba(93, 47, 145, 0.12);
@@ -2089,7 +2089,7 @@
 }
 
 .uc-cell-num {
-  font-size: 0.78rem;
+  font-size: 0.9rem;
   font-weight: 600;
   color: var(--color-purple-600);
   width: 24px;
@@ -2148,7 +2148,7 @@
   transform: translateX(-50%);
   background: var(--color-neutral-900);
   color: #ffffff;
-  font-size: 0.68rem;
+  font-size: 0.9rem;
   font-weight: 600;
   line-height: 1.3;
   white-space: nowrap;
@@ -2190,7 +2190,7 @@
 
 /* Overflow badge */
 .uc-dot-overflow {
-  font-size: 0.62rem;
+  font-size: 0.9rem;
   font-weight: 800;
   color: var(--color-neutral-600);
   background: var(--color-neutral-100);
@@ -2329,7 +2329,7 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  font-size: 0.73rem;
+  font-size: 0.9rem;
   color: var(--color-purple-400);
   font-weight: 500;
 }
@@ -2428,7 +2428,7 @@
 }
 
 .uc-detail-type-badge {
-  font-size: 0.67rem;
+  font-size: 0.9rem;
   font-weight: 800;
   padding: 3px 10px;
   border-radius: 6px;
@@ -2461,7 +2461,7 @@
 }
 
 .uc-meta-row dt {
-  font-size: 0.7rem;
+  font-size: 0.9rem;
   font-weight: 700;
   color: var(--color-neutral-600);
   text-transform: uppercase;
@@ -2470,14 +2470,14 @@
 }
 
 .uc-meta-row dd {
-  font-size: 0.82rem;
+  font-size: 0.9rem;
   color: var(--color-neutral-700);
   line-height: 1.45;
   margin: 0;
 }
 
 .uc-meta-time {
-  font-size: 0.76rem;
+  font-size: 0.9rem;
   color: var(--color-purple-600);
 }
 
@@ -2494,7 +2494,7 @@
 }
 
 .uc-detail-desc h4 {
-  font-size: 0.72rem;
+  font-size: 0.9rem;
   font-weight: 800;
   color: var(--color-neutral-600);
   text-transform: uppercase;
@@ -2503,7 +2503,7 @@
 }
 
 .uc-detail-desc p {
-  font-size: 0.84rem;
+  font-size: 0.9rem;
   color: var(--color-purple-600);
   line-height: 1.6;
   margin: 0;
@@ -2541,7 +2541,7 @@
 }
 
 .uc-register-btn small {
-  font-size: 0.68rem;
+  font-size: 0.9rem;
   font-weight: 400;
   opacity: 0.75;
 }
@@ -2561,7 +2561,7 @@
 .uc-action-past {
   display: block;
   text-align: center;
-  font-size: 0.82rem;
+  font-size: 0.9rem;
   color: var(--color-neutral-600);
   padding: 10px;
   border: 1.5px dashed var(--color-neutral-200);
@@ -2593,7 +2593,7 @@
 }
 
 .uc-detail-empty-inner p {
-  font-size: 0.88rem;
+  font-size: 0.9rem;
   color: var(--color-neutral-600);
   line-height: 1.55;
   margin: 0;
@@ -2673,7 +2673,7 @@
   }
 
   .uc-day-label {
-    font-size: 0.6rem;
+    font-size: 0.9rem;
   }
 }
 
@@ -2787,7 +2787,7 @@
 }
 
 .calendar-row-date small {
-  font-size: 0.72rem;
+  font-size: 0.9rem;
   color: var(--color-neutral-600);
 }
 
@@ -2805,7 +2805,7 @@
 
 .calendar-row p {
   margin: 0;
-  font-size: 0.88rem;
+  font-size: 0.9rem;
   color: var(--color-neutral-600);
   line-height: 1.45;
 }
@@ -2814,7 +2814,7 @@
   display: flex;
   flex-direction: column;
   gap: 5px;
-  font-size: 0.82rem;
+  font-size: 0.9rem;
   color: var(--color-neutral-600);
   font-weight: 600;
   text-align: right;
@@ -3108,7 +3108,7 @@
   border-radius: 20px;
   color: #fff;
   background: rgba(40, 36, 43, 0.82);
-  font-size: .76rem;
+  font-size: 0.9rem;
   font-weight: 700;
 }
 
@@ -3287,7 +3287,7 @@
   border-radius: 9px;
   background: #ffffff;
   color: var(--color-purple-600);
-  font-size: 0.88rem;
+  font-size: 0.9rem;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -3315,7 +3315,7 @@
   border-radius: 20px;
   background: var(--color-neutral-100);
   color: var(--color-purple-600);
-  font-size: 0.82rem;
+  font-size: 0.9rem;
   font-weight: 600;
 }
 
@@ -3432,7 +3432,7 @@
   display: inline-block;
   margin-bottom: 6px;
   color: var(--color-purple-600);
-  font-size: 0.8rem;
+  font-size: 0.9rem;
   font-weight: 800;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -3474,7 +3474,7 @@
   border-radius: 7px;
   background: transparent;
   color: var(--color-neutral-500);
-  font-size: 0.78rem;
+  font-size: 0.9rem;
   font-weight: 700;
   letter-spacing: 0.05em;
   cursor: pointer;
@@ -3606,7 +3606,7 @@
   border-radius: 14px;
   background: var(--color-neutral-200);
   color: var(--color-purple-600);
-  font-size: 0.76rem;
+  font-size: 0.9rem;
   font-weight: 700;
 }
 
@@ -3692,7 +3692,7 @@
 
 .topic-grid-date-badge span {
   display: block;
-  font-size: 0.72rem;
+  font-size: 0.9rem;
   font-weight: 800;
   color: var(--color-neutral-500);
   letter-spacing: 0.06em;
@@ -3833,7 +3833,7 @@
 }
 
 .subnav-label {
-  font-size: 0.82rem;
+  font-size: 0.9rem;
   font-weight: 700;
   color: var(--color-neutral-600);
   text-transform: uppercase;
@@ -3855,7 +3855,7 @@
   border-radius: 30px;
   background: var(--color-neutral-100);
   color: var(--color-purple-600);
-  font-size: 0.88rem;
+  font-size: 0.9rem;
   font-weight: 600;
   text-decoration: none;
   border: 1px solid var(--color-neutral-200);
@@ -3967,7 +3967,7 @@
   border: none;
   background: transparent;
   color: var(--color-neutral-600);
-  font-size: 0.88rem;
+  font-size: 0.9rem;
   font-weight: 700;
   cursor: pointer;
   transition: all 0.22s ease;
@@ -4028,7 +4028,7 @@
   border-radius: 14px;
   background: var(--color-neutral-100);
   border: 1px solid var(--color-neutral-200);
-  font-size: 0.84rem;
+  font-size: 0.9rem;
   font-weight: 700;
   color: var(--color-neutral-600);
 }
@@ -4183,7 +4183,7 @@
 }
 
 .milestones-period-tag {
-  font-size: 0.78rem;
+  font-size: 0.9rem;
   font-weight: 800;
   color: var(--color-purple-600);
   background: var(--color-neutral-100);
@@ -4195,7 +4195,7 @@
 }
 
 .milestones-theme-tag {
-  font-size: 0.82rem;
+  font-size: 0.9rem;
   font-weight: 700;
   color: var(--color-gold-700);
   background: #fdf3e2;
@@ -4300,7 +4300,7 @@
 }
 
 .stepper-phase {
-  font-size: 0.74rem;
+  font-size: 0.9rem;
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -4311,7 +4311,7 @@
 }
 
 .stepper-tag {
-  font-size: 0.74rem;
+  font-size: 0.9rem;
   font-weight: 700;
   color: var(--color-gold-700);
   background: #fdf3e2;
@@ -4438,7 +4438,7 @@
   .stepper-node {
     width: 32px;
     height: 32px;
-    font-size: 0.82rem;
+    font-size: 0.9rem;
     margin-top: 6px;
   }
 
@@ -4512,7 +4512,7 @@
   background: rgba(69, 32, 109, 0.85);
   backdrop-filter: blur(4px);
   color: #ffffff;
-  font-size: 0.76rem;
+  font-size: 0.9rem;
   font-weight: 700;
   padding: 5px 12px;
   border-radius: 20px;
@@ -4563,7 +4563,7 @@
 }
 
 .dialogue-date {
-  font-size: 0.82rem;
+  font-size: 0.9rem;
   font-weight: 700;
   color: var(--color-purple-600);
 }
@@ -4703,7 +4703,7 @@
   border: none;
   background: transparent;
   border-radius: 7px;
-  font-size: 0.85rem;
+  font-size: 0.9rem;
   font-weight: 700;
   color: var(--color-neutral-600);
   cursor: pointer;
@@ -4722,7 +4722,7 @@
   background: #fceceb;
   color: #b9382f;
   border: 1px solid #f5cfcb;
-  font-size: 0.86rem;
+  font-size: 0.9rem;
   font-weight: 700;
   cursor: pointer;
   transition: background 0.2s;
@@ -4751,7 +4751,7 @@
 }
 
 .active-filters-hint {
-  font-size: 0.84rem;
+  font-size: 0.9rem;
   color: var(--color-neutral-600);
   font-style: italic;
 }
@@ -4822,7 +4822,7 @@
 }
 
 .event-type-badge {
-  font-size: 0.75rem;
+  font-size: 0.9rem;
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.06em;
@@ -4867,7 +4867,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 0.86rem;
+  font-size: 0.9rem;
   color: var(--color-neutral-600);
 }
 
@@ -4891,7 +4891,7 @@
   background: var(--color-purple-600);
   color: #ffffff;
   border-radius: 8px;
-  font-size: 0.84rem;
+  font-size: 0.9rem;
   font-weight: 700;
   text-decoration: none;
   transition: all 0.2s ease;
@@ -4903,7 +4903,7 @@
 }
 
 .event-completed-tag {
-  font-size: 0.82rem;
+  font-size: 0.9rem;
   font-weight: 700;
   color: var(--color-neutral-500);
   background: var(--color-neutral-100);
@@ -4916,7 +4916,7 @@
   border: 1px solid var(--color-neutral-300);
   padding: 7px 12px;
   border-radius: 8px;
-  font-size: 0.84rem;
+  font-size: 0.9rem;
   font-weight: 600;
   color: var(--color-purple-600);
   cursor: pointer;
@@ -5046,7 +5046,7 @@
 }
 
 .news-outlet-tag {
-  font-size: 0.8rem;
+  font-size: 0.9rem;
   font-weight: 800;
   color: var(--color-purple-600);
   text-transform: uppercase;
@@ -5054,7 +5054,7 @@
 }
 
 .news-lang-pill {
-  font-size: 0.74rem;
+  font-size: 0.9rem;
   font-weight: 700;
   padding: 3px 8px;
   border-radius: 12px;
@@ -5083,7 +5083,7 @@
 }
 
 .news-click-prompt {
-  font-size: 0.84rem;
+  font-size: 0.9rem;
   font-weight: 700;
   color: var(--color-purple-600);
 }
@@ -5107,7 +5107,7 @@
 }
 
 .collab-label {
-  font-size: 0.82rem;
+  font-size: 0.9rem;
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.08em;
@@ -5230,7 +5230,7 @@
 }
 
 .lightbox-badge {
-  font-size: 0.74rem;
+  font-size: 0.9rem;
   font-weight: 800;
   color: var(--color-purple-600);
   text-transform: uppercase;
@@ -5238,7 +5238,7 @@
 }
 
 .lightbox-date {
-  font-size: 0.82rem;
+  font-size: 0.9rem;
   color: var(--color-neutral-600);
   margin-left: 8px;
 }
@@ -5255,7 +5255,7 @@
   background: #ffffff;
   border: 1px solid var(--color-neutral-300);
   color: var(--color-purple-600);
-  font-size: 0.85rem;
+  font-size: 0.9rem;
   font-weight: 600;
   text-decoration: none;
   cursor: pointer;
@@ -5356,7 +5356,7 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  font-size: 0.74rem;
+  font-size: 0.9rem;
   font-weight: 800;
   color: var(--color-purple-600);
   letter-spacing: 0.12em;
@@ -5421,7 +5421,7 @@
 }
 
 .ct-stat span {
-  font-size: 0.78rem;
+  font-size: 0.9rem;
   color: var(--color-neutral-600);
   font-weight: 600;
   text-transform: uppercase;
@@ -5613,7 +5613,7 @@
   background: var(--color-purple-600);
   border: 2.5px solid #ffffff;
   color: #ffffff;
-  font-size: 0.6rem;
+  font-size: 0.9rem;
   font-weight: 900;
   display: flex;
   align-items: center;
@@ -5633,7 +5633,7 @@
 }
 
 .ct-mc-badge {
-  font-size: 0.62rem;
+  font-size: 0.9rem;
   font-weight: 800;
   letter-spacing: 0.1em;
   text-transform: uppercase;
@@ -5645,7 +5645,7 @@
 }
 
 .ct-mc-name {
-  font-size: 0.86rem;
+  font-size: 0.9rem;
   font-weight: 700;
   color: var(--color-neutral-900);
   line-height: 1.3;
@@ -5653,14 +5653,14 @@
 }
 
 .ct-mc-role {
-  font-size: 0.74rem;
+  font-size: 0.9rem;
   color: var(--color-neutral-600);
   line-height: 1.4;
   display: block;
 }
 
 .ct-mc-inst {
-  font-size: 0.68rem;
+  font-size: 0.9rem;
   color: var(--color-neutral-600);
   display: block;
 }
@@ -5677,7 +5677,7 @@
 }
 
 .ct-mc-cert {
-  font-size: 0.6rem;
+  font-size: 0.9rem;
   color: var(--color-neutral-600);
   font-family: "SF Mono", "Fira Code", monospace;
   white-space: nowrap;
@@ -5687,7 +5687,7 @@
 }
 
 .ct-mc-cta {
-  font-size: 0.72rem;
+  font-size: 0.9rem;
   font-weight: 700;
   color: var(--mc-color, var(--color-purple-600));
   background: none;
@@ -5719,7 +5719,7 @@
 /* ---- Shared section typography ---- */
 .ct-section-eyebrow {
   display: inline-block;
-  font-size: 0.7rem;
+  font-size: 0.9rem;
   font-weight: 800;
   color: var(--color-purple-600);
   letter-spacing: 0.14em;
@@ -5745,7 +5745,7 @@
 }
 
 .ct-section-sub {
-  font-size: 0.88rem;
+  font-size: 0.9rem;
   color: var(--color-neutral-600);
   margin: 0;
 }
@@ -5766,7 +5766,7 @@
   background: transparent;
   border: 1.5px solid var(--color-purple-600);
   color: var(--color-purple-600);
-  font-size: 0.88rem;
+  font-size: 0.9rem;
   font-weight: 700;
   cursor: pointer;
   transition: all 0.22s ease;
@@ -5907,7 +5907,7 @@
 }
 
 .ct-advisory-badge {
-  font-size: 0.67rem;
+  font-size: 0.9rem;
   font-weight: 800;
   letter-spacing: 0.1em;
   text-transform: uppercase;
@@ -5926,13 +5926,13 @@
 }
 
 .ct-advisory-role {
-  font-size: 0.8rem;
+  font-size: 0.9rem;
   color: var(--color-neutral-600);
   line-height: 1.4;
 }
 
 .ct-advisory-inst {
-  font-size: 0.76rem;
+  font-size: 0.9rem;
   color: var(--color-neutral-600);
 }
 
@@ -5946,13 +5946,13 @@
 }
 
 .ct-advisory-cert {
-  font-size: 0.7rem;
+  font-size: 0.9rem;
   color: var(--color-neutral-600);
   font-family: "SF Mono", "Fira Code", monospace;
 }
 
 .ct-advisory-cta {
-  font-size: 0.78rem;
+  font-size: 0.9rem;
   font-weight: 700;
   color: var(--advisory-color, #1e3a8a);
   transition: transform 0.18s ease;
@@ -6019,7 +6019,7 @@
 
 .editorial-eyebrow {
   display: inline-block;
-  font-size: 0.72rem;
+  font-size: 0.9rem;
   font-weight: 800;
   color: var(--color-gold-700);
   letter-spacing: 0.12em;
@@ -6117,7 +6117,7 @@
 
 .facilitator-group-eyebrow {
   display: inline-block;
-  font-size: 0.68rem;
+  font-size: 0.9rem;
   font-weight: 800;
   letter-spacing: 0.12em;
   text-transform: uppercase;
@@ -6167,7 +6167,7 @@
   background: var(--color-neutral-50);
   border: 1.5px solid var(--color-purple-300);
   color: var(--color-purple-600);
-  font-size: 0.84rem;
+  font-size: 0.9rem;
   font-weight: 700;
   cursor: pointer;
   white-space: nowrap;
@@ -6267,7 +6267,7 @@
   background: var(--color-purple-600);
   border: 2px solid #ffffff;
   color: #ffffff;
-  font-size: 0.68rem;
+  font-size: 0.9rem;
   font-weight: 900;
   display: flex;
   align-items: center;
@@ -6277,7 +6277,7 @@
 
 .facilitator-avatar-item.is-advisory .facilitator-avatar-verified {
   background: var(--color-purple-600);
-  font-size: 0.6rem;
+  font-size: 0.9rem;
 }
 
 /* ---- Hover Overlay (pops out above the avatar) ---- */
@@ -6335,14 +6335,14 @@
 }
 
 .overlay-name {
-  font-size: 0.82rem;
+  font-size: 0.9rem;
   font-weight: 700;
   color: #ffffff;
   line-height: 1.3;
 }
 
 .overlay-role {
-  font-size: 0.72rem;
+  font-size: 0.9rem;
   color: var(--color-purple-300);
   line-height: 1.3;
 }
@@ -6352,7 +6352,7 @@
 }
 
 .overlay-city {
-  font-size: 0.7rem;
+  font-size: 0.9rem;
   color: var(--color-gold-300);
   margin-bottom: 6px;
 }
@@ -6364,7 +6364,7 @@
   background: var(--color-purple-600);
   border: none;
   color: #ffffff;
-  font-size: 0.75rem;
+  font-size: 0.9rem;
   font-weight: 700;
   cursor: pointer;
   transition: background 0.18s ease, transform 0.18s ease;
@@ -6407,7 +6407,7 @@
   background: var(--color-neutral-100);
   border: 1px solid var(--color-neutral-200);
   color: var(--color-purple-600);
-  font-size: 0.82rem;
+  font-size: 0.9rem;
   font-weight: 700;
   cursor: pointer;
   transition: all 0.22s ease;
@@ -6439,7 +6439,7 @@
 }
 
 .framework-chip {
-  font-size: 0.78rem;
+  font-size: 0.9rem;
   font-weight: 800;
   color: var(--color-gold-700);
   background: #fdf2df;
@@ -6526,7 +6526,7 @@
   background: #ffffff;
   color: var(--color-purple-600);
   font-weight: 700;
-  font-size: 0.88rem;
+  font-size: 0.9rem;
 }
 
 .framework-card-info {
@@ -6541,7 +6541,7 @@
 
 .framework-card-info small {
   color: var(--color-neutral-600);
-  font-size: 0.82rem;
+  font-size: 0.9rem;
 }
 
 /* Part 2: Trainer Directory & Boundary Notice */
@@ -6580,7 +6580,7 @@
 }
 
 .boundary-text-content p {
-  font-size: 0.88rem;
+  font-size: 0.9rem;
   color: #5d5346;
   line-height: 1.6;
   margin: 0;
@@ -6628,7 +6628,7 @@
   border: none;
   background: transparent;
   color: var(--color-neutral-600);
-  font-size: 0.88rem;
+  font-size: 0.9rem;
   font-weight: 700;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -6663,7 +6663,7 @@
   border-radius: 8px;
   border: 1px solid var(--color-neutral-300);
   background: #ffffff;
-  font-size: 0.88rem;
+  font-size: 0.9rem;
   color: var(--color-purple-700);
   outline: none;
 }
@@ -6694,7 +6694,7 @@
   appearance: none;
   font-weight: 600;
   color: var(--color-purple-700);
-  font-size: 0.86rem;
+  font-size: 0.9rem;
   cursor: pointer;
 }
 
@@ -6774,7 +6774,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.72rem;
+  font-size: 0.9rem;
   font-weight: 900;
   border: 2px solid #ffffff;
 }
@@ -6789,7 +6789,7 @@
 
 .trainer-category-chip {
   display: inline-block;
-  font-size: 0.68rem;
+  font-size: 0.9rem;
   font-weight: 800;
   letter-spacing: 0.06em;
   padding: 3px 8px;
@@ -6815,7 +6815,7 @@
 }
 
 .trainer-role-title {
-  font-size: 0.85rem;
+  font-size: 0.9rem;
   color: var(--color-neutral-600);
   margin: 0 0 6px;
   line-height: 1.4;
@@ -6827,7 +6827,7 @@
 
 .trainer-cert-badge {
   display: inline-block;
-  font-size: 0.72rem;
+  font-size: 0.9rem;
   font-weight: 800;
   color: var(--color-gold-700);
   background: #fbf1e0;
@@ -6851,14 +6851,14 @@
 }
 
 .meta-lbl {
-  font-size: 0.7rem;
+  font-size: 0.9rem;
   color: var(--color-neutral-600);
   text-transform: uppercase;
   font-weight: 700;
 }
 
 .meta-val {
-  font-size: 0.84rem;
+  font-size: 0.9rem;
   color: var(--color-purple-700);
   white-space: nowrap;
   overflow: hidden;
@@ -6896,7 +6896,7 @@
 }
 
 .counter-col span {
-  font-size: 0.72rem;
+  font-size: 0.9rem;
   color: var(--color-neutral-600);
   font-weight: 600;
 }
@@ -6921,7 +6921,7 @@
   background: var(--color-purple-700);
   color: #ffffff;
   border: none;
-  font-size: 0.84rem;
+  font-size: 0.9rem;
   font-weight: 700;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -6948,7 +6948,7 @@
   border: 1px solid var(--color-neutral-200);
   background: #ffffff;
   color: var(--color-purple-600);
-  font-size: 0.78rem;
+  font-size: 0.9rem;
   font-weight: 700;
   cursor: pointer;
   transition: all 0.2s;
@@ -6966,7 +6966,7 @@
   background: var(--color-neutral-100);
   color: var(--color-purple-600);
   border: 1px solid var(--color-neutral-200);
-  font-size: 0.78rem;
+  font-size: 0.9rem;
   font-weight: 700;
   text-decoration: none;
   transition: all 0.2s;
@@ -7096,7 +7096,7 @@
   border-radius: 50%;
   background: var(--color-purple-400);
   color: #ffffff;
-  font-size: 0.85rem;
+  font-size: 0.9rem;
   font-weight: 900;
   display: flex;
   align-items: center;
@@ -7117,7 +7117,7 @@
 }
 
 .facilitator-category-pill {
-  font-size: 0.72rem;
+  font-size: 0.9rem;
   font-weight: 800;
   padding: 4px 10px;
   border-radius: 6px;
@@ -7136,7 +7136,7 @@
 }
 
 .facilitator-cert-ref-pill {
-  font-size: 0.74rem;
+  font-size: 0.9rem;
   font-weight: 700;
   background: #fbf1e0;
   color: var(--color-gold-700);
@@ -7176,14 +7176,14 @@
 }
 
 .meta-label {
-  font-size: 0.7rem;
+  font-size: 0.9rem;
   color: var(--color-neutral-600);
   text-transform: uppercase;
   font-weight: 700;
 }
 
 .meta-value {
-  font-size: 0.88rem;
+  font-size: 0.9rem;
   color: var(--color-purple-700);
   font-weight: 600;
 }
@@ -7225,7 +7225,7 @@
 }
 
 .activities-section-header p {
-  font-size: 0.86rem;
+  font-size: 0.9rem;
   color: var(--color-neutral-600);
   margin: 0;
 }
@@ -7244,7 +7244,7 @@
   border: none;
   background: transparent;
   color: var(--color-neutral-600);
-  font-size: 0.78rem;
+  font-size: 0.9rem;
   font-weight: 700;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -7290,7 +7290,7 @@
 }
 
 .act-type-tag {
-  font-size: 0.72rem;
+  font-size: 0.9rem;
   font-weight: 800;
   color: var(--color-purple-600);
   background: var(--color-neutral-100);
@@ -7305,7 +7305,7 @@
 }
 
 .modal-act-desc {
-  font-size: 0.86rem;
+  font-size: 0.9rem;
   color: var(--color-neutral-600);
   line-height: 1.5;
   margin: 0 0 8px;
@@ -7314,7 +7314,7 @@
 .modal-act-meta {
   display: flex;
   gap: 14px;
-  font-size: 0.8rem;
+  font-size: 0.9rem;
   color: var(--color-neutral-600);
   flex-wrap: wrap;
 }
@@ -7324,7 +7324,7 @@
   border-radius: 8px;
   background: var(--color-purple-600);
   color: #ffffff;
-  font-size: 0.82rem;
+  font-size: 0.9rem;
   font-weight: 700;
   text-decoration: none;
   white-space: nowrap;
@@ -7344,7 +7344,7 @@
 }
 
 .archived-pill {
-  font-size: 0.72rem;
+  font-size: 0.9rem;
   font-weight: 800;
   color: #4b5563;
   background: #f3f4f6;
@@ -7353,7 +7353,7 @@
 }
 
 .modal-act-archived-info small {
-  font-size: 0.74rem;
+  font-size: 0.9rem;
   color: #6b7280;
 }
 
@@ -7385,13 +7385,13 @@
 
 .facilitator-modal-boundary-box strong {
   display: block;
-  font-size: 0.82rem;
+  font-size: 0.9rem;
   color: var(--color-gold-700);
   margin-bottom: 2px;
 }
 
 .facilitator-modal-boundary-box p {
-  font-size: 0.8rem;
+  font-size: 0.9rem;
   color: #695e52;
   line-height: 1.45;
   margin: 0;
@@ -7502,7 +7502,7 @@
 
 .step-sub {
   display: block;
-  font-size: 0.74rem;
+  font-size: 0.9rem;
   font-weight: 700;
   color: var(--color-purple-600);
   text-transform: uppercase;
@@ -7510,7 +7510,7 @@
 }
 
 .trainer-step-card p {
-  font-size: 0.88rem;
+  font-size: 0.9rem;
   color: var(--color-neutral-600);
   line-height: 1.5;
   margin: 0;
@@ -7954,7 +7954,7 @@
 
   .facilitator-hover-overlay {
     width: 170px;
-    font-size: 0.78rem;
+    font-size: 0.9rem;
   }
 }
 
@@ -7970,7 +7970,7 @@
   }
 
   .facilitator-avatar-initials {
-    font-size: 0.88rem;
+    font-size: 0.9rem;
   }
 
   .facilitator-directory-section {

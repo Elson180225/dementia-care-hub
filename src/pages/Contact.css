@@ -17,7 +17,7 @@
 .contact-boundary p { margin: 8px 0 0; }
 .contact-field { margin: 20px 0; }
 .contact-field label { display: block; font-weight: 700; margin-bottom: 6px; }
-.contact-field label span { font-weight: 400; font-size: .85rem; }
+.contact-field label span { font-weight: 400; font-size: 0.9rem; }
 .contact-field input, .contact-field select, .contact-field textarea { width: 100%; padding: 12px; border: 1px solid var(--color-purple-400); border-radius: 8px; color: var(--color-neutral-900); background: white; min-height: 48px; }
 .contact-field textarea { resize: vertical; }
 .contact-field [aria-invalid="true"] { border: 2px solid #a12121; }

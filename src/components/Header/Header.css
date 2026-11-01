@@ -69,7 +69,7 @@
 
   color: var(--color-neutral-600);
 
-  font-size: 14px;
+  font-size: 16px;
 }
 
 .top-actions {
@@ -84,7 +84,7 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  font-size: 12px;
+  font-size: 16px;
   font-weight: 700;
   white-space: nowrap;
 }
@@ -172,7 +172,7 @@
 
   color: var(--color-purple-700);
 
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 600;
 
   transition:
@@ -248,7 +248,7 @@
 
   padding: 8px 10px;
 
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 500;
 
   cursor: pointer;
@@ -387,7 +387,7 @@
 
   color: var(--color-neutral-600);
 
-  font-size: 12px;
+  font-size: 16px;
   font-weight: 500;
 
   letter-spacing: 0.02em;
@@ -427,7 +427,7 @@
 
   text-decoration: none;
 
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 650;
 
   white-space: nowrap;
@@ -459,7 +459,7 @@
 }
 
 .nav-link span {
-  font-size: 12px;
+  font-size: 16px;
 
   opacity: 0.75;
 }
@@ -524,7 +524,7 @@
 
   text-decoration: none;
 
-  font-size: 15px;
+  font-size: 16px;
   font-weight: 550;
 
   background: var(--color-neutral-50);
@@ -567,7 +567,7 @@
 
   text-decoration: none;
 
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 700;
 
   white-space: nowrap;
@@ -746,7 +746,7 @@
 
     text-decoration: none;
 
-    font-size: 15px;
+    font-size: 16px;
     font-weight: 500;
   }
 
@@ -785,7 +785,7 @@
   .utility-nav {
     margin-right: auto;
     gap: 6px;
-    font-size: 11px;
+    font-size: 16px;
   }
 
   .top-actions .animated-search-button {
@@ -806,11 +806,11 @@
   }
 
   .top-actions .animated-search-text {
-    font-size: 13px;
+    font-size: 16px;
   }
 
   .language-wrapper > button {
-    font-size: 13px;
+    font-size: 16px;
 
     padding: 7px 8px;
   }
@@ -833,11 +833,11 @@
   }
 
   .brand-text strong {
-    font-size: 15px;
+    font-size: 16px;
   }
 
   .brand-text span {
-    font-size: 11px;
+    font-size: 16px;
   }
 
   .support-btn {
@@ -862,7 +862,7 @@
   }
 
   .brand-text strong {
-    font-size: 14px;
+    font-size: 16px;
   }
 
   .brand-logo {
