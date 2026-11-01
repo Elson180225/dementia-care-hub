@@ -52,7 +52,7 @@
 
   color: var(--color-gold-300);
 
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 800;
 
   letter-spacing: 0.12em;
@@ -106,7 +106,7 @@
 
   color: var(--fh-purple);
 
-  font-size: 13px;
+  font-size: 16px;
   font-weight: 800;
 
   letter-spacing: 0.1em;
@@ -243,7 +243,7 @@
 .find-help-card-number {
   color: var(--fh-purple);
 
-  font-size: 13px;
+  font-size: 16px;
 
   font-weight: 800;
 
@@ -347,7 +347,7 @@
 
   text-decoration: none;
 
-  font-size: 13px;
+  font-size: 16px;
 
   font-weight: 700;
 
@@ -414,7 +414,7 @@
 .find-help-area-grid a > span {
   color: var(--fh-purple);
 
-  font-size: 12px;
+  font-size: 16px;
 
   font-weight: 800;
 }
@@ -497,7 +497,7 @@
 
   color: var(--fh-purple);
 
-  font-size: 12px;
+  font-size: 16px;
 
   font-weight: 800;
 
@@ -614,7 +614,7 @@
   .find-help-planning-card > span {
     color: var(--fh-purple);
 
-    font-size: 12px;
+    font-size: 16px;
 
     font-weight: 800;
 

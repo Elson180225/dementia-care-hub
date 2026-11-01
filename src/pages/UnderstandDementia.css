@@ -21,7 +21,7 @@
 .understand-eyebrow {
   margin: 0 0 10px;
   color: var(--color-gold-700);
-  font-size: 0.78rem;
+  font-size: 0.9rem;
   font-weight: 800;
   letter-spacing: 0.12em;
   text-transform: uppercase;
@@ -122,7 +122,7 @@
   white-space: nowrap;
 }
 .understand-contents-inner span {
-  font-size: 0.82rem;
+  font-size: 0.9rem;
   font-weight: 800;
   color: var(--color-neutral-600);
 }
@@ -179,7 +179,7 @@
   border-radius: 10px;
   background: var(--color-neutral-100);
   color: var(--color-purple-600);
-  font-size: 0.85rem;
+  font-size: 0.9rem;
   font-weight: 900;
 }
 .understand-info-card h3 {
@@ -330,7 +330,7 @@
   border-radius: 9px;
   background: var(--color-neutral-100);
   color: var(--color-purple-600);
-  font-size: 0.78rem;
+  font-size: 0.9rem;
 }
 .understand-options {
   display: flex;
@@ -362,7 +362,7 @@
 .understand-form-hint {
   margin: 12px 0 0;
   color: var(--color-neutral-600);
-  font-size: 0.86rem;
+  font-size: 0.9rem;
 }
 .understand-disclaimer {
   margin: 26px 0 0;

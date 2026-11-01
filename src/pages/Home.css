@@ -149,7 +149,7 @@ img {
 
   color: var(--color-gold-300);
 
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 800;
 
   letter-spacing: 0.11em;
@@ -350,7 +350,7 @@ img {
 
   color: #ffffff;
 
-  font-size: 15px;
+  font-size: 16px;
 }
 
 .hero-help-line a {
@@ -362,7 +362,7 @@ img {
 
   text-decoration: none;
 
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 700;
 }
 
@@ -393,7 +393,7 @@ img {
   color:
     rgba(93, 47, 145, 0.42);
 
-  font-size: 13px;
+  font-size: 16px;
   font-weight: 800;
 
   letter-spacing: 0.12em;
@@ -406,7 +406,7 @@ img {
 
   color: var(--purple);
 
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 800;
 
   letter-spacing: 0.11em;
@@ -609,7 +609,7 @@ img {
 .visitor-card-number {
   color: var(--purple);
 
-  font-size: 13px;
+  font-size: 16px;
   font-weight: 800;
 
   letter-spacing: 0.09em;
@@ -764,7 +764,7 @@ img {
 
   color: var(--color-neutral-500);
 
-  font-size: 15px;
+  font-size: 16px;
 }
 
 /* ============================================================
@@ -850,7 +850,7 @@ img {
   }
 
   .hero-phase-line {
-    font-size: 15px;
+    font-size: 16px;
 
     flex-wrap: wrap;
   }

@@ -59,7 +59,7 @@
 
   color: var(--color-gold-300);
 
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 800;
 
   letter-spacing: 0.11em;
@@ -143,7 +143,7 @@
   color:
     var(--ss-purple);
 
-  font-size: 12px;
+  font-size: 16px;
 
   font-weight: 800;
 
@@ -241,7 +241,7 @@
   color:
     var(--ss-text);
 
-  font-size: 15px;
+  font-size: 16px;
 }
 
 .support-services-toolbar select {
@@ -299,7 +299,7 @@
   color:
     var(--color-neutral-500);
 
-  font-size: 14px;
+  font-size: 16px;
 }
 
 .support-results-summary strong {
@@ -373,7 +373,7 @@
   color:
     var(--ss-purple);
 
-  font-size: 10px;
+  font-size: 16px;
 
   font-weight: 800;
 
@@ -388,7 +388,7 @@
   color:
     var(--color-purple-600);
 
-  font-size: 12px;
+  font-size: 16px;
 
   font-weight: 700;
 }
@@ -411,7 +411,7 @@
   color:
     var(--ss-soft);
 
-  font-size: 15px;
+  font-size: 16px;
 
   line-height: 1.65;
 }
@@ -444,7 +444,7 @@
   color:
     var(--color-purple-600);
 
-  font-size: 10px;
+  font-size: 16px;
 
   font-weight: 800;
 
@@ -461,7 +461,7 @@
   color:
     var(--color-purple-700);
 
-  font-size: 13px;
+  font-size: 16px;
 
   line-height: 1.45;
 
@@ -494,7 +494,7 @@
 
   border-radius: 20px;
 
-  font-size: 10px;
+  font-size: 16px;
 
   font-weight: 800;
 
@@ -533,7 +533,7 @@
   color:
     var(--color-neutral-600);
 
-  font-size: 11px;
+  font-size: 16px;
 }
 
 /* ============================================================
@@ -562,7 +562,7 @@
   color:
     var(--color-purple-600);
 
-  font-size: 10px;
+  font-size: 16px;
 
   font-weight: 800;
 
@@ -577,7 +577,7 @@
   color:
     var(--ss-purple);
 
-  font-size: 11px;
+  font-size: 16px;
 
   text-transform:
     capitalize;
@@ -712,7 +712,7 @@
   color:
     var(--ss-purple);
 
-  font-size: 11px;
+  font-size: 16px;
 
   font-weight: 800;
 }
@@ -739,7 +739,7 @@
   color:
     var(--ss-purple);
 
-  font-size: 13px;
+  font-size: 16px;
 }
 
 /* ============================================================
@@ -784,7 +784,7 @@
   color:
     var(--ss-purple);
 
-  font-size: 11px;
+  font-size: 16px;
 
   font-weight: 800;
 
@@ -851,7 +851,7 @@
   color:
     var(--color-purple-600);
 
-  font-size: 12px;
+  font-size: 16px;
 
   font-weight: 700;
 }
@@ -918,7 +918,7 @@ strong {
   color:
     var(--ss-purple);
 
-  font-size: 12px;
+  font-size: 16px;
 
   font-weight: 800;
 

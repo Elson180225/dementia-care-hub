@@ -40,7 +40,7 @@
 
   color: var(--ah-purple);
 
-  font-size: 12px;
+  font-size: 16px;
 
   font-weight: 800;
 
@@ -73,7 +73,7 @@
 
   color: var(--color-gold-300);
 
-  font-size: 13px;
+  font-size: 16px;
 
   font-weight: 800;
 
@@ -199,7 +199,7 @@
 .assessment-journey-grid span {
   color: var(--ah-purple);
 
-  font-size: 11px;
+  font-size: 16px;
 
   font-weight: 800;
 }
@@ -222,7 +222,7 @@
 
   color: var(--ah-soft);
 
-  font-size: 13px;
+  font-size: 16px;
 
   line-height: 1.55;
 }
@@ -302,7 +302,7 @@
 .assessment-progress-box small {
   color: var(--ah-soft);
 
-  font-size: 12px;
+  font-size: 16px;
 }
 
 .assessment-progress-track {
@@ -397,7 +397,7 @@
 
   color: #ffffff;
 
-  font-size: 13px;
+  font-size: 16px;
 
   font-weight: 900;
 }
@@ -441,7 +441,7 @@
 .assessment-provider-heading > div > span {
   color: var(--ah-purple);
 
-  font-size: 11px;
+  font-size: 16px;
 
   font-weight: 800;
 
@@ -528,7 +528,7 @@
 .assessment-pathway-intro > span {
   color: var(--ah-purple);
 
-  font-size: 10px;
+  font-size: 16px;
 
   font-weight: 800;
 
@@ -585,7 +585,7 @@
 .assessment-flow span {
   color: var(--ah-purple);
 
-  font-size: 10px;
+  font-size: 16px;
 
   font-weight: 800;
 }
@@ -608,7 +608,7 @@
 
   color: var(--ah-soft);
 
-  font-size: 12px;
+  font-size: 16px;
 
   line-height: 1.55;
 }
@@ -687,7 +687,7 @@
 
   color: var(--ah-soft);
 
-  font-size: 13px;
+  font-size: 16px;
 }
 
 .assessment-provider-count strong {
@@ -727,7 +727,7 @@
 
   color: var(--color-purple-600);
 
-  font-size: 10px;
+  font-size: 16px;
 
   font-weight: 800;
 
@@ -782,7 +782,7 @@ span:first-child {
 
   color: var(--color-purple-600);
 
-  font-size: 9px;
+  font-size: 16px;
 
   font-weight: 800;
 
@@ -797,7 +797,7 @@ span:first-child {
 
   color: var(--color-purple-700);
 
-  font-size: 13px;
+  font-size: 16px;
 
   line-height: 1.5;
 
@@ -835,7 +835,7 @@ span:first-child {
 
   color: var(--ah-purple-dark);
 
-  font-size: 10px;
+  font-size: 16px;
 }
 
 .assessment-provider-footer {
@@ -874,7 +874,7 @@ span:first-child {
 
   color: var(--color-purple-600);
 
-  font-size: 9px;
+  font-size: 16px;
 
   font-weight: 800;
 
@@ -884,7 +884,7 @@ span:first-child {
 .assessment-provider-footer small {
   color: var(--color-purple-600);
 
-  font-size: 10px;
+  font-size: 16px;
 }
 
 .assessment-provider-footer > a {
@@ -896,7 +896,7 @@ span:first-child {
 
   color: var(--ah-purple);
 
-  font-size: 13px;
+  font-size: 16px;
 
   font-weight: 800;
 
@@ -977,7 +977,7 @@ span:first-child {
 .assessment-related-grid > a > span {
   color: var(--ah-purple);
 
-  font-size: 10px;
+  font-size: 16px;
 
   font-weight: 800;
 }
@@ -1002,7 +1002,7 @@ span:first-child {
 
   color: var(--ah-soft);
 
-  font-size: 13px;
+  font-size: 16px;
 
   line-height: 1.55;
 }
@@ -1019,7 +1019,7 @@ span:first-child {
 
   color: var(--ah-purple);
 
-  font-size: 12px;
+  font-size: 16px;
 }
 
 .assessment-related-grid > a:hover strong {
@@ -1077,7 +1077,7 @@ span:first-child {
 .assessment-boundary-box strong {
   color: var(--ah-purple);
 
-  font-size: 11px;
+  font-size: 16px;
 
   font-weight: 800;
 
