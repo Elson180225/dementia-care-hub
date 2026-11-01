@@ -79,10 +79,10 @@
   background:
     linear-gradient(
       to right,
-      rgba(20, 10, 30, 0.72) 0%,
-      rgba(20, 10, 30, 0.5) 35%,
-      rgba(20, 10, 30, 0.25) 60%,
-      rgba(20, 10, 30, 0.1) 100%
+      rgba(36, 16, 56, 0.72) 0%,
+      rgba(36, 16, 56, 0.5) 35%,
+      rgba(36, 16, 56, 0.25) 60%,
+      rgba(36, 16, 56, 0.1) 100%
     ),
     linear-gradient(
       to top,
@@ -244,9 +244,9 @@
     background:
       linear-gradient(
         to right,
-        rgba(20, 10, 30, 0.78) 0%,
-        rgba(20, 10, 30, 0.55) 50%,
-        rgba(20, 10, 30, 0.3) 100%
+        rgba(36, 16, 56, 0.78) 0%,
+        rgba(36, 16, 56, 0.55) 50%,
+        rgba(36, 16, 56, 0.3) 100%
       ),
       linear-gradient(
         to top,

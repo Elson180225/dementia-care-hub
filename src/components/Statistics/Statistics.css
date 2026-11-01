@@ -8,7 +8,7 @@
   background:
     linear-gradient(
       145deg,
-      #edf5ef 0%,
+      var(--color-neutral-100) 0%,
       #f6f8f0 48%,
       #fff8e8 100%
     );
@@ -94,7 +94,7 @@
 
   margin-bottom: 10px;
 
-  color: #5d2f91;
+  color: var(--color-purple-600);
 
   font-size: 14px;
   font-weight: 800;
@@ -107,7 +107,7 @@
 .statistics-header h2 {
   margin: 0;
 
-  color: #28242b;
+  color: var(--color-neutral-900);
 
   font-family:
     Georgia,
@@ -129,7 +129,7 @@
 
   margin: 0;
 
-  color: #68616a;
+  color: var(--color-neutral-600);
 
   font-size: 18px;
 
@@ -184,7 +184,7 @@
 
   border:
     1px solid
-    rgba(67, 54, 72, 0.1);
+    rgba(69, 32, 109, 0.1);
 
   border-radius: 14px;
 
@@ -196,7 +196,7 @@
       0.6
     );
 
-  color: #28242b;
+  color: var(--color-neutral-900);
 
   cursor: pointer;
 
@@ -215,7 +215,7 @@
 }
 
 .statistics-tab span {
-  color: #807684;
+  color: var(--color-purple-600);
 
   font-size: 11px;
   font-weight: 800;
@@ -238,23 +238,13 @@
 
 .statistics-tab-active {
   border-color:
-    rgba(
-      93,
-      47,
-      145,
-      0.3
-    );
+    rgba(93, 47, 145, 0.3);
 
   background: #ffffff;
 
   box-shadow:
     0 11px 30px
-    rgba(
-      49,
-      37,
-      55,
-      0.07
-    );
+    rgba(53, 21, 82, 0.07);
 }
 
 /* ============================================================
@@ -281,12 +271,7 @@
 
   box-shadow:
     0 22px 60px
-    rgba(
-      42,
-      34,
-      45,
-      0.08
-    );
+    rgba(53, 21, 82, 0.08);
 
   animation:
     statisticsCardEnter
@@ -326,12 +311,12 @@
   background:
     linear-gradient(
       145deg,
-      #f5f0fa 0%,
-      #faf8fc 100%
+      var(--color-neutral-100) 0%,
+      var(--color-neutral-50) 100%
     );
 
   border-right:
-    1px solid #ebe4ee;
+    1px solid var(--color-neutral-200);
 }
 
 /* ============================================================
@@ -377,11 +362,11 @@
 }
 
 .donut-background {
-  stroke: #e6ddea;
+  stroke: var(--color-purple-200);
 }
 
 .donut-progress {
-  stroke: #5d2f91;
+  stroke: var(--color-purple-600);
 
   stroke-linecap: round;
 
@@ -412,7 +397,7 @@
 }
 
 .donut-centre strong {
-  color: #45206d;
+  color: var(--color-purple-700);
 
   font-family:
     Georgia,
@@ -434,7 +419,7 @@
 
   margin-top: 10px;
 
-  color: #6a626d;
+  color: var(--color-purple-600);
 
   font-size: 14px;
 
@@ -476,11 +461,11 @@
 }
 
 .legend-primary {
-  background: #5d2f91;
+  background: var(--color-purple-600);
 }
 
 .legend-secondary {
-  background: #d8cfdd;
+  background: var(--color-purple-200);
 }
 
 .donut-legend strong,
@@ -489,7 +474,7 @@
 }
 
 .donut-legend strong {
-  color: #312a34;
+  color: var(--color-neutral-900);
 
   font-size: 16px;
 }
@@ -497,7 +482,7 @@
 .donut-legend span {
   margin-top: 2px;
 
-  color: #746c76;
+  color: var(--color-neutral-500);
 
   font-size: 12px;
 
@@ -521,7 +506,7 @@
   justify-content:
     space-between;
 
-  color: #918993;
+  color: var(--color-neutral-600);
 
   font-size: 11px;
   font-weight: 700;
@@ -563,7 +548,7 @@
 }
 
 .bar-label span {
-  color: #322a35;
+  color: var(--color-purple-800);
 
   font-family:
     Georgia,
@@ -576,7 +561,7 @@
 }
 
 .bar-label strong {
-  color: #5d2f91;
+  color: var(--color-purple-600);
 
   font-size: 17px;
 }
@@ -590,7 +575,7 @@
 
   border-radius: 20px;
 
-  background: #e9e2ec;
+  background: var(--color-neutral-200);
 }
 
 .bar-fill {
@@ -603,8 +588,8 @@
   background:
     linear-gradient(
       90deg,
-      #5d2f91,
-      #8b5bb4
+      var(--color-purple-600),
+      var(--color-purple-600)
     );
 
   transition:
@@ -644,7 +629,7 @@
 
   border-radius: 6px;
 
-  background: #35213f;
+  background: var(--color-purple-800);
 
   color: #ffffff;
 
@@ -684,7 +669,7 @@
   margin:
     32px 0 0;
 
-  color: #7a717c;
+  color: var(--color-purple-400);
 
   text-align: center;
 
@@ -707,7 +692,7 @@
 }
 
 .statistics-region {
-  color: #5d2f91;
+  color: var(--color-purple-600);
 
   font-size: 13px;
   font-weight: 800;
@@ -723,7 +708,7 @@
   margin:
     17px 0 13px;
 
-  color: #28242b;
+  color: var(--color-neutral-900);
 
   font-size:
     clamp(
@@ -738,7 +723,7 @@
 .statistics-description {
   margin: 0;
 
-  color: #68616b;
+  color: var(--color-neutral-600);
 
   font-size: 17px;
 
@@ -757,10 +742,10 @@
 
   border-radius: 11px;
 
-  background: #f6f0fa;
+  background: var(--color-neutral-100);
 
   border:
-    1px solid #e8dded;
+    1px solid var(--color-purple-200);
 }
 
 .statistics-highlight span {
@@ -768,7 +753,7 @@
 
   margin-bottom: 4px;
 
-  color: #85798a;
+  color: var(--color-purple-600);
 
   font-size: 10px;
   font-weight: 800;
@@ -779,7 +764,7 @@
 }
 
 .statistics-highlight strong {
-  color: #512979;
+  color: var(--color-purple-700);
 
   font-size: 15px;
 }
@@ -803,7 +788,7 @@
   gap: 19px;
 
   border-top:
-    1px solid #e5dfe7;
+    1px solid var(--color-neutral-200);
 }
 
 .statistics-source-grid span {
@@ -811,7 +796,7 @@
 
   margin-bottom: 5px;
 
-  color: #89808b;
+  color: var(--color-purple-600);
 
   font-size: 10px;
 
@@ -824,7 +809,7 @@
 
 .statistics-source-grid strong,
 .statistics-source-grid a {
-  color: #3d3540;
+  color: var(--color-purple-700);
 
   font-size: 12px;
 
@@ -834,7 +819,7 @@
 }
 
 .statistics-source-grid a {
-  color: #5d2f91;
+  color: var(--color-purple-600);
 
   text-decoration:
     underline;
@@ -854,11 +839,11 @@
     13px 15px;
 
   border-left:
-    3px solid #f7a81b;
+    3px solid var(--color-gold-500);
 
   background: #fffaf0;
 
-  color: #6f6871;
+  color: var(--color-neutral-600);
 
   font-size: 12px;
 
@@ -866,7 +851,7 @@
 }
 
 .statistics-note strong {
-  color: #39313c;
+  color: var(--color-purple-700);
 }
 
 /* ============================================================
@@ -890,7 +875,7 @@
 
   margin: 0;
 
-  color: #736c75;
+  color: var(--color-neutral-500);
 
   font-size: 13px;
 
@@ -906,7 +891,7 @@
 
   gap: 8px;
 
-  color: #5d2f91;
+  color: var(--color-purple-600);
 
   text-decoration: none;
 
@@ -932,7 +917,7 @@
 .statistics-link:focus-visible,
 .statistics-source-grid a:focus-visible {
   outline:
-    3px solid #f7a81b;
+    3px solid var(--color-gold-500);
 
   outline-offset: 4px;
 }
@@ -953,7 +938,7 @@
     border-right: none;
 
     border-bottom:
-      1px solid #ebe4ee;
+      1px solid var(--color-neutral-200);
   }
 
   .statistics-header {

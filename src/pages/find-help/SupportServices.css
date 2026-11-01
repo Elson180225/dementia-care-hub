@@ -1,19 +1,19 @@
 :root {
-  --ss-purple: #5d2f91;
-  --ss-purple-dark: #45206d;
-  --ss-purple-soft: #f5effa;
+  --ss-purple: var(--color-purple-600);
+  --ss-purple-dark: var(--color-purple-700);
+  --ss-purple-soft: var(--color-purple-100);
 
-  --ss-sage: #edf5ef;
+  --ss-sage: var(--color-neutral-100);
 
-  --ss-gold: #f7a81b;
+  --ss-gold: var(--color-gold-500);
   --ss-gold-soft: #fff5da;
 
   --ss-white: #ffffff;
 
-  --ss-text: #28242b;
-  --ss-soft: #69636c;
+  --ss-text: var(--color-neutral-900);
+  --ss-soft: var(--color-neutral-600);
 
-  --ss-border: #e5dfe7;
+  --ss-border: var(--color-neutral-200);
 }
 
 /* ============================================================
@@ -46,8 +46,8 @@
   background:
     linear-gradient(
       135deg,
-      #45206d 0%,
-      #5d2f91 100%
+      var(--color-purple-700) 0%,
+      var(--color-purple-600) 100%
     );
 
   color: #ffffff;
@@ -58,7 +58,7 @@
 
   margin-bottom: 14px;
 
-  color: #ffd66f;
+  color: var(--color-gold-300);
 
   font-size: 17px;
   font-weight: 800;
@@ -121,7 +121,7 @@
     linear-gradient(
       180deg,
       #ffffff,
-      #faf8fc
+      var(--color-neutral-50)
     );
 }
 
@@ -215,7 +215,7 @@
   gap: 10px;
 
   border:
-    1px solid #ded7e1;
+    1px solid var(--color-neutral-200);
 
   border-radius: 10px;
 
@@ -252,7 +252,7 @@
     0 14px;
 
   border:
-    1px solid #ded7e1;
+    1px solid var(--color-neutral-200);
 
   border-radius: 10px;
 
@@ -271,7 +271,7 @@
     0 18px;
 
   border:
-    1px solid #d7cedb;
+    1px solid var(--color-purple-200);
 
   border-radius: 10px;
 
@@ -298,7 +298,7 @@
   gap: 7px;
 
   color:
-    #7b747d;
+    var(--color-neutral-500);
 
   font-size: 17px;
 }
@@ -326,7 +326,7 @@
 
   border:
     1px solid
-    #e5dfe7;
+    var(--color-neutral-200);
 
   border-radius: 18px;
 
@@ -335,12 +335,7 @@
 
   box-shadow:
     0 10px 30px
-    rgba(
-      48,
-      35,
-      54,
-      0.04
-    );
+    rgba(53, 21, 82, 0.04);
 
   transition:
     transform 0.25s ease,
@@ -353,12 +348,7 @@
 
   box-shadow:
     0 18px 40px
-    rgba(
-      48,
-      35,
-      54,
-      0.08
-    );
+    rgba(53, 21, 82, 0.08);
 }
 
 .support-service-card-top {
@@ -397,7 +387,7 @@
 
 .support-service-location {
   color:
-    #827984;
+    var(--color-purple-600);
 
   font-size: 16px;
 
@@ -444,7 +434,7 @@
   gap: 18px;
 
   border-top:
-    1px solid #ece6ee;
+    1px solid var(--color-neutral-200);
 }
 
 .support-service-details span {
@@ -453,7 +443,7 @@
   margin-bottom: 4px;
 
   color:
-    #908893;
+    var(--color-purple-600);
 
   font-size: 15px;
 
@@ -470,7 +460,7 @@
   display: block;
 
   color:
-    #413944;
+    var(--color-purple-700);
 
   font-size: 16px;
 
@@ -521,15 +511,15 @@
     #fff4d7;
 
   color:
-    #7b5b16;
+    var(--color-gold-700);
 }
 
 .service-status-verified {
   background:
-    #e6f4e9;
+    var(--color-neutral-100);
 
   color:
-    #326943;
+    var(--color-purple-600);
 }
 
 .service-status-rejected {
@@ -542,7 +532,7 @@
 
 .support-service-status small {
   color:
-    #8a828c;
+    var(--color-neutral-600);
 
   font-size: 15px;
 }
@@ -566,12 +556,12 @@
   gap: 15px;
 
   border-top:
-    1px solid #eee8ef;
+    1px solid var(--color-neutral-200);
 }
 
 .support-publication-state span {
   color:
-    #918995;
+    var(--color-purple-600);
 
   font-size: 15px;
 
@@ -609,7 +599,7 @@
   background: #ffffff;
 
   border:
-    1px solid #e6dfe8;
+    1px solid var(--color-neutral-200);
 }
 
 .support-services-empty > span {
@@ -694,7 +684,7 @@
   text-align: left;
 
   border:
-    1px solid #dfe5dd;
+    1px solid var(--color-neutral-200);
 
   border-radius: 16px;
 
@@ -716,12 +706,7 @@
 
   box-shadow:
     0 15px 35px
-    rgba(
-      48,
-      52,
-      45,
-      0.07
-    );
+    rgba(54, 49, 59, 0.07);
 }
 
 .support-category-card > span {
@@ -784,12 +769,12 @@
   background:
     linear-gradient(
       135deg,
-      #f5effa,
+      var(--color-purple-100),
       #fff8ea
     );
 
   border:
-    1px solid #e7dce9;
+    1px solid var(--color-purple-200);
 }
 
 .support-admin-ready-box
@@ -865,7 +850,7 @@
     );
 
   color:
-    #514957;
+    var(--color-purple-600);
 
   font-size: 16px;
 

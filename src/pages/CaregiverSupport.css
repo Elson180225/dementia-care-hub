@@ -1,6 +1,10 @@
 .caregiver-page {
+<<<<<<< HEAD
   /* Keep public-facing text comfortable to read, especially for older visitors. */
   color: #233b34;
+=======
+  color: var(--color-neutral-800);
+>>>>>>> origin/main
   background: #fff;
   font-family: inherit;
 }
@@ -18,8 +22,13 @@
   line-height: 1.7;
 }
 .caregiver-eyebrow {
+<<<<<<< HEAD
   color: #bd7730;
   font-size: 1rem;
+=======
+  color: var(--color-gold-700);
+  font-size: 0.79rem;
+>>>>>>> origin/main
   font-weight: 800;
   letter-spacing: 0.15em;
   text-transform: uppercase;
@@ -27,7 +36,7 @@
 }
 .caregiver-hero {
   padding: 94px 0 100px;
-  background: linear-gradient(135deg, #163e36 0%, #24594c 70%, #316c57 100%);
+  background: linear-gradient(135deg, var(--color-purple-700) 0%, var(--color-purple-600) 70%, var(--color-purple-600) 100%);
   color: #fff;
   overflow: hidden;
 }
@@ -38,7 +47,7 @@
   align-items: center;
 }
 .caregiver-hero .caregiver-eyebrow {
-  color: #f3d49e;
+  color: var(--color-gold-300);
 }
 .caregiver-hero h1 {
   font-size: clamp(3rem, 5.7vw, 5.1rem);
@@ -47,13 +56,13 @@
   margin: 0 0 25px;
 }
 .caregiver-hero h1 em {
-  color: #f5d59d;
+  color: var(--color-gold-300);
   font-style: normal;
 }
 .caregiver-hero-intro {
   font-size: 1.12rem;
   max-width: 610px;
-  color: #e1eee7;
+  color: var(--color-neutral-100);
   margin: 0;
 }
 .caregiver-hero-actions {
@@ -84,11 +93,11 @@
   box-shadow: 0 12px 28px #0c2a202b;
 }
 .caregiver-button-cream {
-  background: #f9dfb3;
-  color: #244638;
+  background: var(--color-gold-200);
+  color: var(--color-purple-600);
 }
 .caregiver-button-green {
-  background: #225c4d;
+  background: var(--color-purple-600);
   color: #fff;
 }
 .caregiver-hero-text-link {
@@ -113,7 +122,7 @@
   left: -25px;
   max-width: 340px;
   background: #fffbf1;
-  color: #284e42;
+  color: var(--color-purple-600);
   padding: 18px 22px;
   border-radius: 14px;
   box-shadow: 0 12px 30px #062e2538;
@@ -122,7 +131,7 @@
   line-height: 1.5;
 }
 .caregiver-hero-image-caption span {
-  color: #be7b35;
+  color: var(--color-gold-700);
   margin-right: 7px;
 }
 .caregiver-on-page {
@@ -131,7 +140,7 @@
   z-index: 10;
   background: #fff;
   box-shadow: 0 3px 18px #1c47351a;
-  border-bottom: 1px solid #e2eae4;
+  border-bottom: 1px solid var(--color-neutral-200);
 }
 .caregiver-on-page-inner {
   display: flex;
@@ -142,13 +151,18 @@
   white-space: nowrap;
 }
 .caregiver-on-page-inner > span {
+<<<<<<< HEAD
   color: #87978d;
   font-size: 1rem;
+=======
+  color: var(--color-neutral-600);
+  font-size: 0.76rem;
+>>>>>>> origin/main
   font-weight: 900;
   letter-spacing: 0.12em;
 }
 .caregiver-on-page a {
-  color: #255747;
+  color: var(--color-purple-600);
   font-weight: 750;
   text-decoration: none;
   font-size: 1rem;
@@ -162,7 +176,7 @@
   scroll-margin-top: 78px;
 }
 .caregiver-section-soft {
-  background: #f5f8f5;
+  background: var(--color-neutral-50);
 }
 .caregiver-section-intro {
   padding: 83px 0 88px;
@@ -183,7 +197,7 @@
 }
 .caregiver-intro-head > p {
   max-width: 355px;
-  color: #5e7066;
+  color: var(--color-neutral-600);
   margin: 0 0 5px;
 }
 .caregiver-pathway-grid {
@@ -192,7 +206,7 @@
   gap: 18px;
 }
 .caregiver-pathway-card {
-  border: 1px solid #dbe8df;
+  border: 1px solid var(--color-neutral-200);
   background: #fff;
   border-radius: 16px;
   padding: 26px 22px;
@@ -210,13 +224,13 @@
 .caregiver-pathway-card:focus-visible {
   transform: translateY(-6px);
   box-shadow: 0 15px 30px #173f331b;
-  border-color: #8eb9a4;
+  border-color: var(--color-purple-300);
 }
 .caregiver-pathway-top {
   display: flex;
   align-items: start;
   justify-content: space-between;
-  color: #2a6855;
+  color: var(--color-purple-600);
   font-weight: 800;
 }
 .caregiver-number {
@@ -226,8 +240,8 @@
   height: 43px;
   padding: 0 6px;
   border-radius: 12px;
-  background: #e7f1e9;
-  color: #286751;
+  background: var(--color-neutral-100);
+  color: var(--color-purple-600);
   font-weight: 900;
 }
 .caregiver-pathway-card h3 {
@@ -237,15 +251,25 @@
 }
 .caregiver-pathway-card p {
   margin: 0;
+<<<<<<< HEAD
   color: #5c7166;
   font-size: 1rem;
+=======
+  color: var(--color-neutral-500);
+  font-size: 0.96rem;
+>>>>>>> origin/main
   line-height: 1.65;
 }
 .caregiver-card-action {
   margin-top: auto;
   padding-top: 25px;
+<<<<<<< HEAD
   color: #235c4b;
   font-size: 1rem;
+=======
+  color: var(--color-purple-600);
+  font-size: 0.88rem;
+>>>>>>> origin/main
   font-weight: 850;
 }
 .caregiver-section-heading {
@@ -259,7 +283,7 @@
   margin: 0 0 15px;
 }
 .caregiver-section-heading > p:last-child {
-  color: #5e7266;
+  color: var(--color-neutral-500);
   font-size: 1.07rem;
   margin: 0;
 }
@@ -281,9 +305,9 @@
   padding: 17px 18px;
   text-align: left;
   border-radius: 12px;
-  border: 1px solid #dce6df;
+  border: 1px solid var(--color-neutral-200);
   background: #fff;
-  color: #254438;
+  color: var(--color-purple-700);
   cursor: pointer;
   transition:
     transform 0.2s,
@@ -293,11 +317,11 @@
 .caregiver-guidance-option:hover {
   transform: translateX(4px);
   box-shadow: 0 10px 24px #245a4816;
-  border-color: #90b9a5;
+  border-color: var(--color-purple-300);
 }
 .caregiver-guidance-option.is-active {
-  background: #235849;
-  border-color: #235849;
+  background: var(--color-purple-600);
+  border-color: var(--color-purple-600);
   color: #fff;
   box-shadow: 0 12px 28px #1f584a26;
 }
@@ -308,13 +332,13 @@
   display: grid;
   place-items: center;
   border-radius: 12px;
-  background: #e8f2ec;
-  color: #28674f;
+  background: var(--color-neutral-100);
+  color: var(--color-purple-600);
   font-size: 1.55rem;
 }
 .caregiver-guidance-option.is-active .caregiver-guidance-symbol {
-  background: #f5dcae;
-  color: #6b481d;
+  background: var(--color-gold-300);
+  color: var(--color-gold-800);
 }
 .caregiver-guidance-option-text {
   min-width: 0;
@@ -328,29 +352,34 @@
 .caregiver-guidance-option-text small {
   font-size: 1rem;
   line-height: 1.4;
-  color: #697b72;
+  color: var(--color-neutral-600);
 }
 .caregiver-guidance-option.is-active small {
-  color: #dbece2;
+  color: var(--color-neutral-200);
 }
 .caregiver-guidance-arrow {
   font-weight: 850;
-  color: #43816e;
+  color: var(--color-purple-400);
 }
 .caregiver-guidance-option.is-active .caregiver-guidance-arrow {
-  color: #f5dcae;
+  color: var(--color-gold-300);
 }
 .caregiver-guidance-detail {
   position: relative;
   padding: 37px 40px;
   background: #fff;
   border-radius: 17px;
-  border: 1px solid #dce8e0;
+  border: 1px solid var(--color-neutral-200);
   box-shadow: 0 15px 45px #1544330b;
 }
 .caregiver-detail-label {
+<<<<<<< HEAD
   color: #b47731;
   font-size: 1rem;
+=======
+  color: var(--color-gold-700);
+  font-size: 0.77rem;
+>>>>>>> origin/main
   font-weight: 900;
   letter-spacing: 0.13em;
 }
@@ -364,7 +393,7 @@
   display: grid;
   place-items: center;
   background: #f5ebda;
-  color: #a66c2d;
+  color: var(--color-gold-700);
   font-size: 2.2rem;
 }
 .caregiver-guidance-detail h3 {
@@ -373,7 +402,7 @@
   margin: 26px 0 9px;
 }
 .caregiver-detail-intro {
-  color: #5c7065;
+  color: var(--color-neutral-600);
   font-size: 1.01rem;
   max-width: 550px;
 }
@@ -392,7 +421,7 @@
 .caregiver-check-list li {
   position: relative;
   padding-left: 32px;
-  color: #435f50;
+  color: var(--color-neutral-600);
   line-height: 1.6;
 }
 .caregiver-check-list li:before {
@@ -402,8 +431,8 @@
   top: 1px;
   display: grid;
   place-items: center;
-  background: #e4f2e9;
-  color: #267054;
+  background: var(--color-neutral-100);
+  color: var(--color-purple-600);
   border-radius: 50%;
   width: 23px;
   height: 23px;
@@ -412,7 +441,7 @@
 }
 .caregiver-detail-note {
   background: #fff5e9;
-  border-left: 4px solid #ce9045;
+  border-left: 4px solid var(--color-gold-600);
   border-radius: 0 8px 8px 0;
   margin-top: 29px;
   padding: 16px 18px;
@@ -429,7 +458,7 @@
   margin-top: 28px;
   padding: 26px 30px;
   border-radius: 14px;
-  background: #e8efe9;
+  background: var(--color-neutral-100);
 }
 .caregiver-crosslink strong,
 .caregiver-listing-note strong {
@@ -438,15 +467,20 @@
 .caregiver-crosslink p,
 .caregiver-listing-note p {
   margin: 5px 0 0;
+<<<<<<< HEAD
   color: #536f60;
   font-size: 1rem;
+=======
+  color: var(--color-neutral-600);
+  font-size: 0.95rem;
+>>>>>>> origin/main
 }
 .caregiver-crosslink a,
 .caregiver-listing-note a {
   flex: none;
   padding: 14px 18px;
   border-radius: 9px;
-  background: #255e4c;
+  background: var(--color-purple-600);
   color: #fff;
   text-decoration: none;
   font-weight: 850;
@@ -454,7 +488,7 @@
 }
 .caregiver-crosslink a:hover,
 .caregiver-listing-note a:hover {
-  background: #194d3e;
+  background: var(--color-purple-600);
 }
 .caregiver-training-grid {
   display: grid;
@@ -463,7 +497,7 @@
 }
 .caregiver-training-card {
   padding: 35px 36px;
-  border: 1px solid #dce6df;
+  border: 1px solid var(--color-neutral-200);
   border-radius: 17px;
   position: relative;
   display: flex;
@@ -471,33 +505,44 @@
   background: #fff;
 }
 .caregiver-training-current {
-  background: #255c4d;
-  border-color: #255c4d;
+  background: var(--color-purple-600);
+  border-color: var(--color-purple-600);
   color: #fff;
 }
 .caregiver-status {
   align-self: flex-start;
   border-radius: 30px;
+<<<<<<< HEAD
   background: #f6d8a5;
   color: #674718;
   font-size: 1rem;
+=======
+  background: var(--color-gold-300);
+  color: var(--color-gold-800);
+  font-size: 0.73rem;
+>>>>>>> origin/main
   font-weight: 900;
   padding: 8px 12px;
   letter-spacing: 0.035em;
 }
 .caregiver-status-muted {
-  background: #e8f0ea;
-  color: #35624d;
+  background: var(--color-neutral-100);
+  color: var(--color-purple-600);
 }
 .caregiver-training-step {
   font-weight: 900;
+<<<<<<< HEAD
   color: #b0d2c3;
   font-size: 1rem;
+=======
+  color: var(--color-purple-300);
+  font-size: 0.77rem;
+>>>>>>> origin/main
   letter-spacing: 0.13em;
   margin-top: 30px;
 }
 .caregiver-training-future .caregiver-training-step {
-  color: #849d8e;
+  color: var(--color-neutral-600);
 }
 .caregiver-training-card h3 {
   font-size: 2.25rem;
@@ -506,10 +551,10 @@
 .caregiver-training-card > p {
   margin: 0 0 12px;
   max-width: 580px;
-  color: #556f61;
+  color: var(--color-neutral-600);
 }
 .caregiver-training-current > p {
-  color: #e0eee6;
+  color: var(--color-neutral-100);
 }
 .caregiver-training-card ul {
   padding-left: 20px;
@@ -519,7 +564,7 @@
   gap: 7px;
 }
 .caregiver-training-current ul {
-  color: #e8f0ec;
+  color: var(--color-neutral-100);
 }
 .caregiver-training-footnote {
   font-size: 1rem;
@@ -532,7 +577,7 @@
   gap: 10px;
   margin-top: 15px;
   font-weight: 850;
-  color: #215b49;
+  color: var(--color-purple-600);
   text-decoration: underline;
   text-underline-offset: 4px;
   background: none;
@@ -541,7 +586,7 @@
   padding: 0;
 }
 .caregiver-training-current .caregiver-text-action {
-  color: #f7dfa9;
+  color: var(--color-gold-200);
 }
 .caregiver-training-path {
   display: flex;
@@ -551,22 +596,27 @@
   flex-wrap: wrap;
   padding: 26px;
   margin-top: 26px;
-  background: #f3f7f3;
+  background: var(--color-neutral-100);
   border-radius: 13px;
 }
 .caregiver-training-path strong {
+<<<<<<< HEAD
   color: #6a7f71;
   font-size: 1rem;
+=======
+  color: var(--color-neutral-600);
+  font-size: 0.91rem;
+>>>>>>> origin/main
 }
 .caregiver-training-path span:not(.caregiver-path-arrow) {
   font-weight: 850;
-  color: #28634f;
+  color: var(--color-purple-600);
 }
 .caregiver-training-path small {
-  color: #8b7260;
+  color: var(--color-gold-700);
 }
 .caregiver-path-arrow {
-  color: #b77c39;
+  color: var(--color-gold-700);
   font-size: 1.5rem;
 }
 .caregiver-verification {
@@ -576,8 +626,8 @@
   align-items: center;
   margin-top: 38px;
   padding: 38px;
-  background: #f6f8f5;
-  border: 1px solid #e0e8e0;
+  background: var(--color-neutral-50);
+  border: 1px solid var(--color-neutral-200);
   border-radius: 18px;
   scroll-margin-top: 78px;
 }
@@ -586,12 +636,12 @@
   font-size: 2.1rem;
 }
 .caregiver-verification-intro > p:not(.caregiver-eyebrow) {
-  color: #5c6f63;
+  color: var(--color-neutral-600);
 }
 .caregiver-verification-warning {
   padding: 15px 17px;
   background: #fff3df;
-  border-left: 4px solid #c28b47;
+  border-left: 4px solid var(--color-gold-600);
   color: #654f2e !important;
   border-radius: 0 9px 9px 0;
 }
@@ -599,7 +649,7 @@
   display: grid;
   gap: 9px;
   padding: 28px;
-  border: 1px solid #dce7df;
+  border: 1px solid var(--color-neutral-200);
   border-radius: 14px;
   background: #fff;
 }
@@ -607,7 +657,7 @@
   font-weight: 900;
   font-size: 1rem;
   letter-spacing: 0.11em;
-  color: #9a6a30;
+  color: var(--color-gold-700);
   margin-bottom: 7px;
 }
 .caregiver-verification-preview label {
@@ -615,35 +665,40 @@
   font-weight: 800;
 }
 .caregiver-verification-preview input {
-  border: 1px solid #dce5de;
+  border: 1px solid var(--color-neutral-200);
   border-radius: 7px;
   padding: 12px 13px;
-  background: #f6f7f6;
-  color: #657a6c;
+  background: var(--color-neutral-100);
+  color: var(--color-neutral-500);
   margin-bottom: 9px;
 }
 .caregiver-verification-preview button {
   padding: 13px;
   border: 0;
   border-radius: 8px;
-  background: #c2d3c8;
-  color: #325747;
+  background: var(--color-neutral-300);
+  color: var(--color-purple-600);
   font-weight: 800;
   cursor: not-allowed;
 }
 .caregiver-verification-preview small {
-  color: #6a7c6e;
+  color: var(--color-neutral-600);
   line-height: 1.5;
 }
 .caregiver-disclaimer {
   margin: 20px 0 0;
+<<<<<<< HEAD
   color: #6b776e;
   font-size: 1rem;
+=======
+  color: var(--color-neutral-500);
+  font-size: 0.86rem;
+>>>>>>> origin/main
   line-height: 1.7;
 }
 .caregiver-directory {
   background: #fff;
-  border: 1px solid #dce7de;
+  border: 1px solid var(--color-neutral-200);
   border-radius: 17px;
   padding: 31px;
   box-shadow: 0 12px 34px #1b43330b;
@@ -661,14 +716,19 @@
 }
 .caregiver-directory-head p {
   margin: 0;
+<<<<<<< HEAD
   color: #607366;
   font-size: 1rem;
+=======
+  color: var(--color-neutral-500);
+  font-size: 0.93rem;
+>>>>>>> origin/main
 }
 .caregiver-directory-count {
   font-size: 1rem;
   font-weight: 850;
-  background: #e9f3eb;
-  color: #2a7055;
+  background: var(--color-neutral-100);
+  color: var(--color-purple-600);
   padding: 10px 13px;
   border-radius: 40px;
   white-space: nowrap;
@@ -681,19 +741,29 @@
 .caregiver-filter-grid label {
   display: grid;
   gap: 9px;
+<<<<<<< HEAD
   color: #3d5747;
   font-size: 1rem;
+=======
+  color: var(--color-neutral-700);
+  font-size: 0.87rem;
+>>>>>>> origin/main
   font-weight: 800;
 }
 .caregiver-filter-grid input,
 .caregiver-filter-grid select {
   width: 100%;
   padding: 13px;
-  border: 1px solid #cdded2;
+  border: 1px solid var(--color-neutral-200);
   border-radius: 8px;
   background: #fff;
+<<<<<<< HEAD
   color: #294a3a;
   font-size: 1rem;
+=======
+  color: var(--color-purple-600);
+  font-size: 0.94rem;
+>>>>>>> origin/main
 }
 .caregiver-filter-footer {
   display: flex;
@@ -707,12 +777,17 @@
   display: flex;
   align-items: center;
   gap: 8px;
+<<<<<<< HEAD
   font-size: 1rem;
   color: #4a6454;
+=======
+  font-size: 0.91rem;
+  color: var(--color-neutral-600);
+>>>>>>> origin/main
   cursor: pointer;
 }
 .caregiver-filter-check input {
-  accent-color: #276b54;
+  accent-color: var(--color-purple-600);
   width: 17px;
   height: 17px;
 }
@@ -720,7 +795,7 @@
   padding: 7px 0;
   border: 0;
   background: transparent;
-  color: #286b53;
+  color: var(--color-purple-600);
   font-weight: 850;
   cursor: pointer;
   text-decoration: underline;
@@ -729,8 +804,8 @@
 .caregiver-empty-state {
   text-align: center;
   padding: 40px 20px;
-  border: 1px dashed #c6d9cd;
-  background: #f7faf8;
+  border: 1px dashed var(--color-neutral-300);
+  background: var(--color-neutral-50);
   border-radius: 13px;
 }
 .caregiver-empty-symbol {
@@ -740,8 +815,8 @@
   height: 56px;
   margin: auto;
   border-radius: 50%;
-  background: #e5f1e9;
-  color: #377e60;
+  background: var(--color-neutral-100);
+  color: var(--color-purple-600);
   font-size: 2rem;
 }
 .caregiver-empty-state h4 {
@@ -751,7 +826,7 @@
 .caregiver-empty-state p {
   margin: 0 auto;
   max-width: 570px;
-  color: #66786b;
+  color: var(--color-neutral-500);
 }
 .caregiver-results {
   display: grid;
@@ -759,7 +834,7 @@
   gap: 15px;
 }
 .caregiver-result-card {
-  border: 1px solid #dce6dd;
+  border: 1px solid var(--color-neutral-200);
   border-radius: 12px;
   padding: 22px;
 }
@@ -769,23 +844,28 @@
 }
 .caregiver-result-card p {
   margin: 5px 0;
+<<<<<<< HEAD
   color: #54705f;
   font-size: 1rem;
+=======
+  color: var(--color-neutral-600);
+  font-size: 0.92rem;
+>>>>>>> origin/main
 }
 .caregiver-result-card a {
   display: inline-block;
   margin: 10px 12px 0 0;
-  color: #255f4b;
+  color: var(--color-purple-600);
   font-weight: 850;
 }
 .caregiver-result-approved {
   font-size: 1rem;
   font-weight: 900;
-  color: #246e51;
+  color: var(--color-purple-600);
   text-transform: uppercase;
 }
 .caregiver-listing-note {
-  background: #ebf1eb;
+  background: var(--color-neutral-100);
 }
 .caregiver-volunteer-layout {
   display: grid;
@@ -803,9 +883,9 @@
   gap: 17px;
   width: 100%;
   padding: 23px;
-  border: 1px solid #dae6dc;
+  border: 1px solid var(--color-neutral-200);
   background: #fff;
-  color: #26513c;
+  color: var(--color-purple-600);
   border-radius: 13px;
   cursor: pointer;
   text-align: left;
@@ -822,26 +902,26 @@
   box-shadow: 0 12px 24px #13412c16;
 }
 .caregiver-volunteer-option.is-active {
-  background: #245b4c;
+  background: var(--color-purple-600);
   color: #fff;
-  border-color: #245b4c;
+  border-color: var(--color-purple-600);
 }
 .caregiver-volunteer-option.is-active .caregiver-number {
-  background: #f4daa8;
-  color: #654822;
+  background: var(--color-gold-300);
+  color: var(--color-gold-800);
 }
 .caregiver-volunteer-detail {
   padding: 37px 42px;
   border-radius: 17px;
-  background: #f3f7f3;
-  border: 1px solid #dfeae1;
+  background: var(--color-neutral-100);
+  border: 1px solid var(--color-neutral-200);
 }
 .caregiver-volunteer-detail h3 {
   font-size: 2rem;
   margin: 19px 0 10px;
 }
 .caregiver-volunteer-detail > p {
-  color: #5d6e62;
+  color: var(--color-neutral-600);
 }
 .caregiver-volunteer-steps {
   counter-reset: volunteer-steps;
@@ -855,7 +935,7 @@
   position: relative;
   padding-left: 43px;
   line-height: 1.6;
-  color: #3c5746;
+  color: var(--color-neutral-700);
 }
 .caregiver-volunteer-steps li:before {
   counter-increment: volunteer-steps;
@@ -867,8 +947,8 @@
   place-items: center;
   width: 29px;
   height: 29px;
-  background: #dfede3;
-  color: #276346;
+  background: var(--color-neutral-200);
+  color: var(--color-purple-600);
   border-radius: 50%;
   font-weight: 900;
   font-size: 1rem;
@@ -878,7 +958,7 @@
   margin-bottom: 0;
 }
 .caregiver-volunteer-small a {
-  color: #215e48;
+  color: var(--color-purple-600);
   font-weight: 850;
 }
 .caregiver-volunteer-terms {
@@ -886,7 +966,7 @@
   background: #fff8ec;
   border-radius: 14px;
   padding: 27px 32px;
-  border-left: 4px solid #c78a3b;
+  border-left: 4px solid var(--color-gold-600);
 }
 .caregiver-volunteer-terms h3 {
   font-size: 1.55rem;
@@ -899,7 +979,7 @@
   line-height: 1.8;
 }
 .caregiver-final-cta {
-  background: #24584b;
+  background: var(--color-purple-600);
   color: #fff;
   padding: 64px 0;
 }
@@ -910,7 +990,7 @@
   gap: 34px;
 }
 .caregiver-final-cta .caregiver-eyebrow {
-  color: #f4d6a2;
+  color: var(--color-gold-300);
 }
 .caregiver-final-cta h2 {
   font-size: clamp(2rem, 3.2vw, 3rem);
@@ -919,7 +999,7 @@
 .caregiver-final-cta p:last-child {
   margin: 0;
   max-width: 650px;
-  color: #e1eee5;
+  color: var(--color-neutral-100);
 }
 .caregiver-final-actions {
   display: flex;
@@ -932,13 +1012,13 @@
   padding: 14px 17px;
   border-radius: 9px;
   background: #fff;
-  color: #24584b;
+  color: var(--color-purple-600);
   text-decoration: none;
   font-weight: 800;
 }
 .caregiver-final-actions a + a {
   background: transparent;
-  border: 1px solid #bbdac5;
+  border: 1px solid var(--color-purple-200);
   color: #fff;
 }
 @media (max-width: 1050px) {
@@ -1088,7 +1168,7 @@
 }
 .caregiver-verification-preview p {
   margin: 0;
-  color: #52675f;
+  color: var(--color-neutral-600);
   line-height: 1.7;
 }
 .caregiver-verification-preview .caregiver-button {

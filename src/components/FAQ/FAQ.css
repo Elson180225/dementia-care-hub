@@ -1,6 +1,6 @@
 .faq-section {
   padding: 110px 0;
-  background: #f5f0fa;
+  background: var(--color-neutral-100);
 }
 
 .faq-container {
@@ -17,7 +17,7 @@
   display: inline-block;
   margin-bottom: 12px;
 
-  color: #5d2f91;
+  color: var(--color-purple-600);
 
   font-size: 14px;
   font-weight: 800;
@@ -37,24 +37,24 @@
   font-size: clamp(38px, 4vw, 54px);
   line-height: 1.15;
 
-  color: #28242b;
+  color: var(--color-neutral-900);
 }
 
 .faq-heading p {
   margin: 18px 0 0;
 
-  color: #66616b;
+  color: var(--color-neutral-600);
 
   font-size: 19px;
   line-height: 1.75;
 }
 
 .faq-list {
-  border-top: 1px solid #ded4e5;
+  border-top: 1px solid var(--color-purple-200);
 }
 
 .faq-item {
-  border-bottom: 1px solid #ded4e5;
+  border-bottom: 1px solid var(--color-purple-200);
 }
 
 .faq-question {
@@ -71,7 +71,7 @@
   border: none;
   background: transparent;
 
-  color: #28242b;
+  color: var(--color-neutral-900);
 
   text-align: left;
 
@@ -104,7 +104,7 @@
 
   background: #ffffff;
 
-  color: #5d2f91;
+  color: var(--color-purple-600);
 
   font-size: 26px;
 
@@ -147,14 +147,14 @@
   margin: 0;
   padding: 0 60px 28px 4px;
 
-  color: #66616b;
+  color: var(--color-neutral-600);
 
   font-size: 18px;
   line-height: 1.75;
 }
 
 .faq-question:focus-visible {
-  outline: 3px solid #f7a81b;
+  outline: 3px solid var(--color-gold-500);
   outline-offset: 4px;
 }
 
