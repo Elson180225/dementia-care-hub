@@ -40,10 +40,18 @@ function ContributionList({ items }) {
 export default function AboutProject() {
   const { t } = useLanguage();
   const ap = t.aboutProject;
+  const hasSupporters = supportedBy.items.length > 0;
+  const confirmedAcknowledgements = acknowledgements.filter(
+    (group) => group.items.length > 0,
+  );
 
   return (
     <main className="about-page">
-      <PublishedRecords kind="content_pages" slug="about" title="Project updates"/>
+      <PublishedRecords
+        kind="content_pages"
+        slug="about"
+        title="Project updates"
+      />
       <header className="about-hero">
         <div className="about-container">
           <p className="about-kicker">{ap.kicker}</p>
@@ -56,28 +64,40 @@ export default function AboutProject() {
         <nav className="about-toc" aria-label="On this page">
           <p className="about-toc-title">{ap.onPage}</p>
           <ol>
-            {aboutNav.map((item) => {
-              const labelMap = {
-                overview: ap.projectOverview,
-                mission: ap.ourMission,
-                journey: ap.ourJourney,
-                organiser: ap.organiser,
-                partner: ap.strategicPartner,
-                advisors: ap.projectAdvisors,
-                supported: ap.supportedBy,
-                acknowledgements: ap.acknowledgements,
-              };
-              return (
-                <li key={item.id}>
-                  <a href={`#${item.id}`}>{labelMap[item.id] || item.label}</a>
-                </li>
-              );
-            })}
+            {aboutNav
+              .filter(
+                (item) =>
+                  (item.id !== "supported" || hasSupporters) &&
+                  (item.id !== "acknowledgements" ||
+                    confirmedAcknowledgements.length > 0),
+              )
+              .map((item) => {
+                const labelMap = {
+                  overview: ap.projectOverview,
+                  mission: ap.ourMission,
+                  journey: ap.ourJourney,
+                  organiser: ap.organiser,
+                  partner: ap.strategicPartner,
+                  advisors: ap.projectAdvisors,
+                  supported: ap.supportedBy,
+                  acknowledgements: ap.acknowledgements,
+                };
+                return (
+                  <li key={item.id}>
+                    <a href={`#${item.id}`}>
+                      {labelMap[item.id] || item.label}
+                    </a>
+                  </li>
+                );
+              })}
           </ol>
         </nav>
 
         <div className="about-content">
-          <Section id="overview" title={ap.projectOverview || "Project Overview"}>
+          <Section
+            id="overview"
+            title={ap.projectOverview || "Project Overview"}
+          >
             <p>{ap.overviewIntro || overview.intro}</p>
             <p>{ap.overviewPlatform || overview.platformText}</p>
             <div className="about-two-col">
@@ -125,7 +145,9 @@ export default function AboutProject() {
                   <h3>{step.title}</h3>
                   <p>{step.text}</p>
                   {step.current && (
-                    <span className="about-badge">{ap.currentPhase || "You are here"}</span>
+                    <span className="about-badge">
+                      {ap.currentPhase || "You are here"}
+                    </span>
                   )}
                 </li>
               ))}
@@ -137,19 +159,29 @@ export default function AboutProject() {
             <p>{ap.organiserText || organiser.text}</p>
             {organiser.link && (
               <p>
-                <a href={organiser.link} target="_blank" rel="noopener noreferrer">
+                <a
+                  href={organiser.link}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
                   {ap.visitRotarySite || "Visit the Rotary Club website"}
                 </a>
               </p>
             )}
           </Section>
 
-          <Section id="partner" title={ap.strategicPartner || "Strategic Partner"}>
+          <Section
+            id="partner"
+            title={ap.strategicPartner || "Strategic Partner"}
+          >
             <h3>{strategicPartner.name}</h3>
             <p>{ap.partnerText || strategicPartner.text}</p>
           </Section>
 
-          <Section id="advisors" title={ap.projectAdvisors || "Project Advisors"}>
+          <Section
+            id="advisors"
+            title={ap.projectAdvisors || "Project Advisors"}
+          >
             <p>{ap.advisorsRole || advisors.role}</p>
             <ul className="about-people">
               {advisors.people.map((name) => (
@@ -161,35 +193,31 @@ export default function AboutProject() {
             </ul>
           </Section>
 
-          <Section id="supported" title={ap.supportedBy || "Supported By"}>
-            <p>{ap.supportedText || supportedBy.text}</p>
-            {supportedBy.items.length > 0 ? (
+          {hasSupporters && (
+            <Section id="supported" title={ap.supportedBy || "Supported By"}>
+              <p>{ap.supportedText || supportedBy.text}</p>
               <ContributionList items={supportedBy.items} />
-            ) : (
-              <p className="about-pending">
-                {ap.supportedPending || "Supporting organisations will be listed here once confirmed by RCBC."}
-              </p>
-            )}
-          </Section>
+            </Section>
+          )}
 
-          <Section id="acknowledgements" title={ap.acknowledgements || "Acknowledgements"}>
-            <p>
-              {ap.ackIntro || "We thank everyone who has contributed to the project. Each acknowledgement shows who contributed, how, and in which phase or programme."}
-            </p>
-            {acknowledgements.map((group) => (
-              <div key={group.title} className="about-ack">
-                <h3>{group.title}</h3>
-                <p>{group.text}</p>
-                {group.items.length > 0 ? (
+          {confirmedAcknowledgements.length > 0 && (
+            <Section
+              id="acknowledgements"
+              title={ap.acknowledgements || "Acknowledgements"}
+            >
+              <p>
+                {ap.ackIntro ||
+                  "We thank the people and organisations who have supported this project."}
+              </p>
+              {confirmedAcknowledgements.map((group) => (
+                <div key={group.title} className="about-ack">
+                  <h3>{group.title}</h3>
+                  <p>{group.text}</p>
                   <ContributionList items={group.items} />
-                ) : (
-                  <p className="about-pending">
-                    {ap.ackPending || "To be confirmed by RCBC."}
-                  </p>
-                )}
-              </div>
-            ))}
-          </Section>
+                </div>
+              ))}
+            </Section>
+          )}
         </div>
       </div>
     </main>
