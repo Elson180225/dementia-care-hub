@@ -1,17 +1,17 @@
 :root {
-  --fh-purple: #5d2f91;
-  --fh-purple-dark: #45206d;
-  --fh-purple-soft: #f5effa;
+  --fh-purple: var(--color-purple-600);
+  --fh-purple-dark: var(--color-purple-700);
+  --fh-purple-soft: var(--color-purple-100);
 
-  --fh-sage: #edf5ef;
-  --fh-gold: #f7a81b;
+  --fh-sage: var(--color-neutral-100);
+  --fh-gold: var(--color-gold-500);
   --fh-gold-soft: #fff5dc;
 
-  --fh-text: #28242b;
-  --fh-soft: #6a646d;
+  --fh-text: var(--color-neutral-900);
+  --fh-soft: var(--color-neutral-600);
 
   --fh-white: #ffffff;
-  --fh-border: #e6dfe8;
+  --fh-border: var(--color-neutral-200);
 }
 
 /* PAGE */
@@ -38,8 +38,8 @@
   background:
     linear-gradient(
       135deg,
-      #45206d 0%,
-      #5d2f91 100%
+      var(--color-purple-700) 0%,
+      var(--color-purple-600) 100%
     );
 
   color: #ffffff;
@@ -50,7 +50,7 @@
 
   margin-bottom: 16px;
 
-  color: #ffd66f;
+  color: var(--color-gold-300);
 
   font-size: 14px;
   font-weight: 800;
@@ -153,7 +153,7 @@
     linear-gradient(
       180deg,
       #ffffff 0%,
-      #faf8fc 100%
+      var(--color-neutral-50) 100%
     );
 }
 
@@ -182,7 +182,7 @@
   overflow: hidden;
 
   border:
-    1px solid rgba(78, 60, 86, 0.08);
+    1px solid rgba(93, 47, 145, 0.08);
 
   border-radius: 24px;
 
@@ -191,7 +191,7 @@
   text-decoration: none;
 
   box-shadow:
-    0 10px 30px rgba(45, 32, 51, 0.04);
+    0 10px 30px rgba(53, 21, 82, 0.04);
 
   transition:
     transform 0.3s ease,
@@ -202,15 +202,15 @@
   transform: translateY(-7px);
 
   box-shadow:
-    0 22px 50px rgba(45, 32, 51, 0.1);
+    0 22px 50px rgba(53, 21, 82, 0.1);
 }
 
 .find-help-card-purple {
   background:
     linear-gradient(
       145deg,
-      #f6f0fa,
-      #ebe1f4
+      var(--color-neutral-100),
+      var(--color-purple-200)
     );
 }
 
@@ -218,8 +218,8 @@
   background:
     linear-gradient(
       145deg,
-      #f0f7f2,
-      #e3efe6
+      var(--color-neutral-100),
+      var(--color-neutral-100)
     );
 }
 
@@ -463,7 +463,7 @@
   background: #fff8e9;
 
   border:
-    1px solid #f4dfaf;
+    1px solid var(--color-gold-200);
 }
 
 .boundary-icon {
@@ -579,7 +579,7 @@
     background:
       linear-gradient(
         180deg,
-        #faf8fc 0%,
+        var(--color-neutral-50) 0%,
         #ffffff 100%
       );
 

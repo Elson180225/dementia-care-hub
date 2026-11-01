@@ -1,25 +1,25 @@
 :root {
-  --purple: #5d2f91;
-  --purple-dark: #45206d;
-  --purple-deep: #32134c;
+  --purple: var(--color-purple-600);
+  --purple-dark: var(--color-purple-700);
+  --purple-deep: var(--color-purple-800);
 
-  --gold: #f7a81b;
+  --gold: var(--color-gold-500);
   --gold-soft: #fff2cf;
 
-  --sage: #eaf3ed;
+  --sage: var(--color-neutral-100);
   --blue-soft: #eaf3f8;
-  --lavender: #f5effa;
+  --lavender: var(--color-purple-100);
   --cream: #fff8ea;
 
   --white: #ffffff;
 
-  --text: #28242b;
-  --text-soft: #67616a;
+  --text: var(--color-neutral-900);
+  --text-soft: var(--color-neutral-600);
 
-  --border: #e5dfe7;
+  --border: var(--color-neutral-200);
 
   --shadow:
-    0 18px 50px rgba(49, 36, 57, 0.08);
+    0 18px 50px rgba(53, 21, 82, 0.08);
 }
 
 /* ============================================================
@@ -147,7 +147,7 @@ img {
 
   margin-bottom: 18px;
 
-  color: #ffd66f;
+  color: var(--color-gold-300);
 
   font-size: 14px;
   font-weight: 800;
@@ -211,7 +211,7 @@ img {
 .hero-project-theme {
   margin: 10px 0 0;
 
-  color: #ffd66f;
+  color: var(--color-gold-300);
 
   font-family:
     Georgia,
@@ -288,7 +288,7 @@ img {
 }
 
 .hero-btn-primary:hover {
-  background: #ffb62d;
+  background: var(--color-gold-500);
 
   box-shadow:
     0 9px 22px rgba(0, 0, 0, 0.17);
@@ -358,7 +358,7 @@ img {
 
   margin-top: 3px;
 
-  color: #ffd66f;
+  color: var(--color-gold-300);
 
   text-decoration: none;
 
@@ -452,7 +452,7 @@ img {
     linear-gradient(
       180deg,
       #ffffff 0%,
-      #fbf9fc 100%
+      var(--color-neutral-50) 100%
     );
 }
 
@@ -494,12 +494,12 @@ img {
   text-decoration: none;
 
   border:
-    1px solid rgba(59, 47, 65, 0.08);
+    1px solid rgba(69, 32, 109, 0.08);
 
   border-radius: 24px;
 
   box-shadow:
-    0 10px 30px rgba(49, 36, 57, 0.04);
+    0 10px 30px rgba(53, 21, 82, 0.04);
 
   transition:
     transform 0.35s
@@ -543,7 +543,7 @@ img {
     rgba(93, 47, 145, 0.18);
 
   box-shadow:
-    0 22px 55px rgba(43, 31, 49, 0.11);
+    0 22px 55px rgba(53, 21, 82, 0.11);
 }
 
 .visitor-card:hover::before {
@@ -559,8 +559,8 @@ img {
   background:
     linear-gradient(
       145deg,
-      #f6f0fa,
-      #ebe1f4
+      var(--color-neutral-100),
+      var(--color-purple-200)
     );
 }
 
@@ -568,8 +568,8 @@ img {
   background:
     linear-gradient(
       145deg,
-      #f0f7f2,
-      #e2eee5
+      var(--color-neutral-100),
+      var(--color-neutral-100)
     );
 }
 
@@ -586,8 +586,8 @@ img {
   background:
     linear-gradient(
       145deg,
-      #f1f7fa,
-      #e3eff5
+      var(--color-neutral-100),
+      var(--color-neutral-100)
     );
 }
 
@@ -624,7 +624,7 @@ img {
   place-items: center;
 
   border:
-    1px solid rgba(62, 48, 69, 0.14);
+    1px solid rgba(69, 32, 109, 0.14);
 
   border-radius: 50%;
 
@@ -762,7 +762,7 @@ img {
 
   text-align: center;
 
-  color: #7b747d;
+  color: var(--color-neutral-500);
 
   font-size: 15px;
 }

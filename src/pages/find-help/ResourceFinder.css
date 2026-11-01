@@ -1,16 +1,16 @@
 :root {
-  --rf-purple: #56277d;
-  --rf-purple-dark: #35134f;
-  --rf-purple-light: #e8d8f1;
+  --rf-purple: var(--color-purple-600);
+  --rf-purple-dark: var(--color-purple-800);
+  --rf-purple-light: var(--color-purple-200);
 
-  --rf-green: #153e3c;
-  --rf-green-light: #dcebe5;
+  --rf-green: var(--color-purple-700);
+  --rf-green-light: var(--color-neutral-200);
 
-  --rf-gold: #e8b34b;
+  --rf-gold: var(--color-gold-500);
   --rf-cream: #f8f3e9;
 
-  --rf-text: #262229;
-  --rf-soft: #6e6771;
+  --rf-text: var(--color-neutral-900);
+  --rf-soft: var(--color-neutral-600);
 
   --rf-white: #ffffff;
 }
@@ -53,7 +53,7 @@
   overflow: hidden;
 
   background:
-    #f2eaf5;
+    var(--color-purple-100);
 }
 
 .rf-intro::before {
@@ -188,7 +188,7 @@
     30px 0 0;
 
   color:
-    #5d5661;
+    var(--color-purple-600);
 
   font-size: 18px;
 
@@ -269,7 +269,7 @@
     center;
 
   color:
-    #a19aa4;
+    var(--color-neutral-600);
 }
 
 .rf-progress-item > span {
@@ -282,7 +282,7 @@
     center;
 
   border:
-    1px solid #d8d1db;
+    1px solid var(--color-neutral-300);
 
   border-radius:
     50%;
@@ -326,7 +326,7 @@
   margin-top: 19px;
 
   background:
-    #ddd6df;
+    var(--color-neutral-200);
 }
 
 /* =========================================================
@@ -346,7 +346,7 @@
   padding-top: 2px;
 
   color:
-    #ded3e3;
+    var(--color-purple-200);
 }
 
 .rf-question-number span {
@@ -368,7 +368,7 @@
   margin-top: 12px;
 
   color:
-    #958c99;
+    var(--color-purple-600);
 
   font-size: 12px;
 
@@ -478,7 +478,7 @@
     stretch;
 
   border:
-    1px solid #ded7e2;
+    1px solid var(--color-purple-200);
 
   border-radius:
     18px;
@@ -553,7 +553,7 @@
 .rf-need-card:hover
 .rf-need-number {
   color:
-    #dcbbea;
+    var(--color-purple-300);
 }
 
 .rf-need-card:hover
@@ -649,7 +649,7 @@
     30px;
 
   background:
-    #f0e8f4;
+    var(--color-purple-100);
 
   color:
     var(--rf-purple);
@@ -664,7 +664,7 @@
     38px;
 
   border-top:
-    1px solid #ddd7df;
+    1px solid var(--color-neutral-200);
 }
 
 .rf-type-list button {
@@ -688,7 +688,7 @@
   border: none;
 
   border-bottom:
-    1px solid #ddd7df;
+    1px solid var(--color-neutral-200);
 
   background:
     transparent;
@@ -716,7 +716,7 @@
 .rf-type-list button
 > span:first-child {
   color:
-    #a196a5;
+    var(--color-purple-600);
 
   font-size: 10px;
 
@@ -762,7 +762,7 @@
   gap: 13px;
 
   border:
-    1px solid #ddd5e0;
+    1px solid var(--color-purple-200);
 
   border-radius:
     11px;
@@ -904,12 +904,12 @@
   gap: 18px;
 
   border-top:
-    1px solid #e3dde5;
+    1px solid var(--color-neutral-200);
 }
 
 .rf-trail > span {
   color:
-    #968c99;
+    var(--color-purple-600);
 
   font-size: 9px;
 
@@ -991,7 +991,7 @@
 > div:first-child
 > span {
   color:
-    #cfaee0;
+    var(--color-purple-300);
 
   font-size: 11px;
 
@@ -1057,7 +1057,7 @@
   font-size: 65px;
 
   color:
-    #e6c868;
+    var(--color-gold-300);
 }
 
 .rf-results-count span {
@@ -1116,7 +1116,7 @@
 
 .rf-result-index {
   color:
-    #d2aedf;
+    var(--color-purple-300);
 
   font-size: 11px;
 
@@ -1129,7 +1129,7 @@
   gap: 16px;
 
   color:
-    #dfc5e8;
+    var(--color-purple-300);
 
   font-size: 9px;
 
@@ -1211,18 +1211,18 @@
 
 .rf-verification-pending {
   background:
-    #f2dca7;
+    var(--color-gold-300);
 
   color:
-    #5d4615;
+    var(--color-gold-800);
 }
 
 .rf-verification-verified {
   background:
-    #d9efdf;
+    var(--color-neutral-200);
 
   color:
-    #285b38;
+    var(--color-purple-600);
 }
 
 .rf-result-action a {
@@ -1276,7 +1276,7 @@
 
 .rf-healthcare-number {
   color:
-    #d9b7e4;
+    var(--color-purple-300);
 
   font-size: 12px;
 
@@ -1287,7 +1287,7 @@
 > div:nth-child(2)
 > span {
   color:
-    #d9b7e4;
+    var(--color-purple-300);
 
   font-size: 9px;
 
@@ -1605,7 +1605,7 @@
   gap: 19px;
 
   border:
-    1px solid #ead8a7;
+    1px solid var(--color-gold-300);
 
   border-radius:
     14px;
