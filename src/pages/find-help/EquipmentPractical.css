@@ -1483,3 +1483,74 @@ strong {
     transition: none;
   }
 }
+
+/* =========================================================
+   VISUAL EXPERIENCE ENHANCEMENTS
+========================================================= */
+
+.equipment-needs-grid > button {
+  position: relative;
+  overflow: hidden;
+}
+
+.equipment-needs-grid > button::after {
+  content: "";
+  position: absolute;
+  right: -32px;
+  bottom: -42px;
+  width: 125px;
+  height: 82px;
+  border-radius: 50%;
+  background: rgba(247,168,27,.07);
+  pointer-events: none;
+}
+
+.equipment-need-icon {
+  width: 56px;
+  height: 56px;
+  margin-bottom: 18px;
+  display: grid;
+  place-items: center;
+  border-radius: 17px;
+  color: var(--eq-purple);
+  background: #ffffff;
+  border: 1px solid var(--color-purple-100);
+  box-shadow: 0 6px 15px rgba(69,32,109,.07);
+  transition: transform .22s ease;
+}
+
+.equipment-needs-grid > button:hover .equipment-need-icon {
+  transform: scale(1.07) rotate(-2deg);
+}
+
+.equipment-resource-icon {
+  box-shadow: 0 5px 14px rgba(69,32,109,.07);
+}
+
+.equipment-resource-card {
+  transition: transform .22s ease, box-shadow .22s ease, border-color .22s ease;
+}
+
+.equipment-resource-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 26px rgba(69,32,109,.08);
+}
+
+.equipment-needs-grid > button,
+.equipment-resource-card {
+  animation: equipmentVisualIn .46s cubic-bezier(.16,1,.3,1) both;
+}
+
+@keyframes equipmentVisualIn {
+  from { opacity:0; transform:translateY(10px); }
+  to { opacity:1; transform:translateY(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .equipment-needs-grid > button,
+  .equipment-need-icon,
+  .equipment-resource-card {
+    animation:none !important;
+    transition:none !important;
+  }
+}

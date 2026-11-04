@@ -1238,3 +1238,266 @@ span:first-child {
       1fr;
   }
 }
+
+/* ============================================================
+   VISUAL EXPERIENCE ENHANCEMENTS
+   Adds visual wayfinding without changing page behaviour.
+============================================================ */
+
+.assessment-hero {
+  position: relative;
+  overflow: hidden;
+}
+
+.assessment-hero::before,
+.assessment-hero::after {
+  content: "";
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.assessment-hero::before {
+  width: 340px;
+  height: 340px;
+  right: -90px;
+  top: -105px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow:
+    0 0 0 44px rgba(255, 255, 255, 0.025),
+    0 0 0 90px rgba(247, 168, 27, 0.035);
+}
+
+.assessment-hero::after {
+  width: 115px;
+  height: 115px;
+  right: 17%;
+  bottom: -58px;
+  background: rgba(247, 168, 27, 0.12);
+}
+
+.assessment-hero .assessment-container {
+  position: relative;
+  z-index: 1;
+}
+
+/* Journey cards now work as visual signposts. */
+.assessment-journey-grid > div {
+  position: relative;
+  overflow: hidden;
+  transition:
+    transform 0.22s ease,
+    box-shadow 0.22s ease,
+    background 0.22s ease;
+}
+
+.assessment-journey-grid > div::after {
+  content: "";
+  position: absolute;
+  right: -32px;
+  bottom: -42px;
+  width: 110px;
+  height: 78px;
+  border-radius: 50%;
+  background: rgba(247, 168, 27, 0.075);
+}
+
+.assessment-journey-grid > div:hover {
+  z-index: 2;
+  transform: translateY(-5px);
+  background: var(--color-neutral-50);
+  box-shadow:
+    0 13px 28px rgba(69, 32, 109, 0.09);
+}
+
+.assessment-journey-icon {
+  width: 52px;
+  height: 52px;
+  margin-bottom: 14px;
+  display: grid;
+  place-items: center;
+  border-radius: 16px;
+  color: var(--ah-purple);
+  background:
+    linear-gradient(
+      145deg,
+      var(--color-purple-50),
+      #ffffff
+    );
+  border: 1px solid var(--color-purple-100);
+  box-shadow:
+    0 5px 13px rgba(69, 32, 109, 0.07);
+  transition:
+    transform 0.22s ease,
+    background 0.22s ease;
+}
+
+.assessment-journey-grid > div:hover .assessment-journey-icon {
+  transform: scale(1.07) rotate(-2deg);
+  background: #ffffff;
+}
+
+/* Checklist gets a clearer interactive visual state. */
+.assessment-check-item {
+  position: relative;
+  overflow: hidden;
+}
+
+.assessment-check-item::after {
+  content: "";
+  position: absolute;
+  right: -25px;
+  top: -28px;
+  width: 78px;
+  height: 78px;
+  border-radius: 50%;
+  background: rgba(93, 47, 145, 0.035);
+  pointer-events: none;
+}
+
+.assessment-check-item:hover {
+  box-shadow:
+    0 8px 18px rgba(69, 32, 109, 0.065);
+}
+
+/* Pathway steps become graphical process cards. */
+.assessment-flow > div:not(.assessment-flow-arrow) {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid var(--color-purple-100);
+  transition:
+    transform 0.22s ease,
+    box-shadow 0.22s ease,
+    border-color 0.22s ease;
+}
+
+.assessment-flow > div:not(.assessment-flow-arrow):hover {
+  transform: translateY(-4px);
+  border-color: var(--color-purple-200);
+  box-shadow:
+    0 10px 22px rgba(69, 32, 109, 0.08);
+}
+
+.assessment-flow-icon {
+  width: 44px;
+  height: 44px;
+  margin-bottom: 13px;
+  display: grid;
+  place-items: center;
+  border-radius: 13px;
+  color: var(--ah-purple);
+  background: #ffffff;
+  border: 1px solid var(--color-purple-100);
+}
+
+.assessment-flow-arrow {
+  font-size: 26px;
+  transition:
+    transform 0.2s ease,
+    color 0.2s ease;
+}
+
+.assessment-pathway-content:hover .assessment-flow-arrow {
+  transform: translateX(3px);
+  color: var(--color-gold-600);
+}
+
+/* Provider cards get a strong visual anchor before the text. */
+.assessment-provider-card {
+  position: relative;
+  overflow: hidden;
+  transition:
+    transform 0.24s ease,
+    box-shadow 0.24s ease,
+    border-color 0.24s ease;
+}
+
+.assessment-provider-card::after {
+  content: "";
+  position: absolute;
+  right: -40px;
+  bottom: -48px;
+  width: 155px;
+  height: 105px;
+  border-radius: 50%;
+  background: rgba(247, 168, 27, 0.055);
+  pointer-events: none;
+}
+
+.assessment-provider-card:hover {
+  transform: translateY(-5px);
+  border-color: var(--color-purple-200);
+  box-shadow:
+    0 16px 34px rgba(69, 32, 109, 0.10);
+}
+
+.assessment-provider-visual {
+  width: 58px;
+  height: 58px;
+  margin-bottom: 17px;
+  display: grid;
+  place-items: center;
+  border-radius: 17px;
+  color: var(--ah-purple);
+  background:
+    linear-gradient(
+      145deg,
+      var(--color-purple-50),
+      #ffffff
+    );
+  border: 1px solid var(--color-purple-100);
+  box-shadow:
+    0 6px 15px rgba(69, 32, 109, 0.07);
+  transition:
+    transform 0.22s ease;
+}
+
+.assessment-provider-card:hover .assessment-provider-visual {
+  transform: translateY(-2px) scale(1.05);
+}
+
+/* Gentle staggered entrance for the visual cards. */
+.assessment-journey-grid > div,
+.assessment-provider-card {
+  animation: assessmentVisualIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.assessment-journey-grid > div:nth-child(2),
+.assessment-provider-card:nth-child(2) {
+  animation-delay: 0.06s;
+}
+
+.assessment-journey-grid > div:nth-child(3),
+.assessment-provider-card:nth-child(3) {
+  animation-delay: 0.12s;
+}
+
+.assessment-journey-grid > div:nth-child(4),
+.assessment-provider-card:nth-child(4) {
+  animation-delay: 0.18s;
+}
+
+@keyframes assessmentVisualIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .assessment-journey-grid > div,
+  .assessment-journey-icon,
+  .assessment-check-item,
+  .assessment-flow > div,
+  .assessment-flow-arrow,
+  .assessment-provider-card,
+  .assessment-provider-visual {
+    animation: none !important;
+    transition: none !important;
+  }
+}

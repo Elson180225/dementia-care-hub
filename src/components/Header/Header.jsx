@@ -137,6 +137,84 @@ function getMenuItems(m) {
   ];
 }
 
+
+function HelpMenuIcon({ path }) {
+  const common = {
+    viewBox: "0 0 24 24",
+    width: "28",
+    height: "28",
+    fill: "none",
+    stroke: "currentColor",
+    strokeWidth: "1.8",
+    strokeLinecap: "round",
+    strokeLinejoin: "round",
+    "aria-hidden": "true",
+  };
+
+  if (path === "/find-help") {
+    return (
+      <svg {...common}>
+        <path d="M5 18c2.5-4 5-5.5 8-5.5h2.5" />
+        <circle cx="5" cy="18" r="2" />
+        <path d="M15 6.5a3.5 3.5 0 1 1 7 0c0 2.6-3.5 6-3.5 6S15 9.1 15 6.5Z" />
+        <circle cx="18.5" cy="6.5" r=".8" />
+      </svg>
+    );
+  }
+
+  if (path.includes("assessment-healthcare")) {
+    return (
+      <svg {...common}>
+        <path d="M6 3v5a4 4 0 0 0 8 0V3" />
+        <path d="M4 3h4M12 3h4" />
+        <path d="M10 12v2a5 5 0 0 0 10 0v-1" />
+        <circle cx="20" cy="10" r="2" />
+      </svg>
+    );
+  }
+
+  if (path.includes("support-services")) {
+    return (
+      <svg {...common}>
+        <circle cx="8" cy="8" r="2.2" />
+        <circle cx="16" cy="8" r="2.2" />
+        <path d="M3.5 18c.7-3.2 2.5-5 4.5-5s3.8 1.8 4.5 5" />
+        <path d="M11.5 18c.7-3.2 2.5-5 4.5-5s3.8 1.8 4.5 5" />
+        <path d="M7 19h10" />
+      </svg>
+    );
+  }
+
+  if (path.includes("government-financial")) {
+    return (
+      <svg {...common}>
+        <path d="M3 9h18L12 3 3 9Z" />
+        <path d="M5 10v7M9 10v7M15 10v7M19 10v7" />
+        <path d="M3 18h18M2 21h20" />
+      </svg>
+    );
+  }
+
+  if (path.includes("equipment-practical")) {
+    return (
+      <svg {...common}>
+        <circle cx="9" cy="5" r="2" />
+        <path d="M9 8v5h5l2 5" />
+        <path d="M9 11H6a4 4 0 1 0 4 6" />
+        <path d="M14 13h4" />
+      </svg>
+    );
+  }
+
+  return (
+    <svg {...common}>
+      <circle cx="10.5" cy="10.5" r="6.5" />
+      <path d="m15.5 15.5 5 5" />
+      <path d="M10.5 7.5c1.8 0 3 1.2 3 3" />
+    </svg>
+  );
+}
+
 function Header() {
   const { language, setLanguage, t, languages, currentLanguageConfig } =
     useLanguage();
@@ -332,16 +410,50 @@ function Header() {
 
                   {/* DROPDOWN */}
                   {openMenu === item.label && (
-                    <div className="dropdown-menu">
-                      <h3>{item.label}</h3>
+                    <div
+                      className={`dropdown-menu ${
+                        item.path === "/find-help" ? "dropdown-menu-visual" : ""
+                      }`}
+                    >
+                      <div className="dropdown-heading-row">
+                        <h3>{item.label}</h3>
+                        {item.path === "/find-help" && (
+                          <span className="dropdown-heading-line" aria-hidden="true" />
+                        )}
+                      </div>
+
                       <div className="dropdown-grid">
                         {item.children.map((child) => (
                           <Link
                             key={child.path}
                             to={child.path}
+                            className={
+                              item.path === "/find-help"
+                                ? "dropdown-visual-link"
+                                : undefined
+                            }
                             onClick={() => setOpenMenu(null)}
                           >
-                            {child.label}
+                            {item.path === "/find-help" ? (
+                              <>
+                                <span className="dropdown-visual-icon">
+                                  <HelpMenuIcon path={child.path} />
+                                </span>
+
+                                <span className="dropdown-visual-label">
+                                  {child.label}
+                                </span>
+
+                                <span
+                                  className="dropdown-visual-arrow"
+                                  aria-hidden="true"
+                                >
+                                  ›
+                                </span>
+                              </>
+                            ) : (
+                              child.label
+                            )}
                           </Link>
                         ))}
                       </div>

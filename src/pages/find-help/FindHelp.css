@@ -661,3 +661,127 @@
     }
   }
 }
+
+/* ============================================================
+   VISUAL EXPERIENCE ENHANCEMENTS
+============================================================ */
+
+.find-help-hero {
+  position: relative;
+  overflow: hidden;
+}
+
+.find-help-hero::before,
+.find-help-hero::after {
+  content: "";
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.find-help-hero::before {
+  width: 360px;
+  height: 360px;
+  right: -95px;
+  top: -105px;
+  border: 1px solid rgba(255,255,255,.13);
+  box-shadow:
+    0 0 0 48px rgba(255,255,255,.025),
+    0 0 0 96px rgba(247,168,27,.035);
+}
+
+.find-help-hero::after {
+  width: 120px;
+  height: 120px;
+  right: 18%;
+  bottom: -60px;
+  background: rgba(247,168,27,.12);
+}
+
+.find-help-hero .find-help-container {
+  position: relative;
+  z-index: 1;
+}
+
+.find-help-card-icon {
+  width: 66px;
+  height: 66px;
+  display: grid;
+  place-items: center;
+  border-radius: 20px;
+  color: var(--fh-purple);
+  background: rgba(255,255,255,.72);
+  border: 1px solid rgba(93,47,145,.10);
+  box-shadow: 0 7px 18px rgba(69,32,109,.07);
+  transition: transform .22s ease, box-shadow .22s ease;
+}
+
+.find-help-card:hover .find-help-card-icon {
+  transform: translateY(-3px) rotate(-2deg);
+  box-shadow: 0 11px 24px rgba(69,32,109,.11);
+}
+
+.find-help-area-grid a {
+  position: relative;
+  overflow: hidden;
+}
+
+.find-help-area-grid a::after {
+  content: "";
+  position: absolute;
+  width: 125px;
+  height: 82px;
+  right: -34px;
+  bottom: -42px;
+  border-radius: 50%;
+  background: rgba(247,168,27,.075);
+  pointer-events: none;
+}
+
+.find-help-area-icon {
+  width: 58px;
+  height: 58px;
+  display: grid;
+  place-items: center;
+  border-radius: 17px;
+  color: var(--fh-purple);
+  background: var(--color-purple-50);
+  border: 1px solid var(--color-purple-100);
+  box-shadow: 0 6px 14px rgba(69,32,109,.06);
+  transition: transform .22s ease;
+}
+
+.find-help-area-grid a:hover .find-help-area-icon {
+  transform: scale(1.06) rotate(-2deg);
+}
+
+.find-help-area-grid a > span {
+  margin-top: 20px;
+}
+
+.find-help-card,
+.find-help-area-grid a {
+  animation: fhVisualIn .48s cubic-bezier(.16,1,.3,1) both;
+}
+
+.find-help-card:nth-child(2),
+.find-help-area-grid a:nth-child(2) { animation-delay: .05s; }
+.find-help-card:nth-child(3),
+.find-help-area-grid a:nth-child(3) { animation-delay: .10s; }
+.find-help-area-grid a:nth-child(4) { animation-delay: .15s; }
+.find-help-area-grid a:nth-child(5) { animation-delay: .20s; }
+
+@keyframes fhVisualIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .find-help-card,
+  .find-help-area-grid a,
+  .find-help-card-icon,
+  .find-help-area-icon {
+    animation: none !important;
+    transition: none !important;
+  }
+}

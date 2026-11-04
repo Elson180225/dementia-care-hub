@@ -14,6 +14,32 @@ const categories = [
   "Older Persons",
 ];
 
+
+function GovernmentResourceIcon({ category = "" }) {
+  const common = {
+    viewBox: "0 0 24 24",
+    width: "28",
+    height: "28",
+    fill: "none",
+    stroke: "currentColor",
+    strokeWidth: "1.8",
+    strokeLinecap: "round",
+    strokeLinejoin: "round",
+    "aria-hidden": "true",
+  };
+
+  if (category.includes("Financial")) {
+    return <svg {...common}><rect x="3" y="6" width="18" height="13" rx="2" /><path d="M3 10h18" /><circle cx="16" cy="14.5" r="1.5" /></svg>;
+  }
+  if (category.includes("Caregiver")) {
+    return <svg {...common}><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10Z" /></svg>;
+  }
+  if (category.includes("Older")) {
+    return <svg {...common}><circle cx="12" cy="5" r="2" /><path d="M12 8v6M8 21l4-7 4 7M15 11h4v8" /></svg>;
+  }
+  return <svg {...common}><path d="M3 9h18L12 3 3 9Z" /><path d="M5 10v7M9 10v7M15 10v7M19 10v7" /><path d="M3 18h18" /></svg>;
+}
+
 function GovernmentFinancial() {
   const { t } = useLanguage();
   const gf = t.governmentFinancialPage || {};
@@ -191,6 +217,10 @@ function GovernmentFinancial() {
                   key={resource.id}
                   className="government-card"
                 >
+                  <div className="government-card-visual" aria-hidden="true">
+                    <GovernmentResourceIcon category={resource.category} />
+                  </div>
+
                   <div className="government-card-top">
                     <span className="government-category">
                       {resource.category}

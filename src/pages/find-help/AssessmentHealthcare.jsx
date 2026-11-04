@@ -46,6 +46,84 @@ const preparationItems = [
   },
 ];
 
+
+function AssessmentVisualIcon({ type }) {
+  const common = {
+    viewBox: "0 0 24 24",
+    width: "28",
+    height: "28",
+    fill: "none",
+    stroke: "currentColor",
+    strokeWidth: "1.8",
+    strokeLinecap: "round",
+    strokeLinejoin: "round",
+    "aria-hidden": "true",
+  };
+
+  const icons = {
+    prepare: (
+      <svg {...common}>
+        <path d="M8 4h8" />
+        <path d="M9 2h6v4H9z" />
+        <path d="M6 5h12v16H6z" />
+        <path d="m9 11 1.5 1.5L14 9" />
+        <path d="M9 16h6" />
+      </svg>
+    ),
+    pathway: (
+      <svg {...common}>
+        <circle cx="6" cy="6" r="2" />
+        <circle cx="18" cy="18" r="2" />
+        <path d="M8 6h4a4 4 0 0 1 4 4v2" />
+        <path d="m13 10 3 3 3-3" />
+      </svg>
+    ),
+    provider: (
+      <svg {...common}>
+        <path d="M4 21V8l8-5 8 5v13" />
+        <path d="M8 21v-6h8v6" />
+        <path d="M9 10h6" />
+        <path d="M12 7v6M9 10h6" />
+      </svg>
+    ),
+    support: (
+      <svg {...common}>
+        <path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10Z" />
+        <path d="M9 11h6M12 8v6" />
+      </svg>
+    ),
+    clinic: (
+      <svg {...common}>
+        <path d="M4 21V8l8-5 8 5v13" />
+        <path d="M8 21v-5h8v5" />
+        <path d="M12 8v5M9.5 10.5h5" />
+      </svg>
+    ),
+    assessment: (
+      <svg {...common}>
+        <circle cx="10" cy="10" r="5" />
+        <path d="m14 14 5 5" />
+        <path d="M8 10h4M10 8v4" />
+      </svg>
+    ),
+    hospital: (
+      <svg {...common}>
+        <path d="M5 21V5h14v16" />
+        <path d="M9 21v-4h6v4" />
+        <path d="M12 8v5M9.5 10.5h5" />
+      </svg>
+    ),
+    followup: (
+      <svg {...common}>
+        <path d="M20 7v5h-5" />
+        <path d="M18.5 12A7 7 0 1 1 16 6.5L20 10" />
+      </svg>
+    ),
+  };
+
+  return icons[type] || icons.support;
+}
+
 function AssessmentHealthcare() {
   const { t } = useLanguage();
   const ah = t.assessmentHealthcare || {};
@@ -141,6 +219,9 @@ function AssessmentHealthcare() {
         <div className="assessment-container">
           <div className="assessment-journey-grid">
             <div>
+              <div className="assessment-journey-icon">
+                <AssessmentVisualIcon type="prepare" />
+              </div>
               <span>01</span>
               <strong>{ah.journeyTitle1 || "Prepare"}</strong>
               <p>
@@ -149,6 +230,9 @@ function AssessmentHealthcare() {
             </div>
 
             <div>
+              <div className="assessment-journey-icon">
+                <AssessmentVisualIcon type="pathway" />
+              </div>
               <span>02</span>
               <strong>{ah.journeyTitle2 || "Choose a pathway"}</strong>
               <p>
@@ -157,6 +241,9 @@ function AssessmentHealthcare() {
             </div>
 
             <div>
+              <div className="assessment-journey-icon">
+                <AssessmentVisualIcon type="provider" />
+              </div>
               <span>03</span>
               <strong>{ah.journeyTitle3 || "Find a provider"}</strong>
               <p>
@@ -165,6 +252,9 @@ function AssessmentHealthcare() {
             </div>
 
             <div>
+              <div className="assessment-journey-icon">
+                <AssessmentVisualIcon type="support" />
+              </div>
               <span>04</span>
               <strong>{ah.journeyTitle4 || "Continue support"}</strong>
               <p>
@@ -331,6 +421,9 @@ function AssessmentHealthcare() {
 
               <div className="assessment-flow">
                 <div>
+                  <div className="assessment-flow-icon">
+                    <AssessmentVisualIcon type="clinic" />
+                  </div>
                   <span>01</span>
                   <strong>
                     {ah.govtFlow1Title || "Contact a government clinic"}
@@ -345,6 +438,9 @@ function AssessmentHealthcare() {
                 </div>
 
                 <div>
+                  <div className="assessment-flow-icon">
+                    <AssessmentVisualIcon type="assessment" />
+                  </div>
                   <span>02</span>
                   <strong>
                     {ah.govtFlow2Title || "Initial assessment"}
@@ -359,6 +455,9 @@ function AssessmentHealthcare() {
                 </div>
 
                 <div>
+                  <div className="assessment-flow-icon">
+                    <AssessmentVisualIcon type="hospital" />
+                  </div>
                   <span>03</span>
                   <strong>
                     {ah.govtFlow3Title || "Hospital or specialist"}
@@ -373,6 +472,9 @@ function AssessmentHealthcare() {
                 </div>
 
                 <div>
+                  <div className="assessment-flow-icon">
+                    <AssessmentVisualIcon type="followup" />
+                  </div>
                   <span>04</span>
                   <strong>
                     {ah.govtFlow4Title || "Follow-up"}
@@ -403,6 +505,9 @@ function AssessmentHealthcare() {
 
               <div className="assessment-flow assessment-flow-private">
                 <div>
+                  <div className="assessment-flow-icon">
+                    <AssessmentVisualIcon type="provider" />
+                  </div>
                   <span>01</span>
                   <strong>
                     {ah.privateFlow1Title || "Choose a provider"}
@@ -417,6 +522,9 @@ function AssessmentHealthcare() {
                 </div>
 
                 <div>
+                  <div className="assessment-flow-icon">
+                    <AssessmentVisualIcon type="clinic" />
+                  </div>
                   <span>02</span>
                   <strong>
                     {ah.privateFlow2Title || "Contact the provider"}
@@ -431,6 +539,9 @@ function AssessmentHealthcare() {
                 </div>
 
                 <div>
+                  <div className="assessment-flow-icon">
+                    <AssessmentVisualIcon type="assessment" />
+                  </div>
                   <span>03</span>
                   <strong>
                     {ah.privateFlow3Title || "Attend assessment"}
@@ -536,6 +647,12 @@ function AssessmentHealthcare() {
                   key={provider.id}
                   className="assessment-provider-card"
                 >
+                  <div className="assessment-provider-visual" aria-hidden="true">
+                    <AssessmentVisualIcon
+                      type={provider.pathway === "government" ? "hospital" : "clinic"}
+                    />
+                  </div>
+
                   <div className="assessment-provider-top">
                     <span>
                       {provider.type}
