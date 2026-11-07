@@ -1,6 +1,7 @@
 import { useState, useMemo } from "react";
 import Activities from "../../../trainer-portal/pages/Activities";
-import UploadField from "../../../trainer-portal/UploadField";
+import TrackEditor from './TrackEditor';
+import TrackApplications from './TrackApplications';
 
 const BLANK_PROGRAMME = {
   id: "",
@@ -24,6 +25,7 @@ const BLANK_PROGRAMME = {
   image: "",
   highlights: [],
   buttonLabel: "Register for Programme",
+  registrationOpen: true,
 };
 
 export default function PhysicalEducationAdmin({ content, onSave }) {
@@ -104,7 +106,7 @@ export default function PhysicalEducationAdmin({ content, onSave }) {
 
     if (Object.keys(errs).length > 0) {
       setErrors(errs);
-      return;
+      return false;
     }
 
     const hlArray = (editingProg.rawHighlights || "")
@@ -134,6 +136,7 @@ export default function PhysicalEducationAdmin({ content, onSave }) {
 
     const ok = await onSave(copy);
     if (ok) setEditingProg(null);
+    return ok;
   };
 
   // Confirm Delete
@@ -149,6 +152,7 @@ export default function PhysicalEducationAdmin({ content, onSave }) {
     if (ok) setDeletingConfirm(null);
   };
 
+  if (editingProg) return <TrackEditor editing={editingProg} onChange={setEditingProg} onSave={handleSaveModal} onClose={()=>setEditingProg(null)} errors={errors} />;
   return (
     <div className="physical-education-admin">
       {/* Sub-navigation bar */}
@@ -185,7 +189,9 @@ export default function PhysicalEducationAdmin({ content, onSave }) {
         >
           🏋️ Physical Workshops &amp; In-Person Sessions
         </button>
+        <button type="button" className="tp-btn tp-btn-ghost" aria-current={subSection==='applications'?'page':undefined} onClick={()=>setSubSection('applications')}>Applications</button>
       </div>
+      {subSection==='applications' && <TrackApplications />}
 
       {/* SUB-SECTION 1: DCS TRACKS TABLE */}
       {subSection === "tracks" && (
@@ -433,339 +439,6 @@ export default function PhysicalEducationAdmin({ content, onSave }) {
         </div>
       )}
 
-      {/* EDIT / CREATE TRACK MODAL */}
-      {editingProg && (
-        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.55)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 99999, padding: "1rem", overflowY: "auto" }}>
-          <div style={{ background: "#fff", borderRadius: "10px", maxWidth: "780px", width: "100%", maxHeight: "90vh", overflowY: "auto", padding: "1.75rem", boxShadow: "0 25px 50px -12px rgba(0,0,0,0.25)" }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1.25rem", borderBottom: "1px solid #e5e7eb", paddingBottom: "0.75rem" }}>
-              <h3 style={{ margin: 0, color: "#0d716b" }}>
-                {editingProg.isNew ? "Create New DCS Track" : `Edit Track: ${editingProg.values.code}`}
-              </h3>
-              <button
-                type="button"
-                className="tp-btn tp-btn-ghost"
-                onClick={() => setEditingProg(null)}
-                style={{ minHeight: "32px", padding: "2px 8px" }}
-              >
-                ✕
-              </button>
-            </div>
-
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "1rem", marginBottom: "1rem" }}>
-              <div>
-                <label style={{ display: "block", fontWeight: 600, fontSize: "0.85rem", marginBottom: "0.25rem" }}>
-                  Track Number *
-                </label>
-                <input
-                  type="text"
-                  value={editingProg.values.trackNumber}
-                  onChange={(e) =>
-                    setEditingProg({
-                      ...editingProg,
-                      values: { ...editingProg.values, trackNumber: e.target.value },
-                    })
-                  }
-                  placeholder="e.g. Track 01"
-                  style={{ width: "100%", padding: "0.5rem", borderRadius: "4px", border: "1px solid #ccc" }}
-                />
-              </div>
-
-              <div>
-                <label style={{ display: "block", fontWeight: 600, fontSize: "0.85rem", marginBottom: "0.25rem" }}>
-                  Track Code *
-                </label>
-                <input
-                  type="text"
-                  value={editingProg.values.code}
-                  onChange={(e) =>
-                    setEditingProg({
-                      ...editingProg,
-                      values: { ...editingProg.values, code: e.target.value },
-                    })
-                  }
-                  placeholder="e.g. DCS-Family"
-                  style={{ width: "100%", padding: "0.5rem", borderRadius: "4px", border: errors.code ? "1px solid #dc2626" : "1px solid #ccc" }}
-                />
-                {errors.code && <div style={{ color: "#dc2626", fontSize: "0.78rem", marginTop: "2px" }}>{errors.code}</div>}
-              </div>
-
-              <div>
-                <label style={{ display: "block", fontWeight: 600, fontSize: "0.85rem", marginBottom: "0.25rem" }}>
-                  Status Badge
-                </label>
-                <input
-                  type="text"
-                  value={editingProg.values.badge}
-                  onChange={(e) =>
-                    setEditingProg({
-                      ...editingProg,
-                      values: { ...editingProg.values, badge: e.target.value },
-                    })
-                  }
-                  placeholder="e.g. Open for Registration"
-                  style={{ width: "100%", padding: "0.5rem", borderRadius: "4px", border: "1px solid #ccc" }}
-                />
-              </div>
-            </div>
-
-            <div style={{ marginBottom: "1rem" }}>
-              <label style={{ display: "block", fontWeight: 600, fontSize: "0.85rem", marginBottom: "0.25rem" }}>
-                Full Programme Title *
-              </label>
-              <input
-                type="text"
-                value={editingProg.values.title}
-                onChange={(e) =>
-                  setEditingProg({
-                    ...editingProg,
-                    values: { ...editingProg.values, title: e.target.value },
-                  })
-                }
-                placeholder="e.g. Basic Dementia Care Skill (Family) Course"
-                style={{ width: "100%", padding: "0.5rem", borderRadius: "4px", border: errors.title ? "1px solid #dc2626" : "1px solid #ccc" }}
-              />
-              {errors.title && <div style={{ color: "#dc2626", fontSize: "0.78rem", marginTop: "2px" }}>{errors.title}</div>}
-            </div>
-
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem", marginBottom: "1rem" }}>
-              <div>
-                <label style={{ display: "block", fontWeight: 600, fontSize: "0.85rem", marginBottom: "0.25rem" }}>
-                  Role Category / Audience Summary *
-                </label>
-                <input
-                  type="text"
-                  value={editingProg.values.roleCategory}
-                  onChange={(e) =>
-                    setEditingProg({
-                      ...editingProg,
-                      values: { ...editingProg.values, roleCategory: e.target.value },
-                    })
-                  }
-                  placeholder="e.g. Family Caregivers, Relatives & Community Helpers"
-                  style={{ width: "100%", padding: "0.5rem", borderRadius: "4px", border: errors.roleCategory ? "1px solid #dc2626" : "1px solid #ccc" }}
-                />
-                {errors.roleCategory && <div style={{ color: "#dc2626", fontSize: "0.78rem", marginTop: "2px" }}>{errors.roleCategory}</div>}
-              </div>
-
-              <div>
-                <label style={{ display: "block", fontWeight: 600, fontSize: "0.85rem", marginBottom: "0.25rem" }}>
-                  Action Button Text
-                </label>
-                <input
-                  type="text"
-                  value={editingProg.values.buttonLabel || ""}
-                  onChange={(e) =>
-                    setEditingProg({
-                      ...editingProg,
-                      values: { ...editingProg.values, buttonLabel: e.target.value },
-                    })
-                  }
-                  placeholder="e.g. Register for DCS-Family"
-                  style={{ width: "100%", padding: "0.5rem", borderRadius: "4px", border: "1px solid #ccc" }}
-                />
-              </div>
-            </div>
-
-            <div style={{ marginBottom: "1rem" }}>
-              <label style={{ display: "block", fontWeight: 600, fontSize: "0.85rem", marginBottom: "0.25rem" }}>
-                Purpose Quote / Short Intro
-              </label>
-              <textarea
-                rows={2}
-                value={editingProg.values.shortIntro || ""}
-                onChange={(e) =>
-                  setEditingProg({
-                    ...editingProg,
-                    values: { ...editingProg.values, shortIntro: e.target.value },
-                  })
-                }
-                placeholder="To shift the daily caregiving focus away from rigid clinical routines..."
-                style={{ width: "100%", padding: "0.5rem", borderRadius: "4px", border: "1px solid #ccc" }}
-              />
-            </div>
-
-            <div style={{ marginBottom: "1rem" }}>
-              <label style={{ display: "block", fontWeight: 600, fontSize: "0.85rem", marginBottom: "0.25rem" }}>
-                Who This Is Designed For (Detailed)
-              </label>
-              <textarea
-                rows={2}
-                value={editingProg.values.suitableFor || ""}
-                onChange={(e) =>
-                  setEditingProg({
-                    ...editingProg,
-                    values: { ...editingProg.values, suitableFor: e.target.value },
-                  })
-                }
-                placeholder="Detailed explanation of target participants..."
-                style={{ width: "100%", padding: "0.5rem", borderRadius: "4px", border: "1px solid #ccc" }}
-              />
-            </div>
-
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "1rem", marginBottom: "1rem" }}>
-              <div>
-                <label style={{ display: "block", fontWeight: 600, fontSize: "0.85rem", marginBottom: "0.25rem" }}>
-                  Mode
-                </label>
-                <input
-                  type="text"
-                  value={editingProg.values.mode || ""}
-                  onChange={(e) =>
-                    setEditingProg({
-                      ...editingProg,
-                      values: { ...editingProg.values, mode: e.target.value },
-                    })
-                  }
-                  placeholder="e.g. In-Person Physical Workshop"
-                  style={{ width: "100%", padding: "0.5rem", borderRadius: "4px", border: "1px solid #ccc" }}
-                />
-              </div>
-
-              <div>
-                <label style={{ display: "block", fontWeight: 600, fontSize: "0.85rem", marginBottom: "0.25rem" }}>
-                  Sessions / Duration
-                </label>
-                <input
-                  type="text"
-                  value={editingProg.values.sessions || ""}
-                  onChange={(e) =>
-                    setEditingProg({
-                      ...editingProg,
-                      values: { ...editingProg.values, sessions: e.target.value },
-                    })
-                  }
-                  placeholder="e.g. 1 Full Day (9:00 AM – 6:00 PM)"
-                  style={{ width: "100%", padding: "0.5rem", borderRadius: "4px", border: "1px solid #ccc" }}
-                />
-              </div>
-
-              <div>
-                <label style={{ display: "block", fontWeight: 600, fontSize: "0.85rem", marginBottom: "0.25rem" }}>
-                  Language(s)
-                </label>
-                <input
-                  type="text"
-                  value={editingProg.values.language || ""}
-                  onChange={(e) =>
-                    setEditingProg({
-                      ...editingProg,
-                      values: { ...editingProg.values, language: e.target.value },
-                    })
-                  }
-                  placeholder="e.g. English / Bahasa Melayu / 中文"
-                  style={{ width: "100%", padding: "0.5rem", borderRadius: "4px", border: "1px solid #ccc" }}
-                />
-              </div>
-            </div>
-
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "1rem", marginBottom: "1rem" }}>
-              <div>
-                <label style={{ display: "block", fontWeight: 600, fontSize: "0.85rem", marginBottom: "0.25rem" }}>
-                  Venue / Location
-                </label>
-                <input
-                  type="text"
-                  value={editingProg.values.location || ""}
-                  onChange={(e) =>
-                    setEditingProg({
-                      ...editingProg,
-                      values: { ...editingProg.values, location: e.target.value },
-                    })
-                  }
-                  placeholder="e.g. Hock Lee Hotel & Residence, Kuching"
-                  style={{ width: "100%", padding: "0.5rem", borderRadius: "4px", border: "1px solid #ccc" }}
-                />
-              </div>
-
-              <div>
-                <label style={{ display: "block", fontWeight: 600, fontSize: "0.85rem", marginBottom: "0.25rem" }}>
-                  Scheduled Date
-                </label>
-                <input
-                  type="text"
-                  value={editingProg.values.schedule?.date || ""}
-                  onChange={(e) =>
-                    setEditingProg({
-                      ...editingProg,
-                      values: {
-                        ...editingProg.values,
-                        schedule: { ...editingProg.values.schedule, date: e.target.value },
-                      },
-                    })
-                  }
-                  placeholder="e.g. 16 May 2026"
-                  style={{ width: "100%", padding: "0.5rem", borderRadius: "4px", border: "1px solid #ccc" }}
-                />
-              </div>
-
-              <div>
-                <label style={{ display: "block", fontWeight: 600, fontSize: "0.85rem", marginBottom: "0.25rem" }}>
-                  Scheduled Time
-                </label>
-                <input
-                  type="text"
-                  value={editingProg.values.schedule?.time || ""}
-                  onChange={(e) =>
-                    setEditingProg({
-                      ...editingProg,
-                      values: {
-                        ...editingProg.values,
-                        schedule: { ...editingProg.values.schedule, time: e.target.value },
-                      },
-                    })
-                  }
-                  placeholder="e.g. 9:00 AM – 6:00 PM"
-                  style={{ width: "100%", padding: "0.5rem", borderRadius: "4px", border: "1px solid #ccc" }}
-                />
-              </div>
-            </div>
-
-            <div style={{ marginBottom: "1rem" }}>
-              <label style={{ display: "block", fontWeight: 600, fontSize: "0.85rem", marginBottom: "0.25rem" }}>
-                Core Learning Pillars / Highlights (One per line)
-              </label>
-              <textarea
-                rows={4}
-                value={editingProg.rawHighlights || ""}
-                onChange={(e) => setEditingProg({ ...editingProg, rawHighlights: e.target.value })}
-                placeholder="Module 1 – Basic DCS&#10;Module 2 – Person-Centred Care"
-                style={{ width: "100%", padding: "0.5rem", borderRadius: "4px", border: "1px solid #ccc", fontFamily: "monospace", fontSize: "0.88rem" }}
-              />
-            </div>
-
-            <div style={{ marginBottom: "1.5rem" }}>
-              <UploadField
-                kind="poster"
-                label="Track Visual Poster / Photo"
-                value={editingProg.values.image}
-                onChange={(url) =>
-                  setEditingProg({
-                    ...editingProg,
-                    values: { ...editingProg.values, image: url },
-                  })
-                }
-              />
-            </div>
-
-            <div style={{ display: "flex", justifyContent: "flex-end", gap: "0.75rem", borderTop: "1px solid #e5e7eb", paddingTop: "1rem" }}>
-              <button
-                type="button"
-                className="tp-btn tp-btn-ghost"
-                onClick={() => setEditingProg(null)}
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                className="tp-btn"
-                onClick={handleSaveModal}
-              >
-                {editingProg.isNew ? "Create Track" : "Save Changes"}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* DELETE CONFIRMATION MODAL */}
       {deletingConfirm && (

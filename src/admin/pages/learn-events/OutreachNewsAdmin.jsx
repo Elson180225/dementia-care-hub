@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import UploadField from "../../../trainer-portal/UploadField";
+import ContentPreviewEditor from './ContentPreviewEditor';
 
 const BLANK_STORY = {
   id: "",
@@ -207,6 +207,7 @@ export default function OutreachNewsAdmin({ content, onSave }) {
 
     const ok = await onSave(copy);
     if (ok) setEditingStory(null);
+    return ok;
   };
 
   // Save Pillar
@@ -236,6 +237,7 @@ export default function OutreachNewsAdmin({ content, onSave }) {
 
     const ok = await onSave(copy);
     if (ok) setEditingPillar(null);
+    return ok;
   };
 
   // Save News
@@ -265,6 +267,7 @@ export default function OutreachNewsAdmin({ content, onSave }) {
 
     const ok = await onSave(copy);
     if (ok) setEditingArticle(null);
+    return ok;
   };
 
   // Delete Action
@@ -296,6 +299,9 @@ export default function OutreachNewsAdmin({ content, onSave }) {
     if (ok) setDeletingConfirm(null);
   };
 
+  if (editingStory) return <ContentPreviewEditor kind="story" editing={editingStory} onChange={setEditingStory} onSave={handleSaveStory} onClose={()=>setEditingStory(null)} errors={errors} />;
+  if (editingPillar) return <ContentPreviewEditor kind="pillar" editing={editingPillar} onChange={setEditingPillar} onSave={handleSavePillar} onClose={()=>setEditingPillar(null)} errors={errors} />;
+  if (editingArticle) return <ContentPreviewEditor kind="article" editing={editingArticle} onChange={setEditingArticle} onSave={handleSaveNews} onClose={()=>setEditingArticle(null)} errors={errors} />;
   return (
     <div className="outreach-news-admin">
       {/* Sub-navigation tabs */}
@@ -878,395 +884,6 @@ export default function OutreachNewsAdmin({ content, onSave }) {
         </div>
       )}
 
-      {/* EDIT / CREATE STORY MODAL */}
-      {editingStory && (
-        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.55)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 99999, padding: "1rem", overflowY: "auto" }}>
-          <div style={{ background: "#fff", borderRadius: "10px", maxWidth: "680px", width: "100%", maxHeight: "90vh", overflowY: "auto", padding: "1.75rem", boxShadow: "0 25px 50px -12px rgba(0,0,0,0.25)" }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1.25rem", borderBottom: "1px solid #e5e7eb", paddingBottom: "0.75rem" }}>
-              <h3 style={{ margin: 0, color: "#0d716b" }}>
-                {editingStory.isNew ? "Add Outreach Story" : `Edit Story: ${editingStory.values.title}`}
-              </h3>
-              <button
-                type="button"
-                className="tp-btn tp-btn-ghost"
-                onClick={() => setEditingStory(null)}
-                style={{ minHeight: "32px", padding: "2px 8px" }}
-              >
-                ✕
-              </button>
-            </div>
-
-            <div style={{ marginBottom: "1rem" }}>
-              <label style={{ display: "block", fontWeight: 600, fontSize: "0.85rem", marginBottom: "0.25rem" }}>
-                Story Title *
-              </label>
-              <input
-                type="text"
-                value={editingStory.values.title}
-                onChange={(e) =>
-                  setEditingStory({
-                    ...editingStory,
-                    values: { ...editingStory.values, title: e.target.value },
-                  })
-                }
-                placeholder="e.g. Alzheimer’s Care Project TTT Batch 2 in Sibu"
-                style={{ width: "100%", padding: "0.5rem", borderRadius: "4px", border: errors.title ? "1px solid #dc2626" : "1px solid #ccc" }}
-              />
-              {errors.title && <div style={{ color: "#dc2626", fontSize: "0.78rem", marginTop: "2px" }}>{errors.title}</div>}
-            </div>
-
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem", marginBottom: "1rem" }}>
-              <div>
-                <label style={{ display: "block", fontWeight: 600, fontSize: "0.85rem", marginBottom: "0.25rem" }}>
-                  Date / Period *
-                </label>
-                <input
-                  type="text"
-                  value={editingStory.values.date}
-                  onChange={(e) =>
-                    setEditingStory({
-                      ...editingStory,
-                      values: { ...editingStory.values, date: e.target.value },
-                    })
-                  }
-                  placeholder="e.g. 16–18 May 2025"
-                  style={{ width: "100%", padding: "0.5rem", borderRadius: "4px", border: errors.date ? "1px solid #dc2626" : "1px solid #ccc" }}
-                />
-                {errors.date && <div style={{ color: "#dc2626", fontSize: "0.78rem", marginTop: "2px" }}>{errors.date}</div>}
-              </div>
-
-              <div>
-                <label style={{ display: "block", fontWeight: 600, fontSize: "0.85rem", marginBottom: "0.25rem" }}>
-                  Location / Division
-                </label>
-                <input
-                  type="text"
-                  value={editingStory.values.location}
-                  onChange={(e) =>
-                    setEditingStory({
-                      ...editingStory,
-                      values: { ...editingStory.values, location: e.target.value },
-                    })
-                  }
-                  placeholder="e.g. Sibu, Sarawak"
-                  style={{ width: "100%", padding: "0.5rem", borderRadius: "4px", border: "1px solid #ccc" }}
-                />
-              </div>
-            </div>
-
-            <div style={{ marginBottom: "1rem" }}>
-              <label style={{ display: "block", fontWeight: 600, fontSize: "0.85rem", marginBottom: "0.25rem" }}>
-                Story Caption / Description
-              </label>
-              <textarea
-                rows={3}
-                value={editingStory.values.description || ""}
-                onChange={(e) =>
-                  setEditingStory({
-                    ...editingStory,
-                    values: { ...editingStory.values, description: e.target.value },
-                  })
-                }
-                placeholder="Participants from Kapit, Betong, and Sibu dedicated three days..."
-                style={{ width: "100%", padding: "0.5rem", borderRadius: "4px", border: "1px solid #ccc" }}
-              />
-            </div>
-
-            <div style={{ marginBottom: "1.25rem" }}>
-              <UploadField
-                kind="poster"
-                label="Story Photo"
-                value={editingStory.values.image}
-                onChange={(url) =>
-                  setEditingStory({
-                    ...editingStory,
-                    values: { ...editingStory.values, image: url },
-                  })
-                }
-              />
-            </div>
-
-            <div style={{ display: "flex", justifyContent: "flex-end", gap: "0.75rem", borderTop: "1px solid #e5e7eb", paddingTop: "1rem" }}>
-              <button
-                type="button"
-                className="tp-btn tp-btn-ghost"
-                onClick={() => setEditingStory(null)}
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                className="tp-btn"
-                onClick={handleSaveStory}
-              >
-                {editingStory.isNew ? "Create Story" : "Save Changes"}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* EDIT / CREATE PILLAR MODAL */}
-      {editingPillar && (
-        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.55)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 99999, padding: "1rem", overflowY: "auto" }}>
-          <div style={{ background: "#fff", borderRadius: "10px", maxWidth: "580px", width: "100%", maxHeight: "90vh", overflowY: "auto", padding: "1.75rem", boxShadow: "0 25px 50px -12px rgba(0,0,0,0.25)" }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1.25rem", borderBottom: "1px solid #e5e7eb", paddingBottom: "0.75rem" }}>
-              <h3 style={{ margin: 0, color: "#0d716b" }}>
-                {editingPillar.isNew ? "Add Dialogue Core Pillar" : `Edit Pillar: ${editingPillar.values.title}`}
-              </h3>
-              <button
-                type="button"
-                className="tp-btn tp-btn-ghost"
-                onClick={() => setEditingPillar(null)}
-                style={{ minHeight: "32px", padding: "2px 8px" }}
-              >
-                ✕
-              </button>
-            </div>
-
-            <div style={{ display: "grid", gridTemplateColumns: "120px 1fr", gap: "1rem", marginBottom: "1rem" }}>
-              <div>
-                <label style={{ display: "block", fontWeight: 600, fontSize: "0.85rem", marginBottom: "0.25rem" }}>
-                  Icon Emoji
-                </label>
-                <input
-                  type="text"
-                  value={editingPillar.values.icon}
-                  onChange={(e) =>
-                    setEditingPillar({
-                      ...editingPillar,
-                      values: { ...editingPillar.values, icon: e.target.value },
-                    })
-                  }
-                  placeholder="🌱"
-                  style={{ width: "100%", padding: "0.5rem", textAlign: "center", fontSize: "1.25rem", borderRadius: "4px", border: "1px solid #ccc" }}
-                />
-              </div>
-
-              <div>
-                <label style={{ display: "block", fontWeight: 600, fontSize: "0.85rem", marginBottom: "0.25rem" }}>
-                  Pillar Title *
-                </label>
-                <input
-                  type="text"
-                  value={editingPillar.values.title}
-                  onChange={(e) =>
-                    setEditingPillar({
-                      ...editingPillar,
-                      values: { ...editingPillar.values, title: e.target.value },
-                    })
-                  }
-                  placeholder="e.g. Kapit, Betong & Sibu"
-                  style={{ width: "100%", padding: "0.5rem", borderRadius: "4px", border: errors.title ? "1px solid #dc2626" : "1px solid #ccc" }}
-                />
-                {errors.title && <div style={{ color: "#dc2626", fontSize: "0.78rem", marginTop: "2px" }}>{errors.title}</div>}
-              </div>
-            </div>
-
-            <div style={{ marginBottom: "1.25rem" }}>
-              <label style={{ display: "block", fontWeight: 600, fontSize: "0.85rem", marginBottom: "0.25rem" }}>
-                Pillar Description / Impact Narrative *
-              </label>
-              <textarea
-                rows={4}
-                value={editingPillar.values.desc}
-                onChange={(e) =>
-                  setEditingPillar({
-                    ...editingPillar,
-                    values: { ...editingPillar.values, desc: e.target.value },
-                  })
-                }
-                placeholder="Uniting dedicated participants from across divisions who committed three days of intensive learning..."
-                style={{ width: "100%", padding: "0.5rem", borderRadius: "4px", border: errors.desc ? "1px solid #dc2626" : "1px solid #ccc" }}
-              />
-              {errors.desc && <div style={{ color: "#dc2626", fontSize: "0.78rem", marginTop: "2px" }}>{errors.desc}</div>}
-            </div>
-
-            <div style={{ display: "flex", justifyContent: "flex-end", gap: "0.75rem", borderTop: "1px solid #e5e7eb", paddingTop: "1rem" }}>
-              <button
-                type="button"
-                className="tp-btn tp-btn-ghost"
-                onClick={() => setEditingPillar(null)}
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                className="tp-btn"
-                onClick={handleSavePillar}
-              >
-                {editingPillar.isNew ? "Create Pillar" : "Save Changes"}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* EDIT / CREATE NEWS ARTICLE MODAL */}
-      {editingArticle && (
-        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.55)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 99999, padding: "1rem", overflowY: "auto" }}>
-          <div style={{ background: "#fff", borderRadius: "10px", maxWidth: "680px", width: "100%", maxHeight: "90vh", overflowY: "auto", padding: "1.75rem", boxShadow: "0 25px 50px -12px rgba(0,0,0,0.25)" }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1.25rem", borderBottom: "1px solid #e5e7eb", paddingBottom: "0.75rem" }}>
-              <h3 style={{ margin: 0, color: "#0d716b" }}>
-                {editingArticle.isNew ? "Add Press Clipping" : `Edit Article: ${editingArticle.values.outlet}`}
-              </h3>
-              <button
-                type="button"
-                className="tp-btn tp-btn-ghost"
-                onClick={() => setEditingArticle(null)}
-                style={{ minHeight: "32px", padding: "2px 8px" }}
-              >
-                ✕
-              </button>
-            </div>
-
-            <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: "1rem", marginBottom: "1rem" }}>
-              <div>
-                <label style={{ display: "block", fontWeight: 600, fontSize: "0.85rem", marginBottom: "0.25rem" }}>
-                  Newspaper Outlet *
-                </label>
-                <input
-                  type="text"
-                  value={editingArticle.values.outlet}
-                  onChange={(e) =>
-                    setEditingArticle({
-                      ...editingArticle,
-                      values: { ...editingArticle.values, outlet: e.target.value },
-                    })
-                  }
-                  placeholder="e.g. Malaysia Sin Chew Daily"
-                  style={{ width: "100%", padding: "0.5rem", borderRadius: "4px", border: errors.outlet ? "1px solid #dc2626" : "1px solid #ccc" }}
-                />
-                {errors.outlet && <div style={{ color: "#dc2626", fontSize: "0.78rem", marginTop: "2px" }}>{errors.outlet}</div>}
-              </div>
-
-              <div>
-                <label style={{ display: "block", fontWeight: 600, fontSize: "0.85rem", marginBottom: "0.25rem" }}>
-                  Language Tag
-                </label>
-                <input
-                  type="text"
-                  value={editingArticle.values.langPill || ""}
-                  onChange={(e) =>
-                    setEditingArticle({
-                      ...editingArticle,
-                      values: { ...editingArticle.values, langPill: e.target.value },
-                    })
-                  }
-                  placeholder="e.g. 中文报道, Sarawak Press"
-                  style={{ width: "100%", padding: "0.5rem", borderRadius: "4px", border: "1px solid #ccc" }}
-                />
-              </div>
-            </div>
-
-            <div style={{ marginBottom: "1rem" }}>
-              <label style={{ display: "block", fontWeight: 600, fontSize: "0.85rem", marginBottom: "0.25rem" }}>
-                Main Headline Title *
-              </label>
-              <input
-                type="text"
-                value={editingArticle.values.mainTitle}
-                onChange={(e) =>
-                  setEditingArticle({
-                    ...editingArticle,
-                    values: { ...editingArticle.values, mainTitle: e.target.value },
-                  })
-                }
-                placeholder="e.g. Empowering Families & Community Dementia Care in Sarawak"
-                style={{ width: "100%", padding: "0.5rem", borderRadius: "4px", border: errors.mainTitle ? "1px solid #dc2626" : "1px solid #ccc" }}
-              />
-              {errors.mainTitle && <div style={{ color: "#dc2626", fontSize: "0.78rem", marginTop: "2px" }}>{errors.mainTitle}</div>}
-            </div>
-
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem", marginBottom: "1rem" }}>
-              <div>
-                <label style={{ display: "block", fontWeight: 600, fontSize: "0.85rem", marginBottom: "0.25rem" }}>
-                  Category
-                </label>
-                <input
-                  type="text"
-                  value={editingArticle.values.category || ""}
-                  onChange={(e) =>
-                    setEditingArticle({
-                      ...editingArticle,
-                      values: { ...editingArticle.values, category: e.target.value },
-                    })
-                  }
-                  placeholder="e.g. Press Feature, Press Release"
-                  style={{ width: "100%", padding: "0.5rem", borderRadius: "4px", border: "1px solid #ccc" }}
-                />
-              </div>
-
-              <div>
-                <label style={{ display: "block", fontWeight: 600, fontSize: "0.85rem", marginBottom: "0.25rem" }}>
-                  Published Date / Status
-                </label>
-                <input
-                  type="text"
-                  value={editingArticle.values.date || ""}
-                  onChange={(e) =>
-                    setEditingArticle({
-                      ...editingArticle,
-                      values: { ...editingArticle.values, date: e.target.value },
-                    })
-                  }
-                  placeholder="e.g. Published Feature"
-                  style={{ width: "100%", padding: "0.5rem", borderRadius: "4px", border: "1px solid #ccc" }}
-                />
-              </div>
-            </div>
-
-            <div style={{ marginBottom: "1rem" }}>
-              <label style={{ display: "block", fontWeight: 600, fontSize: "0.85rem", marginBottom: "0.25rem" }}>
-                Article Summary / Caption
-              </label>
-              <textarea
-                rows={3}
-                value={editingArticle.values.intro || ""}
-                onChange={(e) =>
-                  setEditingArticle({
-                    ...editingArticle,
-                    values: { ...editingArticle.values, intro: e.target.value },
-                  })
-                }
-                placeholder="In-depth reporting on the collaboration between Rotary Club..."
-                style={{ width: "100%", padding: "0.5rem", borderRadius: "4px", border: "1px solid #ccc" }}
-              />
-            </div>
-
-            <div style={{ marginBottom: "1.25rem" }}>
-              <UploadField
-                kind="poster"
-                label="Newspaper Clipping / Press Photo"
-                value={editingArticle.values.image}
-                onChange={(url) =>
-                  setEditingArticle({
-                    ...editingArticle,
-                    values: { ...editingArticle.values, image: url },
-                  })
-                }
-              />
-            </div>
-
-            <div style={{ display: "flex", justifyContent: "flex-end", gap: "0.75rem", borderTop: "1px solid #e5e7eb", paddingTop: "1rem" }}>
-              <button
-                type="button"
-                className="tp-btn tp-btn-ghost"
-                onClick={() => setEditingArticle(null)}
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                className="tp-btn"
-                onClick={handleSaveNews}
-              >
-                {editingArticle.isNew ? "Create Article" : "Save Changes"}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* DELETE CONFIRMATION MODAL */}
       {deletingConfirm && (

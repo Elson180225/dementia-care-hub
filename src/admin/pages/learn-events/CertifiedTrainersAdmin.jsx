@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import UploadField from "../../../trainer-portal/UploadField";
+import ContentPreviewEditor from './ContentPreviewEditor';
 
 const BLANK_TRAINER = {
   id: "",
@@ -86,18 +86,6 @@ export default function CertifiedTrainersAdmin({ content, onSave }) {
   };
 
   // Compute initials automatically if empty
-  const handleNameChange = (name) => {
-    const parts = name.trim().split(" ").filter(Boolean);
-    const inits = parts.length >= 2 ? (parts[0][0] + parts[parts.length - 1][0]).toUpperCase() : name.slice(0, 2).toUpperCase();
-    setEditingTrainer({
-      ...editingTrainer,
-      values: {
-        ...editingTrainer.values,
-        name,
-        initials: editingTrainer.values.initials && !editingTrainer.isNew ? editingTrainer.values.initials : inits || "TR",
-      },
-    });
-  };
 
   // Save Modal
   const handleSaveModal = async () => {
@@ -126,6 +114,7 @@ export default function CertifiedTrainersAdmin({ content, onSave }) {
 
     const ok = await onSave(copy);
     if (ok) setEditingTrainer(null);
+    return ok;
   };
 
   // Delete
@@ -141,6 +130,7 @@ export default function CertifiedTrainersAdmin({ content, onSave }) {
     if (ok) setDeletingConfirm(null);
   };
 
+  if (editingTrainer) return <ContentPreviewEditor kind="trainer" editing={editingTrainer} onChange={setEditingTrainer} onSave={handleSaveModal} onClose={()=>setEditingTrainer(null)} errors={errors} />;
   return (
     <div className="certified-trainers-admin">
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem", flexWrap: "wrap", gap: "1rem" }}>
@@ -389,226 +379,6 @@ export default function CertifiedTrainersAdmin({ content, onSave }) {
         </div>
       )}
 
-      {/* EDIT / CREATE MODAL */}
-      {editingTrainer && (
-        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.55)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 99999, padding: "1rem", overflowY: "auto" }}>
-          <div style={{ background: "#fff", borderRadius: "10px", maxWidth: "720px", width: "100%", maxHeight: "90vh", overflowY: "auto", padding: "1.75rem", boxShadow: "0 25px 50px -12px rgba(0,0,0,0.25)" }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1.25rem", borderBottom: "1px solid #e5e7eb", paddingBottom: "0.75rem" }}>
-              <h3 style={{ margin: 0, color: "#0d716b" }}>
-                {editingTrainer.isNew ? "Add New Certified Trainer" : `Edit Profile: ${editingTrainer.values.name}`}
-              </h3>
-              <button
-                type="button"
-                className="tp-btn tp-btn-ghost"
-                onClick={() => setEditingTrainer(null)}
-                style={{ minHeight: "32px", padding: "2px 8px" }}
-              >
-                ✕
-              </button>
-            </div>
-
-            <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: "1rem", marginBottom: "1rem" }}>
-              <div>
-                <label style={{ display: "block", fontWeight: 600, fontSize: "0.85rem", marginBottom: "0.25rem" }}>
-                  Full Name &amp; Title *
-                </label>
-                <input
-                  type="text"
-                  value={editingTrainer.values.name}
-                  onChange={(e) => handleNameChange(e.target.value)}
-                  placeholder="e.g. Dr. Wong Teck Shin"
-                  style={{ width: "100%", padding: "0.5rem", borderRadius: "4px", border: errors.name ? "1px solid #dc2626" : "1px solid #ccc" }}
-                />
-                {errors.name && <div style={{ color: "#dc2626", fontSize: "0.78rem", marginTop: "2px" }}>{errors.name}</div>}
-              </div>
-
-              <div>
-                <label style={{ display: "block", fontWeight: 600, fontSize: "0.85rem", marginBottom: "0.25rem" }}>
-                  Initials / Badge
-                </label>
-                <input
-                  type="text"
-                  value={editingTrainer.values.initials || ""}
-                  onChange={(e) =>
-                    setEditingTrainer({
-                      ...editingTrainer,
-                      values: { ...editingTrainer.values, initials: e.target.value },
-                    })
-                  }
-                  placeholder="e.g. WS"
-                  style={{ width: "100%", padding: "0.5rem", borderRadius: "4px", border: "1px solid #ccc" }}
-                />
-              </div>
-            </div>
-
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem", marginBottom: "1rem" }}>
-              <div>
-                <label style={{ display: "block", fontWeight: 600, fontSize: "0.85rem", marginBottom: "0.25rem" }}>
-                  Role / Clinical Designation *
-                </label>
-                <input
-                  type="text"
-                  value={editingTrainer.values.role}
-                  onChange={(e) =>
-                    setEditingTrainer({
-                      ...editingTrainer,
-                      values: { ...editingTrainer.values, role: e.target.value },
-                    })
-                  }
-                  placeholder="e.g. Consultant Geriatrician"
-                  style={{ width: "100%", padding: "0.5rem", borderRadius: "4px", border: errors.role ? "1px solid #dc2626" : "1px solid #ccc" }}
-                />
-                {errors.role && <div style={{ color: "#dc2626", fontSize: "0.78rem", marginTop: "2px" }}>{errors.role}</div>}
-              </div>
-
-              <div>
-                <label style={{ display: "block", fontWeight: 600, fontSize: "0.85rem", marginBottom: "0.25rem" }}>
-                  Governance Category
-                </label>
-                <select
-                  value={editingTrainer.values.category}
-                  onChange={(e) =>
-                    setEditingTrainer({
-                      ...editingTrainer,
-                      values: { ...editingTrainer.values, category: e.target.value },
-                    })
-                  }
-                  style={{ width: "100%", padding: "0.5rem", borderRadius: "4px", border: "1px solid #ccc" }}
-                >
-                  <option value="medical-professional">Clinical Frontline (Doctors &amp; Educators)</option>
-                  <option value="advisory-support">Clinical Governance (Advisory Specialists)</option>
-                </select>
-              </div>
-            </div>
-
-            <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: "1rem", marginBottom: "1rem" }}>
-              <div>
-                <label style={{ display: "block", fontWeight: 600, fontSize: "0.85rem", marginBottom: "0.25rem" }}>
-                  Hospital / Institution *
-                </label>
-                <input
-                  type="text"
-                  value={editingTrainer.values.institution}
-                  onChange={(e) =>
-                    setEditingTrainer({
-                      ...editingTrainer,
-                      values: { ...editingTrainer.values, institution: e.target.value },
-                    })
-                  }
-                  placeholder="e.g. Sarawak General Hospital, Kuching"
-                  style={{ width: "100%", padding: "0.5rem", borderRadius: "4px", border: errors.institution ? "1px solid #dc2626" : "1px solid #ccc" }}
-                />
-                {errors.institution && <div style={{ color: "#dc2626", fontSize: "0.78rem", marginTop: "2px" }}>{errors.institution}</div>}
-              </div>
-
-              <div>
-                <label style={{ display: "block", fontWeight: 600, fontSize: "0.85rem", marginBottom: "0.25rem" }}>
-                  City / Locality
-                </label>
-                <input
-                  type="text"
-                  value={editingTrainer.values.city || ""}
-                  onChange={(e) =>
-                    setEditingTrainer({
-                      ...editingTrainer,
-                      values: { ...editingTrainer.values, city: e.target.value },
-                    })
-                  }
-                  placeholder="e.g. Kuching, Sibu, Miri"
-                  style={{ width: "100%", padding: "0.5rem", borderRadius: "4px", border: "1px solid #ccc" }}
-                />
-              </div>
-            </div>
-
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem", marginBottom: "1rem" }}>
-              <div>
-                <label style={{ display: "block", fontWeight: 600, fontSize: "0.85rem", marginBottom: "0.25rem" }}>
-                  Language(s) Spoken
-                </label>
-                <input
-                  type="text"
-                  value={editingTrainer.values.language || ""}
-                  onChange={(e) =>
-                    setEditingTrainer({
-                      ...editingTrainer,
-                      values: { ...editingTrainer.values, language: e.target.value },
-                    })
-                  }
-                  placeholder="e.g. English / Bahasa Melayu / 中文"
-                  style={{ width: "100%", padding: "0.5rem", borderRadius: "4px", border: "1px solid #ccc" }}
-                />
-              </div>
-
-              <div>
-                <label style={{ display: "block", fontWeight: 600, fontSize: "0.85rem", marginBottom: "0.25rem" }}>
-                  Card Accent Color
-                </label>
-                <input
-                  type="text"
-                  value={editingTrainer.values.badgeColor || "#0d716b"}
-                  onChange={(e) =>
-                    setEditingTrainer({
-                      ...editingTrainer,
-                      values: { ...editingTrainer.values, badgeColor: e.target.value },
-                    })
-                  }
-                  placeholder="e.g. #0d716b"
-                  style={{ width: "100%", padding: "0.5rem", borderRadius: "4px", border: "1px solid #ccc" }}
-                />
-              </div>
-            </div>
-
-            <div style={{ marginBottom: "1rem" }}>
-              <label style={{ display: "block", fontWeight: 600, fontSize: "0.85rem", marginBottom: "0.25rem" }}>
-                Background &amp; Clinical Bio
-              </label>
-              <textarea
-                rows={3}
-                value={editingTrainer.values.bio || ""}
-                onChange={(e) =>
-                  setEditingTrainer({
-                    ...editingTrainer,
-                    values: { ...editingTrainer.values, bio: e.target.value },
-                  })
-                }
-                placeholder="Senior consultant geriatrician leading dementia clinical assessments..."
-                style={{ width: "100%", padding: "0.5rem", borderRadius: "4px", border: "1px solid #ccc" }}
-              />
-            </div>
-
-            <div style={{ marginBottom: "1.25rem" }}>
-              <UploadField
-                kind="photo"
-                label="Profile Picture / Avatar"
-                value={editingTrainer.values.avatarUrl}
-                onChange={(url) =>
-                  setEditingTrainer({
-                    ...editingTrainer,
-                    values: { ...editingTrainer.values, avatarUrl: url },
-                  })
-                }
-              />
-            </div>
-
-            <div style={{ display: "flex", justifyContent: "flex-end", gap: "0.75rem", borderTop: "1px solid #e5e7eb", paddingTop: "1rem" }}>
-              <button
-                type="button"
-                className="tp-btn tp-btn-ghost"
-                onClick={() => setEditingTrainer(null)}
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                className="tp-btn"
-                onClick={handleSaveModal}
-              >
-                {editingTrainer.isNew ? "Create Profile" : "Save Changes"}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* DELETE CONFIRMATION MODAL */}
       {deletingConfirm && (
