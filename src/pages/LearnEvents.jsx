@@ -1288,14 +1288,17 @@ function ProgramModal({ program, onClose }) {
       program.id === "dcs-family"
         ? "Family Caregiver / Relative"
         : program.id === "dcs-ttt"
-          ? "Healthcare Professional / Educator"
-          : "Direct-Care Worker / Nurse",
+          ? "Healthcare Professional / Nurse"
+          : "Direct-Care Worker / Attendant",
     preferredLanguage: "English",
     intakeLocation:
       program.cities && program.cities.length > 0 ? program.cities[0] : "Kuching",
     notes: "",
   });
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [submitting,setSubmitting]=useState(false);
+  const [submitError,setSubmitError]=useState('');
+  const [consent,setConsent]=useState(false);
 
   useEffect(() => {
     const handleKeyDown = (e) => {
@@ -1305,9 +1308,16 @@ function ProgramModal({ program, onClose }) {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [onClose]);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    setIsSubmitted(true);
+    if(submitting)return;
+    setSubmitting(true);setSubmitError('');
+    try {
+      const response=await fetch('/api/public/track-applications',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({...formData,trackId:program.id,consent})});
+      const result=await response.json();
+      if(!response.ok)throw new Error(result.error || 'Unable to save your application.');
+      setIsSubmitted(true);
+    }catch(error){setSubmitError(error.message || 'Connection failed. Please try again.');}finally{setSubmitting(false);}
   };
 
   const pm = le?.programModal || {};
@@ -1355,12 +1365,12 @@ function ProgramModal({ program, onClose }) {
                 <polyline points="22 4 12 14.01 9 11.01" />
               </svg>
             </div>
-            <h3>{le?.registrationReceived || "Registration Details Received!"}</h3>
+            <h3>Application received</h3>
             <p>
-              Thank you, <strong>{formData.fullName || "Caregiver / Applicant"}</strong>. Your entry for <strong>{program.title}</strong> has been successfully recorded.
+              Thank you, <strong>{formData.fullName}</strong>. Your interest in <strong>{program.title}</strong> is recorded. If you have already applied using this email, your original application is retained.
             </p>
             <p className="success-note">
-              {pm.successNote || "Our community training coordinator will contact you via WhatsApp / Phone to confirm session logistics, attendance requirements, and venue directions."}
+              RCBC will review your application. Submission does not confirm a place or certification.
             </p>
             <div className="program-modal-actions">
               <button
@@ -1374,6 +1384,7 @@ function ProgramModal({ program, onClose }) {
           </div>
         ) : (
           <form className="program-modal-form" onSubmit={handleSubmit}>
+            <p>This application goes to RCBC for review. You do not need a website account, and submission does not guarantee a place.</p>
             <div className="program-modal-summary">
               <div>
                 <strong>{pm.scheduledIntake || "Scheduled Intake"}:</strong> {program.schedule?.date} ({program.schedule?.time})
@@ -1478,6 +1489,12 @@ function ProgramModal({ program, onClose }) {
               />
             </div>
 
+            <div className="program-consent-panel">
+              <label className="program-consent-label" htmlFor="program-consent"><input id="program-consent" type="checkbox" required checked={consent} disabled={submitting} aria-describedby="program-consent-help" onChange={e=>setConsent(e.target.checked)}/><span>I agree that RCBC may use my details to review this application and contact me about training.</span></label>
+              <p id="program-consent-help">Please avoid including medical records or unnecessary sensitive details.</p>
+            </div>
+              {submitError && <p className="program-submit-error" role="alert">{submitError}</p>}
+              {program.registrationOpen===false && <p role="status">Applications for this track are currently closed.</p>}
             <div className="program-modal-footer">
               <button
                 type="button"
@@ -1489,8 +1506,9 @@ function ProgramModal({ program, onClose }) {
               <button
                 type="submit"
                 className="activity-action-btn"
+                disabled={submitting || program.registrationOpen===false}
               >
-                {actionTitle}
+                {submitting ? 'Submitting…' : actionTitle}
               </button>
             </div>
           </form>
@@ -1660,9 +1678,10 @@ function PhysicalEducation() {
                   <button
                     type="button"
                     className="stage-btn-primary"
+                    disabled={activeTrack.registrationOpen===false}
                     onClick={() => setActiveModalProgram(activeTrack)}
                   >
-                    {activeTrack.buttonLabel} <span aria-hidden="true">→</span>
+                    {activeTrack.registrationOpen===false?'Applications closed':activeTrack.buttonLabel} <span aria-hidden="true">→</span>
                   </button>
 
                   {activeTrack.id === "dcs-family" && (

@@ -28,7 +28,8 @@
         "speaker": "RCBC & ADFM Specialists",
         "suitableFor": "General public, families and caregivers",
         "description": "Opening online education webinar for the 2026 Season under the Alzheimer's Care Project 'Finding the Missing Pieces'. Conducted primarily in English with Bahasa Malaysia support provided where appropriate.",
-        "image": "/src/assets/education/webinar-learning.jpg"
+        "image": "/src/assets/education/webinar-learning.jpg",
+        "dateISO": "2026-04-11"
       },
       {
         "id": "topic-dcs-family-2026",
@@ -44,7 +45,8 @@
         "speaker": "12 ADFM-Certified Trainers & Advisory Specialists",
         "suitableFor": "Family caregivers, community helpers, and those interested in dementia care",
         "description": "Foundation Dementia Care Course covering 6 core modules: Basic DCS, Person-Centred Care, Effective Communication, BPSD, Meaningful Activities, and Advance Care Planning. Limited to 100 seats only.",
-        "image": "/src/assets/education/dcs-family-poster.jpg"
+        "image": "/src/assets/education/dcs-family-poster.jpg",
+        "dateISO": "2026-05-16"
       },
       {
         "id": "topic-dcs-ttt-2026",
@@ -60,7 +62,8 @@
         "speaker": "Dr. Tiong Ing Khieng & ADFM Training Team",
         "suitableFor": "Healthcare professionals, nurses, therapists, community educators",
         "description": "3-day Train-the-Trainer program in Kuching to train and certify healthcare educators and community champions across Sarawak under ADFM credentialing.",
-        "image": "/src/assets/education/adfm-poster.jpg"
+        "image": "/src/assets/education/adfm-poster.jpg",
+        "dateISO": "2026-06-26"
       },
       {
         "id": "topic-1793265675178",
@@ -205,6 +208,33 @@
           "Institutional care dignity standards & care-plan documentation"
         ],
         "buttonLabel": "Join Priority Waitlist / Express Interest"
+      },
+      {
+        "id": "dcs-track-1794038842414",
+        "code": "DCS",
+        "trackNumber": "Track 04",
+        "title": "Testing ",
+        "roleCategory": "Student",
+        "badge": "Open for Registration",
+        "shortIntro": "Ready to achieve your goal??",
+        "suitableFor": "Welcome to everyone",
+        "description": "",
+        "mode": "In-Person Physical Workshop",
+        "sessions": "1 Full Day (9:00 AM – 6:00 PM)",
+        "language": "English / Bahasa Melayu / 中文",
+        "location": "Kuching",
+        "schedule": {
+          "date": "",
+          "time": "9:00 AM – 5:00 PM",
+          "label": "Scheduled Intake"
+        },
+        "image": "",
+        "highlights": [
+          "Module 1 – Basic Dementia Understanding",
+          "Module 2 – Person-Centred Care",
+          "Module 3 – Effective Communication"
+        ],
+        "buttonLabel": "Register for Programme"
       }
     ]
   },
@@ -353,10 +383,10 @@
       ],
       "pillars": [
         {
-          "id": "pillar-1792745461478",
-          "icon": "👻",
-          "title": "Happy Children Day ",
-          "desc": "Save the children"
+          "id": "pillar-1794042812642",
+          "icon": "🌱",
+          "title": "Working together",
+          "desc": "To be brave"
         }
       ]
     },

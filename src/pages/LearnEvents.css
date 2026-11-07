@@ -1172,11 +1172,70 @@
 
 .program-modal-footer {
   display: flex;
+  align-items: center;
+  flex-wrap: wrap;
   justify-content: flex-end;
   gap: 12px;
   margin-top: 24px;
   padding-top: 18px;
   border-top: 1px solid var(--color-neutral-100);
+}
+
+.program-consent-panel {
+  margin-top: 24px;
+  padding: 18px;
+  background: #f7f3fa;
+  border: 1px solid #e3d8ec;
+  border-radius: 10px;
+}
+
+.program-modal-form .program-consent-label {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  font-size: 0.94rem;
+  line-height: 1.6;
+  font-weight: 500;
+  color: #493957;
+  text-transform: none;
+  letter-spacing: normal;
+  cursor: pointer;
+}
+
+.program-modal-form .program-consent-label input[type="checkbox"] {
+  flex: 0 0 20px;
+  width: 20px;
+  height: 20px;
+  min-height: 20px;
+  margin: 3px 0 0;
+  padding: 0;
+  accent-color: #60378a;
+  cursor: pointer;
+}
+
+.program-consent-panel p {
+  margin: 10px 0 0 32px;
+  color: #65596d;
+  font-size: 0.85rem;
+  line-height: 1.6;
+}
+
+.program-modal-footer .activity-action-btn {
+  flex: 0 1 auto;
+  min-height: 48px;
+  max-width: 100%;
+  padding: 12px 20px;
+  text-align: center;
+  align-items: center;
+  justify-content: center;
+  overflow-wrap: anywhere;
+}
+
+.program-submit-error { color: #922b29; padding: 12px; background: #fff1f0; border-radius: 8px; }
+
+@media (max-width: 540px) {
+  .program-modal-footer { flex-direction: column-reverse; align-items: stretch; }
+  .program-modal-footer .activity-action-btn { width: 100%; }
 }
 
 .program-modal-footer .activity-action-btn.secondary {
@@ -1588,6 +1647,11 @@
   cursor: pointer;
   transition: background 0.2s ease;
 }
+
+.activity-action-btn:not(:disabled) {cursor:pointer;background:var(--color-purple-600);color:#fff;}
+.activity-action-btn:disabled {cursor:not-allowed;opacity:.65;}
+.stage-btn-primary:disabled {cursor:not-allowed;opacity:.65;}
+.activity-action-btn:focus-visible {outline:3px solid #a66b00;outline-offset:3px;}
 
 .activity-action-register:hover {
   background: var(--color-purple-600);
@@ -6705,11 +6769,13 @@
 
 .trainer-profiles-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 24px;
 }
 
 .trainer-profile-card {
+  min-width: 0;
+  overflow-wrap: anywhere;
   background: var(--color-neutral-50);
   border: 1.5px solid var(--color-neutral-200);
   border-radius: 18px;
@@ -6781,6 +6847,7 @@
 
 .trainer-primary-info {
   flex: 1;
+  min-width: 0;
 }
 
 .trainer-category-tag-row {
@@ -6837,7 +6904,7 @@
 
 .trainer-meta-strip {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 8px;
   background: var(--color-neutral-100);
   padding: 10px 14px;
@@ -6848,6 +6915,67 @@
 .trainer-meta-col {
   display: flex;
   flex-direction: column;
+  min-width: 0;
+}
+
+.trainer-directory-section .meta-val {
+  white-space: normal;
+  overflow: visible;
+  text-overflow: clip;
+  overflow-wrap: anywhere;
+}
+
+.trainer-directory-section .trainer-sub-actions-row {
+  flex-wrap: wrap;
+}
+
+.trainer-directory-section .trainer-sub-actions-row > * {
+  flex: 1 1 150px;
+  min-width: 0;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  text-align: center;
+}
+
+.trainer-directory-section .directory-filters-cluster {
+  min-width: 0;
+  max-width: 100%;
+  flex: 0 1 650px;
+}
+
+.trainer-directory-section .directory-search-input-wrap {
+  min-width: min(220px, 100%);
+  flex: 1 1 220px;
+}
+
+.trainer-directory-section .directory-filters-cluster select {
+  min-width: 0;
+  max-width: 100%;
+  flex: 1 1 150px;
+}
+
+.trainer-directory-section .directory-track-tabs {
+  max-width: 100%;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 1200px) {
+  .trainer-directory-section .trainer-profiles-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 760px) {
+  .trainer-directory-section .trainer-profiles-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .trainer-directory-section .trainer-profile-card { padding: 20px; }
+  .trainer-directory-section .directory-filters-cluster { flex-basis: 100%; }
+}
+
+@media (max-width: 400px) {
+  .trainer-directory-section .trainer-meta-strip { grid-template-columns: minmax(0, 1fr); }
+  .trainer-directory-section .trainer-card-topbar { flex-direction: column; }
 }
 
 .meta-lbl {
