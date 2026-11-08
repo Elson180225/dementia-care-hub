@@ -1804,3 +1804,105 @@
       1fr;
   }
 }
+
+/* =========================================================
+   VISUAL EXPERIENCE ENHANCEMENTS
+========================================================= */
+
+.rf-intro::after {
+  content: "";
+  position: absolute;
+  width: 150px;
+  height: 150px;
+  right: 28%;
+  bottom: -70px;
+  border-radius: 50%;
+  background: rgba(247,168,27,.12);
+  pointer-events: none;
+}
+
+.rf-need-card {
+  position: relative;
+  overflow: hidden;
+}
+
+.rf-need-card::after {
+  content: "";
+  position: absolute;
+  right: -30px;
+  bottom: -42px;
+  width: 125px;
+  height: 82px;
+  border-radius: 50%;
+  background: rgba(247,168,27,.07);
+  pointer-events: none;
+}
+
+.rf-need-icon {
+  width: 58px !important;
+  height: 58px !important;
+  display: grid !important;
+  place-items: center;
+  border-radius: 17px !important;
+  color: var(--rf-purple) !important;
+  background: #ffffff !important;
+  border: 1px solid var(--color-purple-100);
+  box-shadow: 0 6px 15px rgba(69,32,109,.07);
+  transition: transform .22s ease;
+}
+
+.rf-need-card:hover .rf-need-icon {
+  transform: scale(1.07) rotate(-2deg);
+}
+
+.rf-current-selection > span {
+  display: grid;
+  place-items: center;
+}
+
+.rf-result,
+.rf-healthcare-result {
+  position: relative;
+  overflow: hidden;
+  transition: transform .22s ease, box-shadow .22s ease, border-color .22s ease;
+}
+
+.rf-result::after,
+.rf-healthcare-result::after {
+  content: "";
+  position: absolute;
+  right: -35px;
+  bottom: -45px;
+  width: 140px;
+  height: 90px;
+  border-radius: 50%;
+  background: rgba(247,168,27,.055);
+  pointer-events: none;
+}
+
+.rf-result:hover,
+.rf-healthcare-result:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 14px 28px rgba(69,32,109,.09);
+}
+
+.rf-need-card,
+.rf-result,
+.rf-healthcare-result {
+  animation: rfVisualIn .46s cubic-bezier(.16,1,.3,1) both;
+}
+
+@keyframes rfVisualIn {
+  from { opacity:0; transform:translateY(10px); }
+  to { opacity:1; transform:translateY(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rf-need-card,
+  .rf-need-icon,
+  .rf-result,
+  .rf-healthcare-result {
+    animation:none !important;
+    transition:none !important;
+  }
+}

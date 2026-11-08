@@ -40,6 +40,30 @@ const heroCards = [
   },
 ];
 
+
+function EquipmentNeedIcon({ type }) {
+  const common = {
+    viewBox: "0 0 24 24",
+    width: "29",
+    height: "29",
+    fill: "none",
+    stroke: "currentColor",
+    strokeWidth: "1.8",
+    strokeLinecap: "round",
+    strokeLinejoin: "round",
+    "aria-hidden": "true",
+  };
+
+  const icons = {
+    daily: <svg {...common}><path d="M5 21V9l7-6 7 6v12" /><path d="M9 21v-6h6v6" /></svg>,
+    medication: <svg {...common}><rect x="5" y="3" width="14" height="18" rx="2" /><path d="M9 9h6M12 6v6" /></svg>,
+    reminders: <svg {...common}><circle cx="12" cy="12" r="8" /><path d="M12 7v5l3 2" /></svg>,
+    mobility: <svg {...common}><circle cx="9" cy="5" r="2" /><path d="M9 8v5h5l2 5M9 11H6a4 4 0 1 0 4 6" /></svg>,
+  };
+
+  return icons[type] || icons.daily;
+}
+
 function EquipmentPractical() {
   const { t } = useLanguage();
   const ep = t.equipmentPracticalPage || {};
@@ -310,6 +334,10 @@ function EquipmentPractical() {
                 )
               }
             >
+              <div className="equipment-need-icon">
+                <EquipmentNeedIcon type="daily" />
+              </div>
+
               <span className="equipment-need-number">
                 01
               </span>
@@ -335,6 +363,10 @@ function EquipmentPractical() {
                 )
               }
             >
+              <div className="equipment-need-icon">
+                <EquipmentNeedIcon type="medication" />
+              </div>
+
               <span className="equipment-need-number">
                 02
               </span>
@@ -360,6 +392,10 @@ function EquipmentPractical() {
                 )
               }
             >
+              <div className="equipment-need-icon">
+                <EquipmentNeedIcon type="reminders" />
+              </div>
+
               <span className="equipment-need-number">
                 03
               </span>
@@ -385,6 +421,10 @@ function EquipmentPractical() {
                 )
               }
             >
+              <div className="equipment-need-icon">
+                <EquipmentNeedIcon type="mobility" />
+              </div>
+
               <span className="equipment-need-number">
                 04
               </span>

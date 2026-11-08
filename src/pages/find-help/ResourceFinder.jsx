@@ -85,6 +85,30 @@ const locations = [
   "Miri",
 ];
 
+
+function ResourceNeedIcon({ type }) {
+  const common = {
+    viewBox: "0 0 24 24",
+    width: "30",
+    height: "30",
+    fill: "none",
+    stroke: "currentColor",
+    strokeWidth: "1.8",
+    strokeLinecap: "round",
+    strokeLinejoin: "round",
+    "aria-hidden": "true",
+  };
+
+  const icons = {
+    healthcare: <svg {...common}><path d="M6 3v5a4 4 0 0 0 8 0V3" /><path d="M4 3h4M12 3h4" /><circle cx="19" cy="11" r="2" /></svg>,
+    services: <svg {...common}><circle cx="8" cy="8" r="2" /><circle cx="16" cy="8" r="2" /><path d="M4 18c1-3 2.5-5 4-5s3 2 4 5M12 18c1-3 2.5-5 4-5s3 2 4 5" /></svg>,
+    financial: <svg {...common}><path d="M3 9h18L12 3 3 9Z" /><path d="M5 10v7M9 10v7M15 10v7M19 10v7" /><path d="M3 18h18" /></svg>,
+    equipment: <svg {...common}><circle cx="9" cy="5" r="2" /><path d="M9 8v5h5l2 5M9 11H6a4 4 0 1 0 4 6" /></svg>,
+  };
+
+  return icons[type] || icons.services;
+}
+
 function ResourceFinder() {
   const { t } = useLanguage();
   const rf = t.resourceFinderPage || {};
@@ -452,9 +476,7 @@ function ResourceFinder() {
                             </span>
 
                             <span className="rf-need-icon">
-                              {
-                                icon
-                              }
+                              <ResourceNeedIcon type={item.id} />
                             </span>
                           </div>
 
@@ -493,9 +515,7 @@ function ResourceFinder() {
 
                   <div className="rf-current-selection">
                     <span>
-                      {
-                        selectedNeed?.icon
-                      }
+                      <ResourceNeedIcon type={need} />
                     </span>
 
                     <strong>

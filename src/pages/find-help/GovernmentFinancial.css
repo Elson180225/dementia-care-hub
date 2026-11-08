@@ -1075,3 +1075,90 @@
       1fr;
   }
 }
+
+/* ============================================================
+   VISUAL EXPERIENCE ENHANCEMENTS
+============================================================ */
+
+.government-hero {
+  position: relative;
+  overflow: hidden;
+}
+
+.government-hero::before {
+  content: "";
+  position: absolute;
+  width: 360px;
+  height: 360px;
+  right: -90px;
+  top: -115px;
+  border-radius: 50%;
+  border: 1px solid rgba(255,255,255,.14);
+  box-shadow:
+    0 0 0 48px rgba(255,255,255,.025),
+    0 0 0 95px rgba(247,168,27,.035);
+}
+
+.government-hero .government-container {
+  position: relative;
+  z-index: 1;
+}
+
+.government-card {
+  position: relative;
+  overflow: hidden;
+  transition: transform .24s ease, box-shadow .24s ease, border-color .24s ease;
+}
+
+.government-card::after {
+  content: "";
+  position: absolute;
+  right: -36px;
+  bottom: -45px;
+  width: 145px;
+  height: 92px;
+  border-radius: 50%;
+  background: rgba(247,168,27,.06);
+  pointer-events: none;
+}
+
+.government-card:hover {
+  transform: translateY(-5px);
+  border-color: var(--color-purple-200);
+  box-shadow: 0 16px 34px rgba(69,32,109,.10);
+}
+
+.government-card-visual {
+  width: 58px;
+  height: 58px;
+  margin-bottom: 18px;
+  display: grid;
+  place-items: center;
+  border-radius: 17px;
+  color: var(--gf-purple);
+  background: linear-gradient(145deg,var(--color-purple-50),#fff);
+  border: 1px solid var(--color-purple-100);
+  box-shadow: 0 6px 15px rgba(69,32,109,.07);
+  transition: transform .22s ease;
+}
+
+.government-card:hover .government-card-visual {
+  transform: scale(1.06) rotate(-2deg);
+}
+
+.government-card {
+  animation: governmentCardIn .45s cubic-bezier(.16,1,.3,1) both;
+}
+
+@keyframes governmentCardIn {
+  from { opacity:0; transform:translateY(10px); }
+  to { opacity:1; transform:translateY(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .government-card,
+  .government-card-visual {
+    animation:none !important;
+    transition:none !important;
+  }
+}

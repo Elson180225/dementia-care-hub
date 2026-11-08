@@ -24,6 +24,38 @@ const cities = [
   "Sibu",
 ];
 
+
+function SupportServiceIcon({ category = "" }) {
+  const common = {
+    viewBox: "0 0 24 24",
+    width: "28",
+    height: "28",
+    fill: "none",
+    stroke: "currentColor",
+    strokeWidth: "1.8",
+    strokeLinecap: "round",
+    strokeLinejoin: "round",
+    "aria-hidden": "true",
+  };
+
+  if (category.includes("Pharmacy")) {
+    return <svg {...common}><path d="M6 3h12v18H6z" /><path d="M9 8h6M12 5v6" /></svg>;
+  }
+  if (category.includes("Occupational")) {
+    return <svg {...common}><circle cx="12" cy="5" r="2" /><path d="M12 8v6M8 21l4-7 4 7M8 12h8" /></svg>;
+  }
+  if (category.includes("Physio")) {
+    return <svg {...common}><circle cx="8" cy="5" r="2" /><path d="m8 8 3 4 4-1M11 12l-3 6M11 12l5 6" /></svg>;
+  }
+  if (category.includes("Home")) {
+    return <svg {...common}><path d="m3 11 9-8 9 8" /><path d="M5 10v11h14V10" /><path d="M9 21v-6h6v6" /></svg>;
+  }
+  if (category.includes("Respite")) {
+    return <svg {...common}><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10Z" /></svg>;
+  }
+  return <svg {...common}><circle cx="8" cy="8" r="2" /><circle cx="16" cy="8" r="2" /><path d="M4 18c1-3 2.5-5 4-5s3 2 4 5M12 18c1-3 2.5-5 4-5s3 2 4 5" /></svg>;
+}
+
 function SupportServices() {
   const { t } = useLanguage();
   const ss = t.supportServicesPage || {};
@@ -230,6 +262,10 @@ function SupportServices() {
                     key={service.id}
                     className="support-service-card"
                   >
+                    <div className="support-service-visual" aria-hidden="true">
+                      <SupportServiceIcon category={service.category} />
+                    </div>
+
                     <div className="support-service-card-top">
                       <span className="support-service-category">
                         {
