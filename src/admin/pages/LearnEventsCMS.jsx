@@ -72,7 +72,7 @@ export default function LearnEventsCMS() {
             Manage scheduled live sessions, online webinars, physical programmes, roadmap timelines, media stories, and certified trainers.
           </p>
         </div>
-        {activeTab !== "sessions" && activeTab !== "online" && (
+        {!["sessions","online","physical","roadmap","outreach","trainers"].includes(activeTab) && (
           <button
             type="button"
             className="tp-btn"
