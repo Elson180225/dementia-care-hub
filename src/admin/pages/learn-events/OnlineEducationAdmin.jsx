@@ -222,10 +222,10 @@ export default function OnlineEducationAdmin({ content, onSave }) {
       <div className="online-topic-edit-view">
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem", flexWrap: "wrap", gap: "0.5rem" }}>
           <div>
-            <h2 style={{ margin: 0, color: "#45206d" }}>
+            <h2 style={{ margin: 0, color: "var(--color-purple-700)" }}>
               {editingTopic.isNew ? "➕ New Upcoming Webinar / Topic" : `✏️ Edit Topic: ${v.title || "Untitled"}`}
             </h2>
-            <p style={{ margin: "0.25rem 0 0", color: "#61596a", fontSize: "0.95rem" }}>
+            <p style={{ margin: "0.25rem 0 0", color: "var(--color-purple-600)", fontSize: "0.95rem" }}>
               Configure details for the "Looking Ahead" webinar preview card on the public website.
             </p>
           </div>
@@ -458,10 +458,10 @@ export default function OnlineEducationAdmin({ content, onSave }) {
       <div className="online-resource-edit-view">
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem", flexWrap: "wrap", gap: "0.5rem" }}>
           <div>
-            <h2 style={{ margin: 0, color: "#45206d" }}>
+            <h2 style={{ margin: 0, color: "var(--color-purple-700)" }}>
               {editingResource.isNew ? "➕ New Approved Learning Resource" : `✏️ Edit Resource: ${v.title || "Untitled"}`}
             </h2>
-            <p style={{ margin: "0.25rem 0 0", color: "#61596a", fontSize: "0.95rem" }}>
+            <p style={{ margin: "0.25rem 0 0", color: "var(--color-purple-600)", fontSize: "0.95rem" }}>
               Configure permanent educational recording, video link, and Q&amp;A document viewer data.
             </p>
           </div>
@@ -616,7 +616,7 @@ export default function OnlineEducationAdmin({ content, onSave }) {
     <div className="online-education-admin-module">
       {/* Sub-section Switcher */}
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1.5rem", flexWrap: "wrap", gap: "1rem" }}>
-        <div style={{ display: "flex", gap: "6px", background: "#f3e8ff", padding: "4px", borderRadius: "10px", flexWrap: "wrap" }}>
+        <div style={{ display: "flex", gap: "6px", background: "var(--color-purple-100)", padding: "4px", borderRadius: "10px", flexWrap: "wrap" }}>
           <button
             type="button"
             onClick={() => setSubSection("webinars")}
@@ -626,8 +626,8 @@ export default function OnlineEducationAdmin({ content, onSave }) {
               padding: "8px 16px",
               borderRadius: "8px",
               fontWeight: subSection === "webinars" ? 700 : 500,
-              background: subSection === "webinars" ? "#51277d" : "transparent",
-              color: subSection === "webinars" ? "#fff" : "#51277d",
+              background: subSection === "webinars" ? "var(--color-purple-700)" : "transparent",
+              color: subSection === "webinars" ? "#fff" : "var(--color-purple-700)",
               transition: "all 0.15s ease",
             }}
           >
@@ -642,8 +642,8 @@ export default function OnlineEducationAdmin({ content, onSave }) {
               padding: "8px 16px",
               borderRadius: "8px",
               fontWeight: subSection === "topics" ? 700 : 500,
-              background: subSection === "topics" ? "#51277d" : "transparent",
-              color: subSection === "topics" ? "#fff" : "#51277d",
+              background: subSection === "topics" ? "var(--color-purple-700)" : "transparent",
+              color: subSection === "topics" ? "#fff" : "var(--color-purple-700)",
               transition: "all 0.15s ease",
             }}
           >
@@ -658,8 +658,8 @@ export default function OnlineEducationAdmin({ content, onSave }) {
               padding: "8px 16px",
               borderRadius: "8px",
               fontWeight: subSection === "resources" ? 700 : 500,
-              background: subSection === "resources" ? "#51277d" : "transparent",
-              color: subSection === "resources" ? "#fff" : "#51277d",
+              background: subSection === "resources" ? "var(--color-purple-700)" : "transparent",
+              color: subSection === "resources" ? "#fff" : "var(--color-purple-700)",
               transition: "all 0.15s ease",
             }}
           >
@@ -674,8 +674,8 @@ export default function OnlineEducationAdmin({ content, onSave }) {
               padding: "8px 16px",
               borderRadius: "8px",
               fontWeight: subSection === "headers" ? 700 : 500,
-              background: subSection === "headers" ? "#51277d" : "transparent",
-              color: subSection === "headers" ? "#fff" : "#51277d",
+              background: subSection === "headers" ? "var(--color-purple-700)" : "transparent",
+              color: subSection === "headers" ? "#fff" : "var(--color-purple-700)",
               transition: "all 0.15s ease",
             }}
           >
@@ -748,7 +748,7 @@ export default function OnlineEducationAdmin({ content, onSave }) {
         >
           <div className="tp-card" style={{ maxWidth: "480px", width: "100%", margin: 0, boxShadow: "0 10px 25px rgba(0,0,0,0.2)" }}>
             <h3 style={{ margin: "0 0 0.75rem", color: "#991b1b" }}>⚠️ Confirm Deletion</h3>
-            <p style={{ color: "#374151", margin: "0 0 1.25rem" }}>
+            <p style={{ color: "var(--color-neutral-700)", margin: "0 0 1.25rem" }}>
               Are you sure you want to delete <strong>"{deletingConfirm.title}"</strong>? This action cannot be undone.
             </p>
             <div style={{ display: "flex", justifyContent: "flex-end", gap: "10px" }}>
@@ -854,7 +854,7 @@ export default function OnlineEducationAdmin({ content, onSave }) {
           {/* Table */}
           {filteredTopics.length === 0 ? (
             <div className="tp-card" style={{ textAlign: "center", padding: "2.5rem 1rem" }}>
-              <p style={{ margin: 0, color: "#61596a", fontSize: "1.05rem" }}>
+              <p style={{ margin: 0, color: "var(--color-purple-600)", fontSize: "1.05rem" }}>
                 No topics found matching your search.
               </p>
               {topicSearch && (
@@ -888,19 +888,19 @@ export default function OnlineEducationAdmin({ content, onSave }) {
                   {pagedTopics.map((t) => (
                     <tr key={t.id}>
                       <td>
-                        <div style={{ textAlign: "center", background: "#f3e8ff", border: "1px solid #d8b4fe", borderRadius: "8px", padding: "4px 6px" }}>
-                          <span style={{ display: "block", fontSize: "0.75rem", fontWeight: 700, color: "#7e22ce" }}>{t.month}</span>
-                          <strong style={{ display: "block", fontSize: "1.2rem", color: "#45206d", lineHeight: 1.1 }}>{t.day}</strong>
+                        <div style={{ textAlign: "center", background: "var(--color-purple-100)", border: "1px solid var(--color-purple-300)", borderRadius: "8px", padding: "4px 6px" }}>
+                          <span style={{ display: "block", fontSize: "0.75rem", fontWeight: 700, color: "var(--color-purple-600)" }}>{t.month}</span>
+                          <strong style={{ display: "block", fontSize: "1.2rem", color: "var(--color-purple-700)", lineHeight: 1.1 }}>{t.day}</strong>
                         </div>
                       </td>
                       <td>
-                        <div style={{ fontWeight: 700, color: "#1f2937", marginBottom: "4px" }}>
+                        <div style={{ fontWeight: 700, color: "var(--color-neutral-900)", marginBottom: "4px" }}>
                           {t.title}
                         </div>
-                        <div style={{ fontSize: "0.85rem", color: "#61596a", marginBottom: "4px", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>
+                        <div style={{ fontSize: "0.85rem", color: "var(--color-purple-600)", marginBottom: "4px", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>
                           {t.description}
                         </div>
-                        <div style={{ fontSize: "0.8rem", color: "#4b5563" }}>
+                        <div style={{ fontSize: "0.8rem", color: "var(--color-neutral-600)" }}>
                           ⏱️ {t.time} • 🎯 {t.suitableFor}
                         </div>
                       </td>
@@ -908,15 +908,15 @@ export default function OnlineEducationAdmin({ content, onSave }) {
                         <span className={`tp-badge-mode ${t.mode === "Online" ? "tp-badge-online" : "tp-badge-physical"}`}>
                           {t.mode}
                         </span>
-                        <div style={{ fontSize: "0.82rem", color: "#4b5563", marginTop: "4px" }}>
+                        <div style={{ fontSize: "0.82rem", color: "var(--color-neutral-600)", marginTop: "4px" }}>
                           📍 {t.location}
                         </div>
                       </td>
                       <td>
-                        <div style={{ fontSize: "0.85rem", fontWeight: 600, color: "#374151" }}>
+                        <div style={{ fontSize: "0.85rem", fontWeight: 600, color: "var(--color-neutral-700)" }}>
                           🗣️ {t.language}
                         </div>
-                        <div style={{ fontSize: "0.82rem", color: "#6b7280", marginTop: "3px" }}>
+                        <div style={{ fontSize: "0.82rem", color: "var(--color-neutral-500)", marginTop: "3px" }}>
                           👤 {t.speaker}
                         </div>
                       </td>
@@ -1000,7 +1000,7 @@ export default function OnlineEducationAdmin({ content, onSave }) {
             </div>
             <div className="tp-stat">
               <span>Available Years</span>
-              <strong style={{ color: "#7e22ce" }}>
+              <strong style={{ color: "var(--color-purple-600)" }}>
                 {allResYears.join(", ") || "—"}
               </strong>
             </div>
@@ -1063,7 +1063,7 @@ export default function OnlineEducationAdmin({ content, onSave }) {
           {/* Table */}
           {filteredResources.length === 0 ? (
             <div className="tp-card" style={{ textAlign: "center", padding: "2.5rem 1rem" }}>
-              <p style={{ margin: 0, color: "#61596a", fontSize: "1.05rem" }}>
+              <p style={{ margin: 0, color: "var(--color-purple-600)", fontSize: "1.05rem" }}>
                 No learning resources found matching your search.
               </p>
               {resSearch && (
@@ -1096,23 +1096,23 @@ export default function OnlineEducationAdmin({ content, onSave }) {
                   {pagedResources.map((r) => (
                     <tr key={r.id}>
                       <td>
-                        <span style={{ fontSize: "0.85rem", fontWeight: 700, background: "#f1f5f9", color: "#334155", padding: "3px 8px", borderRadius: "6px" }}>
+                        <span style={{ fontSize: "0.85rem", fontWeight: 700, background: "var(--color-neutral-100)", color: "var(--color-neutral-700)", padding: "3px 8px", borderRadius: "6px" }}>
                           {r.year}
                         </span>
                       </td>
                       <td>
-                        <div style={{ fontWeight: 700, color: "#1f2937", marginBottom: "4px" }}>
+                        <div style={{ fontWeight: 700, color: "var(--color-neutral-900)", marginBottom: "4px" }}>
                           {r.title}
                         </div>
-                        <div style={{ fontSize: "0.85rem", color: "#61596a", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>
+                        <div style={{ fontSize: "0.85rem", color: "var(--color-purple-600)", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>
                           {r.description}
                         </div>
                       </td>
                       <td>
-                        <div style={{ fontSize: "0.85rem", fontWeight: 600, color: "#0d716b" }}>
+                        <div style={{ fontSize: "0.85rem", fontWeight: 600, color: "var(--color-purple-600)" }}>
                           📄 {r.type}
                         </div>
-                        <div style={{ fontSize: "0.8rem", color: "#64748b", marginTop: "3px" }}>
+                        <div style={{ fontSize: "0.8rem", color: "var(--color-neutral-500)", marginTop: "3px" }}>
                           🗣️ {r.language} {r.duration ? `• ⏳ ${r.duration}` : ""}
                         </div>
                       </td>
@@ -1127,7 +1127,7 @@ export default function OnlineEducationAdmin({ content, onSave }) {
                             Watch Recording ↗
                           </a>
                         ) : (
-                          <span style={{ fontSize: "0.8rem", color: "#9ca3af" }}>No video link</span>
+                          <span style={{ fontSize: "0.8rem", color: "var(--color-neutral-500)" }}>No video link</span>
                         )}
                         <div>{publicLink(r.qaUrl) ? <a href={publicLink(r.qaUrl)} target="_blank" rel="noreferrer">Review Q&amp;A ↗</a> : r.qaFolder ? `Image collection: ${r.qaFolder}` : 'No Q&A material'}</div>
                       </td>

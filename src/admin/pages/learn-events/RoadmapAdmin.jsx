@@ -121,7 +121,7 @@ export default function RoadmapAdmin({ content, onSave }) {
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem", flexWrap: "wrap", gap: "1rem" }}>
         <div>
           <h2 style={{ margin: 0, fontSize: "1.25rem" }}>Annual Activity Roadmap Editions</h2>
-          <p style={{ margin: "0.25rem 0 0", color: "#61596a", fontSize: "0.9rem" }}>
+          <p style={{ margin: "0.25rem 0 0", color: "var(--color-purple-600)", fontSize: "0.9rem" }}>
             Manage the multi-calendar switcher cards, themes, timelines, and milestone highlights.
           </p>
         </div>
@@ -178,7 +178,7 @@ export default function RoadmapAdmin({ content, onSave }) {
               setPageSize(Number(e.target.value));
               setPage(1);
             }}
-            style={{ padding: "4px 8px", borderRadius: "6px", border: "1px solid #877991" }}
+            style={{ padding: "4px 8px", borderRadius: "6px", border: "1px solid var(--color-purple-400)" }}
           >
             <option value="10">10</option>
             <option value="25">25</option>
@@ -189,7 +189,7 @@ export default function RoadmapAdmin({ content, onSave }) {
       {/* Data Table */}
       {filteredRoadmaps.length === 0 ? (
         <div className="tp-card" style={{ textAlign: "center", padding: "40px 20px" }}>
-          <p style={{ color: "#61596a", margin: 0 }}>No roadmap editions found.</p>
+          <p style={{ color: "var(--color-purple-600)", margin: 0 }}>No roadmap editions found.</p>
         </div>
       ) : (
         <div className="tp-table-wrap">
@@ -208,32 +208,32 @@ export default function RoadmapAdmin({ content, onSave }) {
               {pagedRoadmaps.map((r) => (
                 <tr key={r.id}>
                   <td>
-                    <span style={{ fontWeight: 700, color: "#0d716b", background: "#f0fdf4", padding: "2px 8px", borderRadius: "4px", fontSize: "0.82rem" }}>
+                    <span style={{ fontWeight: 700, color: "var(--color-purple-600)", background: "#f0fdf4", padding: "2px 8px", borderRadius: "4px", fontSize: "0.82rem" }}>
                       {r.editionLabel}
                     </span>
                   </td>
                   <td>
-                    <div style={{ fontWeight: 700, color: "#1f2937", marginBottom: "2px" }}>
+                    <div style={{ fontWeight: 700, color: "var(--color-neutral-900)", marginBottom: "2px" }}>
                       {r.title}
                     </div>
                     {r.intro && (
-                      <div style={{ fontSize: "0.82rem", color: "#6b7280", maxWidth: "320px", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                      <div style={{ fontSize: "0.82rem", color: "var(--color-neutral-500)", maxWidth: "320px", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
                         {r.intro}
                       </div>
                     )}
                   </td>
                   <td>
-                    <span style={{ fontSize: "0.85rem", color: "#374151", fontWeight: 600 }}>
+                    <span style={{ fontSize: "0.85rem", color: "var(--color-neutral-700)", fontWeight: 600 }}>
                       “{r.theme}”
                     </span>
                   </td>
                   <td>
-                    <span style={{ fontSize: "0.85rem", color: "#4b5563" }}>
+                    <span style={{ fontSize: "0.85rem", color: "var(--color-neutral-600)" }}>
                       📅 {r.period}
                     </span>
                   </td>
                   <td>
-                    <span style={{ fontSize: "0.82rem", fontWeight: 700, background: "#f3e8ff", color: "#6b21a8", padding: "2px 8px", borderRadius: "12px" }}>
+                    <span style={{ fontSize: "0.82rem", fontWeight: 700, background: "var(--color-purple-100)", color: "var(--color-purple-600)", padding: "2px 8px", borderRadius: "12px" }}>
                       {r.highlights?.length || 0} phases
                     </span>
                   </td>
@@ -302,7 +302,7 @@ export default function RoadmapAdmin({ content, onSave }) {
         <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 99999, padding: "1rem" }}>
           <div style={{ background: "#fff", borderRadius: "10px", maxWidth: "480px", width: "100%", padding: "1.5rem", boxShadow: "0 20px 25px -5px rgba(0,0,0,0.2)" }}>
             <h3 style={{ margin: "0 0 0.5rem", color: "#991b1b" }}>Confirm Edition Deletion</h3>
-            <p style={{ margin: "0 0 1rem", color: "#4b5563", fontSize: "0.95rem" }}>
+            <p style={{ margin: "0 0 1rem", color: "var(--color-neutral-600)", fontSize: "0.95rem" }}>
               Are you sure you want to delete <strong>{deletingConfirm.editionLabel} — {deletingConfirm.title}</strong>? This edition will be removed from the interactive roadmap switcher.
             </p>
             <div style={{ display: "flex", justifyContent: "flex-end", gap: "0.75rem" }}>

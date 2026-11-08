@@ -164,14 +164,15 @@ export default function Records() {
   const reviewed = "review_status" in toForm(config);
   return (
     <>
-      <h1>Content and records</h1>
+      <h1>Content &amp; records</h1>
       <SubscriberAudience />
+      <h2>Website records</h2>
       <p>
-        One place to maintain directory listings, learning resources, FAQs, page content, subscribers,
-        DCS certificates and enquiries. Inclusion does not mean RCBC endorses the provider.
+        Choose what you want to update: support directory, learning resources, FAQs, page text,
+        subscribers, DCS certificates or enquiries. Listing a provider does not mean RCBC endorses them.
       </p>
       <div className="tp-toolbar">
-        <Field id="kind" label="Record type">
+        <Field id="kind" label="What to update">
           <select id="kind" value={kind} onChange={(e) => { setKind(e.target.value); setNotice(""); }}>
             {KINDS.map((k) => <option key={k} value={k}>{recordTypes[k].label}</option>)}
           </select>

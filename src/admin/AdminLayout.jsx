@@ -1,17 +1,16 @@
 import AccountForm from "../trainer-portal/AccountForm";
+import { Fragment } from "react";
 import { NavLink, Outlet } from "react-router-dom";
 import { useTrainer } from "../trainer-portal/TrainerContext";
+import { buildQueue } from "../trainer-portal/selectors";
 import "../trainer-portal/TrainerPortal.css";
 
-const links = [
-  ["/admin", "Overview", true],
-  ["/admin/learn-events", "Learn & Events Hub"],
-  ["/admin/participants", "Workshop participants"],
-  ["/admin/review", "Review queue"],
-  ["/admin/contribution", "Trainer contribution"],
-  ["/admin/conducted", "Completion records"],
-  ["/admin/records", "Content and records"],
-  ["/admin/users", "Users and access"],
+// Grouped so related pages sit together: daily tasks, events, trainers, website.
+const groups = [
+  [["/admin", "Overview", true], ["/admin/review", "Approvals"]],
+  [["/admin/learn-events", "Events & learning"], ["/admin/participants", "Participants"], ["/admin/conducted", "Completed workshops"]],
+  [["/admin/contribution", "Trainer hours"]],
+  [["/admin/records", "Content & records"], ["/admin/users", "Users"]],
 ];
 
 export default function AdminLayout() {
@@ -22,6 +21,8 @@ export default function AdminLayout() {
     return <main className="tp-page"><div className="tp-container"><AccountForm role="admin" /></div></main>;
   }
 
+  const waiting = buildQueue(state).length;
+
   return (
     <main className="tp-page">
       <div className="tp-container">
@@ -31,9 +32,21 @@ export default function AdminLayout() {
             Sign out
           </button>
         </header>
-        <nav className="tp-nav" aria-label="Administrative Dashboard">
-          {links.map(([to, label, end]) => (
-            <NavLink key={to} to={to} end={end}>{label}</NavLink>
+        <nav className="tp-menu" aria-label="Administrative Dashboard">
+          {groups.map((group, i) => (
+            <Fragment key={group[0][0]}>
+              {i > 0 && <span className="tp-menu-sep" aria-hidden="true" />}
+              {group.map(([to, label, end]) => (
+                <NavLink key={to} to={to} end={end}>
+                  {label}
+                  {to === "/admin/review" && waiting > 0 && (
+                    <span className="tp-menu-count">
+                      {waiting}<span className="tp-sr"> waiting</span>
+                    </span>
+                  )}
+                </NavLink>
+              ))}
+            </Fragment>
           ))}
         </nav>
         <Outlet />

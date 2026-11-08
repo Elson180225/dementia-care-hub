@@ -94,6 +94,7 @@ export default function Activities({
   newButtonLabel,
 }) {
   const { state, dispatch } = useTrainer();
+  const addLabel = newButtonLabel || (admin ? "+ New event / workshop" : "+ New workshop / seminar");
   const [uploading, setUploading] = useState(0);
   const uploadBusy = (busy) => setUploading((n) => n + (busy ? 1 : -1));
   const [editing, setEditing] = useState(null); // { id?, values }
@@ -374,7 +375,7 @@ export default function Activities({
 
           <fieldset className="tp-field">
             <legend>Assigned Activity Trainers</legend>
-            <p style={{ margin: "0.25rem 0 0.75rem", fontSize: "0.9rem", color: "#61596a" }}>
+            <p style={{ margin: "0.25rem 0 0.75rem", fontSize: "0.9rem", color: "var(--color-purple-600)" }}>
               Assign certified trainers responsible for leading or facilitating this session.
             </p>
             {assigned.map((t, i) => (
@@ -531,12 +532,12 @@ export default function Activities({
     <>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem", flexWrap: "wrap", gap: "1rem" }}>
         <div>
-          <h1 style={{ margin: 0 }}>{pageTitle || (admin ? "Events & Workshop Management" : "Workshop & Seminar")}</h1>
-          <p style={{ margin: "0.25rem 0 0", color: "#61596a", fontSize: "0.95rem" }}>
+          <h1 style={{ margin: 0 }}>{pageTitle || (admin ? "Events & workshops" : "My workshops")}</h1>
+          <p style={{ margin: "0.25rem 0 0", color: "var(--color-neutral-600)", fontSize: "0.95rem" }}>
             {pageSubtitle ||
               (admin
-                ? "Create and manage all community events, workshops, dialogues, and online sessions."
-                : "Submit your own activities. RCBC Admin reviews them before they appear in Education & Events.")}
+                ? "Add and manage community events, workshops, dialogues and online sessions."
+                : "Add the workshops and seminars you will run. RCBC checks them before they appear on the public Education & Events page.")}
           </p>
         </div>
         <button
@@ -544,31 +545,31 @@ export default function Activities({
           onClick={() => open(null)}
           style={{ minWidth: "180px", whiteSpace: "nowrap" }}
         >
-          {newButtonLabel || (admin ? "+ New Event / Workshop" : "+ New Workshop / Seminar")}
+          {addLabel}
         </button>
       </div>
 
       {/* Metric Stats Cards */}
       <div className="tp-stats">
         <div className="tp-stat">
-          <span>Total Records</span>
+          <span>All</span>
           <strong>{state.activities.length}</strong>
         </div>
         <div className="tp-stat">
-          <span>Published Live</span>
-          <strong style={{ color: "#0d716b" }}>
+          <span>On the website</span>
+          <strong style={{ color: "var(--color-purple-600)" }}>
             {state.activities.filter((a) => a.status === "published" && !a.cancelledAt).length}
           </strong>
         </div>
         <div className="tp-stat">
-          <span>In Review / Draft</span>
+          <span>Draft or waiting for review</span>
           <strong style={{ color: "#b45309" }}>
             {state.activities.filter((a) => ["draft", "submitted", "returned"].includes(a.status) && !a.cancelledAt).length}
           </strong>
         </div>
         <div className="tp-stat">
-          <span>Completed / Archived</span>
-          <strong style={{ color: "#475569" }}>
+          <span>Finished or archived</span>
+          <strong style={{ color: "var(--color-neutral-600)" }}>
             {state.activities.filter((a) => ["completed", "verified", "archived"].includes(a.status) || Boolean(a.cancelledAt)).length}
           </strong>
         </div>
@@ -684,7 +685,7 @@ export default function Activities({
               setPageSize(Number(e.target.value));
               setPage(1);
             }}
-            style={{ padding: "4px 8px", borderRadius: "6px", border: "1px solid #877991" }}
+            style={{ padding: "4px 8px", borderRadius: "6px", border: "1px solid var(--color-purple-400)" }}
           >
             <option value="10">10</option>
             <option value="25">25</option>
@@ -696,10 +697,10 @@ export default function Activities({
       {/* Main Data Table */}
       {totalCount === 0 ? (
         <div className="tp-card" style={{ textAlign: "center", padding: "40px 20px" }}>
-          <p style={{ fontSize: "1.1rem", color: "#61596a", margin: 0 }}>
+          <p style={{ fontSize: "1.1rem", color: "var(--color-purple-600)", margin: 0 }}>
             {hasActiveFilters
               ? "No activities matched your search or filters."
-              : "No activities found. Click '+ New Event / Workshop' to schedule your first session."}
+              : `Nothing here yet. Click "${addLabel}" to add your first one.`}
           </p>
           {hasActiveFilters && (
             <button
@@ -732,21 +733,21 @@ export default function Activities({
                 return (
                   <tr key={a.id}>
                     <td>
-                      <div style={{ fontWeight: 700, color: "#1f2937", marginBottom: "4px" }}>
+                      <div style={{ fontWeight: 700, color: "var(--color-neutral-900)", marginBottom: "4px" }}>
                         {a.title}
                       </div>
                       <div style={{ display: "flex", gap: "6px", alignItems: "center", flexWrap: "wrap", marginBottom: "4px" }}>
-                        <span style={{ fontSize: "0.78rem", fontWeight: 700, background: "#f3e8ff", color: "#6b21a8", padding: "2px 8px", borderRadius: "4px" }}>
+                        <span style={{ fontSize: "0.78rem", fontWeight: 700, background: "var(--color-purple-100)", color: "var(--color-purple-600)", padding: "2px 8px", borderRadius: "4px" }}>
                           {a.type}
                         </span>
                         {(a.audience || a.suitableFor) && (
-                          <span style={{ fontSize: "0.82rem", color: "#4b5563" }}>
+                          <span style={{ fontSize: "0.82rem", color: "var(--color-neutral-600)" }}>
                             🎯 Suitable for: <strong>{a.audience || a.suitableFor}</strong>
                           </span>
                         )}
                       </div>
                       {a.trainers?.length > 0 && (
-                        <div style={{ fontSize: "0.82rem", color: "#4338ca", marginTop: "3px" }}>
+                        <div style={{ fontSize: "0.82rem", color: "var(--color-purple-600)", marginTop: "3px" }}>
                           👤 Assigned Trainers:{" "}
                           <strong>
                             {a.trainers
@@ -772,11 +773,11 @@ export default function Activities({
                     </td>
 
                     <td>
-                      <div style={{ fontWeight: 600, color: "#374151" }}>
+                      <div style={{ fontWeight: 600, color: "var(--color-neutral-700)" }}>
                         {fmtDate(a.date)}
                       </div>
                       {a.plannedHours && (
-                        <div style={{ fontSize: "0.82rem", color: "#6b7280" }}>
+                        <div style={{ fontSize: "0.82rem", color: "var(--color-neutral-500)" }}>
                           ⏱️ {a.plannedHours} hrs
                         </div>
                       )}
@@ -786,7 +787,7 @@ export default function Activities({
                       <span className={`tp-badge-mode ${a.mode === "Online" ? "tp-badge-online" : "tp-badge-physical"}`}>
                         {a.mode}
                       </span>
-                      <div style={{ fontSize: "0.85rem", color: "#4b5563", marginTop: "4px" }}>
+                      <div style={{ fontSize: "0.85rem", color: "var(--color-neutral-600)", marginTop: "4px" }}>
                         {a.mode === "Online"
                           ? "Online"
                           : a.venue && a.city && a.venue !== a.city && !a.venue.toLowerCase().includes(a.city.toLowerCase())
@@ -800,12 +801,12 @@ export default function Activities({
                         👥 {a.capacity ? `${a.capacity} seats` : "No limit"}
                       </div>
                       {a.registrationDeadline ? (
-                        <div style={{ fontSize: "0.82rem", color: isDeadlinePassed ? "#dc2626" : "#6b7280", marginTop: "2px" }}>
+                        <div style={{ fontSize: "0.82rem", color: isDeadlinePassed ? "#dc2626" : "var(--color-neutral-500)", marginTop: "2px" }}>
                           ⏳ {fmtDate(a.registrationDeadline)}
                           {isDeadlinePassed && <span style={{ fontWeight: 700 }}> (Closed)</span>}
                         </div>
                       ) : (
-                        <div style={{ fontSize: "0.82rem", color: "#9ca3af" }}>No deadline</div>
+                        <div style={{ fontSize: "0.82rem", color: "var(--color-neutral-500)" }}>No deadline</div>
                       )}
                     </td>
 
@@ -970,7 +971,7 @@ export default function Activities({
               );
             }
             if (num === safePage - 3 || num === safePage + 3) {
-              return <span key={num} style={{ padding: "0 4px", color: "#877991" }}>…</span>;
+              return <span key={num} style={{ padding: "0 4px", color: "var(--color-purple-600)" }}>…</span>;
             }
             return null;
           })}
@@ -992,7 +993,7 @@ export default function Activities({
         <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 99999, padding: "1rem" }}>
           <div style={{ background: "#fff", borderRadius: "10px", maxWidth: "480px", width: "100%", padding: "1.5rem", boxShadow: "0 20px 25px -5px rgba(0,0,0,0.2)" }}>
             <h3 style={{ margin: "0 0 0.5rem", color: "#991b1b" }}>Confirm Activity Deletion</h3>
-            <p style={{ margin: "0 0 1rem", color: "#4b5563", fontSize: "0.95rem" }}>
+            <p style={{ margin: "0 0 1rem", color: "var(--color-neutral-600)", fontSize: "0.95rem" }}>
               Are you sure you want to permanently delete <strong>{deletingActivity.title}</strong>? This will remove the event, its trainer assignments, and any linked attendance records. This action cannot be undone.
             </p>
             <div style={{ display: "flex", justifyContent: "flex-end", gap: "0.75rem" }}>

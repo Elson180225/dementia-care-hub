@@ -305,7 +305,7 @@ export default function OutreachNewsAdmin({ content, onSave }) {
   return (
     <div className="outreach-news-admin">
       {/* Sub-navigation tabs */}
-      <div style={{ display: "flex", gap: "0.5rem", borderBottom: "1px solid #e5e7eb", marginBottom: "1.25rem" }}>
+      <div style={{ display: "flex", gap: "0.5rem", borderBottom: "1px solid var(--color-neutral-200)", marginBottom: "1.25rem" }}>
         <button
           type="button"
           onClick={() => setActiveSubTab("outreach")}
@@ -313,8 +313,8 @@ export default function OutreachNewsAdmin({ content, onSave }) {
             padding: "0.6rem 1.25rem",
             background: "none",
             border: "none",
-            borderBottom: activeSubTab === "outreach" ? "3px solid #0d716b" : "3px solid transparent",
-            color: activeSubTab === "outreach" ? "#0d716b" : "#4b5563",
+            borderBottom: activeSubTab === "outreach" ? "3px solid var(--color-purple-600)" : "3px solid transparent",
+            color: activeSubTab === "outreach" ? "var(--color-purple-600)" : "var(--color-neutral-600)",
             fontWeight: activeSubTab === "outreach" ? 700 : 500,
             cursor: "pointer",
             fontSize: "0.95rem",
@@ -329,8 +329,8 @@ export default function OutreachNewsAdmin({ content, onSave }) {
             padding: "0.6rem 1.25rem",
             background: "none",
             border: "none",
-            borderBottom: activeSubTab === "pillars" ? "3px solid #0d716b" : "3px solid transparent",
-            color: activeSubTab === "pillars" ? "#0d716b" : "#4b5563",
+            borderBottom: activeSubTab === "pillars" ? "3px solid var(--color-purple-600)" : "3px solid transparent",
+            color: activeSubTab === "pillars" ? "var(--color-purple-600)" : "var(--color-neutral-600)",
             fontWeight: activeSubTab === "pillars" ? 700 : 500,
             cursor: "pointer",
             fontSize: "0.95rem",
@@ -345,8 +345,8 @@ export default function OutreachNewsAdmin({ content, onSave }) {
             padding: "0.6rem 1.25rem",
             background: "none",
             border: "none",
-            borderBottom: activeSubTab === "news" ? "3px solid #0d716b" : "3px solid transparent",
-            color: activeSubTab === "news" ? "#0d716b" : "#4b5563",
+            borderBottom: activeSubTab === "news" ? "3px solid var(--color-purple-600)" : "3px solid transparent",
+            color: activeSubTab === "news" ? "var(--color-purple-600)" : "var(--color-neutral-600)",
             fontWeight: activeSubTab === "news" ? 700 : 500,
             cursor: "pointer",
             fontSize: "0.95rem",
@@ -362,7 +362,7 @@ export default function OutreachNewsAdmin({ content, onSave }) {
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem", flexWrap: "wrap", gap: "1rem" }}>
             <div>
               <h2 style={{ margin: 0, fontSize: "1.25rem" }}>Community Outreach Stories &amp; Dialogue Gallery</h2>
-              <p style={{ margin: "0.25rem 0 0", color: "#61596a", fontSize: "0.9rem" }}>
+              <p style={{ margin: "0.25rem 0 0", color: "var(--color-purple-600)", fontSize: "0.9rem" }}>
                 Spotlight regional training cohorts, grassroots dialogues, and community photo galleries.
               </p>
             </div>
@@ -419,7 +419,7 @@ export default function OutreachNewsAdmin({ content, onSave }) {
                   setStoryPageSize(Number(e.target.value));
                   setStoryPage(1);
                 }}
-                style={{ padding: "4px 8px", borderRadius: "6px", border: "1px solid #877991" }}
+                style={{ padding: "4px 8px", borderRadius: "6px", border: "1px solid var(--color-purple-400)" }}
               >
                 <option value="10">10</option>
                 <option value="25">25</option>
@@ -430,7 +430,7 @@ export default function OutreachNewsAdmin({ content, onSave }) {
           {/* Table */}
           {filteredStories.length === 0 ? (
             <div className="tp-card" style={{ textAlign: "center", padding: "40px 20px" }}>
-              <p style={{ color: "#61596a", margin: 0 }}>No outreach stories found.</p>
+              <p style={{ color: "var(--color-purple-600)", margin: 0 }}>No outreach stories found.</p>
             </div>
           ) : (
             <div className="tp-table-wrap">
@@ -448,17 +448,17 @@ export default function OutreachNewsAdmin({ content, onSave }) {
                   {pagedStories.map((st) => (
                     <tr key={st.id}>
                       <td>
-                        <div style={{ fontWeight: 700, color: "#1f2937", marginBottom: "2px" }}>
+                        <div style={{ fontWeight: 700, color: "var(--color-neutral-900)", marginBottom: "2px" }}>
                           {st.title}
                         </div>
                         {st.subtitle && (
-                          <div style={{ fontSize: "0.8rem", color: "#6b7280" }}>
+                          <div style={{ fontSize: "0.8rem", color: "var(--color-neutral-500)" }}>
                             {st.subtitle}
                           </div>
                         )}
                       </td>
                       <td>
-                        <span style={{ fontSize: "0.85rem", color: "#374151" }}>
+                        <span style={{ fontSize: "0.85rem", color: "var(--color-neutral-700)" }}>
                           📅 {st.date}
                         </span>
                       </td>
@@ -468,7 +468,7 @@ export default function OutreachNewsAdmin({ content, onSave }) {
                         </span>
                       </td>
                       <td>
-                        <div style={{ fontSize: "0.82rem", color: "#4b5563", maxWidth: "340px", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                        <div style={{ fontSize: "0.82rem", color: "var(--color-neutral-600)", maxWidth: "340px", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
                           {st.description}
                         </div>
                       </td>
@@ -539,7 +539,7 @@ export default function OutreachNewsAdmin({ content, onSave }) {
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem", flexWrap: "wrap", gap: "1rem" }}>
             <div>
               <h2 style={{ margin: 0, fontSize: "1.25rem" }}>Community Dialogue Core Pillars</h2>
-              <p style={{ margin: "0.25rem 0 0", color: "#61596a", fontSize: "0.9rem" }}>
+              <p style={{ margin: "0.25rem 0 0", color: "var(--color-purple-600)", fontSize: "0.9rem" }}>
                 Define the foundational pillars shown under the Community Outreach section on the main website.
               </p>
             </div>
@@ -588,7 +588,7 @@ export default function OutreachNewsAdmin({ content, onSave }) {
               <strong>{filteredPillars.length}</strong> pillars
             </div>
             <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-              <label htmlFor="pillarPageSizeSelect" style={{ fontSize: "0.85rem", color: "#61596a" }}>
+              <label htmlFor="pillarPageSizeSelect" style={{ fontSize: "0.85rem", color: "var(--color-purple-600)" }}>
                 Rows:
               </label>
               <select
@@ -611,7 +611,7 @@ export default function OutreachNewsAdmin({ content, onSave }) {
           {/* Pillars Table */}
           {pagedPillars.length === 0 ? (
             <div className="tp-empty-state">
-              <p style={{ color: "#61596a", margin: 0 }}>No dialogue pillars found.</p>
+              <p style={{ color: "var(--color-purple-600)", margin: 0 }}>No dialogue pillars found.</p>
             </div>
           ) : (
             <div className="tp-table-wrap">
@@ -631,12 +631,12 @@ export default function OutreachNewsAdmin({ content, onSave }) {
                         {pl.icon || "🌱"}
                       </td>
                       <td>
-                        <div style={{ fontWeight: 700, color: "#1f2937" }}>
+                        <div style={{ fontWeight: 700, color: "var(--color-neutral-900)" }}>
                           {pl.title}
                         </div>
                       </td>
                       <td>
-                        <div style={{ fontSize: "0.88rem", color: "#4b5563", lineHeight: 1.4 }}>
+                        <div style={{ fontSize: "0.88rem", color: "var(--color-neutral-600)", lineHeight: 1.4 }}>
                           {pl.desc || pl.description}
                         </div>
                       </td>
@@ -707,7 +707,7 @@ export default function OutreachNewsAdmin({ content, onSave }) {
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem", flexWrap: "wrap", gap: "1rem" }}>
             <div>
               <h2 style={{ margin: 0, fontSize: "1.25rem" }}>Sarawak Dementia Care in the News (Press Clippings)</h2>
-              <p style={{ margin: "0.25rem 0 0", color: "#61596a", fontSize: "0.9rem" }}>
+              <p style={{ margin: "0.25rem 0 0", color: "var(--color-purple-600)", fontSize: "0.9rem" }}>
                 Feature newspaper clippings, press coverage, and media spotlight articles with zoomable lightboxes.
               </p>
             </div>
@@ -764,7 +764,7 @@ export default function OutreachNewsAdmin({ content, onSave }) {
                   setNewsPageSize(Number(e.target.value));
                   setNewsPage(1);
                 }}
-                style={{ padding: "4px 8px", borderRadius: "6px", border: "1px solid #877991" }}
+                style={{ padding: "4px 8px", borderRadius: "6px", border: "1px solid var(--color-purple-400)" }}
               >
                 <option value="10">10</option>
                 <option value="25">25</option>
@@ -775,7 +775,7 @@ export default function OutreachNewsAdmin({ content, onSave }) {
           {/* Table */}
           {filteredArticles.length === 0 ? (
             <div className="tp-card" style={{ textAlign: "center", padding: "40px 20px" }}>
-              <p style={{ color: "#61596a", margin: 0 }}>No press articles found.</p>
+              <p style={{ color: "var(--color-purple-600)", margin: 0 }}>No press articles found.</p>
             </div>
           ) : (
             <div className="tp-table-wrap">
@@ -794,32 +794,32 @@ export default function OutreachNewsAdmin({ content, onSave }) {
                   {pagedArticles.map((art) => (
                     <tr key={art.id}>
                       <td>
-                        <div style={{ fontWeight: 700, color: "#1f2937" }}>
+                        <div style={{ fontWeight: 700, color: "var(--color-neutral-900)" }}>
                           📰 {art.outlet}
                         </div>
                       </td>
                       <td>
-                        <div style={{ fontWeight: 600, color: "#1f2937", marginBottom: "2px" }}>
+                        <div style={{ fontWeight: 600, color: "var(--color-neutral-900)", marginBottom: "2px" }}>
                           {art.mainTitle}
                         </div>
                         {art.intro && (
-                          <div style={{ fontSize: "0.8rem", color: "#6b7280", maxWidth: "300px", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                          <div style={{ fontSize: "0.8rem", color: "var(--color-neutral-500)", maxWidth: "300px", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
                             {art.intro}
                           </div>
                         )}
                       </td>
                       <td>
-                        <span style={{ fontSize: "0.8rem", fontWeight: 600, background: "#f3f4f6", color: "#374151", padding: "2px 8px", borderRadius: "4px" }}>
+                        <span style={{ fontSize: "0.8rem", fontWeight: 600, background: "var(--color-neutral-100)", color: "var(--color-neutral-700)", padding: "2px 8px", borderRadius: "4px" }}>
                           {art.category || "Feature"}
                         </span>
                       </td>
                       <td>
-                        <span style={{ fontSize: "0.8rem", fontWeight: 700, color: "#6b21a8", background: "#f3e8ff", padding: "2px 8px", borderRadius: "10px" }}>
+                        <span style={{ fontSize: "0.8rem", fontWeight: 700, color: "var(--color-purple-600)", background: "var(--color-purple-100)", padding: "2px 8px", borderRadius: "10px" }}>
                           {art.langPill || "English"}
                         </span>
                       </td>
                       <td>
-                        <span style={{ fontSize: "0.85rem", color: "#4b5563" }}>
+                        <span style={{ fontSize: "0.85rem", color: "var(--color-neutral-600)" }}>
                           {art.date}
                         </span>
                       </td>
@@ -890,7 +890,7 @@ export default function OutreachNewsAdmin({ content, onSave }) {
         <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 99999, padding: "1rem" }}>
           <div style={{ background: "#fff", borderRadius: "10px", maxWidth: "480px", width: "100%", padding: "1.5rem", boxShadow: "0 20px 25px -5px rgba(0,0,0,0.2)" }}>
             <h3 style={{ margin: "0 0 0.5rem", color: "#991b1b" }}>Confirm Deletion</h3>
-            <p style={{ margin: "0 0 1rem", color: "#4b5563", fontSize: "0.95rem" }}>
+            <p style={{ margin: "0 0 1rem", color: "var(--color-neutral-600)", fontSize: "0.95rem" }}>
               Are you sure you want to delete <strong>{deletingConfirm.title}</strong>? It will no longer be visible on the public website.
             </p>
             <div style={{ display: "flex", justifyContent: "flex-end", gap: "0.75rem" }}>

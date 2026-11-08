@@ -103,7 +103,7 @@ export default function LearnEventsCMS() {
           type="button"
           className={activeTab === "sessions" ? "active" : ""}
           onClick={() => setActiveTab("sessions")}
-          style={{ cursor: "pointer", background: "none", border: "none", padding: "0.6rem 1rem", borderBottom: activeTab === "sessions" ? "2px solid #0d716b" : "none", fontWeight: activeTab === "sessions" ? "700" : "500", color: activeTab === "sessions" ? "#0d716b" : "#4b5563" }}
+          style={{ cursor: "pointer", background: "none", border: "none", padding: "0.6rem 1rem", borderBottom: activeTab === "sessions" ? "2px solid var(--color-purple-600)" : "none", fontWeight: activeTab === "sessions" ? "700" : "500", color: activeTab === "sessions" ? "var(--color-purple-600)" : "var(--color-neutral-600)" }}
         >
           Events &amp; Workshop
         </button>
@@ -111,7 +111,7 @@ export default function LearnEventsCMS() {
           type="button"
           className={activeTab === "online" ? "active" : ""}
           onClick={() => setActiveTab("online")}
-          style={{ cursor: "pointer", background: "none", border: "none", padding: "0.6rem 1rem", borderBottom: activeTab === "online" ? "2px solid #0d716b" : "none", fontWeight: activeTab === "online" ? "700" : "500", color: activeTab === "online" ? "#0d716b" : "#4b5563" }}
+          style={{ cursor: "pointer", background: "none", border: "none", padding: "0.6rem 1rem", borderBottom: activeTab === "online" ? "2px solid var(--color-purple-600)" : "none", fontWeight: activeTab === "online" ? "700" : "500", color: activeTab === "online" ? "var(--color-purple-600)" : "var(--color-neutral-600)" }}
         >
           Online Education
         </button>
@@ -119,7 +119,7 @@ export default function LearnEventsCMS() {
           type="button"
           className={activeTab === "physical" ? "active" : ""}
           onClick={() => setActiveTab("physical")}
-          style={{ cursor: "pointer", background: "none", border: "none", padding: "0.6rem 1rem", borderBottom: activeTab === "physical" ? "2px solid #0d716b" : "none", fontWeight: activeTab === "physical" ? "700" : "500", color: activeTab === "physical" ? "#0d716b" : "#4b5563" }}
+          style={{ cursor: "pointer", background: "none", border: "none", padding: "0.6rem 1rem", borderBottom: activeTab === "physical" ? "2px solid var(--color-purple-600)" : "none", fontWeight: activeTab === "physical" ? "700" : "500", color: activeTab === "physical" ? "var(--color-purple-600)" : "var(--color-neutral-600)" }}
         >
           Physical Education
         </button>
@@ -127,7 +127,7 @@ export default function LearnEventsCMS() {
           type="button"
           className={activeTab === "roadmap" ? "active" : ""}
           onClick={() => setActiveTab("roadmap")}
-          style={{ cursor: "pointer", background: "none", border: "none", padding: "0.6rem 1rem", borderBottom: activeTab === "roadmap" ? "2px solid #0d716b" : "none", fontWeight: activeTab === "roadmap" ? "700" : "500", color: activeTab === "roadmap" ? "#0d716b" : "#4b5563" }}
+          style={{ cursor: "pointer", background: "none", border: "none", padding: "0.6rem 1rem", borderBottom: activeTab === "roadmap" ? "2px solid var(--color-purple-600)" : "none", fontWeight: activeTab === "roadmap" ? "700" : "500", color: activeTab === "roadmap" ? "var(--color-purple-600)" : "var(--color-neutral-600)" }}
         >
           Annual Roadmap
         </button>
@@ -135,7 +135,7 @@ export default function LearnEventsCMS() {
           type="button"
           className={activeTab === "outreach" ? "active" : ""}
           onClick={() => setActiveTab("outreach")}
-          style={{ cursor: "pointer", background: "none", border: "none", padding: "0.6rem 1rem", borderBottom: activeTab === "outreach" ? "2px solid #0d716b" : "none", fontWeight: activeTab === "outreach" ? "700" : "500", color: activeTab === "outreach" ? "#0d716b" : "#4b5563" }}
+          style={{ cursor: "pointer", background: "none", border: "none", padding: "0.6rem 1rem", borderBottom: activeTab === "outreach" ? "2px solid var(--color-purple-600)" : "none", fontWeight: activeTab === "outreach" ? "700" : "500", color: activeTab === "outreach" ? "var(--color-purple-600)" : "var(--color-neutral-600)" }}
         >
           Outreach &amp; News
         </button>
@@ -143,7 +143,7 @@ export default function LearnEventsCMS() {
           type="button"
           className={activeTab === "trainers" ? "active" : ""}
           onClick={() => setActiveTab("trainers")}
-          style={{ cursor: "pointer", background: "none", border: "none", padding: "0.6rem 1rem", borderBottom: activeTab === "trainers" ? "2px solid #0d716b" : "none", fontWeight: activeTab === "trainers" ? "700" : "500", color: activeTab === "trainers" ? "#0d716b" : "#4b5563" }}
+          style={{ cursor: "pointer", background: "none", border: "none", padding: "0.6rem 1rem", borderBottom: activeTab === "trainers" ? "2px solid var(--color-purple-600)" : "none", fontWeight: activeTab === "trainers" ? "700" : "500", color: activeTab === "trainers" ? "var(--color-purple-600)" : "var(--color-neutral-600)" }}
         >
           Certified Trainers &amp; Governance
         </button>
@@ -152,9 +152,9 @@ export default function LearnEventsCMS() {
       {/* TAB 1: EVENTS & WORKSHOP */}
       {activeTab === "sessions" && (
         <div>
-          <div style={{ background: "#f8fafc", padding: "1rem 1.25rem", borderRadius: "8px", border: "1px solid #e2e8f0", marginBottom: "1.5rem" }}>
+          <div style={{ background: "var(--color-neutral-50)", padding: "1rem 1.25rem", borderRadius: "8px", border: "1px solid var(--color-neutral-200)", marginBottom: "1.5rem" }}>
             <h3 style={{ margin: "0 0 0.5rem" }}>📅 Events &amp; Workshop Hub</h3>
-            <p style={{ margin: 0, fontSize: "0.95rem", color: "#475569" }}>
+            <p style={{ margin: 0, fontSize: "0.95rem", color: "var(--color-neutral-600)" }}>
               Create, update, and manage all project activities, community workshops, dialogues, and online sessions. Published activities immediately reflect across the public <strong>Explore Community Events &amp; Workshops</strong> directory and <strong>Upcoming Calendar</strong>.
             </p>
           </div>
@@ -165,9 +165,9 @@ export default function LearnEventsCMS() {
       {/* TAB 2: ONLINE EDUCATION */}
       {activeTab === "online" && (
         <div>
-          <div style={{ background: "#f8fafc", padding: "1rem 1.25rem", borderRadius: "8px", border: "1px solid #e2e8f0", marginBottom: "1.5rem" }}>
+          <div style={{ background: "var(--color-neutral-50)", padding: "1rem 1.25rem", borderRadius: "8px", border: "1px solid var(--color-neutral-200)", marginBottom: "1.5rem" }}>
             <h3 style={{ margin: "0 0 0.5rem" }}>💻 Online Education Management</h3>
-            <p style={{ margin: 0, fontSize: "0.95rem", color: "#475569" }}>
+            <p style={{ margin: 0, fontSize: "0.95rem", color: "var(--color-neutral-600)" }}>
               Manage upcoming online webinars, preview cards, and permanent Q&amp;A learning resources with full CRUD operations, keyword search, and pagination.
             </p>
           </div>
@@ -178,9 +178,9 @@ export default function LearnEventsCMS() {
       {/* TAB 3: PHYSICAL EDUCATION */}
       {activeTab === "physical" && (
         <div>
-          <div style={{ background: "#f8fafc", padding: "1rem 1.25rem", borderRadius: "8px", border: "1px solid #e2e8f0", marginBottom: "1.5rem" }}>
+          <div style={{ background: "var(--color-neutral-50)", padding: "1rem 1.25rem", borderRadius: "8px", border: "1px solid var(--color-neutral-200)", marginBottom: "1.5rem" }}>
             <h3 style={{ margin: "0 0 0.5rem" }}>🏋️ Physical Education Management</h3>
-            <p style={{ margin: 0, fontSize: "0.95rem", color: "#475569" }}>
+            <p style={{ margin: 0, fontSize: "0.95rem", color: "var(--color-neutral-600)" }}>
               Configure in-person DCS tracks, target roles, syllabus pillars, and scheduled intakes with full CRUD operations, keyword search, and pagination.
             </p>
           </div>
@@ -191,9 +191,9 @@ export default function LearnEventsCMS() {
       {/* TAB 4: ANNUAL ROADMAP */}
       {activeTab === "roadmap" && (
         <div>
-          <div style={{ background: "#f8fafc", padding: "1rem 1.25rem", borderRadius: "8px", border: "1px solid #e2e8f0", marginBottom: "1.5rem" }}>
+          <div style={{ background: "var(--color-neutral-50)", padding: "1rem 1.25rem", borderRadius: "8px", border: "1px solid var(--color-neutral-200)", marginBottom: "1.5rem" }}>
             <h3 style={{ margin: "0 0 0.5rem" }}>🗺️ Annual Activity Roadmap Management</h3>
-            <p style={{ margin: 0, fontSize: "0.95rem", color: "#475569" }}>
+            <p style={{ margin: 0, fontSize: "0.95rem", color: "var(--color-neutral-600)" }}>
               Manage multi-edition roadmaps, milestone stepper tracks, and high-resolution calendar posters with full CRUD operations.
             </p>
           </div>
@@ -204,9 +204,9 @@ export default function LearnEventsCMS() {
       {/* TAB 5: OUTREACH & NEWS */}
       {activeTab === "outreach" && (
         <div>
-          <div style={{ background: "#f8fafc", padding: "1rem 1.25rem", borderRadius: "8px", border: "1px solid #e2e8f0", marginBottom: "1.5rem" }}>
+          <div style={{ background: "var(--color-neutral-50)", padding: "1rem 1.25rem", borderRadius: "8px", border: "1px solid var(--color-neutral-200)", marginBottom: "1.5rem" }}>
             <h3 style={{ margin: "0 0 0.5rem" }}>🗣️ Community Outreach &amp; Press News</h3>
-            <p style={{ margin: 0, fontSize: "0.95rem", color: "#475569" }}>
+            <p style={{ margin: 0, fontSize: "0.95rem", color: "var(--color-neutral-600)" }}>
               Manage community dialogue photo stories and regional press clipping articles with full CRUD operations, search, and pagination.
             </p>
           </div>
@@ -217,9 +217,9 @@ export default function LearnEventsCMS() {
       {/* TAB 6: CERTIFIED TRAINERS & GOVERNANCE */}
       {activeTab === "trainers" && (
         <div>
-          <div style={{ background: "#f8fafc", padding: "1rem 1.25rem", borderRadius: "8px", border: "1px solid #e2e8f0", marginBottom: "1.5rem" }}>
+          <div style={{ background: "var(--color-neutral-50)", padding: "1rem 1.25rem", borderRadius: "8px", border: "1px solid var(--color-neutral-200)", marginBottom: "1.5rem" }}>
             <h3 style={{ margin: "0 0 0.5rem" }}>👨‍⚕️ Certified Trainers &amp; Governance Directory</h3>
-            <p style={{ margin: 0, fontSize: "0.95rem", color: "#475569" }}>
+            <p style={{ margin: 0, fontSize: "0.95rem", color: "var(--color-neutral-600)" }}>
               Manage clinical facilitators and advisory specialists displayed on the public carousel and directory with search, category filters, and CRUD modals.
             </p>
           </div>
