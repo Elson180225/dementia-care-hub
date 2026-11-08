@@ -173,7 +173,7 @@ function HelpMenuIcon({ path }) {
     );
   }
 
-  if (path.includes("support-services")) {
+  if (path.includes("support-services") || path.includes("support-groups")) {
     return (
       <svg {...common}>
         <circle cx="8" cy="8" r="2.2" />
@@ -202,6 +202,161 @@ function HelpMenuIcon({ path }) {
         <path d="M9 8v5h5l2 5" />
         <path d="M9 11H6a4 4 0 1 0 4 6" />
         <path d="M14 13h4" />
+      </svg>
+    );
+  }
+
+  // Understanding Dementia
+  if (path.includes("what-is-dementia")) {
+    return (
+      <svg {...common}>
+        <circle cx="12" cy="12" r="9" />
+        <path d="M12 11v6" />
+        <circle cx="12" cy="7.5" r=".8" />
+      </svg>
+    );
+  }
+
+  if (path.includes("alzheimers")) {
+    return (
+      <svg {...common}>
+        <path d="M10 3.5a2 2 0 1 1 4 0V5h4a1 1 0 0 1 1 1v4h-1.5a2 2 0 1 0 0 4H19v4a1 1 0 0 1-1 1h-4v-1.5a2 2 0 1 0-4 0V19H6a1 1 0 0 1-1-1v-4h1.5a2 2 0 1 0 0-4H5V6a1 1 0 0 1 1-1h4V3.5Z" />
+      </svg>
+    );
+  }
+
+  if (path.includes("signs-and-changes")) {
+    return (
+      <svg {...common}>
+        <path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12Z" />
+        <circle cx="12" cy="12" r="3" />
+      </svg>
+    );
+  }
+
+  if (path.includes("why-changes-matter")) {
+    return (
+      <svg {...common}>
+        <path d="M12 3 2.5 20h19L12 3Z" />
+        <path d="M12 10v4.5" />
+        <circle cx="12" cy="17" r=".8" />
+      </svg>
+    );
+  }
+
+  if (path.includes("medical-advice")) {
+    return (
+      <svg {...common}>
+        <rect x="5" y="4" width="14" height="17" rx="2" />
+        <path d="M9 4V3h6v1" />
+        <path d="M12 9v6M9 12h6" />
+      </svg>
+    );
+  }
+
+  if (path.includes("healthy-ageing")) {
+    return (
+      <svg {...common}>
+        <path d="M12 20s-7.5-4.6-7.5-10A4.5 4.5 0 0 1 12 7.2 4.5 4.5 0 0 1 19.5 10c0 5.4-7.5 10-7.5 10Z" />
+      </svg>
+    );
+  }
+
+  // Caregiver Support
+  if (path.includes("#guidance")) {
+    return (
+      <svg {...common}>
+        <path d="M3 5.5C5.5 4 8.5 4 12 6c3.5-2 6.5-2 9-.5V19c-2.5-1.5-5.5-1.5-9 .5-3.5-2-6.5-2-9-.5V5.5Z" />
+        <path d="M12 6v13.5" />
+      </svg>
+    );
+  }
+
+  if (path.includes("#training")) {
+    return (
+      <svg {...common}>
+        <path d="M2.5 9 12 4.5 21.5 9 12 13.5 2.5 9Z" />
+        <path d="M6.5 11v4.5c1.5 1.5 3.5 2.2 5.5 2.2s4-.7 5.5-2.2V11" />
+        <path d="M21.5 9v5" />
+      </svg>
+    );
+  }
+
+  if (path.includes("certificate-verification")) {
+    return (
+      <svg {...common}>
+        <path d="M12 3 4.5 6v5.5c0 4.5 3.2 8 7.5 9.5 4.3-1.5 7.5-5 7.5-9.5V6L12 3Z" />
+        <path d="m8.5 12 2.5 2.5 4.5-5" />
+      </svg>
+    );
+  }
+
+  if (path.includes("#volunteer")) {
+    return (
+      <svg {...common}>
+        <path d="M12 9.5s-3.5-2.2-3.5-4.6A2 2 0 0 1 12 3.8a2 2 0 0 1 3.5 1.1c0 2.4-3.5 4.6-3.5 4.6Z" />
+        <path d="M3 14h3.5l3 2h4a1.5 1.5 0 0 1 0 3H9" />
+        <path d="M13.5 17.5 18 15a1.6 1.6 0 0 1 2 2.4L14 21H6.5L3 19" />
+      </svg>
+    );
+  }
+
+  // Learn & Events
+  if (path.includes("online-education")) {
+    return (
+      <svg {...common}>
+        <rect x="3" y="4" width="18" height="12" rx="2" />
+        <path d="M8 20h8M12 16v4" />
+        <path d="m10.5 8 4 2-4 2V8Z" />
+      </svg>
+    );
+  }
+
+  if (path.includes("physical-education")) {
+    return (
+      <svg {...common}>
+        <rect x="4" y="3.5" width="16" height="10" rx="1.5" />
+        <path d="M8 21l2-7.5M16 21l-2-7.5" />
+        <path d="M8 7.5h8M8 10h5" />
+      </svg>
+    );
+  }
+
+  if (path.includes("upcoming-calendar") || path.includes("/events")) {
+    return (
+      <svg {...common}>
+        <rect x="3.5" y="5" width="17" height="15.5" rx="2" />
+        <path d="M3.5 10h17M8 3v4M16 3v4" />
+        {path.includes("/events") && <path d="m12 12.6.9 1.8 2 .3-1.45 1.4.35 2-1.8-.95-1.8.95.35-2-1.45-1.4 2-.3.9-1.8Z" />}
+      </svg>
+    );
+  }
+
+  if (path.includes("certified-trainers")) {
+    return (
+      <svg {...common}>
+        <circle cx="10" cy="8" r="3.5" />
+        <path d="M3.5 20c.8-3.6 3.3-5.5 6.5-5.5 1.4 0 2.6.3 3.6 1" />
+        <path d="m15 18 2 2 4-4.5" />
+      </svg>
+    );
+  }
+
+  // About
+  if (path === "/about") {
+    return (
+      <svg {...common}>
+        <circle cx="12" cy="12" r="9" />
+        <path d="M12 8v.01M11 11.5h1V17h1" />
+      </svg>
+    );
+  }
+
+  if (path.includes("contact")) {
+    return (
+      <svg {...common}>
+        <rect x="3" y="5" width="18" height="14" rx="2" />
+        <path d="m3.5 6.5 8.5 6.5 8.5-6.5" />
       </svg>
     );
   }
@@ -410,16 +565,10 @@ function Header() {
 
                   {/* DROPDOWN */}
                   {openMenu === item.label && (
-                    <div
-                      className={`dropdown-menu ${
-                        item.path === "/find-help" ? "dropdown-menu-visual" : ""
-                      }`}
-                    >
+                    <div className="dropdown-menu dropdown-menu-visual">
                       <div className="dropdown-heading-row">
                         <h3>{item.label}</h3>
-                        {item.path === "/find-help" && (
-                          <span className="dropdown-heading-line" aria-hidden="true" />
-                        )}
+                        <span className="dropdown-heading-line" aria-hidden="true" />
                       </div>
 
                       <div className="dropdown-grid">
@@ -427,33 +576,23 @@ function Header() {
                           <Link
                             key={child.path}
                             to={child.path}
-                            className={
-                              item.path === "/find-help"
-                                ? "dropdown-visual-link"
-                                : undefined
-                            }
+                            className="dropdown-visual-link"
                             onClick={() => setOpenMenu(null)}
                           >
-                            {item.path === "/find-help" ? (
-                              <>
-                                <span className="dropdown-visual-icon">
-                                  <HelpMenuIcon path={child.path} />
-                                </span>
+                            <span className="dropdown-visual-icon">
+                              <HelpMenuIcon path={child.path} />
+                            </span>
 
-                                <span className="dropdown-visual-label">
-                                  {child.label}
-                                </span>
+                            <span className="dropdown-visual-label">
+                              {child.label}
+                            </span>
 
-                                <span
-                                  className="dropdown-visual-arrow"
-                                  aria-hidden="true"
-                                >
-                                  ›
-                                </span>
-                              </>
-                            ) : (
-                              child.label
-                            )}
+                            <span
+                              className="dropdown-visual-arrow"
+                              aria-hidden="true"
+                            >
+                              ›
+                            </span>
                           </Link>
                         ))}
                       </div>
