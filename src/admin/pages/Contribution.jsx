@@ -47,28 +47,28 @@ export default function Contribution() {
 
   return (
     <>
-      <h1>Trainer contribution</h1>
-      <p>Calculated from verified activity records only. There is no separate hours entry.</p>
-      <button className="tp-btn" onClick={exportCsv} disabled={rows.length === 0}>Export CSV</button>
+      <h1>Trainer hours</h1>
+      <p>Hours are added up automatically from completed activities you have checked. Nobody needs to enter them twice.</p>
+      <button className="tp-btn" onClick={exportCsv} disabled={rows.length === 0}>Download as spreadsheet (CSV)</button>
 
-      <h2>Annual totals</h2>
+      <h2>Totals by year</h2>
       <div className="tp-table-wrap">
         <table className="tp-table">
-          <caption className="tp-sr">Annual totals</caption>
-          <thead><tr><th>Year</th><th>Verified activities</th><th>Hours</th><th>Participants</th></tr></thead>
+          <caption className="tp-sr">Totals by year</caption>
+          <thead><tr><th>Year</th><th>Activities</th><th>Hours</th><th>Participants</th></tr></thead>
           <tbody>
             {Object.entries(totals).map(([year, t]) => (
               <tr key={year}><td>{year}</td><td>{t.activities}</td><td>{t.hours}</td><td>{t.participants}</td></tr>
             ))}
-            {rows.length === 0 && <tr><td colSpan="4">No verified records yet.</td></tr>}
+            {rows.length === 0 && <tr><td colSpan="4">No checked activities yet.</td></tr>}
           </tbody>
         </table>
       </div>
 
-      <h2>Verified records</h2>
+      <h2>Hours by trainer</h2>
       <div className="tp-table-wrap">
         <table className="tp-table">
-          <caption className="tp-sr">Verified records</caption>
+          <caption className="tp-sr">Hours by trainer</caption>
           <thead><tr><th>Year</th><th>Trainer</th><th>Activity</th><th>Role</th><th>Hours</th><th>Participants</th></tr></thead>
           <tbody>
             {trainerRows.map((a) => (

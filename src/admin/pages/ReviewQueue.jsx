@@ -16,6 +16,20 @@ const DECISION_LABEL = {
   archived: "Archived",
   restored: "Restored as draft",
   reviewed: "Marked as reviewed",
+  INSERT: "Created",
+  UPDATE: "Updated",
+  DELETE: "Deleted",
+};
+
+// Plain names for the database tables recorded in the audit log.
+const RECORD_LABEL = {
+  trainer_access_requests: "Trainer application",
+  trainer_profiles: "Trainer profile",
+  users: "User account",
+  activities: "Activity",
+  completions: "Completed activity",
+  activity_trainers: "Activity trainers",
+  subscribers: "Get Updated subscriber",
 };
 
 export default function ReviewQueue() {
@@ -48,10 +62,10 @@ export default function ReviewQueue() {
 
   return (
     <>
-      <h1>Review queue</h1>
+      <h1>Approvals</h1>
       <p>
-        Trainers submit and Admin reviews. Approving keeps the same record. Returning needs a short
-        comment, which the trainer sees.
+        Approve, return or reject what trainers send in. If you return or reject something, add a
+        short comment so the trainer knows what to change.
       </p>
 
       {queue.length === 0 && <p className="tp-card">Nothing is waiting for review.</p>}
@@ -81,7 +95,7 @@ export default function ReviewQueue() {
             {item.target === "access" && (
                 <Field
                     id={`ref-${item.key}`}
-                    label="Official certificate reference (checked against RCBC records)"
+                    label="Certificate reference (check it matches RCBC records)"
                 >
                     <input
                         id={`ref-${item.key}`}
@@ -92,7 +106,7 @@ export default function ReviewQueue() {
                 )}
                 <Field
                     id={`c-${item.key}`}
-                    label="Comment (needed when returning or rejecting)"
+                    label="Comment for the trainer (required to return or reject)"
                     error={errors[item.key]}
                 >
                 <textarea
@@ -121,15 +135,15 @@ export default function ReviewQueue() {
         ))}
       </ul>
 
-      <h2>Recent decisions</h2>
+      <h2>Recent activity</h2>
       <div className="tp-table-wrap">
         <table className="tp-table">
-          <caption className="tp-sr">Status history</caption>
+          <caption className="tp-sr">Recent activity</caption>
           <thead>
             <tr>
               <th>When</th>
-              <th>Record</th>
-              <th>Decision</th>
+              <th>Item</th>
+              <th>What happened</th>
               <th>By</th>
               <th>Comment</th>
             </tr>
@@ -140,14 +154,14 @@ export default function ReviewQueue() {
                 <td>
                   {new Date(h.at).toLocaleString("en-MY", { dateStyle: "medium", timeStyle: "short" })}
                 </td>
-                <td>{h.entity}: {h.entityLabel}</td>
+                <td>{RECORD_LABEL[h.entity] ?? h.entity}: {h.entityLabel}</td>
                 <td>{DECISION_LABEL[h.decision] ?? h.decision}</td>
                 <td>{h.by}</td>
                 <td>{h.comment || "–"}</td>
               </tr>
             ))}
             {state.history.length === 0 && (
-              <tr><td colSpan="5">No decisions yet.</td></tr>
+              <tr><td colSpan="5">Nothing yet.</td></tr>
             )}
           </tbody>
         </table>

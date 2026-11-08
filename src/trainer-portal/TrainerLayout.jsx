@@ -5,10 +5,10 @@ import "./TrainerPortal.css";
 
 const links = [
   ["/trainer-portal", "Dashboard", true],
-  ["/trainer-portal/profile", "My Profile"],
-  ["/trainer-portal/activities", "Workshop & Seminar"],
-  ["/trainer-portal/conducted", "Conducted"],
-  ["/trainer-portal/hours", "Contribution & Hours"],
+  ["/trainer-portal/profile", "My profile"],
+  ["/trainer-portal/activities", "My workshops"],
+  ["/trainer-portal/conducted", "Completed workshops"],
+  ["/trainer-portal/hours", "My hours"],
 ];
 
 export default function TrainerLayout() {
@@ -28,7 +28,7 @@ export default function TrainerLayout() {
             Sign out
           </button>
         </header>
-        <nav className="tp-nav" aria-label="Trainer Portal">
+        <nav className="tp-menu" aria-label="Trainer Portal">
           {links.map(([to, label, end]) => (
             <NavLink key={to} to={to} end={end}>{label}</NavLink>
           ))}

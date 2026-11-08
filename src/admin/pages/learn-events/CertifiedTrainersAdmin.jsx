@@ -136,7 +136,7 @@ export default function CertifiedTrainersAdmin({ content, onSave }) {
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem", flexWrap: "wrap", gap: "1rem" }}>
         <div>
           <h2 style={{ margin: 0, fontSize: "1.25rem" }}>Certified Trainers &amp; Governance Directory</h2>
-          <p style={{ margin: "0.25rem 0 0", color: "#61596a", fontSize: "0.9rem" }}>
+          <p style={{ margin: "0.25rem 0 0", color: "var(--color-purple-600)", fontSize: "0.9rem" }}>
             Manage doctors, healthcare educators, and advisory board profiles displayed on the continuous carousel and public directory.
           </p>
         </div>
@@ -227,7 +227,7 @@ export default function CertifiedTrainersAdmin({ content, onSave }) {
               setPageSize(Number(e.target.value));
               setPage(1);
             }}
-            style={{ padding: "4px 8px", borderRadius: "6px", border: "1px solid #877991" }}
+            style={{ padding: "4px 8px", borderRadius: "6px", border: "1px solid var(--color-purple-400)" }}
           >
             <option value="10">10</option>
             <option value="25">25</option>
@@ -238,7 +238,7 @@ export default function CertifiedTrainersAdmin({ content, onSave }) {
       {/* Data Table */}
       {filteredTrainers.length === 0 ? (
         <div className="tp-card" style={{ textAlign: "center", padding: "40px 20px" }}>
-          <p style={{ color: "#61596a", margin: 0 }}>No trainers match your search criteria.</p>
+          <p style={{ color: "var(--color-purple-600)", margin: 0 }}>No trainers match your search criteria.</p>
         </div>
       ) : (
         <div className="tp-table-wrap">
@@ -280,17 +280,17 @@ export default function CertifiedTrainersAdmin({ content, onSave }) {
                     </div>
                   </td>
                   <td>
-                    <div style={{ fontWeight: 700, color: "#1f2937", marginBottom: "2px" }}>
+                    <div style={{ fontWeight: 700, color: "var(--color-neutral-900)", marginBottom: "2px" }}>
                       {tr.name}
                     </div>
                     {tr.language && (
-                      <div style={{ fontSize: "0.8rem", color: "#6b7280" }}>
+                      <div style={{ fontSize: "0.8rem", color: "var(--color-neutral-500)" }}>
                         🌐 {tr.language}
                       </div>
                     )}
                   </td>
                   <td>
-                    <div style={{ fontSize: "0.88rem", color: "#374151", fontWeight: 600 }}>
+                    <div style={{ fontSize: "0.88rem", color: "var(--color-neutral-700)", fontWeight: 600 }}>
                       {tr.role}
                     </div>
                   </td>
@@ -311,11 +311,11 @@ export default function CertifiedTrainersAdmin({ content, onSave }) {
                     </span>
                   </td>
                   <td>
-                    <div style={{ fontSize: "0.85rem", color: "#1f2937" }}>
+                    <div style={{ fontSize: "0.85rem", color: "var(--color-neutral-900)" }}>
                       🏥 {tr.institution}
                     </div>
                     {tr.city && (
-                      <div style={{ fontSize: "0.8rem", color: "#6b7280", marginTop: "2px" }}>
+                      <div style={{ fontSize: "0.8rem", color: "var(--color-neutral-500)", marginTop: "2px" }}>
                         📍 {tr.city}
                       </div>
                     )}
@@ -385,7 +385,7 @@ export default function CertifiedTrainersAdmin({ content, onSave }) {
         <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 99999, padding: "1rem" }}>
           <div style={{ background: "#fff", borderRadius: "10px", maxWidth: "480px", width: "100%", padding: "1.5rem", boxShadow: "0 20px 25px -5px rgba(0,0,0,0.2)" }}>
             <h3 style={{ margin: "0 0 0.5rem", color: "#991b1b" }}>Confirm Trainer Deletion</h3>
-            <p style={{ margin: "0 0 1rem", color: "#4b5563", fontSize: "0.95rem" }}>
+            <p style={{ margin: "0 0 1rem", color: "var(--color-neutral-600)", fontSize: "0.95rem" }}>
               Are you sure you want to delete <strong>{deletingConfirm.name} ({deletingConfirm.role})</strong>? This profile will no longer appear on the public clinical carousel or directory.
             </p>
             <div style={{ display: "flex", justifyContent: "flex-end", gap: "0.75rem" }}>

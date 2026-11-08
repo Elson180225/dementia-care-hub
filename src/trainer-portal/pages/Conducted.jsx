@@ -42,8 +42,8 @@ export default function Conducted({admin=false}) {
 
   return (
     <>
-      <h1>Workshops & Seminars Conducted</h1>
-      <p>After an approved activity ends, add its record here. The title, date and language carry over automatically.</p>
+      <h1>Completed workshops</h1>
+      <p>When a workshop or seminar has finished, add how it went here. The title, date and language are filled in for you.</p>
       <ul className="tp-cards">
         {eligible.map((a) => (
           <li key={a.id} className="tp-card">
@@ -51,10 +51,10 @@ export default function Conducted({admin=false}) {
             <p>{fmtDate(a.date)} · {a.language}</p>
             <p><StatusChip status={a.completion.status} labels={COMPLETION_LABEL} /></p>
             {a.completion.status === "returned" && a.completion.adminComment && (
-              <p className="tp-note">Admin comment: {a.completion.adminComment}</p>
+              <p className="tp-note">Comment from RCBC: {a.completion.adminComment}</p>
             )}
             {["none", "draft", "returned"].includes(a.completion.status) && (admin || a.created_by===state.session?.id) && openId !== a.id && (
-              <button className="tp-btn tp-btn-ghost" onClick={() => open(a)}>Add activity record</button>
+              <button className="tp-btn tp-btn-ghost" onClick={() => open(a)}>Record how it went</button>
             )}
             {openId === a.id && (
               <form noValidate onSubmit={(e) => e.preventDefault()}>
@@ -79,7 +79,7 @@ export default function Conducted({admin=false}) {
             )}
           </li>
         ))}
-        {eligible.length === 0 && <li className="tp-card">No approved activities yet.</li>}
+        {eligible.length === 0 && <li className="tp-card">No finished workshops yet. Published workshops appear here once their date has passed.</li>}
       </ul>
     </>
   );

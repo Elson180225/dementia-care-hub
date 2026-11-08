@@ -156,7 +156,7 @@ export default function PhysicalEducationAdmin({ content, onSave }) {
   return (
     <div className="physical-education-admin">
       {/* Sub-navigation bar */}
-      <div style={{ display: "flex", gap: "0.5rem", borderBottom: "1px solid #e5e7eb", marginBottom: "1.25rem" }}>
+      <div style={{ display: "flex", gap: "0.5rem", borderBottom: "1px solid var(--color-neutral-200)", marginBottom: "1.25rem" }}>
         <button
           type="button"
           onClick={() => setSubSection("tracks")}
@@ -164,8 +164,8 @@ export default function PhysicalEducationAdmin({ content, onSave }) {
             padding: "0.6rem 1.25rem",
             background: "none",
             border: "none",
-            borderBottom: subSection === "tracks" ? "3px solid #0d716b" : "3px solid transparent",
-            color: subSection === "tracks" ? "#0d716b" : "#4b5563",
+            borderBottom: subSection === "tracks" ? "3px solid var(--color-purple-600)" : "3px solid transparent",
+            color: subSection === "tracks" ? "var(--color-purple-600)" : "var(--color-neutral-600)",
             fontWeight: subSection === "tracks" ? 700 : 500,
             cursor: "pointer",
             fontSize: "0.95rem",
@@ -180,8 +180,8 @@ export default function PhysicalEducationAdmin({ content, onSave }) {
             padding: "0.6rem 1.25rem",
             background: "none",
             border: "none",
-            borderBottom: subSection === "sessions" ? "3px solid #0d716b" : "3px solid transparent",
-            color: subSection === "sessions" ? "#0d716b" : "#4b5563",
+            borderBottom: subSection === "sessions" ? "3px solid var(--color-purple-600)" : "3px solid transparent",
+            color: subSection === "sessions" ? "var(--color-purple-600)" : "var(--color-neutral-600)",
             fontWeight: subSection === "sessions" ? 700 : 500,
             cursor: "pointer",
             fontSize: "0.95rem",
@@ -199,7 +199,7 @@ export default function PhysicalEducationAdmin({ content, onSave }) {
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem", flexWrap: "wrap", gap: "1rem" }}>
             <div>
               <h2 style={{ margin: 0, fontSize: "1.25rem" }}>DCS Learning Tracks Management</h2>
-              <p style={{ margin: "0.25rem 0 0", color: "#61596a", fontSize: "0.9rem" }}>
+              <p style={{ margin: "0.25rem 0 0", color: "var(--color-purple-600)", fontSize: "0.9rem" }}>
                 Configure in-person training pathways, module pillars, schedules, and registration criteria.
               </p>
             </div>
@@ -273,7 +273,7 @@ export default function PhysicalEducationAdmin({ content, onSave }) {
                   setPageSize(Number(e.target.value));
                   setPage(1);
                 }}
-                style={{ padding: "4px 8px", borderRadius: "6px", border: "1px solid #877991" }}
+                style={{ padding: "4px 8px", borderRadius: "6px", border: "1px solid var(--color-purple-400)" }}
               >
                 <option value="10">10</option>
                 <option value="25">25</option>
@@ -284,7 +284,7 @@ export default function PhysicalEducationAdmin({ content, onSave }) {
           {/* Table */}
           {filteredProgrammes.length === 0 ? (
             <div className="tp-card" style={{ textAlign: "center", padding: "40px 20px" }}>
-              <p style={{ color: "#61596a", margin: 0 }}>No DCS programmes match your search criteria.</p>
+              <p style={{ color: "var(--color-purple-600)", margin: 0 }}>No DCS programmes match your search criteria.</p>
             </div>
           ) : (
             <div className="tp-table-wrap">
@@ -304,40 +304,40 @@ export default function PhysicalEducationAdmin({ content, onSave }) {
                   {pagedProgrammes.map((p) => (
                     <tr key={p.id}>
                       <td>
-                        <span style={{ fontWeight: 700, color: "#0d716b", background: "#f0fdf4", padding: "2px 8px", borderRadius: "4px", fontSize: "0.82rem" }}>
+                        <span style={{ fontWeight: 700, color: "var(--color-purple-600)", background: "#f0fdf4", padding: "2px 8px", borderRadius: "4px", fontSize: "0.82rem" }}>
                           {p.trackNumber || "Track"}
                         </span>
                       </td>
                       <td>
-                        <div style={{ fontWeight: 700, color: "#1f2937", marginBottom: "2px" }}>
+                        <div style={{ fontWeight: 700, color: "var(--color-neutral-900)", marginBottom: "2px" }}>
                           {p.code}
                         </div>
-                        <div style={{ fontSize: "0.88rem", color: "#4b5563" }}>
+                        <div style={{ fontSize: "0.88rem", color: "var(--color-neutral-600)" }}>
                           {p.title}
                         </div>
                       </td>
                       <td>
-                        <div style={{ fontSize: "0.85rem", color: "#374151" }}>
+                        <div style={{ fontSize: "0.85rem", color: "var(--color-neutral-700)" }}>
                           {p.roleCategory}
                         </div>
                       </td>
                       <td>
-                        <div style={{ fontSize: "0.82rem", fontWeight: 600, color: "#0f766e" }}>
+                        <div style={{ fontSize: "0.82rem", fontWeight: 600, color: "var(--color-purple-600)" }}>
                           {p.mode}
                         </div>
-                        <div style={{ fontSize: "0.78rem", color: "#6b7280" }}>
+                        <div style={{ fontSize: "0.78rem", color: "var(--color-neutral-500)" }}>
                           {p.sessions}
                         </div>
                       </td>
                       <td>
-                        <div style={{ fontSize: "0.85rem", fontWeight: 600, color: "#1f2937" }}>
+                        <div style={{ fontSize: "0.85rem", fontWeight: 600, color: "var(--color-neutral-900)" }}>
                           {p.schedule?.date || "TBD"}
                         </div>
-                        <div style={{ fontSize: "0.78rem", color: "#6b7280" }}>
+                        <div style={{ fontSize: "0.78rem", color: "var(--color-neutral-500)" }}>
                           {p.schedule?.time}
                         </div>
                         {p.location && (
-                          <div style={{ fontSize: "0.78rem", color: "#4b5563", marginTop: "2px" }}>
+                          <div style={{ fontSize: "0.78rem", color: "var(--color-neutral-600)", marginTop: "2px" }}>
                             📍 {p.location}
                           </div>
                         )}
@@ -422,9 +422,9 @@ export default function PhysicalEducationAdmin({ content, onSave }) {
       {/* SUB-SECTION 2: LIVE PHYSICAL SESSIONS DB TABLE */}
       {subSection === "sessions" && (
         <div>
-          <div style={{ background: "#f8fafc", padding: "1rem 1.25rem", borderRadius: "8px", border: "1px solid #e2e8f0", marginBottom: "1.5rem" }}>
+          <div style={{ background: "var(--color-neutral-50)", padding: "1rem 1.25rem", borderRadius: "8px", border: "1px solid var(--color-neutral-200)", marginBottom: "1.5rem" }}>
             <h3 style={{ margin: "0 0 0.5rem" }}>🏋️ In-Person Training &amp; Community Workshop Hub</h3>
-            <p style={{ margin: 0, fontSize: "0.95rem", color: "#475569" }}>
+            <p style={{ margin: 0, fontSize: "0.95rem", color: "var(--color-neutral-600)" }}>
               Manage in-person sessions, community workshops, hospital cohorts, and public roadshows. Live entries automatically synchronize with the main website events directory and upcoming calendar.
             </p>
           </div>
@@ -445,7 +445,7 @@ export default function PhysicalEducationAdmin({ content, onSave }) {
         <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 99999, padding: "1rem" }}>
           <div style={{ background: "#fff", borderRadius: "10px", maxWidth: "480px", width: "100%", padding: "1.5rem", boxShadow: "0 20px 25px -5px rgba(0,0,0,0.2)" }}>
             <h3 style={{ margin: "0 0 0.5rem", color: "#991b1b" }}>Confirm Track Deletion</h3>
-            <p style={{ margin: "0 0 1rem", color: "#4b5563", fontSize: "0.95rem" }}>
+            <p style={{ margin: "0 0 1rem", color: "var(--color-neutral-600)", fontSize: "0.95rem" }}>
               Are you sure you want to delete <strong>{deletingConfirm.code} — {deletingConfirm.title}</strong>? This track will be removed from the public website showcase.
             </p>
             <div style={{ display: "flex", justifyContent: "flex-end", gap: "0.75rem" }}>

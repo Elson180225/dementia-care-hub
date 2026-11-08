@@ -89,36 +89,31 @@ export default function Overview() {
             <ul className="tp-list">
               {Object.entries(byKind).map(([kind, count]) => (
                 <li key={kind}>
-                  <strong>{count}</strong> × {kind}
+                  <strong>{count}</strong> {kind.toLowerCase()}
+                  {count === 1 ? "" : "s"} to review
                 </li>
               ))}
 
               {toPublish > 0 && (
                 <li>
-                  <strong>{toPublish}</strong> × Approved activity
-                  waiting to be published (
-                  <Link to="/admin/activities">
-                    Activities
-                  </Link>
-                  )
+                  <strong>{toPublish}</strong> approved{" "}
+                  {toPublish === 1 ? "activity" : "activities"} ready to
+                  publish (<Link to="/admin/activities">Events &amp; learning</Link>)
                 </li>
               )}
 
               {dueRecords > 0 && (
                 <li>
-                  <strong>{dueRecords}</strong> × Directory, learning
-                  resource, content page, or FAQ items needing review (
-                  <Link to="/admin/records">
-                    Directory &amp; content
-                  </Link>
-                  )
+                  <strong>{dueRecords}</strong> website{" "}
+                  {dueRecords === 1 ? "item" : "items"} due for a check (
+                  <Link to="/admin/records">Content &amp; records</Link>)
                 </li>
               )}
             </ul>
 
             {queue.length > 0 && (
               <Link className="tp-btn" to="/admin/review">
-                Go to review queue
+                Go to approvals
               </Link>
             )}
           </>
@@ -127,7 +122,7 @@ export default function Overview() {
 
       {/* Maintenance and follow-up */}
       <section className="tp-card">
-        <h2>Maintenance and follow-up</h2>
+        <h2>Items due for a check</h2>
 
         <ul>
           {maintenance.map((m) => (
@@ -138,12 +133,12 @@ export default function Overview() {
         </ul>
 
         <Link to="/admin/records">
-          Open content and records
+          Go to content &amp; records
         </Link>
       </section>
 
       {/* Yearly summary */}
-      <h2>{year} summary</h2>
+      <h2>This year ({year})</h2>
 
       <div className="tp-stats">
         <div className="tp-stat">
@@ -152,12 +147,12 @@ export default function Overview() {
         </div>
 
         <div className="tp-stat">
-          <span>Verified activities</span>
+          <span>Completed and checked</span>
           <strong>{summary.conducted}</strong>
         </div>
 
         <div className="tp-stat">
-          <span>Verified contribution hours</span>
+          <span>Trainer hours</span>
           <strong>{contributionHours}</strong>
         </div>
 

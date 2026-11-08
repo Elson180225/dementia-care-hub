@@ -46,7 +46,7 @@ export default function Participants() {
   const currentPage = Math.min(page,totalPages);
   const visible = filtered.slice((currentPage-1)*15,currentPage*15);
   return <section className="participants-workspace" aria-busy={busy}>
-    <header className="pm-heading"><div><span className="pm-eyebrow">EVENT MANAGEMENT</span><h1>Every participant, connected.</h1><p>A welcoming workshop starts with an organised guest list.</p></div><span className="pm-private">Admin workspace</span></header>
+    <header className="pm-heading"><div><span className="pm-eyebrow">EVENTS</span><h1>Workshop participants</h1><p>Import registrations from Google Forms, manage the participant list and send reminders.</p></div><span className="pm-private">Admins only</span></header>
     <div className="pm-workshop"><span className="pm-workshop-icon" aria-hidden="true">▦</span><label>Choose your workshop <select value={activityId} disabled={busy} onChange={e=>setParams(e.target.value?{activity:e.target.value}:{})}><option value="">Select a workshop to get started</option>{events.map(event=><option key={event.id} value={event.id}>{event.title} — {new Date(event.starts_at).toLocaleDateString('en-MY',{timeZone:'Asia/Kuala_Lumpur'})}</option>)}</select></label></div>
     {!activityId && <div className="pm-empty"><span aria-hidden="true">✧</span><h2>Bring your participant list together</h2><p>Select a workshop above, import your Google Form responses, and keep everyone informed before the event.</p><ol><li>Choose a workshop</li><li>Import registrations</li><li>Review and send reminders</li></ol></div>}
     {error && <p className="pm-alert pm-alert-error" role="alert">{error}</p>}{notice && <p className="pm-alert pm-alert-success" role="status">{notice}</p>}

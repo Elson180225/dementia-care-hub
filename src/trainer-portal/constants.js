@@ -1,20 +1,20 @@
 export const STATUS_LABEL = {
   draft: "Draft",
-  submitted: "Submitted – awaiting Admin review",
+  submitted: "Sent – waiting for RCBC review",
   approved: "Approved",
   published: "Published",
   completed: "Completed",
-  verified: "Verified",
+  verified: "Checked by RCBC",
   archived: "Archived",
-  returned: "Returned for amendment",
+  returned: "Returned – changes needed",
 };
 
 export const COMPLETION_LABEL = {
-  none: "Not yet completed",
+  none: "Not completed yet",
   draft: "Draft",
-  submitted: "Submitted – awaiting verification",
-  verified: "Verified",
-  returned: "Returned for amendment",
+  submitted: "Sent – waiting for RCBC to check",
+  verified: "Checked by RCBC",
+  returned: "Returned – changes needed",
 };
 
 export const ACTIVITY_TYPES = ["Workshop", "Seminar"];
