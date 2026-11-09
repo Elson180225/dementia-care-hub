@@ -409,7 +409,7 @@
 }
 
 .nav-item {
-  position: static;
+  position: relative;
 }
 
 .nav-link {
@@ -471,12 +471,15 @@
 .dropdown-menu {
   position: absolute;
 
-  top: 92px;
-  left: 50%;
+  top: 100%;
+  left: 0;
 
-  transform: translateX(-50%);
+  transform: none;
 
-  width: min(92%, 920px);
+  width: 360px;
+  max-width: calc(100vw - 32px);
+  max-height: calc(100dvh - 160px);
+  overflow-y: auto;
 
   padding: 30px;
 
@@ -495,6 +498,11 @@
     0 18px 45px rgba(69, 32, 109, 0.12);
 
   z-index: 2000;
+}
+
+.nav-item:last-child .dropdown-menu {
+  left: auto;
+  right: 0;
 }
 
 .dropdown-menu h3 {
@@ -900,8 +908,7 @@
 ============================================================ */
 
 .dropdown-menu-visual {
-  width: min(92%, 860px);
-  padding: 22px 26px 26px;
+  padding: 18px;
   border-radius: 0 0 18px 18px;
   background:
     linear-gradient(
@@ -961,7 +968,8 @@
 }
 
 .dropdown-menu-visual .dropdown-grid {
-  gap: 12px 14px;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 8px;
 }
 
 .dropdown-menu-visual .dropdown-visual-link {
@@ -1089,16 +1097,10 @@
 @keyframes visualDropdownIn {
   from {
     opacity: 0;
-    transform:
-      translateX(-50%)
-      translateY(-8px);
   }
 
   to {
     opacity: 1;
-    transform:
-      translateX(-50%)
-      translateY(0);
   }
 }
 
