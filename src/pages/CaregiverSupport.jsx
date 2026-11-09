@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useLanguage } from "../i18n/LanguageContext";
 import caregiverPhoto from "../assets/caregiver-support.jpg";
 import "./CaregiverSupport.css";
@@ -134,11 +134,25 @@ function SectionHeading({ eyebrow, title, description }) {
 }
 
 function CaregiverSupport() {
-  const { hash } = useLocation();
+  const { pathname, search, hash } = useLocation();
+  const navigate = useNavigate();
+  const page = pathname.split("/").filter(Boolean)[1] || "guidance";
+  useEffect(() => {
+    const legacyPath = {
+      "#guidance": "/caregiver-support",
+      "#training": "/caregiver-support/training",
+      "#certificate-verification": "/caregiver-support/certificate-verification",
+      "#support-groups": "/caregiver-support/support-groups",
+      "#volunteer": "/caregiver-support/volunteer",
+    }[hash];
+    if (legacyPath) navigate(legacyPath, { replace: true });
+  }, [hash, navigate]);
   const [activeTopic, setActiveTopic] = useState(guidanceTopics[0].id);
   const [city, setCity] = useState("");
   const [language, setLanguage] = useState("");
-  const [volunteerOnly, setVolunteerOnly] = useState(false);
+  const [volunteerOnly, setVolunteerOnly] = useState(
+    () => new URLSearchParams(search).get("volunteers") === "1",
+  );
   const [selectedVolunteer, setSelectedVolunteer] = useState(0);
   const [supportGroups, setSupportGroups] = useState([]);
   const [groupsLoading, setGroupsLoading] = useState(true);
@@ -146,6 +160,7 @@ function CaregiverSupport() {
   const [reloadGroups, setReloadGroups] = useState(0);
 
   useEffect(() => {
+    if (page !== "support-groups") return undefined;
     const controller = new AbortController();
     setGroupsLoading(true);
     setGroupsError("");
@@ -176,17 +191,7 @@ function CaregiverSupport() {
         if (!controller.signal.aborted) setGroupsLoading(false);
       });
     return () => controller.abort();
-  }, [reloadGroups]);
-
-  // Supports direct links from the header and former caregiver URLs.
-  useEffect(() => {
-    if (!hash) return undefined;
-    const target = decodeURIComponent(hash.slice(1));
-    const frame = window.requestAnimationFrame(() => {
-      document.getElementById(target)?.scrollIntoView({ block: "start" });
-    });
-    return () => window.cancelAnimationFrame(frame);
-  }, [hash]);
+  }, [reloadGroups, page]);
 
   const { t } = useLanguage();
   const cs = t.caregiverSupport;
@@ -232,13 +237,19 @@ function CaregiverSupport() {
 
   const findVolunteerGroups = () => {
     setVolunteerOnly(true);
-    document
-      .getElementById("support-groups")
-      ?.scrollIntoView({ behavior: "smooth", block: "start" });
+    navigate("/caregiver-support/support-groups?volunteers=1");
+  };
+
+  const pageLabels = {
+    training: { title: m.caregiverTraining, intro: cs.trainingIntro },
+    "certificate-verification": { title: m.certVerification, intro: cs.checkCertDesc },
+    "support-groups": { title: m.supportGroups, intro: cs.supportGroupsIntro },
+    volunteer: { title: m.volunteer, intro: cs.volunteerIntro },
   };
 
   return (
     <main className="caregiver-page">
+      {page === "guidance" ? (
       <section className="caregiver-hero" aria-labelledby="caregiver-title">
         <div className="caregiver-container caregiver-hero-grid">
           <div className="caregiver-hero-copy">
@@ -256,9 +267,9 @@ function CaregiverSupport() {
               >
                 {m.caregiverGuidance} <span aria-hidden="true">↗</span>
               </a>
-              <a className="caregiver-hero-text-link" href="#training">
-                {m.caregiverTraining} <span aria-hidden="true">↓</span>
-              </a>
+              <Link className="caregiver-hero-text-link" to="/caregiver-support/training">
+                {m.caregiverTraining} <span aria-hidden="true">↗</span>
+              </Link>
             </div>
           </div>
           <div className="caregiver-hero-image-wrap">
@@ -274,74 +285,17 @@ function CaregiverSupport() {
         </div>
       </section>
 
-      <nav className="caregiver-on-page" aria-label="On this page">
-        <div className="caregiver-container caregiver-on-page-inner">
-          <span>{t.header.overview}</span>
-          <a href="#guidance">{m.caregiverGuidance}</a>
-          <a href="#training">{m.caregiverTraining}</a>
-          <a href="#support-groups">{m.supportGroups}</a>
-          <a href="#volunteer">{m.volunteer}</a>
-        </div>
-      </nav>
-
-      <section className="caregiver-section caregiver-section-intro">
-        <div className="caregiver-container">
-          <div className="caregiver-intro-head">
-            <div>
-              <p className="caregiver-eyebrow">{cs.startingPointKicker || "Find your starting point"}</p>
-              <h2>{cs.startingPointHeading || "What kind of support do you need today?"}</h2>
-            </div>
-            <p>
-              {cs.startingPointSub || "Choose a pathway to learn practical skills, connect with others or give your time to the community."}
-            </p>
+      ) : (
+        <section className="caregiver-subpage-hero">
+          <div className="caregiver-container">
+            <p className="caregiver-eyebrow">{cs.eyebrow}</p>
+            <h1>{pageLabels[page]?.title}</h1>
+            <p>{pageLabels[page]?.intro}</p>
           </div>
-          <div className="caregiver-pathway-grid">
-            {(cs.pathways || [
-              {
-                number: "01",
-                title: "Caregiver Guidance",
-                text: "Everyday advice for caring for someone at home.",
-                target: "guidance",
-              },
-              {
-                number: "02",
-                title: "Caregiver Training",
-                text: "Learn about DCS–Family and the future DCS–Worker pathway.",
-                target: "training",
-              },
-              {
-                number: "03",
-                title: "Support Groups",
-                text: "Find published groups by city, language and volunteer availability.",
-                target: "support-groups",
-              },
-              {
-                number: "04",
-                title: "Volunteer",
-                text: "Discover ways to contribute through organisations.",
-                target: "volunteer",
-              },
-            ]).map((item) => (
-              <a
-                className="caregiver-pathway-card"
-                key={item.number}
-                href={`#${item.target}`}
-              >
-                <span className="caregiver-pathway-top">
-                  <span className="caregiver-number">{item.number}</span>
-                  <span aria-hidden="true">↗</span>
-                </span>
-                <h3>{item.title}</h3>
-                <p>{item.text}</p>
-                <span className="caregiver-card-action">
-                  {cs.exploreSection || "Explore section"} <span aria-hidden="true">→</span>
-                </span>
-              </a>
-            ))}
-          </div>
-        </div>
-      </section>
+        </section>
+      )}
 
+      {page === "guidance" && (
       <section
         className="caregiver-section caregiver-section-soft"
         id="guidance"
@@ -423,6 +377,9 @@ function CaregiverSupport() {
         </div>
       </section>
 
+      )}
+
+      {page === "training" && (
       <section className="caregiver-section" id="training">
         <div className="caregiver-container">
           <SectionHeading
@@ -490,13 +447,23 @@ function CaregiverSupport() {
               DCS–Worker <small>{cs.futureTag || "(future)"}</small>
             </span>
           </div>
-          <div className="caregiver-verification" id="certificate-verification">
+        </div>
+      </section>
+
+      )}
+
+      {page === "certificate-verification" && (
+        <section className="caregiver-section" id="certificate-verification">
+          <div className="caregiver-container">
+            <SectionHeading
+              eyebrow={cs.checkCertEyebrow || m.certVerification}
+              title={cs.checkCertTitle || m.certVerification}
+              description={cs.checkCertDesc}
+            />
+          <div className="caregiver-verification">
             <div className="caregiver-verification-intro">
-              <p className="caregiver-eyebrow">{cs.checkCertEyebrow || "Certificate Verification"}</p>
-              <h3>{cs.checkCertTitle || "Check a DCS certificate"}</h3>
-              <p>
-                {cs.checkCertDesc || "Verify a DCS programme certificate using the participant's name and certificate reference through the existing secure verification page."}
-              </p>
+              <h3>{cs.certVerificationTag || m.certVerification}</h3>
+              <p>{cs.certReadyPrompt}</p>
             </div>
             <div className="caregiver-verification-preview">
               <span className="caregiver-preview-tag">
@@ -519,9 +486,11 @@ function CaregiverSupport() {
           <p className="caregiver-disclaimer">
             {cs.certDisclaimer || "Certificate verification confirms completion of the stated DCS programme only. It is not professional licensing, an employment endorsement, a guarantee of service quality or a recommendation by RCBC."}
           </p>
-        </div>
-      </section>
+          </div>
+        </section>
+      )}
 
+      {page === "support-groups" && (
       <section
         className="caregiver-section caregiver-section-soft"
         id="support-groups"
@@ -687,6 +656,9 @@ function CaregiverSupport() {
         </div>
       </section>
 
+      )}
+
+      {page === "volunteer" && (
       <section className="caregiver-section" id="volunteer">
         <div className="caregiver-container">
           <SectionHeading
@@ -767,6 +739,8 @@ function CaregiverSupport() {
           </div>
         </div>
       </section>
+
+      )}
 
       <section className="caregiver-final-cta">
         <div className="caregiver-container caregiver-final-cta-inner">

@@ -8,7 +8,7 @@ const searchItems = [
     title: "What is Dementia?",
     description:
       "Learn what dementia is and how it can affect memory, thinking and daily life.",
-    path: "/understand-dementia/what-is-dementia",
+    path: "/understand-dementia",
     category: "Understand Dementia",
     keywords: "dementia memory thinking symptoms information",
   },
@@ -16,7 +16,7 @@ const searchItems = [
     title: "Alzheimer's Disease",
     description:
       "Learn about Alzheimer's disease, the most common form of dementia.",
-    path: "/understand-dementia/alzheimers",
+    path: "/understand-dementia#common-types",
     category: "Understand Dementia",
     keywords: "alzheimer alzheimers disease dementia memory",
   },
@@ -24,7 +24,7 @@ const searchItems = [
     title: "Signs & Changes",
     description:
       "Explore common memory, behaviour and daily functioning changes.",
-    path: "/understand-dementia/signs-and-changes",
+    path: "/understand-dementia#early-signs",
     category: "Understand Dementia",
     keywords: "signs changes symptoms memory behaviour behavior",
   },
@@ -32,7 +32,7 @@ const searchItems = [
     title: "When to Seek Medical Advice",
     description:
       "Guidance on when changes may need assessment by a healthcare professional.",
-    path: "/understand-dementia/medical-advice",
+    path: "/understand-dementia#medical-advice",
     category: "Understand Dementia",
     keywords: "doctor medical help assessment healthcare advice",
   },
@@ -40,7 +40,7 @@ const searchItems = [
     title: "Healthy Ageing & Risk Reduction",
     description:
       "Information about healthy ageing and reducing dementia-related risks.",
-    path: "/understand-dementia/healthy-ageing",
+    path: "/understand-dementia#healthy-living",
     category: "Understand Dementia",
     keywords: "healthy ageing aging risk reduction prevention health",
   },

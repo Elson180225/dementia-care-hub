@@ -105,37 +105,6 @@
   padding-left: 20px;
   color: var(--color-neutral-600);
 }
-.understand-contents {
-  position: sticky;
-  top: 0;
-  z-index: 20;
-  background: #fff;
-  border-bottom: 1px solid var(--color-neutral-200);
-  box-shadow: 0 4px 16px #203b3509;
-}
-.understand-contents-inner {
-  display: flex;
-  align-items: center;
-  gap: 24px;
-  min-height: 62px;
-  overflow-x: auto;
-  white-space: nowrap;
-}
-.understand-contents-inner span {
-  font-size: 0.9rem;
-  font-weight: 800;
-  color: var(--color-neutral-600);
-}
-.understand-contents a {
-  color: var(--color-purple-600);
-  text-decoration: none;
-  font-size: 0.9rem;
-  font-weight: 700;
-}
-.understand-contents a:hover {
-  text-decoration: underline;
-  text-underline-offset: 4px;
-}
 .understand-section {
   padding: 76px 0;
   scroll-margin-top: 78px;
@@ -538,12 +507,6 @@
   .understand-key-card {
     padding: 24px;
   }
-  .understand-contents-inner {
-    gap: 18px;
-  }
-  .understand-contents-inner span {
-    display: none;
-  }
   .understand-section {
     padding: 55px 0;
   }
@@ -737,5 +700,30 @@
   }
   .understand-types-grid article:hover {
     transform: none;
+  }
+}
+
+
+/* Leave room for the fixed site header when navigating to a section. */
+.understand-page #overview,
+.understand-page #common-types,
+.understand-page #early-signs,
+.understand-page #why-changes-matter,
+.understand-page #medical-advice,
+.understand-page #healthy-living,
+.understand-page #risk-reduction,
+.understand-page #understand-faq {
+  scroll-margin-top: 158px;
+}
+@media (max-width: 700px) {
+  .understand-page #overview,
+  .understand-page #common-types,
+  .understand-page #early-signs,
+  .understand-page #why-changes-matter,
+  .understand-page #medical-advice,
+  .understand-page #healthy-living,
+  .understand-page #risk-reduction,
+  .understand-page #understand-faq {
+    scroll-margin-top: 132px;
   }
 }

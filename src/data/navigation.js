@@ -6,27 +6,27 @@ export const navigation = [
         children: [
         {
             label: "What is Dementia?",
-            path: "/understand-dementia/what-is-dementia",
+            path: "/understand-dementia#overview",
         },
         {
             label: "Alzheimer's Disease",
-            path: "/understand-dementia/alzheimers",
+            path: "/understand-dementia#common-types",
         },
         {
             label: "Signs & Changes",
-            path: "/understand-dementia/signs-and-changes",
+            path: "/understand-dementia#early-signs",
         },
         {
             label: "Why These Changes Matter",
-            path: "/understand-dementia/why-changes-matter",
+            path: "/understand-dementia#why-changes-matter",
         },
         {
             label: "When to Seek Medical Advice",
-            path: "/understand-dementia/medical-advice",
+            path: "/understand-dementia#medical-advice",
         },
         {
             label: "Healthy Ageing & Risk Reduction",
-            path: "/understand-dementia/healthy-ageing",
+            path: "/understand-dementia#healthy-living",
         },
         ],
     },
@@ -70,23 +70,23 @@ export const navigation = [
         children: [
         {
             label: "Caregiver Guidance",
-            path: "/caregiver-support#guidance",
+            path: "/caregiver-support",
         },
         {
             label: "Caregiver Training",
-            path: "/caregiver-support#training",
+            path: "/caregiver-support/training",
         },
         {
             label: "Certificate Verification",
-            path: "/caregiver-support#certificate-verification",
+            path: "/caregiver-support/certificate-verification",
         },
         {
             label: "Support Groups",
-            path: "/caregiver-support#support-groups",
+            path: "/caregiver-support/support-groups",
         },
         {
             label: "Volunteer",
-            path: "/caregiver-support#volunteer",
+            path: "/caregiver-support/volunteer",
         },
         ],
     },

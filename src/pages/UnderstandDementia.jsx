@@ -1,6 +1,6 @@
 import PublishedRecords from "../components/PublishedRecords";
-import { useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { useEffect, useMemo, useState } from "react";
+import { Link, useLocation } from "react-router-dom";
 import { useLanguage } from "../i18n/LanguageContext";
 import "./UnderstandDementia.css";
 
@@ -238,6 +238,28 @@ const understandingDementiaContent = {
 };
 
 function UnderstandDementia() {
+  const { hash } = useLocation();
+
+  // Scroll after React Router has rendered the target, including links from
+  // other pages and the browser's Back/Forward navigation.
+  useEffect(() => {
+    if (!hash) {
+      window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+      return undefined;
+    }
+    const targetId = decodeURIComponent(hash.slice(1));
+    const frame = window.requestAnimationFrame(() => {
+      const target = document.getElementById(targetId);
+      if (target) {
+        target.scrollIntoView({
+          behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth",
+          block: "start",
+        });
+      }
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, [hash]);
+
   const { t: translationsData } = useLanguage();
   const rawT = translationsData.understandDementia || {};
   const t = {
@@ -305,16 +327,6 @@ function UnderstandDementia() {
           </aside>
         </div>
       </section>
-
-      <nav className="understand-contents" aria-label={t.onPage}>
-        <div className="understand-container understand-contents-inner">
-          <span>{t.onPage}</span>
-          <a href="#overview">{t.overview}</a>
-          <a href="#early-signs">{t.earlySigns}</a>
-          <a href="#healthy-living">{t.healthyActive}</a>
-          <a href="#understand-faq">{t.faq}</a>
-        </div>
-      </nav>
 
       <section className="understand-section" id="overview">
         <div className="understand-container">
@@ -402,7 +414,7 @@ function UnderstandDementia() {
               </div>
             ))}
           </div>
-          <div className="understand-assessment-card">
+          <div className="understand-assessment-card" id="why-changes-matter">
             <div className="understand-assessment-intro">
               <p className="understand-eyebrow">{t.selfAssessmentEyebrow}</p>
               <h3>{t.selfAssessmentTitle}</h3>
@@ -521,6 +533,23 @@ function UnderstandDementia() {
               </div>
             )}
             <p className="understand-disclaimer">{t.disclaimer}</p>
+          </div>
+        </div>
+      </section>
+
+      <section className="understand-section understand-advice-section" id="medical-advice">
+        <div className="understand-container">
+          <div className="understand-section-heading">
+            <p className="understand-eyebrow">{t.selfAssessmentEyebrow}</p>
+            <h2>{t.considerTitle}</h2>
+            <p>{t.considerText}</p>
+          </div>
+          <div className="understand-callout">
+            <div>
+              <h3>{t.findHelp}</h3>
+              <p>{t.disclaimer}</p>
+            </div>
+            <Link to="/find-help/assessment-healthcare">{t.healthcareLink} →</Link>
           </div>
         </div>
       </section>

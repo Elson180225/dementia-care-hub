@@ -13,27 +13,27 @@ function getMenuItems(m) {
       children: [
         {
           label: m.whatIsDementia,
-          path: "/understand-dementia/what-is-dementia",
+          path: "/understand-dementia#overview",
         },
         {
           label: m.alzheimers,
-          path: "/understand-dementia/alzheimers",
+          path: "/understand-dementia#common-types",
         },
         {
           label: m.signsChanges,
-          path: "/understand-dementia/signs-and-changes",
+          path: "/understand-dementia#early-signs",
         },
         {
           label: m.whyChangesMatter,
-          path: "/understand-dementia/why-changes-matter",
+          path: "/understand-dementia#why-changes-matter",
         },
         {
           label: m.medicalAdvice,
-          path: "/understand-dementia/medical-advice",
+          path: "/understand-dementia#medical-advice",
         },
         {
           label: m.healthyAgeing,
-          path: "/understand-dementia/healthy-ageing",
+          path: "/understand-dementia#healthy-living",
         },
       ],
     },
@@ -73,23 +73,23 @@ function getMenuItems(m) {
       children: [
         {
           label: m.caregiverGuidance,
-          path: "/caregiver-support#guidance",
+          path: "/caregiver-support",
         },
         {
           label: m.caregiverTraining,
-          path: "/caregiver-support#training",
+          path: "/caregiver-support/training",
         },
         {
           label: m.certVerification,
-          path: "/caregiver-support#certificate-verification",
+          path: "/caregiver-support/certificate-verification",
         },
         {
           label: m.supportGroups,
-          path: "/caregiver-support#support-groups",
+          path: "/caregiver-support/support-groups",
         },
         {
           label: m.volunteer,
-          path: "/caregiver-support#volunteer",
+          path: "/caregiver-support/volunteer",
         },
       ],
     },
@@ -207,7 +207,7 @@ function HelpMenuIcon({ path }) {
   }
 
   // Understanding Dementia
-  if (path.includes("what-is-dementia")) {
+  if (path === "/understand-dementia") {
     return (
       <svg {...common}>
         <circle cx="12" cy="12" r="9" />
@@ -263,7 +263,7 @@ function HelpMenuIcon({ path }) {
   }
 
   // Caregiver Support
-  if (path.includes("#guidance")) {
+  if (path === "/caregiver-support") {
     return (
       <svg {...common}>
         <path d="M3 5.5C5.5 4 8.5 4 12 6c3.5-2 6.5-2 9-.5V19c-2.5-1.5-5.5-1.5-9 .5-3.5-2-6.5-2-9-.5V5.5Z" />
@@ -272,7 +272,7 @@ function HelpMenuIcon({ path }) {
     );
   }
 
-  if (path.includes("#training")) {
+  if (path.includes("/training")) {
     return (
       <svg {...common}>
         <path d="M2.5 9 12 4.5 21.5 9 12 13.5 2.5 9Z" />
@@ -291,7 +291,7 @@ function HelpMenuIcon({ path }) {
     );
   }
 
-  if (path.includes("#volunteer")) {
+  if (path.includes("/volunteer")) {
     return (
       <svg {...common}>
         <path d="M12 9.5s-3.5-2.2-3.5-4.6A2 2 0 0 1 12 3.8a2 2 0 0 1 3.5 1.1c0 2.4-3.5 4.6-3.5 4.6Z" />
@@ -636,7 +636,7 @@ function Header() {
                 <details key={item.label}>
                   <summary>{item.label}</summary>
                   <div className="mobile-submenu">
-                    {!item.menuOnly && (
+                    {!item.menuOnly && !["/understand-dementia", "/caregiver-support"].includes(item.path) && (
                       <Link to={item.path} onClick={closeMobileMenu}>
                         {t.header.overview}
                       </Link>

@@ -124,38 +124,6 @@
   color: var(--color-gold-700);
   margin-right: 7px;
 }
-.caregiver-on-page {
-  position: sticky;
-  top: 0;
-  z-index: 10;
-  background: #fff;
-  box-shadow: 0 3px 18px #1c47351a;
-  border-bottom: 1px solid var(--color-neutral-200);
-}
-.caregiver-on-page-inner {
-  display: flex;
-  align-items: center;
-  gap: 33px;
-  min-height: 62px;
-  overflow-x: auto;
-  white-space: nowrap;
-}
-.caregiver-on-page-inner > span {
-  color: var(--color-neutral-600);
-  font-size: 0.9rem;
-  font-weight: 900;
-  letter-spacing: 0.12em;
-}
-.caregiver-on-page a {
-  color: var(--color-purple-600);
-  font-weight: 750;
-  text-decoration: none;
-  font-size: 0.94rem;
-}
-.caregiver-on-page a:hover {
-  text-decoration: underline;
-  text-underline-offset: 5px;
-}
 .caregiver-section {
   padding: 90px 0;
   scroll-margin-top: 78px;
@@ -977,12 +945,6 @@
     left: 12px;
     bottom: -27px;
   }
-  .caregiver-on-page-inner {
-    gap: 21px;
-  }
-  .caregiver-on-page-inner > span {
-    display: none;
-  }
   .caregiver-section {
     padding: 60px 0;
   }
@@ -1101,4 +1063,27 @@
   .caregiver-filter-grid {
     grid-template-columns: 1fr;
   }
+}
+
+/* Topic pages use dedicated routes; Guidance remains the section's main page. */
+/* Match the purple hero used by the main Caregiver Support page. */
+.caregiver-subpage-hero {
+  padding: 76px 0 72px;
+  background: linear-gradient(135deg, var(--color-purple-700) 0%, var(--color-purple-600) 70%, var(--color-purple-600) 100%);
+  color: #fff;
+}
+.caregiver-subpage-hero .caregiver-eyebrow {
+  color: var(--color-gold-300);
+}
+.caregiver-subpage-hero h1 {
+  max-width: 800px;
+  font-size: clamp(2.1rem, 5vw, 3.6rem);
+  line-height: 1.12;
+  margin: 12px 0 18px;
+}
+.caregiver-subpage-hero p:last-child {
+  max-width: 760px;
+  margin-bottom: 0;
+  color: var(--color-neutral-100);
+  line-height: 1.7;
 }
