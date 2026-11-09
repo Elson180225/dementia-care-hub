@@ -1,3 +1,4 @@
+import FormFeedback from "../components/FormFeedback";
 import AccountForm from "../trainer-portal/AccountForm";
 import { Fragment } from "react";
 import { NavLink, Outlet } from "react-router-dom";
@@ -14,7 +15,7 @@ const groups = [
 ];
 
 export default function AdminLayout() {
-  const { state, dispatch, loading } = useTrainer();
+  const { state, dispatch, loading, error } = useTrainer();
   if (loading) return <p role="status">Loading account...</p>;
 
   if (!state.adminSession) {
@@ -49,6 +50,7 @@ export default function AdminLayout() {
             </Fragment>
           ))}
         </nav>
+        <FormFeedback>{error}</FormFeedback>
         <Outlet />
       </div>
     </main>

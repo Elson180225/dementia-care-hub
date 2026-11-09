@@ -1,0 +1,9 @@
+.form-feedback { display: block; margin: 10px 0 16px; padding: 12px 14px; border: 1px solid var(--color-purple-200, #ded2ee); border-left: 4px solid var(--color-purple-600, #59308d); border-radius: 8px; background: var(--color-purple-100, #f5f0fa); color: var(--color-purple-800, #38204f); font-size: 14px; font-weight: 400; line-height: 1.6; overflow-wrap: anywhere; }
+.form-feedback-error { border-color: #e6c1c1; border-left-color: #a12121; background: #fff5f5; color: #8c2420; }
+.form-feedback-warning { border-color: #e6d39b; border-left-color: #a66b00; background: #fff5dc; color: #634500; }
+.form-feedback-success { border-left-color: #33734b; background: #f1f8f3; color: #245537; }
+.tp-field .form-feedback { display: block; margin: 4px 0 0; }
+.tp-field input[aria-invalid="true"], .tp-field select[aria-invalid="true"], .tp-field textarea[aria-invalid="true"] { border-color: #a12121; }
+.tp-password-row:has(input[aria-invalid="true"]) { border-color: #a12121; }
+
+:is(.tp-page, .contact-page) :is(.tp-error, .contact-error, .pm-alert-error) { padding: 12px 14px; border: 1px solid #e6c1c1; border-left: 4px solid #a12121; border-radius: 8px; background: #fff5f5; color: #8c2420; font-size: 14px; font-weight: 400; line-height: 1.6; overflow-wrap: anywhere; }

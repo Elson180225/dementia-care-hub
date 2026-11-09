@@ -1,28 +1,29 @@
 # Contact page release checklist
 
-The CONTACT draft provides channel roles but no confirmed contact values. The implementation uses Dementia Care Hub pending confirmation of Hub versus Connect.
+The public page uses Dementia Care Connect. All project and organiser contact options remain visible. Options without an approved destination show a confirmation notice and direct visitors to the enquiry form. They are not clickable until configured.
 
-- Confirm the public name and use it consistently across the website.
-- Populate `src/data/contact.js` with approved project email, Facebook Page, Messenger, WhatsApp Community invite and RCBC contacts. Only populate the postal address after publication approval. Verify each link manually with the project administrators, including community invite access.
-- Approve the short privacy notice in `src/pages/Contact.jsx`, including administrator access, retention and deletion arrangements.
-- Assign an RCBC/project administrator to the enquiry inbox. This implementation routes to a private administrative file inbox, not email. Do not release until administrators have an agreed process for reviewing it.
+- Populate `src/data/contact.js` with approved project email, Facebook Page, Messenger, WhatsApp Community invite and RCBC contacts. Verify each destination with RCBC. Publish a postal address only after approval.
+- Ask RCBC to approve public wording, translated notices and privacy/retention arrangements.
+- Run `npm run db:migrate` before starting the updated API.
+- Set `ENQUIRY_ADMIN_EMAIL` to the designated RCBC recipient. Configure `BREVO_API_KEY`, verified `BREVO_SENDER_EMAIL`, `BREVO_SENDER_NAME` and `APP_BASE_URL`.
+- Run `npm run dev` and `npm run server`. Set `PUBLIC_ORIGIN` to the website origin. For production, reverse-proxy `/api` to the API on the same HTTPS origin.
 
-## Running the administrative workflow
+## Enquiry workflow
 
-Run `npm run dev` for the website and `npm run server` for the API. Set `ENQUIRY_INBOX_DIR` to a persistent, private directory outside the public website and repository before starting the server. Without it, submissions fail safely and retain the user's input. For example, in PowerShell:
+Accepted enquiries are saved in PostgreSQL and appear in Admin > Content & records > Enquiries. The notification worker checks queued enquiries every minute and emails the designated RCBC recipient when configured. A form success confirms storage, not email delivery. Administrators can inspect notification status even when delivery fails.
 
-```powershell
-$env:ENQUIRY_INBOX_DIR = 'C:\ProgramData\DementiaCareHub\enquiries'
-$env:PUBLIC_ORIGIN = 'http://localhost:5173'
-npm run server
-```
+Choose Record follow-up, reply using the visitor email link, record the action/outcome, and select In progress or Closed. Follow-up notes, status history and timestamps demonstrate handling and closure. Saving a note does not automatically send a reply to the visitor.
 
-Each accepted enquiry creates a JSON record with its name, reply email, enquiry type, message and timestamp. Administrators review these records through organisation-controlled filesystem access. Never serve this directory publicly. Restrict Windows folder ACLs to authorised administrators and the API service account; POSIX file modes alone do not configure Windows permissions. Agree a retention policy and delete records according to it.
-
-For production, run one API process and reverse-proxy `/api/enquiries` to port 3001 on the same HTTPS origin as the site. Set `PUBLIC_ORIGIN` to that exact origin and use persistent backed-up inbox storage. Multiple instances require shared transactional storage and shared rate limiting. The API uses the socket IP, not untrusted forwarded headers; behind a proxy the limit is shared across visitors. Configure additional per-client rate limiting at the trusted proxy for production traffic.
-
-Server and client share validation. The API limits body size, verifies request origin, checks a hidden spam field and minimum form-fill time, and limits requests to ten per ten minutes per socket IP. Requests are serialized, and identical enquiry contents are deduplicated for 24 hours, including retries after a lost response. These are basic spam controls; monitor abuse and add a challenge service if necessary.
+Confirmed failed notifications can be retried by an admin. Uncertain outcomes require checking Brevo logs before manual recovery to avoid duplicate messages. Email delivery is not enabled until the recipient and provider settings are configured. The optional file inbox in the standalone handler is not the running API's production workflow.
 
 ## Acceptance
 
-Run `npm test`, `npm run build` and `npm run lint`. Before release, check a real enquiry lands in the administrator's configured inbox, test unavailable storage and retry, verify mobile layout and keyboard navigation, and confirm all published official links with their owners. Event registrations remain on Education & Events; external services link to Find Help & Support.
+Run `npm test`, `npm run build` and `npm run lint`. Use an authorized test recipient to demonstrate one saved enquiry, its email notification, recorded follow-up and closure. Check mobile layout, keyboard navigation and all supported languages. Verify unavailable options remain visible without empty links. Confirm all official destinations with their owners.
+
+See [About and Contact workflow](about-contact-workflow.md) for content approval, setup and acceptance details.
+
+## Branded notification email
+
+Enquiry notifications include the RCBC Alzheimer?s Care logo, Rotary emblem, enquiry details, the original visitor message and a link to the admin portal. HTML and plain-text versions are provided. Visitor wording is preserved exactly; only the surrounding template copy is edited.
+
+The logo files are served from `/email/` in the public website. In production, set APP_BASE_URL to the public HTTPS website origin. For local development, optionally set EMAIL_ASSET_BASE_URL to a public HTTPS origin where the same `/email/` files have been deployed. Gmail cannot retrieve images from localhost. Recipients may need to enable image display. This changes the email body, not the sender profile picture. Restart the API after updating the template or environment. Existing sent emails are unchanged.

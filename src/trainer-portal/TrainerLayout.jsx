@@ -1,3 +1,4 @@
+import FormFeedback from "../components/FormFeedback";
 import AccountForm from "./AccountForm";
 import { NavLink, Outlet } from "react-router-dom";
 import { useTrainer } from "./TrainerContext";
@@ -12,7 +13,7 @@ const links = [
 ];
 
 export default function TrainerLayout() {
-  const { state, dispatch, loading } = useTrainer();
+  const { state, dispatch, loading, error } = useTrainer();
   if (loading) return <p role="status">Loading account...</p>;
 
   if (!state.session) {
@@ -33,6 +34,7 @@ export default function TrainerLayout() {
             <NavLink key={to} to={to} end={end}>{label}</NavLink>
           ))}
         </nav>
+        <FormFeedback>{error}</FormFeedback>
         <Outlet />
       </div>
     </main>

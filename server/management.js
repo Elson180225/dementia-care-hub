@@ -65,6 +65,20 @@ export async function managementHandler(req,res,url,send) {
   },user.id);
   return send(res,200,{ok:true});
  }
+ if (url.pathname === '/api/admin/enquiry-notification-retry' && req.method === 'POST') {
+  const data = await body(req);
+  await transaction(async db => {
+   const result = await db.query("UPDATE enquiries SET notification_status='pending',notification_error=NULL WHERE id=$1 AND notification_status='failed' RETURNING id",[data.id]);
+   if (!result.rowCount) fail('Only confirmed failed deliveries can be retried. Check Brevo logs for uncertain deliveries.');
+   await decision(db,user,'enquiries',data.id,'notification retry','Admin requested another email delivery attempt');
+  },user.id);
+  return send(res,200,{ok:true});
+ }
+ if (url.pathname === '/api/admin/enquiry-history' && req.method === 'GET') {
+  const id = url.searchParams.get('id');
+  if (!/^[a-f0-9-]{36}$/i.test(id || '')) fail('Invalid enquiry reference');
+  return send(res,200,(await pool.query("SELECT changed_at,decision,admin_comment,from_status,to_status FROM audit_log WHERE entity='enquiries' AND record_id=$1 AND operation='DECISION' ORDER BY changed_at DESC",[id])).rows);
+ }
  const kind=url.pathname.split('/')[4];const config=recordTypes[kind];
  if(!config || url.pathname!==`/api/admin/records/${kind}`) fail('Not found',404);
  const recordsPool=kind==='subscribers'?subscriberPool:pool;
@@ -110,11 +124,18 @@ export async function managementHandler(req,res,url,send) {
    if(values.review_status==='current' && !values.last_reviewed_at) fail('A current record needs a last-reviewed date');
    if(values.publication_status==='published') {
     if(!values.source || !values.last_reviewed_at) fail('Verify source and last-reviewed date before publishing');
+    if(kind==='content_pages' && values.slug?.startsWith('about-') && (values.review_status!=='current' || !values.reviewer)) fail('Record the RCBC approver and mark the text as reviewed before publishing');
     if(kind==='learning_resources' && (!values.copyright_permission || !values.url)) fail('Permission evidence and resource URL are required before publication');
    }
    if(kind!=='faqs') values.status=values.review_status==='archived'?'archived':values.publication_status==='published'?'published':kind==='organisations'?'verified':'approved';
   }
   if(kind==='subscribers' && (!values.consent_at || !values.name || !values.city || !values.state)) fail('Name, locality and opt-in consent evidence are required');
+  if (kind === 'enquiries') {
+   if (values.status !== 'new' && !values.admin_comment?.trim()) fail('Add a follow-up note before marking an enquiry in progress or closed');
+   if (values.status === 'follow-up' && old.status !== 'follow-up') values.followed_up_at = new Date().toISOString();
+   if (values.status === 'closed' && old.status !== 'closed') values.closed_at = new Date().toISOString();
+   if (values.status !== 'closed') values.closed_at = null;
+  }
   const names=Object.keys(values);const params=[id,...names.map(k=>k==='body'?JSON.stringify(values[k]):values[k])];
   const sql=old?`UPDATE ${config.table} SET ${names.map((n,i)=>`${n}=$${i+2}`).join(',')} WHERE id=$1`:`INSERT INTO ${config.table}(id,${names.join(',')}) VALUES(${params.map((_,i)=>'$'+(i+1)).join(',')})`;
   await db.query(sql,params);
