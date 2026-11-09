@@ -1,0 +1,11 @@
+﻿.field-label-row { display:flex; align-items:center; gap:6px; flex-wrap:wrap; }
+.required-marker { color:#a12121; font-weight:700; }
+.field-info { position:relative; display:inline-flex; vertical-align:middle; margin-left:6px; font-weight:400; }
+.field-info-button { display:inline-flex; align-items:center; justify-content:center; flex-shrink:0; width:28px; height:28px; min-width:28px; min-height:28px; padding:0; border:0; border-radius:50%; background:transparent; color:var(--color-purple-700,#59308d); cursor:help; }
+.field-info-glyph { display:inline-flex; align-items:center; justify-content:center; width:16px; height:16px; border:1px solid var(--color-purple-300,#c8afd9); border-radius:50%; background:var(--color-purple-100,#f5f0fa); font:700 11px/1 Georgia,serif; pointer-events:none; }
+.account-field-label { display:flex; align-items:center; gap:4px; flex-wrap:wrap; }
+.account-field-label .field-info { margin-left:0; }
+
+.field-info-button:focus-visible { outline:3px solid var(--color-gold-600,#a66b00); outline-offset:2px; }
+.field-info-tooltip { position:absolute; z-index:30; top:calc(100% + 6px); left:0; width:240px; max-width:65vw; padding:12px 14px; border:1px solid var(--color-purple-300,#c8afd9); border-radius:10px; background:#fff; color:var(--color-purple-800,#38204f); box-shadow:0 6px 20px #38204f22; font:400 13px/1.6 Arial,sans-serif; text-align:left; overflow-wrap:anywhere; }
+@media(max-width:640px) { .field-info-tooltip { left:auto; right:0; width:210px; } }

@@ -1,7 +1,7 @@
-import PublishedRecords from "../components/PublishedRecords";
+import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { useLanguage } from "../i18n/LanguageContext";
 import {
-  aboutNav,
   overview,
   mission,
   journey,
@@ -13,11 +13,11 @@ import {
 } from "../data/about";
 import "./AboutProject.css";
 
-function Section({ id, title, children }) {
+function Section({ id, title, children, records = [] }) {
   return (
     <section id={id} className="about-section" aria-labelledby={`${id}-title`}>
       <h2 id={`${id}-title`}>{title}</h2>
-      {children}
+      {records.length ? records.map(record => <article key={record.id} className="about-approved"><h3>{record.title}</h3><p style={{ whiteSpace: "pre-line" }}>{record.body?.text}</p></article>) : children}
     </section>
   );
 }
@@ -38,12 +38,21 @@ function ContributionList({ items }) {
 }
 
 export default function AboutProject() {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
+  const [records, setRecords] = useState([]);
+  useEffect(() => {
+    const controller = new AbortController();
+    fetch('/api/public/content_pages', { signal: controller.signal }).then(r => r.ok ? r.json() : []).then(data => setRecords(Array.isArray(data) ? data : [])).catch(() => {});
+    return () => controller.abort();
+  }, []);
+  const languageName = { en: 'English', ms: 'Bahasa Malaysia', zh: 'Chinese' }[language];
+  const approved = id => records.filter(r => r.slug === `about-${id}` && r.language === languageName);
+  const hasThanks = acknowledgements.some(group => group.items.length) || approved('acknowledgements').length > 0;
+  const navigation = [{id:'overview',label:t.aboutProject.projectOverview},{id:'journey',label:t.aboutProject.ourJourney},{id:'organiser',label:t.aboutProject.peoplePartners},...(hasThanks ? [{id:'acknowledgements',label:t.aboutProject.acknowledgements}] : [])];
   const ap = t.aboutProject;
 
   return (
     <main className="about-page">
-      <PublishedRecords kind="content_pages" slug="about" title="Project updates"/>
       <header className="about-hero">
         <div className="about-container">
           <p className="about-kicker">{ap.kicker}</p>
@@ -56,28 +65,12 @@ export default function AboutProject() {
         <nav className="about-toc" aria-label="On this page">
           <p className="about-toc-title">{ap.onPage}</p>
           <ol>
-            {aboutNav.map((item) => {
-              const labelMap = {
-                overview: ap.projectOverview,
-                mission: ap.ourMission,
-                journey: ap.ourJourney,
-                organiser: ap.organiser,
-                partner: ap.strategicPartner,
-                advisors: ap.projectAdvisors,
-                supported: ap.supportedBy,
-                acknowledgements: ap.acknowledgements,
-              };
-              return (
-                <li key={item.id}>
-                  <a href={`#${item.id}`}>{labelMap[item.id] || item.label}</a>
-                </li>
-              );
-            })}
+            {navigation.map(item => <li key={item.id}><a href={`#${item.id}`}>{item.label}</a></li>)}
           </ol>
         </nav>
 
         <div className="about-content">
-          <Section id="overview" title={ap.projectOverview || "Project Overview"}>
+          <Section records={approved("overview")} id="overview" title={ap.projectOverview || "Project Overview"}>
             <p>{ap.overviewIntro || overview.intro}</p>
             <p>{ap.overviewPlatform || overview.platformText}</p>
             <div className="about-two-col">
@@ -100,7 +93,7 @@ export default function AboutProject() {
             </div>
           </Section>
 
-          <Section id="mission" title={ap.ourMission || "Our Mission & Vision"}>
+          <Section records={approved("mission")} id="mission" title={ap.ourMission || "Our Mission & Vision"}>
             <div className="about-two-col">
               <div className="about-card">
                 <h3>{ap.mission || "Mission"}</h3>
@@ -113,7 +106,7 @@ export default function AboutProject() {
             </div>
           </Section>
 
-          <Section id="journey" title={ap.ourJourney || "Our Journey"}>
+          <Section records={approved("journey")} id="journey" title={ap.ourJourney || "Our Journey"}>
             <ol className="about-journey">
               {(ap.journeySteps || journey).map((step) => (
                 <li
@@ -132,7 +125,8 @@ export default function AboutProject() {
             </ol>
           </Section>
 
-          <Section id="organiser" title={ap.organiser || "Organiser"}>
+          <div className="about-partners"><h2>{ap.peoplePartners}</h2>
+          <Section records={approved("organiser")} id="organiser" title={ap.organiser || "Organiser"}>
             <h3>{organiser.name}</h3>
             <p>{ap.organiserText || organiser.text}</p>
             {organiser.link && (
@@ -144,12 +138,12 @@ export default function AboutProject() {
             )}
           </Section>
 
-          <Section id="partner" title={ap.strategicPartner || "Strategic Partner"}>
+          <Section records={approved("partner")} id="partner" title={ap.strategicPartner || "Strategic Partner"}>
             <h3>{strategicPartner.name}</h3>
             <p>{ap.partnerText || strategicPartner.text}</p>
           </Section>
 
-          <Section id="advisors" title={ap.projectAdvisors || "Project Advisors"}>
+          <Section records={approved("advisors")} id="advisors" title={ap.projectAdvisors || "Project Advisors"}>
             <p>{ap.advisorsRole || advisors.role}</p>
             <ul className="about-people">
               {advisors.people.map((name) => (
@@ -161,7 +155,8 @@ export default function AboutProject() {
             </ul>
           </Section>
 
-          <Section id="supported" title={ap.supportedBy || "Supported By"}>
+          </div>
+          {(supportedBy.items.length > 0 || approved("supported").length > 0) && <Section records={approved("supported")} id="supported" title={ap.supportedBy || "Supported By"}>
             <p>{ap.supportedText || supportedBy.text}</p>
             {supportedBy.items.length > 0 ? (
               <ContributionList items={supportedBy.items} />
@@ -170,13 +165,13 @@ export default function AboutProject() {
                 {ap.supportedPending || "Supporting organisations will be listed here once confirmed by RCBC."}
               </p>
             )}
-          </Section>
+          </Section>}
 
-          <Section id="acknowledgements" title={ap.acknowledgements || "Acknowledgements"}>
+          {hasThanks && <Section records={approved("acknowledgements")} id="acknowledgements" title={ap.acknowledgements || "Acknowledgements"}>
             <p>
               {ap.ackIntro || "We thank everyone who has contributed to the project. Each acknowledgement shows who contributed, how, and in which phase or programme."}
             </p>
-            {acknowledgements.map((group) => (
+            {acknowledgements.filter(group => group.items.length).map((group) => (
               <div key={group.title} className="about-ack">
                 <h3>{group.title}</h3>
                 <p>{group.text}</p>
@@ -189,7 +184,9 @@ export default function AboutProject() {
                 )}
               </div>
             ))}
-          </Section>
+          </Section>}
+          {records.filter(r => r.slug === 'about' && r.language === languageName).map(r => <article className="about-section" key={r.id}><h2>{r.title}</h2><p style={{whiteSpace:'pre-line'}}>{r.body?.text}</p></article>)}
+          <nav className="about-next" aria-label={ap.nextSteps}><h2>{ap.nextSteps}</h2><Link to="/find-help">{ap.findSupport}</Link><Link to="/learn-events/events">{ap.exploreEvents}</Link><Link to="/contact">{ap.contactUs}</Link></nav>
         </div>
       </div>
     </main>

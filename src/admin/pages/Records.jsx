@@ -4,6 +4,8 @@ import { Field, describe } from "../../trainer-portal/ui";
 import { recordTypes } from "../../../shared/admin-records.js";
 import SubscriberAudience from '../SubscriberAudience';
 
+const ABOUT_SECTIONS = { overview: 'About the project', mission: 'What we aim to do', journey: 'Our journey', organiser: 'Organiser', partner: 'Partner roles', advisors: 'Advisors', supported: 'Supporting organisations', acknowledgements: 'Our thanks' };
+const enquiryStatus = value => ({ new: 'New', 'follow-up': 'In progress', closed: 'Closed' }[value] || value);
 const KINDS = Object.keys(recordTypes);
 const ZONE = { timeZone: "Asia/Kuala_Lumpur" };
 
@@ -66,6 +68,8 @@ export default function Records() {
   const [editing, setEditing] = useState(null); // { id?, values }
   const [errors, setErrors] = useState({});
   const [notice, setNotice] = useState("");
+  const [history, setHistory] = useState([]);
+  const [historyError, setHistoryError] = useState("");
   const [busy, setBusy] = useState(false);
 
   const load = useCallback(async () => {
@@ -82,6 +86,14 @@ export default function Records() {
   useEffect(() => {
     load();
   }, [load]);
+
+  useEffect(() => {
+    if (kind !== 'enquiries' || !editing?.id) return;
+    let live = true;
+    queueMicrotask(() => { if (live) { setHistory([]); setHistoryError(''); } });
+    api('/api/admin/enquiry-history?id=' + encodeURIComponent(editing.id)).then(rows => { if (live) setHistory(rows); }).catch(() => { if (live) setHistoryError('Follow-up history could not be loaded.'); });
+    return () => { live = false; };
+  }, [kind, editing?.id]);
 
   async function send(data, done) {
     setBusy(true);
@@ -103,6 +115,9 @@ export default function Records() {
     const found = validate(config, editing.values);
     setErrors(found);
     if (Object.keys(found).length) return;
+    if (kind === 'enquiries' && editing.values.status !== 'new' && !editing.values.admin_comment?.trim()) {
+      setErrors({ admin_comment: 'Describe the follow-up or outcome before saving.' }); return;
+    }
     const ok = await send({ id: editing.id, values: toPayload(config, editing.values) }, "Record saved.");
     if (ok) setEditing(null);
   }
@@ -123,6 +138,8 @@ export default function Records() {
     return (
       <>
         <h1>{editing.id ? `Edit ${config.label.toLowerCase()} record` : `New ${config.label.toLowerCase()} record`}</h1>
+        {kind === 'enquiries' && (() => { const row = rows.find(r => r.id === editing.id); return row && <article className="tp-card"><h2>Visitor message</h2><p>{row.name} · <a href={`mailto:${row.email}`}>{row.email}</a></p><p>{row.type}</p><p style={{whiteSpace:'pre-wrap'}}>{row.message}</p><p>Received: {fmt(row.received_at)}</p></article>; })()}
+        {kind === 'content_pages' && <p>RCBC supplies and approves About text. Save as unpublished until approved, then record the approver, source and review date before publishing.</p>}
         <form className="tp-card" noValidate onSubmit={(e) => { e.preventDefault(); save(); }}>
           {config.fields.map(([name, label, type, required]) => {
             const id = `rec-${name}`;
@@ -139,23 +156,25 @@ export default function Records() {
                 </label>
               );
             return (
-              <Field key={name} id={id} label={text} error={errors[name]}>
+              <Field key={name} id={id} label={text} required={required} error={errors[name]}>
                 {Array.isArray(type) ? (
-                  <select {...common}>{type.map((o) => <option key={o}>{o}</option>)}</select>
+                  <select {...common}>{type.map((o) => <option key={o} value={o}>{kind === "enquiries" && name === "status" ? enquiryStatus(o) : o}</option>)}</select>
                 ) : type === "textarea" || type === "array" ? (
                   <textarea rows={name === "body" ? 8 : 3} {...common} />
                 ) : (
-                  <input type={type} {...common} />
+                  <><input type={type} {...common} list={kind === 'content_pages' && name === 'slug' ? 'about-sections' : undefined} />{kind === 'content_pages' && name === 'slug' && <datalist id="about-sections">{Object.entries(ABOUT_SECTIONS).map(([id,title]) => <option key={id} value={`about-${id}`}>{title}</option>)}</datalist>}</>
                 )}
               </Field>
             );
           })}
+          {kind === 'content_pages' && <aside className="tp-card"><h2>Text preview</h2><h3>{v.title || 'Page title'}</h3><p style={{whiteSpace:'pre-wrap'}}>{v.body || 'Your text will appear here.'}</p></aside>}
           <div className="tp-actions">
             <button className="tp-btn" disabled={busy}>{busy ? "Saving..." : "Save"}</button>
             <button type="button" className="tp-btn tp-btn-ghost" onClick={() => setEditing(null)}>Cancel</button>
           </div>
           <p role="status" aria-live="polite">{notice}</p>
         </form>
+        {kind === 'enquiries' && <section className="tp-card"><h2>Follow-up history</h2>{historyError && <p role="alert">{historyError}</p>}{history.map((entry,index) => <article key={index}><p>{new Date(entry.changed_at).toLocaleString('en-MY', ZONE)} · {enquiryStatus(entry.to_status) || entry.decision}</p><p style={{whiteSpace:'pre-wrap'}}>{entry.admin_comment}</p></article>)}{!history.length && !historyError && <p>No recorded follow-up yet.</p>}</section>}
       </>
     );
   }
@@ -183,6 +202,7 @@ export default function Records() {
           </button>
         )}
       </div>
+      {kind === 'content_pages' && <section className="tp-card"><h3>About the Project</h3><p>Add approved text to each section as it becomes available. Published entries replace the matching section in the selected language. Use separate entries for partners and contributors.</p><div className="tp-actions">{Object.entries(ABOUT_SECTIONS).map(([id,title]) => <button className="tp-btn tp-btn-ghost" key={id} onClick={() => { setErrors({}); setEditing({values:{...toForm(config),slug:`about-${id}`,title}}); }}>Add {title.toLowerCase()}</button>)}</div></section>}
       {notice && <p className="tp-note" role="status">{notice}</p>}
       {loading && <p role="status">Loading records…</p>}
 
@@ -191,7 +211,7 @@ export default function Records() {
           <li key={r.id} className="tp-card">
             <h2>{r[config.title] || "(untitled)"}</h2>
             {r.category && <p className="tp-dev">{r.category}</p>}
-            {kind === "enquiries" && <p>{r.email} · {r.type} — {r.message}</p>}
+            {kind === "enquiries" && <><p><a href={`mailto:${r.email}`}>{r.email}</a> · {r.type}</p><p style={{whiteSpace:'pre-wrap'}}>{r.message}</p><p>Received: {fmt(r.received_at)}{r.followed_up_at && ` · Followed up: ${fmt(r.followed_up_at)}`}{r.closed_at && ` · Closed: ${fmt(r.closed_at)}`}</p><p>Email notification: {r.notification_status === 'sent' ? 'Sent to RCBC' : r.notification_status || 'Pending'}</p>{r.notification_error && <p>{r.notification_error}</p>}{r.admin_comment && <p>Latest note: {r.admin_comment}</p>}{r.notification_status === 'failed' && <button className="tp-btn tp-btn-ghost" disabled={busy} onClick={async () => { setBusy(true); try { await api('/api/admin/enquiry-notification-retry',{id:r.id}); setNotice('Email queued for another delivery attempt.'); await load(); } catch(e) { setNotice(e.message); } finally { setBusy(false); } }}>Retry notification</button>}</>}
             {reviewed ? (
               <>
                 <p>Source: {r.source || <em>none yet</em>} · Last reviewed: {fmt(r.last_reviewed_at)}</p>
@@ -204,12 +224,12 @@ export default function Records() {
                 </p>
               </>
             ) : (
-              r.status && <p><span className="tp-chip tp-chip-grey">{r.status}</span></p>
+              r.status && <p><span className="tp-chip tp-chip-grey">{kind === "enquiries" ? enquiryStatus(r.status) : r.status}</span></p>
             )}
             <div className="tp-actions">
               <button className="tp-btn tp-btn-ghost" disabled={busy}
                 onClick={() => { setErrors({}); setEditing({ id: r.id, values: toForm(config, r) }); }}>
-                Edit / correct
+                {kind === "enquiries" ? "Record follow-up" : "Edit / correct"}
               </button>
               {reviewed && r.review_status !== "archived" && (
                 <>

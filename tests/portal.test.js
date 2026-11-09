@@ -21,7 +21,7 @@ test('PostgreSQL portal and administrative workflows',{skip:!process.env.TEST_DA
  const connection=new URL(process.env.TEST_DATABASE_URL);connection.searchParams.set('options',`-c search_path=${schema},public`);
  const db=new pg.Pool({connectionString:connection.toString()});let server;
  try {
-  for(const name of ['001_shared_records.sql','003_admin_auth.sql','004_record_details.sql','005_admin_workflow.sql','006_portal_operations.sql','007_content_feedback.sql','008_idle_sessions.sql']) await db.query(await readFile(new URL('../database/'+name,import.meta.url),'utf8'));
+  for(const name of ['001_shared_records.sql','003_admin_auth.sql','004_record_details.sql','005_admin_workflow.sql','006_portal_operations.sql','007_content_feedback.sql','008_idle_sessions.sql','014_enquiry_notifications.sql']) await db.query(await readFile(new URL('../database/'+name,import.meta.url),'utf8'));
   server=spawn(process.execPath,['server/index.js'],{env:{...process.env,DATABASE_URL:connection.toString(),SUBSCRIBER_DATABASE_URL:'',SUBSCRIBER_TOKEN_SECRET:'test-secret-'.repeat(5),REMINDERS_ENABLED:'false',API_PORT:'3098'},stdio:['ignore','pipe','pipe']});
   let serverErrors='';server.stderr.on('data',d=>{serverErrors+=d;});
   await new Promise((resolve,reject)=>{server.stdout.once('data',resolve);server.once('error',reject);server.once('exit',()=>reject(new Error('Test API exited: '+serverErrors)));});
@@ -119,8 +119,17 @@ test('PostgreSQL portal and administrative workflows',{skip:!process.env.TEST_DA
   const enquiry={id:randomUUID(),name:'Visitor',email:'visitor@test.example',type:'Collaboration',message:'Please contact me about the project.',website:'',startedAt:Date.now()-3000};
   ok(await request('enquiries',enquiry));ok(await request('enquiries',enquiry));
   const enquiries=ok(await request('admin/records/enquiries',null,admin.cookie)).data;assert.equal(enquiries.length,1);
+  ok(await request('admin/records/enquiries',{id:enquiries[0].id,values:{status:'closed',admin_comment:''}},admin.cookie),400);
+  ok(await request('admin/records/enquiries',{id:enquiries[0].id,values:{status:'follow-up',admin_comment:'Replied by email'}},admin.cookie));
   ok(await request('admin/records/enquiries',{id:enquiries[0].id,values:{status:'closed',admin_comment:'Followed up internally'}},admin.cookie));
-  assert.equal((await db.query('SELECT status FROM enquiries')).rows[0].status,'closed');
+  const closed=(await db.query('SELECT * FROM enquiries')).rows[0];
+  assert.equal(closed.status,'closed');assert.ok(closed.followed_up_at);assert.ok(closed.closed_at);
+  const history=ok(await request('admin/enquiry-history?id='+closed.id,null,admin.cookie)).data;
+  assert.equal(history.length,2);assert.ok(history.some(r=>r.admin_comment==='Replied by email'));
+  ok(await request('admin/enquiry-history?id='+closed.id),401);
+  ok(await request('admin/records/content_pages',{values:record('content_pages',{slug:'about-overview',title:'About',body:'Approved text',reviewer:''})},admin.cookie),400);
+  const approvedPage=ok(await request('admin/records/content_pages',{values:record('content_pages',{slug:'about-overview',title:'About',body:'Approved text',reviewer:'RCBC approver'})},admin.cookie));
+  assert.ok(approvedPage.data.id);
   ok(await request('admin/records/faqs',{id:faqId,remove:true},admin.cookie),400);
   ok(await request('admin/records/faqs',{id:faqId,values:{...faq,review_status:'archived'}},admin.cookie));
   assert.equal(ok(await request('public/faqs')).data.length,0);

@@ -1,3 +1,5 @@
+import FieldInfo, { fieldExample } from "../components/FieldInfo";
+import FormFeedback from "../components/FormFeedback";
 import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useLanguage } from '../i18n/LanguageContext';
@@ -6,7 +8,14 @@ import { contact } from '../data/contact';
 import './Contact.css';
 
 function Channel({ href, title, children }) {
-  return <div className="contact-channel"><h3>{href ? <a href={href}>{title}</a> : title}</h3><p>{children}</p>{!href && <small>Official contact details will be published once confirmed.</small>}</div>;
+  const { t } = useLanguage();
+  return (
+    <div className={`contact-channel${href ? '' : ' contact-channel-pending'}`}>
+      <h3>{href ? <a href={href}><span aria-hidden="true">↗</span> {title}</a> : title}</h3>
+      {children && <p>{children}</p>}
+      {!href && <small>{t.contact?.pendingDetails || 'Official contact details will be published once confirmed. Please use the enquiry form for now.'}</small>}
+    </div>
+  );
 }
 
 export default function Contact() {
@@ -77,18 +86,18 @@ export default function Contact() {
         <Channel href={contact.whatsappCommunity} title={c.whatsapp || "Join Our WhatsApp Community"}>{c.whatsappSub || "Receive project updates, educational information and activity announcements."}</Channel>
         <section className="contact-organiser" aria-labelledby="organiser"><h2 id="organiser">{c.organiser || "Our organiser"}</h2><h3>{c.rcbc || "Rotary Club of Bintulu Central (RCBC)"}</h3><p>{c.rcbcSub || "Dementia Care Connect is an initiative of the Alzheimer’s Care Project organised by RCBC."}</p>
           <Channel href={contact.organiserEmail && `mailto:${contact.organiserEmail}`} title={c.officialEmail || "Official RCBC email"}>{contact.organiserEmail || (c.organiserSub || 'For organiser-level enquiries.')}</Channel>
-          {contact.organiserWebsite && <p><a href={contact.organiserWebsite}>{c.website || "RCBC official website"}</a></p>}
-          {contact.organiserFacebook && <p><a href={contact.organiserFacebook}>{c.rcbcFacebook || "RCBC Facebook Page"}</a></p>}
+          <Channel href={contact.organiserWebsite} title={c.website || "RCBC official website"} />
+          <Channel href={contact.organiserFacebook} title={c.rcbcFacebook || "RCBC Facebook Page"} />
           {contact.approvedPostalAddress && <address>{contact.approvedPostalAddress}</address>}
         </section>
       </section>
-      <section className="contact-form-card" aria-labelledby="enquiry-heading"><h2 id="enquiry-heading">{c.title || "Send an enquiry"}</h2>
+      <section className="contact-form-card" aria-labelledby="enquiry-heading"><h2 id="enquiry-heading">{c.formTitle || "Send us a message"}</h2>
         <div className="contact-boundary"><strong>{c.boundaryTitle || "Our service boundary"}</strong><p>{c.boundaryText || "Dementia Care Connect does not provide emergency, medical consultation or crisis support services."}</p><p>{c.boundaryHelp || "For external services, visit"} <Link to="/find-help">{t.header?.menu?.findHelp || "Find Help & Support"}</Link>. {c.boundaryEvents || "For event registration, visit the relevant"} <Link to="/learn-events/events">{t.header?.menu?.learnEvents || "Education & Events page"}</Link>.</p></div>
         <p id="privacy-notice">{c.privacyNotice || "We use your name, email and message to manage and respond to your enquiry through the project’s administrative workflow. Please do not include sensitive medical details."}</p>
         <form ref={form} onSubmit={submit} noValidate aria-describedby="privacy-notice" aria-busy={busy}>
-          {['name', 'email', 'type', 'message'].map(field => <div className="contact-field" key={field}><label htmlFor={`contact-${field}`}>{({ name: c.name || 'Name', email: c.email || 'Email', type: c.enquiryType || 'Enquiry Type', message: c.message || 'Message' })[field]} <span>{c.required || "(required)"}</span></label>
+          {['name', 'email', 'type', 'message'].map(field => <div className="contact-field" key={field}><label htmlFor={`contact-${field}`}>{({ name: c.name || 'Name', email: c.email || 'Email', type: c.enquiryType || 'Enquiry Type', message: c.message || 'Message' })[field]} <span className="required-marker" aria-label={c.required || "required"}>*</span><FieldInfo label={field} example={field === "type" ? "Example: choose Collaboration for a partnership enquiry." : fieldExample(field)} /></label>
             {field === 'type' ? <select id={`contact-${field}`} name={field} value={values[field]} onChange={change} required aria-invalid={!!errors[field]} aria-describedby={errors[field] ? `${field}-error` : undefined}>{enquiryTypes.map(type => <option key={type}>{type}</option>)}</select> : field === 'message' ? <textarea id={`contact-${field}`} name={field} value={values[field]} onChange={change} required maxLength={5000} rows={6} aria-invalid={!!errors[field]} aria-describedby={errors[field] ? `${field}-error` : undefined} /> : <input id={`contact-${field}`} name={field} type={field === 'email' ? 'email' : 'text'} autoComplete={field} maxLength={field === 'name' ? 120 : 254} value={values[field]} onChange={change} required aria-invalid={!!errors[field]} aria-describedby={errors[field] ? `${field}-error` : undefined} />}
-            {errors[field] && <p className="contact-error" id={`${field}-error`}>{errors[field]}</p>}
+            <FormFeedback id={`${field}-error`}>{errors[field]}</FormFeedback>
           </div>)}
           <div className="contact-trap" aria-hidden="true"><label htmlFor="contact-website">Leave this field empty</label><input id="contact-website" name="website" tabIndex={-1} autoComplete="off" value={values.website} onChange={change} /></div>
           <button className="contact-submit" disabled={busy} type="submit">{busy ? (c.sending || 'Sending…') : (c.send || 'Send Enquiry')}</button>

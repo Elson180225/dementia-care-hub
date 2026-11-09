@@ -1,5 +1,6 @@
 
 import { createServer } from 'node:http';
+import { startEnquiryNotificationWorker } from './enquiry-notifications.js';
 import { enquiryHandler } from './enquiries.js';
 import { authHandler } from './auth.js';
 import { portalHandler } from './portal.js';
@@ -96,5 +97,6 @@ server.on('error',error=>{
 });
 server.listen(port, '127.0.0.1', () => {
   console.log(`Dementia Care Hub API listening on http://127.0.0.1:${port}`);
+  startEnquiryNotificationWorker();
   try {startReminderWorker();} catch(error) {console.error('Reminder worker disabled:',error.message);}
 });

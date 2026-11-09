@@ -1,3 +1,4 @@
+import FormFeedback from "../components/FormFeedback";
 import { useState } from 'react';
 export default function UploadField({label,kind,value=[],onChange,multiple=false,disabled=false,onBusyChange}) {
  const [busy,setBusy]=useState(false);const [error,setError]=useState('');
@@ -15,6 +16,6 @@ export default function UploadField({label,kind,value=[],onChange,multiple=false
  }
  return <fieldset className="tp-upload"><legend>{label}</legend><p>PNG, JPEG, WebP{kind==='document'?' or PDF':''}. Maximum 8 MB each.</p>
  <input aria-label={label} type="file" accept={kind==='document'?'.png,.jpg,.jpeg,.webp,.pdf':'.png,.jpg,.jpeg,.webp'} multiple={multiple} disabled={disabled || busy} onChange={upload}/>
- {busy && <p role="status">Uploading...</p>}{error && <p role="alert">{error}</p>}
+ {busy && <p role="status">Uploading...</p>}<FormFeedback>{error}</FormFeedback>
  <ul>{links.filter(Boolean).map((link,i)=><li key={link+i}><a href={link} target="_blank" rel="noreferrer">View {kind} {i+1}</a>{!disabled && <button type="button" className="tp-btn tp-btn-ghost" onClick={()=>onChange(multiple?links.filter((_,j)=>i!==j):'')}>Remove</button>}</li>)}</ul></fieldset>;
 }
