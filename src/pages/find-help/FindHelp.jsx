@@ -125,7 +125,7 @@ function FindHelp() {
                   {fh.card2?.link6 || "Practical aids / equipment"}
                 </Link>
 
-                <Link to="/caregiver-support#support-groups">
+                <Link to="/caregiver-support/support-groups">
                   Peer / community support → Support Groups
                 </Link>
 
