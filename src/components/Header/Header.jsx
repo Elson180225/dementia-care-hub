@@ -95,8 +95,7 @@ function getMenuItems(m) {
     },
     {
       label: m.learnEvents,
-      path: "/learn-events",
-      menuOnly: true,
+      path: "/learn-events/online-education",
       children: [
         {
           label: m.onlineEducation,
@@ -440,9 +439,9 @@ function Header() {
 
             <div className="top-actions">
               <nav className="utility-nav" aria-label="Updates and trainer access">
-                <Link to="/get-updated" onClick={closeMobileMenu}>GET UPDATED</Link>
+                <Link to="/get-updated" onClick={closeMobileMenu}>{t.footer.getUpdated}</Link>
                 <span aria-hidden="true">|</span>
-                <Link to="/trainer-portal" onClick={closeMobileMenu}>TRAINER PORTAL</Link>
+                <Link to="/trainer-portal" onClick={closeMobileMenu}>{t.footer.trainerPortal}</Link>
               </nav>
               {/* SEARCH */}
               <button
@@ -478,7 +477,8 @@ function Header() {
                   aria-expanded={languageOpen}
                   aria-label="Select language"
                 >
-                  {currentLanguageConfig.nativeLabel} ▼
+                  <span className="language-label">{currentLanguageConfig.nativeLabel}</span>
+                  <span className="language-chevron" aria-hidden="true">▼</span>
                 </button>
 
                 {languageOpen && (
@@ -557,7 +557,7 @@ function Header() {
                       <span aria-hidden="true"> ⌄</span>
                     </button>
                   ) : (
-                    <Link to={item.path} className="nav-link">
+                    <Link to={item.path} className="nav-link" onClick={() => setOpenMenu(null)}>
                       {item.label}
                       <span aria-hidden="true"> ⌄</span>
                     </Link>
@@ -636,7 +636,7 @@ function Header() {
                 <details key={item.label}>
                   <summary>{item.label}</summary>
                   <div className="mobile-submenu">
-                    {!item.menuOnly && !["/understand-dementia", "/caregiver-support"].includes(item.path) && (
+                    {!item.menuOnly && !["/understand-dementia", "/caregiver-support", "/learn-events/online-education"].includes(item.path) && (
                       <Link to={item.path} onClick={closeMobileMenu}>
                         {t.header.overview}
                       </Link>
