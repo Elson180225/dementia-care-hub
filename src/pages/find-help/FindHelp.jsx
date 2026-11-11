@@ -77,8 +77,28 @@ function getAreaIcon(path) {
 }
 
 function FindHelp() {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const fh = t.findHelp;
+
+  // RCBC requires Journeys A and B to support people seeking
+  // help for themselves or for someone else.
+  const isEnglish = !language || language === "en";
+
+  const journeyATitle = isEnglish
+    ? "Concerned about changes?"
+    : (fh.card1?.title || "I am concerned about changes");
+
+  const journeyAText = isEnglish
+    ? "For yourself or someone you support."
+    : (fh.card1?.text || "You may have noticed changes in memory, thinking, behaviour or daily life and want to understand what to do next.");
+
+  const journeyBTitle = isEnglish
+    ? "Already diagnosed?"
+    : (fh.card2?.title || "I / my family member has been diagnosed");
+
+  const journeyBText = isEnglish
+    ? "Find care, services and support for yourself or someone else."
+    : (fh.card2?.text || "Explore the areas that may need attention after diagnosis and move directly to the most relevant support section.");
 
   return (
     <main className="find-help-page">
@@ -139,11 +159,11 @@ function FindHelp() {
               </div>
 
               <h3>
-                {fh.card1?.title || "I am concerned about changes"}
+                {journeyATitle}
               </h3>
 
               <p>
-                {fh.card1?.text || "You may have noticed changes in memory, thinking, behaviour or daily life and want to understand what to do next."}
+                {journeyAText}
               </p>
 
               <span className="find-help-card-link">
@@ -165,11 +185,11 @@ function FindHelp() {
               </div>
 
               <h3>
-                {fh.card2?.title || "I / my family member has been diagnosed"}
+                {journeyBTitle}
               </h3>
 
               <p>
-                {fh.card2?.text || "Explore the areas that may need attention after diagnosis and move directly to the most relevant support section."}
+                {journeyBText}
               </p>
 
               <div className="diagnosis-links">

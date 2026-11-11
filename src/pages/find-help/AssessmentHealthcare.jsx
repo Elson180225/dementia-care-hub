@@ -202,7 +202,7 @@ function AssessmentHealthcare() {
             </a>
 
             <Link
-              to="/learn-events/dementia-education"
+              to="/understand-dementia"
               className="assessment-secondary-button"
             >
               {t.header?.menu?.whatIsDementia || "Learn about dementia"}

@@ -127,6 +127,9 @@ function ResourceFinder() {
   const [showResults, setShowResults] =
     useState(false);
 
+  const [showNeedGuide, setShowNeedGuide] =
+    useState(false);
+
   /* =========================================================
      NORMALISE DATA FROM THE OTHER MODULES
 
@@ -275,6 +278,8 @@ function ResourceFinder() {
 
     setShowResults(false);
 
+    setShowNeedGuide(false);
+
     setStep(2);
   };
 
@@ -311,6 +316,8 @@ function ResourceFinder() {
     setLocation("");
 
     setShowResults(false);
+
+    setShowNeedGuide(false);
   };
 
   const selectedNeed =
@@ -501,6 +508,117 @@ function ResourceFinder() {
                         </button>
                       );
                     })}
+                  </div>
+
+                  <div className="rf-need-guide">
+                    <button
+                      type="button"
+                      className="rf-need-guide-toggle"
+                      onClick={() =>
+                        setShowNeedGuide(
+                          (current) =>
+                            !current
+                        )
+                      }
+                      aria-expanded={
+                        showNeedGuide
+                      }
+                    >
+                      <span>
+                        Not sure where to start?
+                      </span>
+
+                      <strong>
+                        Help me choose
+                      </strong>
+
+                      <span
+                        className="rf-need-guide-arrow"
+                        aria-hidden="true"
+                      >
+                        {showNeedGuide
+                          ? "↑"
+                          : "↓"}
+                      </span>
+                    </button>
+
+                    {showNeedGuide && (
+                      <div className="rf-need-guide-content">
+                        <p className="rf-need-guide-intro">
+                          Choose what sounds closest to your situation.
+                        </p>
+
+                        <div className="rf-need-guide-options">
+                          <button
+                            type="button"
+                            onClick={() =>
+                              chooseNeed(
+                                "healthcare"
+                              )
+                            }
+                          >
+                            <span>
+                              I&apos;ve noticed memory or behaviour changes
+                            </span>
+
+                            <strong>
+                              Assessment & Healthcare →
+                            </strong>
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={() =>
+                              chooseNeed(
+                                "services"
+                              )
+                            }
+                          >
+                            <span>
+                              I need help caring for someone day to day
+                            </span>
+
+                            <strong>
+                              Support Services →
+                            </strong>
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={() =>
+                              chooseNeed(
+                                "financial"
+                              )
+                            }
+                          >
+                            <span>
+                              I&apos;m worried about costs or government assistance
+                            </span>
+
+                            <strong>
+                              Government & Financial →
+                            </strong>
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={() =>
+                              chooseNeed(
+                                "equipment"
+                              )
+                            }
+                          >
+                            <span>
+                              I need something to make daily life safer or easier
+                            </span>
+
+                            <strong>
+                              Equipment & Practical Aids →
+                            </strong>
+                          </button>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </>
               )}

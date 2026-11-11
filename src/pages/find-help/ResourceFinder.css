@@ -1906,3 +1906,147 @@
     transition:none !important;
   }
 }
+
+
+/* =========================================================
+   GUIDED "NOT SURE" HELP
+========================================================= */
+
+.rf-need-guide {
+  margin-top: 22px;
+}
+
+.rf-need-guide-toggle {
+  width: 100%;
+  min-height: 64px;
+  padding: 15px 20px;
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  align-items: center;
+  gap: 12px;
+  border: 1px solid var(--color-gold-300);
+  border-radius: 14px;
+  background: #fff8e9;
+  color: var(--rf-text);
+  text-align: left;
+  cursor: pointer;
+  transition:
+    transform 0.2s ease,
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.rf-need-guide-toggle:hover {
+  transform: translateY(-2px);
+  border-color: var(--rf-gold);
+  box-shadow: 0 10px 24px rgba(69, 32, 109, 0.08);
+}
+
+.rf-need-guide-toggle > span:first-child {
+  font-size: 16px;
+  font-weight: 800;
+}
+
+.rf-need-guide-toggle strong {
+  color: var(--rf-purple);
+  font-size: 16px;
+  font-weight: 900;
+}
+
+.rf-need-guide-arrow {
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--rf-purple);
+  color: #ffffff;
+  font-weight: 900;
+}
+
+.rf-need-guide-content {
+  margin-top: 14px;
+}
+
+.rf-need-guide-intro {
+  margin: 0 0 14px;
+  color: var(--rf-soft);
+  font-size: 16px;
+  line-height: 1.6;
+}
+
+.rf-need-guide-options {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  animation: rfEnter 0.25s ease;
+}
+
+.rf-need-guide-options button {
+  min-height: 120px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 14px;
+  border: 1px solid var(--color-purple-100);
+  border-radius: 14px;
+  background: #ffffff;
+  color: var(--rf-text);
+  text-align: left;
+  cursor: pointer;
+  transition:
+    transform 0.2s ease,
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.rf-need-guide-options button:hover {
+  transform: translateY(-3px);
+  border-color: var(--rf-purple);
+  box-shadow: 0 10px 24px rgba(69, 32, 109, 0.08);
+}
+
+.rf-need-guide-options button span {
+  color: var(--rf-text);
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1.45;
+}
+
+.rf-need-guide-options button strong {
+  margin-top: 16px;
+  color: var(--rf-purple);
+  font-size: 16px;
+}
+
+@media (max-width: 700px) {
+  .rf-need-guide-toggle {
+    grid-template-columns: 1fr auto;
+  }
+
+  .rf-need-guide-toggle strong {
+    grid-column: 1;
+  }
+
+  .rf-need-guide-arrow {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+  }
+
+  .rf-need-guide-options {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rf-need-guide-toggle,
+  .rf-need-guide-options button {
+    transition: none !important;
+  }
+
+  .rf-need-guide-options {
+    animation: none !important;
+  }
+}
