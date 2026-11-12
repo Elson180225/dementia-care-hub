@@ -11,30 +11,17 @@ function getMenuItems(m) {
       label: m.understand,
       path: "/understand-dementia",
       children: [
-        {
-          label: m.whatIsDementia,
-          path: "/understand-dementia#overview",
-        },
-        {
-          label: m.alzheimers,
-          path: "/understand-dementia#common-types",
-        },
-        {
-          label: m.signsChanges,
-          path: "/understand-dementia#early-signs",
-        },
-        {
-          label: m.whyChangesMatter,
-          path: "/understand-dementia#why-changes-matter",
-        },
-        {
-          label: m.medicalAdvice,
-          path: "/understand-dementia#medical-advice",
-        },
-        {
-          label: m.healthyAgeing,
-          path: "/understand-dementia#healthy-living",
-        },
+        // RCBC reading order. Keep the basics first so visitors have context.
+        // New labels stay in English until RCBC approves translations.
+        { label: "The Basics", path: "/understand-dementia#overview" },
+        { label: "Normal Ageing", path: "/understand-dementia#normal-ageing" },
+        { label: "Concerning Changes", path: "/understand-dementia#changes-to-watch" },
+        { label: "Early Signs", path: "/understand-dementia#early-signs" },
+        { label: "Self-Assessment", path: "/understand-dementia#self-check" },
+        { label: "Professional Assessment", path: "/understand-dementia#medical-advice" },
+        { label: "Further Care", path: "/understand-dementia#further-care" },
+        { label: "Healthy & Active Living", path: "/understand-dementia#healthy-living" },
+        { label: "FAQs", path: "/understand-dementia#understand-faq" },
       ],
     },
     {
@@ -565,7 +552,7 @@ function Header() {
 
                   {/* DROPDOWN */}
                   {openMenu === item.label && (
-                    <div className="dropdown-menu dropdown-menu-visual">
+                    <div className={`dropdown-menu dropdown-menu-visual${item.path === "/understand-dementia" ? " dropdown-menu-understand" : ""}`}>
                       <div className="dropdown-heading-row">
                         <h3>{item.label}</h3>
                         <span className="dropdown-heading-line" aria-hidden="true" />
