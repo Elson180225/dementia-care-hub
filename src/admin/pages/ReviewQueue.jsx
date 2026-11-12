@@ -30,6 +30,7 @@ const RECORD_LABEL = {
   completions: "Completed activity",
   activity_trainers: "Activity trainers",
   subscribers: "Get Updated subscriber",
+  trainer_listing: "Public listing"
 };
 
 export default function ReviewQueue() {

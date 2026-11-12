@@ -11,7 +11,7 @@ function validateLinks(single, list = []) {
   try { new URL(url); } catch { fail('Invalid file URL'); }
  }
 }
-const profile = p => p && ({...p, shortProfile:p.short_profile, certifiedStatus:p.certified_status, certificateRef:p.certificate_ref || '', adminComment:p.admin_comment, photoUrl:p.photo_url, supportingDocuments:p.supporting_documents});
+const profile = p => p && ({...p, shortProfile:p.short_profile, certifiedStatus:p.certified_status, certificateRef:p.certificate_ref || '', adminComment:p.admin_comment, photoUrl:p.photo_url, supportingDocuments:p.supporting_documents, listingStatus:p.listing_status, listingConsentAt:p.listing_consent_at, listingComment:p.listing_comment});
 export async function snapshot(user) {
  const admin=user.role==='admin';
  const profiles=(await pool.query('SELECT p.*,u.name,u.email FROM trainer_profiles p JOIN users u ON u.id=p.id WHERE $1 OR p.id=$2',[admin,user.id])).rows;
@@ -26,7 +26,7 @@ export async function snapshot(user) {
  registrationDeadline:a.registration_deadline?new Date(a.registration_deadline).toLocaleString('sv-SE',{timeZone:'Asia/Kuala_Lumpur'}).replace(' ','T').slice(0,16):'',capacity:a.capacity || '',
  role:a.trainers.find(t=>t.trainerId===user.id)?.role || 'Trainer',completion:{status:a.completion_status,venue:a.actual_venue,participants:a.participants,hours:Number(a.actual_hours),photos:a.photos || [],adminComment:a.completion_comment}})),
  accessRequests:admin?(await pool.query('SELECT *,claimed_certificate_ref AS "certificateRef",submitted_at AS "requestedAt",admin_comment AS "adminComment" FROM trainer_access_requests ORDER BY submitted_at DESC')).rows:[],
- users:admin?(await pool.query('SELECT u.id,u.name,u.email,u.role,u.enabled,p.certified_status,p.certificate_ref FROM users u LEFT JOIN trainer_profiles p ON p.id=u.id ORDER BY u.created_at DESC')).rows:[],
+ users:admin?(await pool.query('SELECT u.id,u.name,u.email,u.role,u.enabled,p.certified_status,p.certificate_ref,p.listing_status FROM users u LEFT JOIN trainer_profiles p ON p.id=u.id ORDER BY u.created_at DESC')).rows:[],
  contributions:(await pool.query('SELECT * FROM annual_trainer_contributions WHERE $1 OR trainer_id=$2 ORDER BY year DESC',[admin,user.id])).rows,
  projectReach:admin?(await pool.query('SELECT * FROM annual_project_reach ORDER BY year DESC')).rows:[],
  maintenance:admin?(await pool.query(`SELECT 'Directory' AS kind,count(*)::int AS count FROM organisations WHERE review_status='needs review' OR (review_status<>'archived' AND next_review_at<=now())
@@ -59,6 +59,29 @@ export async function portalHandler(req,res,url,send) {
    if(action.type==='PROFILE_SUBMIT' && (!v.city?.trim() || !v.shortProfile?.trim())) fail('City and short profile are required');
    await db.query("UPDATE trainer_profiles SET city=$2,language=$3,short_profile=$4,qualifications=$5,experience=$6,photo_url=$7,supporting_documents=$8,status=$9,admin_comment='',updated_at=now() WHERE id=$1",[user.id,v.city,v.language,v.shortProfile,v.qualifications,v.experience,v.photoUrl || null,JSON.stringify(v.supportingDocuments || []),action.type==='PROFILE_SAVE'?'draft':'submitted']); return;
   }
+  if(action.type==='LISTING_REQUEST' || action.type==='LISTING_WITHDRAW') {
+   if(admin || !p) fail('Trainer profile required',403);
+   if(action.type==='LISTING_REQUEST') {
+    if(action.consent!==true) fail('Please tick the consent box to request a public listing');
+    if(!['none','returned','rejected'].includes(p.listing_status)) fail('Your listing request is already with RCBC',409);
+    await db.query("UPDATE trainer_profiles SET listing_status='requested',listing_consent_at=now(),listing_comment='' WHERE id=$1",[user.id]);
+   } else {
+    await db.query("UPDATE trainer_profiles SET listing_status='none',listing_consent_at=NULL WHERE id=$1",[user.id]);
+   }
+   return;
+  }
+  if(action.type==='ADMIN_LISTING') {
+   if(!admin) fail('Admin access required',403);
+   const {id,listing,comment=''}=action;
+   if(!['suspended','approved'].includes(listing)) fail('Invalid listing change');
+   if(listing==='suspended' && !comment.trim()) fail('A comment is required');
+   const old=(await db.query('SELECT * FROM trainer_profiles WHERE id=$1 FOR UPDATE',[id])).rows[0];
+   if(!old) fail('Trainer not found',404);
+   if(listing==='suspended' && old.listing_status!=='approved') fail('Only an approved listing can be suspended',409);
+   if(listing==='approved' && (old.listing_status!=='suspended' || !old.listing_consent_at)) fail('Only a suspended listing with consent can be restored',409);
+   await db.query('UPDATE trainer_profiles SET listing_status=$2,listing_comment=$3,listing_reviewed_by=$4,listing_reviewed_at=now() WHERE id=$1',[id,listing,comment,user.id]);
+   await logDecision(db,user,'trainer_listing',id,listing==='suspended'?'unpublished':'published',comment,old.listing_status,listing);return;
+  }
   if(action.type==='ADMIN_REVIEW') {
    if(!admin) fail('Admin access required',403);
    const {target,id,decision,comment=''}=action;
@@ -81,6 +104,14 @@ export async function portalHandler(req,res,url,send) {
     const result=await db.query("UPDATE trainer_profiles SET status=$2,admin_comment=$3,updated_at=now() WHERE id=$1 AND status='submitted' RETURNING id",[targetId,decision,comment]);
     if(!result.rowCount) fail('Profile is not awaiting review',409);
     await logDecision(db,user,'trainer_profiles',targetId,decision,comment,'submitted',decision);return;
+   }
+   if(target==='listing') {
+    if(!['approved','returned','rejected'].includes(decision)) fail('Invalid listing decision');
+    const old=(await db.query('SELECT * FROM trainer_profiles WHERE id=$1 FOR UPDATE',[id])).rows[0];
+    if(!old || old.listing_status!=='requested' || !old.listing_consent_at) fail('Listing is not awaiting review',409);
+    if(decision==='approved' && (old.certified_status!=='certified' || old.status!=='approved')) fail('Approve portal access and the trainer profile before approving the public listing',409);
+    await db.query('UPDATE trainer_profiles SET listing_status=$2,listing_comment=$3,listing_reviewed_by=$4,listing_reviewed_at=now() WHERE id=$1',[id,decision,comment,user.id]);
+    await logDecision(db,user,'trainer_listing',id,decision,comment,'requested',decision);return;
    }
    if(target==='activity') {
     const transitions={approved:['submitted'],returned:['submitted'],published:['approved'],completed:['published'],archived:['verified','approved','published'],unpublished:['published'],cancelled:['approved','published']};
