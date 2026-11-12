@@ -4,6 +4,7 @@ import { useTrainer } from "../TrainerContext";
 import { LANGUAGES } from "../constants";
 import { Field } from "../ui";
 import "./MyProfile.css";
+import { ASSESSMENT_LABEL, teachingEligibility } from "../../../shared/teaching-eligibility";
 
 const CERT_LABEL = { pending: "Waiting for approval", certified: "Certified", suspended: "Suspended" };
 
@@ -58,42 +59,6 @@ export default function MyProfile() {
     <>
       <h1>My profile</h1>
       {message && <p className="tp-note" role="status">{message}</p>}
-      <section className="tp-card">
-        <dl className="tp-dl">
-          <dt>Name</dt><dd>{profile.name}</dd>
-          <dt>Certification</dt><dd>{CERT_LABEL[profile.certifiedStatus] ?? profile.certifiedStatus}</dd>
-          <dt>Assessment result</dt><dd>{profile.assessment_result || "Not recorded"}</dd>
-          <dt>Healthcare professional</dt><dd>{profile.healthcare_professional == null ? "Not recorded" : profile.healthcare_professional ? "Yes" : "No"}</dd>
-          <dt>Independent teaching scope</dt><dd>{profile.independent_teaching_scope || "Not recorded"}</dd>
-          <dt>Certificate evidence (private)</dt><dd>{profile.certificateEvidenceUrl ? <a href={profile.certificateEvidenceUrl} target="_blank" rel="noreferrer">Open certificate image or PDF</a> : "Not uploaded"}</dd>
-          <dt>Certificate number</dt><dd>{profile.certificateRef}</dd>
-        </dl>
-        <p>Trainers running independent sessions are responsible for those sessions, not RCBC.</p>
-      </section>
-
-      <section className="tp-card">
-        <h2>Public listing</h2>
-        <p><strong>Status:</strong> {LISTING_LABEL[profile.listingStatus] ?? profile.listingStatus}</p>
-        {profile.listingComment && <p className="tp-note">Comment from RCBC: {profile.listingComment}</p>}
-
-        {["none", "returned", "rejected"].includes(profile.listingStatus) && (
-          <>
-            <Field id="listing-consent" label="I agree that RCBC may publish my name, city, language, profile, photo and certificate number on the public Certified Trainers page. I can withdraw at any time." required example="Tick this only if you want a public listing. Your certificate image and supporting documents stay private. RCBC reviews the listing request separately.">
-              <input id="listing-consent" type="checkbox" checked={consent} onChange={e=>setConsent(e.target.checked)}/>
-            </Field>
-            <button className="tp-btn" disabled={!consent} onClick={() => dispatch({ type: "LISTING_REQUEST", consent: true })}>
-              Request public listing
-            </button>
-          </>
-        )}
-
-        {["requested", "approved"].includes(profile.listingStatus) && (
-          <button className="tp-btn tp-btn-ghost" onClick={() => dispatch({ type: "LISTING_WITHDRAW" })}>
-            Withdraw from public listing
-          </button>
-        )}
-      </section>
-
       {!editing ? (
         <section className="tp-card">
           <div className="mp-view">
@@ -154,6 +119,43 @@ export default function MyProfile() {
           </div>
         </form>
       )}
+      <section className="tp-card">
+        <dl className="tp-dl">
+          <dt>Name</dt><dd>{profile.name}</dd>
+          <dt>Certification</dt><dd>{CERT_LABEL[profile.certifiedStatus] ?? profile.certifiedStatus}</dd>
+          <dt>Assessment</dt><dd>{ASSESSMENT_LABEL[profile.assessment_status] ?? "Not assessed yet"}</dd>
+          <dt>Assessment notes</dt><dd>{profile.assessment_result || "Not recorded"}</dd>
+          <dt>Healthcare professional</dt><dd>{profile.healthcare_professional == null ? "Not recorded" : profile.healthcare_professional ? "Yes" : "No"}</dd>
+          <dt>Teaching eligibility</dt><dd>{teachingEligibility(profile.assessment_status, profile.healthcare_professional)}</dd>    
+          <dt>Independent teaching scope</dt><dd>{profile.independent_teaching_scope || "Not recorded"}</dd>
+          <dt>Certificate evidence (private)</dt><dd>{profile.certificateEvidenceUrl ? <a href={profile.certificateEvidenceUrl} target="_blank" rel="noreferrer">Open certificate image or PDF</a> : "Not uploaded"}</dd>
+          <dt>Certificate number</dt><dd>{profile.certificateRef}</dd>
+        </dl>
+        <p>Trainers running independent sessions are responsible for those sessions, not RCBC.</p>
+      </section>
+
+      <section className="tp-card">
+        <h2>Public listing</h2>
+        <p><strong>Status:</strong> {LISTING_LABEL[profile.listingStatus] ?? profile.listingStatus}</p>
+        {profile.listingComment && <p className="tp-note">Comment from RCBC: {profile.listingComment}</p>}
+
+        {["none", "returned", "rejected"].includes(profile.listingStatus) && (
+          <>
+            <Field id="listing-consent" label="I agree that RCBC may publish my name, city, language, profile, photo and certificate number on the public Certified Trainers page. I can withdraw at any time." required example="Tick this only if you want a public listing. Your certificate image and supporting documents stay private. RCBC reviews the listing request separately.">
+              <input id="listing-consent" type="checkbox" checked={consent} onChange={e=>setConsent(e.target.checked)}/>
+            </Field>
+            <button className="tp-btn" disabled={!consent} onClick={() => dispatch({ type: "LISTING_REQUEST", consent: true })}>
+              Request public listing
+            </button>
+          </>
+        )}
+
+        {["requested", "approved"].includes(profile.listingStatus) && (
+          <button className="tp-btn tp-btn-ghost" onClick={() => dispatch({ type: "LISTING_WITHDRAW" })}>
+            Withdraw from public listing
+          </button>
+        )}
+      </section>
     </>
   );
 }
