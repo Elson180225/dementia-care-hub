@@ -14,8 +14,11 @@ import { learnEventsContentHandler } from './learn-events-content.js';
 import { createHash } from 'node:crypto';
 import { participantsHandler } from './participants.js';
 import { trackApplicationsHandler } from './track-applications.js';
+import { serveWebsite } from './website.js';
 
-const port = Number(process.env.API_PORT || 3001);
+const port = Number(process.env.PORT || process.env.API_PORT || 3001);
+// Local default stays private; hosting sets HOST=0.0.0.0 so the platform can reach the server.
+const host = process.env.HOST || '127.0.0.1';
 const handleEnquiry = enquiryHandler({persist:async data=>{
  const {id,name,email,type,message}=data;
  const fingerprint=createHash('sha256').update(JSON.stringify({name,email,type,message})).digest('hex');
@@ -34,6 +37,10 @@ function sendJson(res, status, data) {
 const server = createServer(async (req, res) => {
  try {
   const url = new URL(req.url, `http://${req.headers.host || 'localhost'}`);
+    // On Render, the same server also serves the built website; locally Vite does this instead.
+  if (process.env.SERVE_WEBSITE === 'true' && !url.pathname.startsWith('/api') && ['GET', 'HEAD'].includes(req.method)) {
+    return await serveWebsite(req, res, url);
+  }
   if(url.pathname==='/api/uploads' || url.pathname.startsWith('/api/files/')) return await filesHandler(req,res,url,sendJson);
   if(url.pathname==='/api/admin/learn-events-content' || url.pathname==='/api/public/learn-events-content') return await learnEventsContentHandler(req,res,url,sendJson);
   if(url.pathname==='/api/admin/participants') return await participantsHandler(req,res,url,sendJson);
@@ -95,8 +102,8 @@ server.on('error',error=>{
  console.error(error.code==='EADDRINUSE'?`Port ${port} is already in use. Stop the existing API before starting another server.`:'API listener failed: '+error.code);
  process.exitCode=1;
 });
-server.listen(port, '127.0.0.1', () => {
-  console.log(`Dementia Care Hub API listening on http://127.0.0.1:${port}`);
+server.listen(port, host, () => {
+  console.log(`Dementia Care Hub API listening on http://${host}:${port}`);
   startEnquiryNotificationWorker();
   try {startReminderWorker();} catch(error) {console.error('Reminder worker disabled:',error.message);}
 });
