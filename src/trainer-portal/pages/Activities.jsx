@@ -1,4 +1,5 @@
 import UploadField from "../UploadField";
+import {validateEventPricing} from '../../../shared/event-registration';
 import { Link } from "react-router-dom";
 import { useEffect, useMemo, useState } from "react";
 import { useTrainer } from "../TrainerContext";
@@ -45,6 +46,14 @@ const blank = {
   audience: "",
   description: "",
   registrationLink: "",
+  registrationType: "",
+  registrationFee: "",
+  registrationMethod: "closed",
+  registrationGoogleUrl: "",
+  registrationInstructions: "",
+  registrationPhone: false,
+  registrationNotes: false,
+  paymentInstructions: "",
   plannedHours: "",
   city: "",
   posterUrl: "",
@@ -181,6 +190,7 @@ export default function Activities({
 
   async function save(saveMode = "draft") {
     const found = validate(editing.values);
+    if(admin){try{validateEventPricing(editing.values.registrationType,editing.values.mode);}catch(e){found.registrationType=e.message;}}
     setErrors(found);
     if (Object.keys(found).length) {
       document.getElementById(Object.keys(found)[0])?.focus();
@@ -365,7 +375,8 @@ export default function Activities({
             />
           </Field>
 
-          {input("registrationLink", "External registration link (optional)", {
+          {admin&&<fieldset className="tp-field"><legend>Registration</legend><label htmlFor="registrationType">Free or paid (required)</label><select id="registrationType" value={editing.values.registrationType||''} aria-invalid={!!errors.registrationType} onChange={e=>setEditing({...editing,values:{...editing.values,registrationType:e.target.value,...(e.target.value==='free-online'?{registrationFee:'',paymentInstructions:''}:{})}})}><option value="">Choose event type</option><option value="free-online">Free online webinar</option><option value="paid-in-person">Paid in-person programme</option></select>{errors.registrationType&&<p className="tp-error">{errors.registrationType}</p>}{editing.values.registrationType==='paid-in-person'?<><label>Fee description<input maxLength={100} value={editing.values.registrationFee||''} onChange={e=>setEditing({...editing,values:{...editing.values,registrationFee:e.target.value}})}/></label><label>Payment instructions<textarea maxLength={4000} value={editing.values.paymentInstructions||''} onChange={e=>setEditing({...editing,values:{...editing.values,paymentInstructions:e.target.value}})}/></label></>:<p>Free — no payment required.</p>}<label>Registration method<select value={editing.values.registrationMethod||'closed'} onChange={e=>setEditing({...editing,values:{...editing.values,registrationMethod:e.target.value}})}><option value="closed">Registration closed</option><option value="google">Google Form</option><option value="website">Website registration</option></select></label>{editing.values.registrationMethod==='google'&&<label>Google Form link (required)<input type="url" value={editing.values.registrationGoogleUrl||''} onChange={e=>setEditing({...editing,values:{...editing.values,registrationGoogleUrl:e.target.value}})}/></label>}{editing.values.registrationMethod==='website'&&<><p>Visitors register directly on the website. No external link or account is required.</p>{[['registrationPhone','Require phone number'],['registrationNotes','Allow optional notes']].map(([key,label])=><label key={key}><span><input type="checkbox" checked={!!editing.values[key]} onChange={e=>setEditing({...editing,values:{...editing.values,[key]:e.target.checked}})}/> {label}</span></label>)}</>}<label>General registration instructions (optional)<textarea maxLength={4000} value={editing.values.registrationInstructions||''} onChange={e=>setEditing({...editing,values:{...editing.values,registrationInstructions:e.target.value}})}/></label><small>Changing the registration method affects new submissions only. Existing participant records are preserved. Paid bookings require RCBC payment verification.</small></fieldset>}
+          {!admin&&input("registrationLink", "External registration link (optional)", {
             type: "url",
             placeholder: "https://forms.google.com/...",
             hint: "Google Form or external ticketing URL. If blank, 'Registration coming soon' is shown.",

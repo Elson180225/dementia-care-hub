@@ -3,6 +3,7 @@ import { currentUser, body, fail } from './auth.js';
 import { isAllowedOrigin } from './origin.js';
 import { decision as logDecision } from './decisions.js';
 import { validateFileLinks } from './uploads.js';
+import {validateEventPricing} from '../shared/event-registration.js';
 function validateLinks(single, list = []) {
  if(!Array.isArray(list) || list.some(x=>typeof x!=='string')) fail('Document and photo links must be a list of URLs');
  for(const url of [single,...list].filter(Boolean)) {
@@ -15,14 +16,14 @@ const profile = p => p && ({...p, shortProfile:p.short_profile, certifiedStatus:
 export async function snapshot(user) {
  const admin=user.role==='admin';
  const profiles=(await pool.query('SELECT p.*,u.name,u.email FROM trainer_profiles p JOIN users u ON u.id=p.id WHERE $1 OR p.id=$2',[admin,user.id])).rows;
- const activities=(await pool.query(`SELECT a.*,coalesce(c.status,'none') AS completion_status,c.actual_venue,c.participants,c.actual_hours,c.admin_comment AS completion_comment,c.photos,
+ const activities=(await pool.query(`SELECT a.*,(SELECT jsonb_build_object('paid',s.paid,'enabled',s.enabled,'fee',s.fee,'instructions',s.instructions,'generalInstructions',s.general_instructions,'website',s.website_enabled,'googleUrl',s.google_url,'askPhone',s.ask_phone,'askNotes',s.ask_notes) FROM event_registration_settings s WHERE s.activity_id=a.id) AS registration_settings,coalesce(c.status,'none') AS completion_status,c.actual_venue,c.participants,c.actual_hours,c.admin_comment AS completion_comment,c.photos,
  coalesce((SELECT jsonb_agg(jsonb_build_object('trainerId',t.trainer_id,'role',t.role,'name',u.name)) FROM activity_trainers t LEFT JOIN users u ON u.id=t.trainer_id WHERE t.activity_id=a.id),'[]') AS trainers
  FROM activities a LEFT JOIN completions c ON c.activity_id=a.id
  WHERE $1 OR a.created_by=$2 OR EXISTS(SELECT 1 FROM activity_trainers t WHERE t.activity_id=a.id AND t.trainer_id=$2) ORDER BY a.starts_at DESC`,[admin,user.id])).rows;
  return {session:admin?null:{id:user.id},adminSession:admin?user:null,
  profile:profile(profiles.find(p=>p.id===user.id) || profiles[0]) || {name:user.name}, profiles:profiles.map(profile),
  activities:activities.map(a=>({...a,date:new Date(a.starts_at).toLocaleString('sv-SE',{timeZone:'Asia/Kuala_Lumpur'}).replace(' ','T').slice(0,16),
- audience:a.audience,registrationLink:a.registration_link || '',plannedHours:Number(a.planned_hours),adminComment:a.admin_comment,posterUrl:a.poster_url || '',cancelledAt:a.cancelled_at,
+ registrationType:a.registration_settings?(a.registration_settings.paid?'paid-in-person':'free-online'):'',registrationFee:a.registration_settings?.fee||'',paymentInstructions:a.registration_settings?.instructions||'',registrationInstructions:a.registration_settings?.generalInstructions||'',registrationMethod:a.registration_settings?.enabled?(a.registration_settings.website?'website':'google'):'closed',registrationGoogleUrl:a.registration_settings?.googleUrl||a.registration_link||'',registrationPhone:!!a.registration_settings?.askPhone,registrationNotes:!!a.registration_settings?.askNotes,audience:a.audience,registrationLink:a.registration_link || '',plannedHours:Number(a.planned_hours),adminComment:a.admin_comment,posterUrl:a.poster_url || '',cancelledAt:a.cancelled_at,
  registrationDeadline:a.registration_deadline?new Date(a.registration_deadline).toLocaleString('sv-SE',{timeZone:'Asia/Kuala_Lumpur'}).replace(' ','T').slice(0,16):'',capacity:a.capacity || '',
  role:a.trainers.find(t=>t.trainerId===user.id)?.role || 'Trainer',completion:{status:a.completion_status,venue:a.actual_venue,participants:a.participants,hours:Number(a.actual_hours),photos:a.photos || [],adminComment:a.completion_comment}})),
  accessRequests:admin?(await pool.query('SELECT *,claimed_certificate_ref AS "certificateRef",submitted_at AS "requestedAt",admin_comment AS "adminComment" FROM trainer_access_requests ORDER BY submitted_at DESC')).rows:[],
@@ -42,7 +43,7 @@ export async function snapshot(user) {
 }
 export async function portalHandler(req,res,url,send) {
  if(req.method==='GET' && url.pathname==='/api/trainers') return send(res,200,(await pool.query('SELECT * FROM public_trainers')).rows);
- if(req.method==='GET' && url.pathname==='/api/activities') return send(res,200,(await pool.query("SELECT a.id,a.title,a.starts_at,a.type,a.mode,a.venue,a.city,a.language,a.audience,a.description,a.poster_url,CASE WHEN a.cancelled_at IS NULL THEN a.registration_link ELSE NULL END AS registration_link,a.status,a.cancelled_at,a.cancellation_reason,a.registration_deadline,a.capacity,coalesce((SELECT jsonb_agg(jsonb_build_object('trainerId',t.trainer_id,'role',t.role,'name',u.name)) FROM activity_trainers t LEFT JOIN users u ON u.id=t.trainer_id WHERE t.activity_id=a.id),'[]') AS trainers FROM activities a WHERE a.status IN ('published','completed','verified','archived') AND a.published_at IS NOT NULL")).rows);
+ if(req.method==='GET' && url.pathname==='/api/activities') return send(res,200,(await pool.query("SELECT (SELECT jsonb_build_object('paid',s.paid,'enabled',s.enabled,'fee',s.fee) FROM event_registration_settings s WHERE s.activity_id=a.id) AS registration_settings,a.id,a.title,a.starts_at,a.type,a.mode,a.venue,a.city,a.language,a.audience,a.description,a.poster_url,CASE WHEN a.cancelled_at IS NULL THEN a.registration_link ELSE NULL END AS registration_link,a.status,a.cancelled_at,a.cancellation_reason,a.registration_deadline,a.capacity,coalesce((SELECT jsonb_agg(jsonb_build_object('trainerId',t.trainer_id,'role',t.role,'name',u.name)) FROM activity_trainers t LEFT JOIN users u ON u.id=t.trainer_id WHERE t.activity_id=a.id),'[]') AS trainers FROM activities a WHERE a.status IN ('published','completed','verified','archived') AND a.published_at IS NOT NULL")).rows);
  const user=await currentUser(req); if(!user) fail('Please sign in',401);
  if(req.method==='GET' && url.pathname==='/api/portal/trainers') return send(res,200,(await pool.query("SELECT u.id,u.name,p.city,p.language FROM approved_trainer_accounts u JOIN trainer_profiles p ON p.id=u.id ORDER BY u.name")).rows);
  if(req.method==='GET' && url.pathname==='/api/portal') return send(res,200,await snapshot(user));
@@ -117,6 +118,20 @@ export async function portalHandler(req,res,url,send) {
     ON CONFLICT(id) DO UPDATE SET title=excluded.title,starts_at=excluded.starts_at,type=excluded.type,mode=excluded.mode,venue=excluded.venue,language=excluded.language,audience=excluded.audience,description=excluded.description,registration_link=excluded.registration_link,planned_hours=excluded.planned_hours,city=excluded.city,poster_url=excluded.poster_url
     WHERE activities.created_by=$2 OR $15::boolean RETURNING id`,[id,user.id,a.title,a.date,a.type,a.mode,a.venue,a.language,a.audience,a.description,a.registrationLink,a.plannedHours,a.city || '',a.posterUrl || null,admin]);
    if(!saved.rowCount) fail('Only the activity owner can edit this record',403);
+   if(admin){
+    let paid;try{paid=validateEventPricing(a.registrationType,a.mode);}catch(e){fail(e.message);}
+    const oldSettings=(await db.query('SELECT paid FROM event_registration_settings WHERE activity_id=$1 FOR UPDATE',[id])).rows[0];
+    if(oldSettings&&oldSettings.paid!==paid&&(await db.query('SELECT 1 FROM event_participants WHERE activity_id=$1 LIMIT 1',[id])).rowCount)fail('Cannot change free/paid classification after registrations exist.');
+    if(String(a.registrationFee||'').length>100||String(a.paymentInstructions||'').length>4000)fail('Fee or payment instructions are too long');
+    await db.query('INSERT INTO event_registration_settings(activity_id,paid,fee,instructions,updated_by) VALUES($1,$2,$3,$4,$5) ON CONFLICT(activity_id) DO UPDATE SET paid=$2,fee=$3,instructions=$4,updated_by=$5,updated_at=now()',[id,paid,a.registrationFee||'',a.paymentInstructions||'',user.id]);
+    if(!['website','google','closed'].includes(a.registrationMethod))fail('Choose a registration method.');
+    const google=String(a.registrationGoogleUrl??a.registrationLink??'').trim();
+    if(a.registrationMethod==='google'&&!/^https?:\/\//i.test(google))fail('Enter a valid Google Form link.');
+    if(google){try{const url=new URL(google);if(!['http:','https:'].includes(url.protocol))throw Error();}catch{fail('Enter a valid registration URL');}}
+    if(String(a.registrationInstructions||'').length>4000)fail('Registration instructions are too long');
+    await db.query('UPDATE event_registration_settings SET enabled=$2,website_enabled=$3,google_url=$4,fee=$5,instructions=$6,general_instructions=$7,ask_phone=$8,ask_notes=$9 WHERE activity_id=$1',[id,a.registrationMethod!=='closed',a.registrationMethod==='website',a.registrationMethod==='google'?google:'',paid?(a.registrationFee||''):'',paid?(a.paymentInstructions||''):'',a.registrationInstructions||'',!!a.registrationPhone,!!a.registrationNotes]);
+    await db.query('UPDATE activities SET registration_link=$2 WHERE id=$1',[id,a.registrationMethod==='google'?google:null]);
+   }
    if(a.registrationDeadline && new Date(a.registrationDeadline)>new Date(a.date)) fail('Registration deadline must be before the activity');
    if(a.capacity && (!Number.isInteger(Number(a.capacity)) || Number(a.capacity)<=0)) fail('Capacity must be a positive integer');
    await db.query("UPDATE activities SET registration_deadline=$2::timestamp AT TIME ZONE 'Asia/Kuala_Lumpur',capacity=$3,updated_at=now() WHERE id=$1",[id,a.registrationDeadline || null,a.capacity || null]);
