@@ -533,12 +533,11 @@ export default function Activities({
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem", flexWrap: "wrap", gap: "1rem" }}>
         <div>
           <h1 style={{ margin: 0 }}>{pageTitle || (admin ? "Events & workshops" : "My workshops")}</h1>
-          <p style={{ margin: "0.25rem 0 0", color: "var(--color-neutral-600)", fontSize: "0.95rem" }}>
-            {pageSubtitle ||
-              (admin
-                ? "Add and manage community events, workshops, dialogues and online sessions."
-                : "Add the workshops and seminars you will run. RCBC checks them before they appear on the public Education & Events page.")}
-          </p>
+          {(admin || pageSubtitle) && (
+            <p style={{ margin: "0.25rem 0 0", color: "var(--color-neutral-600)", fontSize: "0.95rem" }}>
+              {pageSubtitle || "Add and manage community events, workshops, dialogues and online sessions."}
+            </p>
+          )}
         </div>
         <button
           className="tp-btn"
