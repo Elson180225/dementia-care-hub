@@ -51,13 +51,14 @@ export async function portalHandler(req,res,url,send) {
  const action=await body(req); const admin=user.role==='admin';
  await transaction(async db=>{
   const p=(await db.query('SELECT * FROM trainer_profiles WHERE id=$1 FOR UPDATE',[user.id])).rows[0];
-  if(action.type==='PROFILE_SUBMIT' || action.type==='PROFILE_SAVE') {
-   if(!p || p.status==='submitted') fail('Profile is awaiting review',409);
+  if(action.type==='PROFILE_SAVE') {
+   // Trainers manage their own profile; no RCBC review step (team decision, Nov 2026).
+   if(!p) fail('Trainer profile required',403);
    const v=action.values;
    validateLinks(v.photoUrl,v.supportingDocuments || []);
    await validateFileLinks(db,user,[v.photoUrl,...(v.supportingDocuments || [])]);
-   if(action.type==='PROFILE_SUBMIT' && (!v.city?.trim() || !v.shortProfile?.trim())) fail('City and short profile are required');
-   await db.query("UPDATE trainer_profiles SET city=$2,language=$3,short_profile=$4,qualifications=$5,experience=$6,photo_url=$7,supporting_documents=$8,status=$9,admin_comment='',updated_at=now() WHERE id=$1",[user.id,v.city,v.language,v.shortProfile,v.qualifications,v.experience,v.photoUrl || null,JSON.stringify(v.supportingDocuments || []),action.type==='PROFILE_SAVE'?'draft':'submitted']); return;
+   if(!v.city?.trim() || !v.shortProfile?.trim()) fail('City and short profile are required');
+   await db.query("UPDATE trainer_profiles SET city=$2,language=$3,short_profile=$4,qualifications=$5,experience=$6,photo_url=$7,supporting_documents=$8,status='approved',admin_comment='',updated_at=now() WHERE id=$1",[user.id,v.city.trim(),v.language,v.shortProfile.trim(),v.qualifications,v.experience,v.photoUrl || null,JSON.stringify(v.supportingDocuments || [])]); return;
   }
   if(action.type==='LISTING_REQUEST' || action.type==='LISTING_WITHDRAW') {
    if(admin || !p) fail('Trainer profile required',403);

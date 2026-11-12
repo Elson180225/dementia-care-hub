@@ -43,7 +43,6 @@ export default function Conducted({admin=false}) {
   return (
     <>
       <h1>Completed workshops</h1>
-      <p>When a workshop or seminar has finished, add how it went here. The title, date and language are filled in for you.</p>
       <ul className="tp-cards">
         {eligible.map((a) => (
           <li key={a.id} className="tp-card">

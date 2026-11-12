@@ -1,8 +1,9 @@
 import UploadField from "../UploadField";
 import { useState } from "react";
 import { useTrainer } from "../TrainerContext";
-import { LANGUAGES, STATUS_LABEL } from "../constants";
-import { Field, StatusChip } from "../ui";
+import { LANGUAGES } from "../constants";
+import { Field } from "../ui";
+import "./MyProfile.css";
 
 const CERT_LABEL = { pending: "Waiting for approval", certified: "Certified", suspended: "Suspended" };
 
@@ -20,39 +21,43 @@ export default function MyProfile() {
   const [uploading,setUploading]=useState(0);
   const uploadBusy=busy=>setUploading(n=>n+(busy?1:-1));
   const { profile } = state;
-  const [values, setValues] = useState({
-    city: profile.city, language: profile.language, shortProfile: profile.shortProfile,
-    qualifications: profile.qualifications, experience: profile.experience,
-    photoUrl: profile.photoUrl || "", supportingDocuments: profile.supportingDocuments || [],
+  const fromProfile = (p) => ({
+    city: p.city || "", language: p.language || "English", shortProfile: p.shortProfile || "",
+    qualifications: p.qualifications || "", experience: p.experience || "",
+    photoUrl: p.photoUrl || "", supportingDocuments: p.supportingDocuments || [],
   });
+  const [values, setValues] = useState(() => fromProfile(profile));
   const [message, setMessage] = useState("");
   const [consent, setConsent] = useState(false);
-  const locked = profile.status === "submitted";
+  // A profile that has never been completed opens straight in edit mode.
+  const [editing, setEditing] = useState(profile.status !== "approved");
 
   const change = (e) => { setValues({ ...values, [e.target.name]: e.target.value }); setMessage(""); };
 
-  async function submit(e) {
+  function startEditing() {
+    setValues(fromProfile(profile));
+    setMessage("");
+    setEditing(true);
+  }
+
+  async function save(e) {
     e.preventDefault();
-    const draft=e.nativeEvent.submitter?.value==="draft";
-    if (!draft && (!values.city.trim() || !values.shortProfile.trim())) {
+    if (!values.city.trim() || !values.shortProfile.trim()) {
       setMessage("Please fill in your city and a short profile.");
       return;
     }
-    if(!await dispatch({ type: draft?"PROFILE_SAVE":"PROFILE_SUBMIT", values })) return;
-    setMessage(draft?"Draft saved.":"Sent. RCBC will review your profile changes.");
+    if (!await dispatch({ type: "PROFILE_SAVE", values })) return;
+    setEditing(false);
+    setMessage("Profile saved.");
   }
+
+  const initials = (profile.name || "?").split(" ").map((w) => w[0]).join("").slice(0, 2).toUpperCase();
 
   return (
     <>
       <h1>My profile</h1>
-      <p>After RCBC approves it, this profile appears on the public Certified Trainers page.</p>
-      <p><StatusChip status={profile.status} labels={STATUS_LABEL} /></p>
-      {profile.status === "returned" && profile.adminComment && (
-        <p className="tp-note">Comment from RCBC: {profile.adminComment}</p>
-      )}
-
+      {message && <p className="tp-note" role="status">{message}</p>}
       <section className="tp-card">
-        <h2>Checked by RCBC (you can't change these)</h2>
         <dl className="tp-dl">
           <dt>Name</dt><dd>{profile.name}</dd>
           <dt>Certification</dt><dd>{CERT_LABEL[profile.certifiedStatus] ?? profile.certifiedStatus}</dd>
@@ -62,7 +67,6 @@ export default function MyProfile() {
 
       <section className="tp-card">
         <h2>Public listing</h2>
-        <p>Your portal access and your public listing are approved separately. You only appear on the public Certified Trainers page if you agree and RCBC approves it.</p>
         <p><strong>Status:</strong> {LISTING_LABEL[profile.listingStatus] ?? profile.listingStatus}</p>
         {profile.listingComment && <p className="tp-note">Comment from RCBC: {profile.listingComment}</p>}
 
@@ -85,31 +89,65 @@ export default function MyProfile() {
         )}
       </section>
 
-      <form className="tp-card" onSubmit={submit} noValidate>
-        <h2>Details you can change</h2>
-        <Field id="city" label="City / Location">
-          <input id="city" name="city" value={values.city} onChange={change} disabled={locked} />
-        </Field>
-        <Field id="language" label="Language">
-          <select id="language" name="language" value={values.language} onChange={change} disabled={locked}>
-            {LANGUAGES.map((l) => <option key={l}>{l}</option>)}
-          </select>
-        </Field>
-        <Field id="shortProfile" label="Short profile / background">
-          <textarea id="shortProfile" name="shortProfile" rows="4" value={values.shortProfile} onChange={change} disabled={locked} />
-        </Field>
-        <Field id="qualifications" label="Qualifications">
-          <textarea id="qualifications" name="qualifications" rows="3" value={values.qualifications} onChange={change} disabled={locked} />
-        </Field>
-        <Field id="experience" label="Relevant experience">
-          <textarea id="experience" name="experience" rows="3" value={values.experience} onChange={change} disabled={locked} />
-        </Field>
-        <UploadField onBusyChange={uploadBusy} label="Profile photo" kind="photo" value={values.photoUrl} onChange={photoUrl=>setValues({...values,photoUrl})} disabled={locked}/>
-        <UploadField onBusyChange={uploadBusy} label="Supporting documents (private)" kind="document" value={values.supportingDocuments} onChange={supportingDocuments=>setValues({...values,supportingDocuments})} multiple disabled={locked}/>
-        <button className="tp-btn" disabled={locked || uploading>0}>Send to RCBC for review</button>
-        <button className="tp-btn tp-btn-ghost" value="draft" disabled={locked || uploading>0}>Save draft</button>
-        <p role="status" aria-live="polite">{locked ? "Waiting for RCBC to review your changes." : message}</p>
-      </form>
+      {!editing ? (
+        <section className="tp-card">
+          <div className="mp-view">
+            {profile.photoUrl
+              ? <img className="mp-photo" src={profile.photoUrl} alt={`Profile photo of ${profile.name}`} />
+              : <div className="mp-photo mp-initials" aria-hidden="true">{initials}</div>}
+            <div className="mp-details">
+              <h2>{profile.name}</h2>
+              <p className="mp-meta">{profile.city} · {profile.language}</p>
+              <h3>Short profile</h3>
+              <p>{profile.shortProfile || "–"}</p>
+              <h3>Qualifications</h3>
+              <p>{profile.qualifications || "–"}</p>
+              <h3>Relevant experience</h3>
+              <p>{profile.experience || "–"}</p>
+              <h3>Supporting documents (private)</h3>
+              {(profile.supportingDocuments || []).length === 0 ? <p>–</p> : (
+                <ul className="mp-docs">
+                  {profile.supportingDocuments.map((url, i) => (
+                    <li key={url}><a href={url} target="_blank" rel="noreferrer">Document {i + 1}</a></li>
+                  ))}
+                </ul>
+              )}
+              <div className="mp-actions">
+                <button type="button" className="tp-btn" onClick={startEditing}>Edit profile</button>
+              </div>
+            </div>
+          </div>
+        </section>
+      ) : (
+        <form className="tp-card" onSubmit={save} noValidate>
+          <h2>{profile.status === "approved" ? "Edit your profile" : "Complete your profile"}</h2>
+          <Field id="city" label="City / Location (required)">
+            <input id="city" name="city" value={values.city} onChange={change} />
+          </Field>
+          <Field id="language" label="Language">
+            <select id="language" name="language" value={values.language} onChange={change}>
+              {LANGUAGES.map((l) => <option key={l}>{l}</option>)}
+            </select>
+          </Field>
+          <Field id="shortProfile" label="Short profile / background (required)">
+            <textarea id="shortProfile" name="shortProfile" rows="4" value={values.shortProfile} onChange={change} />
+          </Field>
+          <Field id="qualifications" label="Qualifications">
+            <textarea id="qualifications" name="qualifications" rows="3" value={values.qualifications} onChange={change} />
+          </Field>
+          <Field id="experience" label="Relevant experience">
+            <textarea id="experience" name="experience" rows="3" value={values.experience} onChange={change} />
+          </Field>
+          <UploadField onBusyChange={uploadBusy} label="Profile photo" kind="photo" value={values.photoUrl} onChange={photoUrl=>setValues({...values,photoUrl})} />
+          <UploadField onBusyChange={uploadBusy} label="Supporting documents (private)" kind="document" value={values.supportingDocuments} onChange={supportingDocuments=>setValues({...values,supportingDocuments})} multiple />
+          <div className="mp-actions">
+            <button className="tp-btn" disabled={uploading > 0}>Save profile</button>
+            {profile.status === "approved" && (
+              <button type="button" className="tp-btn tp-btn-ghost" onClick={() => { setEditing(false); setMessage(""); }}>Cancel</button>
+            )}
+          </div>
+        </form>
+      )}
     </>
   );
 }
