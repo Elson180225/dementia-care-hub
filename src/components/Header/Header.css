@@ -42,7 +42,8 @@
 }
 
 .header-container {
-  width: min(94%, 1280px);
+  /* Allow the navigation to use the full desktop width before collapsing. */
+  width: min(calc(100% - 48px), 1860px);
 
   margin: 0 auto;
 }
@@ -65,7 +66,7 @@
   align-items: center;
   justify-content: space-between;
 
-  gap: 20px;
+  gap: 16px;
 
   color: var(--color-neutral-600);
 
@@ -78,6 +79,8 @@
   align-items: center;
 
   gap: 8px;
+  min-width: 0;
+  flex-shrink: 0;
 }
 
 .utility-nav {
@@ -86,6 +89,7 @@
   gap: 10px;
   font-size: 16px;
   font-weight: 700;
+  text-transform: uppercase;
   white-space: nowrap;
 }
 
@@ -237,6 +241,8 @@
 
 .language-wrapper {
   position: relative;
+  flex: 0 0 186px;
+  width: 186px;
 }
 
 .language-wrapper > button {
@@ -246,14 +252,21 @@
 
   color: var(--color-purple-700);
 
+  width: 100%;
+  min-height: 40px;
   padding: 8px 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
 
   font-size: 16px;
   font-weight: 500;
+  white-space: nowrap;
 
   cursor: pointer;
 
-  border-radius: 6px;
+  border-radius: 999px;
 
   transition:
     background 0.2s ease,
@@ -331,13 +344,13 @@
 }
 
 .main-header-inner {
-  min-height: 92px;
+  min-height: 112px;
 
   display: flex;
 
   align-items: center;
 
-  gap: 26px;
+  gap: 20px;
 }
 
 /* ============================================================
@@ -345,7 +358,8 @@
 ============================================================ */
 
 .brand {
-  min-width: 250px;
+  flex: 0 0 238px;
+  min-width: 0;
 
   display: flex;
 
@@ -371,6 +385,7 @@
   display: flex;
 
   flex-direction: column;
+  min-width: 0;
 
   line-height: 1.15;
 }
@@ -397,70 +412,67 @@
    DESKTOP NAVIGATION
 ============================================================ */
 
+/* Align the link group to the right, next to the fixed-width support
+   button, while leaving the brand anchored to the left. */
 .desktop-nav {
-  flex: 1;
+  flex: 1 1 auto;
+  min-width: 0;
 
   display: flex;
-
+  align-self: stretch;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-end;
 
-  gap: 2px;
+  /* Visible breathing room on roomy desktop layouts. Keep the link group
+     right-aligned; the responsive rules below avoid overflowing in Malay. */
+  gap: 24px;
 }
 
 .nav-item {
   position: relative;
+  display: flex;
+  align-self: stretch;
+  align-items: center;
 }
 
 .nav-link {
-  min-height: 92px;
+  min-height: 46px;
+  padding: 11px clamp(9px, 0.75vw, 14px);
 
-  padding: 0 12px;
-
-  display: flex;
-
+  display: inline-flex;
   align-items: center;
-
+  justify-content: center;
   gap: 5px;
 
   color: var(--color-purple-700);
-
   text-decoration: none;
-
-  font-size: 16px;
+  font-size: clamp(14.5px, 0.90vw, 17px);
   font-weight: 650;
-
+  line-height: 1.2;
   white-space: nowrap;
 
-  border-bottom: 3px solid transparent;
+  border-radius: 999px;
+  border: 0;
+  background: transparent;
 
-  transition:
-    color 0.2s ease,
-    border-color 0.2s ease,
-    background 0.2s ease;
+  transition: color 0.2s ease, background-color 0.2s ease;
 }
 
 .nav-menu-trigger {
-  border: 0;
-
-  background: transparent;
-
   cursor: pointer;
-
   font-family: inherit;
 }
 
-.nav-link:hover {
-  color: var(--color-purple-600);
-
-  border-bottom-color: var(--color-gold-500);
-
-  background: var(--color-neutral-50);
+.nav-link:hover,
+.nav-link:focus-visible,
+.nav-item:hover > .nav-link,
+.nav-item:focus-within > .nav-link {
+  color: var(--color-purple-700);
+  background: var(--color-purple-100, #f3eaf8);
 }
 
 .nav-link span {
   font-size: 16px;
-
   opacity: 0.75;
 }
 
@@ -500,7 +512,7 @@
   z-index: 2000;
 }
 
-.nav-item:last-child .dropdown-menu {
+.nav-item:nth-last-child(-n + 2) .dropdown-menu {
   left: auto;
   right: 0;
 }
@@ -563,11 +575,16 @@
 ============================================================ */
 
 .support-btn {
-  flex-shrink: 0;
+  flex: 0 0 210px;
+  width: 210px;
+  min-height: 56px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 15px;
+  text-align: center;
 
-  padding: 13px 18px;
-
-  border-radius: 8px;
+  border-radius: 14px;
 
   background: var(--color-purple-600);
 
@@ -676,12 +693,49 @@
    TABLET
 ============================================================ */
 
-@media (max-width: 1150px) {
+/* Progressively use the available space instead of abruptly cancelling
+   desktop navigation gaps at a breakpoint. The longest Malay labels set
+   the safe minimum; roomy widths retain a noticeably wider separation. */
+@media (min-width: 1651px) and (max-width: 1850px) {
+  .desktop-nav { gap: clamp(2px, calc(12vw - 198px), 24px); }
+}
+
+@media (min-width: 1591px) and (max-width: 1650px) {
+  .desktop-nav { gap: clamp(0px, calc(8vw - 127px), 5px); }
+}
+
+/* Allow moderate browser zoom without hiding the full navigation. */
+@media (min-width: 1361px) and (max-width: 1590px) {
+  .main-header-inner { gap: 12px; }
+  .brand { flex-basis: 192px; gap: 8px; }
+  .brand-logo { width: 48px; height: 48px; }
+  .brand-text strong { font-size: 15px; }
+  .brand-text span { font-size: 14px; }
+  .nav-link { padding: 10px 4px; font-size: clamp(14px, 0.94vw, 15px); }
+  .support-btn { flex-basis: 176px; width: 176px; font-size: 14px; }
+
+  /* Malay takes the most horizontal room at this width. */
+  .desktop-nav { gap: clamp(0px, calc(16vw - 217.6px), 24px); }
+
+  /* Shorter English and Chinese labels can use the otherwise empty room.
+     Language selector and support button placement remain unchanged. */
+  html:lang(en) .desktop-nav { gap: clamp(10px, calc(16vw - 207px), 24px); }
+  html:lang(zh) .desktop-nav { gap: clamp(14px, calc(16vw - 203px), 24px); }
+}
+
+/* Browser zoom reduces the effective CSS viewport width. Switch
+   before the longest translated labels collide with the support button. */
+@media (max-width: 1360px) {
+  .main-header-inner {
+    min-height: 92px;
+  }
+
   .desktop-nav {
     display: none;
   }
 
   .brand {
+    flex: 0 1 auto;
     min-width: 0;
   }
 
@@ -695,6 +749,9 @@
 
   .mobile-nav {
     display: block;
+    max-height: min(70dvh, calc(100dvh - 140px));
+    overflow-y: auto;
+    overscroll-behavior: contain;
 
     padding:
       12px 5% 20px;
@@ -767,10 +824,37 @@
    MOBILE
 ============================================================ */
 
+/* The utility text is wider than the available space at tablet widths. */
+@media (max-width: 1100px) {
+  .top-bar-inner > span {
+    display: none;
+  }
+
+  .top-bar-inner {
+    justify-content: flex-end;
+  }
+}
+
+/* Preserve utility/header spacing at narrower viewport widths. */
+@media (max-width: 1000px) {
+  .language-wrapper {
+    flex: 0 0 170px;
+    width: 170px;
+  }
+
+  .top-actions .animated-search-button:hover,
+  .top-actions .animated-search-button:focus-visible {
+    width: 42px;
+  }
+
+  .top-actions .animated-search-text {
+    display: none;
+  }
+}
+
 @media (max-width: 700px) {
   .header-container {
-    width:
-      min(92%, 1280px);
+    width: calc(100% - 24px);
   }
 
   .top-bar-inner {
@@ -784,19 +868,34 @@
   }
 
   .top-actions {
-    gap: 4px;
-    flex-wrap: wrap;
-    justify-content: flex-end;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 176px;
+    grid-template-rows: 40px auto;
+    column-gap: 4px;
+    row-gap: 2px;
+    align-items: center;
     width: 100%;
+    flex-shrink: 1;
   }
 
   .utility-nav {
-    margin-right: auto;
-    gap: 6px;
-    font-size: 16px;
+    grid-column: 1 / -1;
+    grid-row: 2;
+    width: 100%;
+    margin: 0;
+    justify-content: center;
+    gap: 8px;
+    font-size: clamp(12px, 2.9vw, 14px);
+    flex-wrap: wrap;
+    white-space: normal;
   }
 
+  .utility-nav a { padding: 5px 0; }
+
   .top-actions .animated-search-button {
+    grid-column: 1;
+    grid-row: 1;
+    justify-self: end;
     width: 40px;
     height: 40px;
   }
@@ -817,9 +916,15 @@
     font-size: 16px;
   }
 
+  .language-wrapper {
+    grid-column: 2;
+    grid-row: 1;
+    flex: none;
+    width: 176px;
+  }
+
   .language-wrapper > button {
     font-size: 16px;
-
     padding: 7px 8px;
   }
 
@@ -830,7 +935,8 @@
   }
 
   .brand {
-    flex: 1;
+    flex: 1 1 auto;
+    min-width: 0;
 
     gap: 10px;
   }
@@ -842,6 +948,7 @@
 
   .brand-text strong {
     font-size: 16px;
+    overflow-wrap: anywhere;
   }
 
   .brand-text span {
@@ -865,6 +972,16 @@
 ============================================================ */
 
 @media (max-width: 430px) {
+  /* Keep long translated utility links on separate lines, not off-screen. */
+  .utility-nav {
+    justify-content: center;
+    gap: 8px;
+  }
+
+  .utility-nav > span {
+    display: none;
+  }
+
   .brand-text span {
     display: none;
   }
