@@ -78,4 +78,44 @@ fieldset.tp-field legend { font-weight: 700; padding: 0 6px; }
 .tp-page-btn:disabled { opacity: 0.4; cursor: not-allowed; }
 .tp-badge-mode { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 0.78rem; font-weight: 700; }
 .tp-badge-online { background: #e0f2fe; color: #0369a1; }
-.tp-badge-physical { background: #dcfce7; color: #15803d; }
+.tp-badge-physical { background: #dcfce7; color: #15803d; }
+
+/* Portal shell: sidebar menu + content area (Admin Dashboard and Trainer Portal). */
+.tp-shell { display: grid; grid-template-columns: 260px minmax(0, 1fr); min-height: 100vh; padding: 0; }
+.tp-sidebar { position: sticky; top: 0; height: 100vh; display: flex; flex-direction: column; gap: 20px; padding: 24px 16px; background: #fff; border-right: 1px solid var(--color-neutral-200); overflow-y: auto; }
+.tp-sidebar-brand { display: grid; gap: 2px; padding: 0 10px 16px; border-bottom: 1px solid var(--color-neutral-200); }
+.tp-sidebar-eyebrow { font-size: 0.72rem; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase; color: var(--color-gold-700); }
+.tp-sidebar-brand strong { font-family: Georgia, "Times New Roman", serif; font-size: 1.2rem; line-height: 1.25; color: var(--color-purple-700); }
+.tp-sidebar-nav { display: grid; align-content: start; gap: 18px; flex: 1; }
+.tp-sidebar-group { display: grid; gap: 2px; }
+.tp-sidebar-label { padding: 0 12px 4px; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--color-neutral-600); }
+.tp-sidebar-nav a { display: flex; align-items: center; gap: 12px; min-height: 44px; padding: 0 12px; border-radius: 10px; color: var(--color-neutral-700); font-size: 0.95rem; font-weight: 600; text-decoration: none; transition: background-color 0.15s ease, color 0.15s ease; }
+.tp-sidebar-nav a svg { flex: 0 0 auto; color: var(--color-purple-500); }
+.tp-sidebar-nav a:hover { background: var(--color-purple-100); color: var(--color-purple-700); }
+.tp-sidebar-nav a[aria-current="page"] { background: var(--color-purple-600); color: #fff; font-weight: 700; box-shadow: 0 2px 6px rgba(93, 47, 145, 0.25); }
+.tp-sidebar-nav a[aria-current="page"] svg { color: var(--color-gold-300); }
+.tp-sidebar-nav a:focus-visible, .tp-sidebar-signout:focus-visible { outline: 3px solid #a66b00; outline-offset: 2px; }
+.tp-sidebar-text { flex: 1; }
+.tp-sidebar-user { display: grid; gap: 2px; padding: 16px 10px 0; border-top: 1px solid var(--color-neutral-200); font-size: 0.9rem; }
+.tp-sidebar-user span { color: var(--color-neutral-600); }
+.tp-sidebar-user strong { color: var(--color-neutral-900); overflow-wrap: anywhere; }
+.tp-sidebar-signout { display: inline-flex; align-items: center; justify-content: center; gap: 8px; margin-top: 10px; min-height: 40px; padding: 0 12px; border: 1px solid var(--color-purple-300); border-radius: 8px; background: #fff; color: var(--color-purple-700); font-weight: 700; cursor: pointer; }
+.tp-sidebar-signout:hover { background: var(--color-purple-100); }
+.tp-main { min-width: 0; padding: 36px clamp(20px, 4vw, 48px) 72px; }
+.tp-main > * { max-width: 1100px; }
+@media (prefers-reduced-motion: reduce) { .tp-sidebar-nav a { transition: none; } }
+
+/* Tablets and phones: the sidebar becomes a top bar with a sideways-scrolling menu. */
+@media (max-width: 900px) {
+  .tp-shell { grid-template-columns: minmax(0, 1fr); }
+  .tp-sidebar { position: static; height: auto; flex-direction: row; flex-wrap: wrap; align-items: center; gap: 12px; padding: 14px 16px; border-right: 0; border-bottom: 1px solid var(--color-neutral-200); }
+  .tp-sidebar-brand { flex: 1; padding: 0; border-bottom: 0; }
+  .tp-sidebar-nav { order: 3; flex: 0 0 100%; display: flex; gap: 4px; overflow-x: auto; }
+  .tp-sidebar-group { display: flex; gap: 4px; }
+  .tp-sidebar-label { display: none; }
+  .tp-sidebar-nav a { white-space: nowrap; }
+  .tp-sidebar-user { display: flex; align-items: center; padding: 0; border-top: 0; }
+  .tp-sidebar-user span, .tp-sidebar-user strong { display: none; }
+  .tp-sidebar-signout { margin-top: 0; }
+  .tp-main { padding: 24px 16px 56px; }
+}
