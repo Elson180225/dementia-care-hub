@@ -5,6 +5,7 @@ import { onlineHeadingText } from '../../shared/online-headings';
 import { createPortal } from "react-dom";
 import { Link, useLocation } from "react-router-dom";
 import { useLanguage } from "../i18n/LanguageContext";
+import TrainerDisclaimer from "../components/TrainerDisclaimer";
 
 import educationImage from "../assets/understand-dementia.jpg";
 import trainingImage from "../assets/Group_Photo_2.png";
@@ -3619,6 +3620,13 @@ function CertifiedTrainers() {
               );
             })}
           </div>
+        </div>
+      </section>
+
+      {/* RCBC disclaimer for independently conducted training */}
+      <section>
+        <div className="section-container">
+          <TrainerDisclaimer />
         </div>
       </section>
 

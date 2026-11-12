@@ -1,0 +1,5 @@
+/* RCBC disclaimer for independently conducted training. */
+.trainer-disclaimer { margin: 24px 0; padding: 16px 20px; border-left: 4px solid var(--color-gold-500); border-radius: 10px; background: var(--color-gold-50); color: var(--color-neutral-800); font-size: 0.95rem; line-height: 1.6; }
+.trainer-disclaimer h3 { margin: 0 0 6px; font-size: 1rem; color: var(--color-purple-700); }
+.trainer-disclaimer p { margin: 0 0 8px; }
+.trainer-disclaimer p:last-child { margin-bottom: 0; }

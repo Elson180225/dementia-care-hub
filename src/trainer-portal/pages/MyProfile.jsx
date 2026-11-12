@@ -5,6 +5,7 @@ import { LANGUAGES } from "../constants";
 import { Field } from "../ui";
 import "./MyProfile.css";
 import { ASSESSMENT_LABEL, teachingEligibility } from "../../../shared/teaching-eligibility";
+import TrainerDisclaimer from "../../components/TrainerDisclaimer";
 
 const CERT_LABEL = { pending: "Waiting for approval", certified: "Certified", suspended: "Suspended" };
 
@@ -131,7 +132,7 @@ export default function MyProfile() {
           <dt>Certificate evidence (private)</dt><dd>{profile.certificateEvidenceUrl ? <a href={profile.certificateEvidenceUrl} target="_blank" rel="noreferrer">Open certificate image or PDF</a> : "Not uploaded"}</dd>
           <dt>Certificate number</dt><dd>{profile.certificateRef}</dd>
         </dl>
-        <p>Trainers running independent sessions are responsible for those sessions, not RCBC.</p>
+        <TrainerDisclaimer />
       </section>
 
       <section className="tp-card">
