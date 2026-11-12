@@ -38,6 +38,7 @@ export function buildQueue({ accessRequests, profile, profiles = [profile], acti
         approveLabel: "Approve access",
         canReject: true,
         claimedRef: r.certificateRef,
+        certificateEvidenceUrl: r.certificate_file_id ? `/api/files/${r.certificate_file_id}` : "",
       })
     );
 
@@ -50,7 +51,7 @@ export function buildQueue({ accessRequests, profile, profiles = [profile], acti
   profiles.filter(p => p.listingStatus === "requested").forEach(p => items.push({
     key: `listing-${p.id}`, target: "listing", id: p.id, kind: "Public listing request", title: p.name,
     detail: `${p.city} · consent given ${new Date(p.listingConsentAt).toLocaleDateString("en-MY")}`,
-    approveLabel: "Approve public listing", canReject: true,
+    approveLabel: "Approve public listing", canReject: true, profile: p,
   }));
 
   activities

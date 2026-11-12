@@ -51,6 +51,7 @@ export default function PublishedRecords({ kind, category, slug, title }) {
       </label>
       {shown.map((r) => (
         <article className="tp-card" key={r.id}>
+          <p>{r.is_example ? "Example only - not a real service. RCBC can edit this record." : ""}</p>
           <h3>{r.name || r.title || r.question}</h3>
           <p>{r.answer || r.body?.text || r.description || r.specialist_field}</p>
           {r.city && (

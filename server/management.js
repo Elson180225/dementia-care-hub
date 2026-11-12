@@ -1,3 +1,4 @@
+import { certificateFileId } from './certificate-evidence.js';
 import { randomBytes, randomUUID } from "node:crypto";
 import { pool, transaction } from "./db.js";
 import { body, currentUser, digest, fail } from "./auth.js";
@@ -146,6 +147,16 @@ export async function managementHandler(req, res, url, send) {
                         data.certificateRef?.trim() || null,
                     ],
                 );
+                if (data.certificateEvidenceUrl !== undefined) {
+                    const fileId = await certificateFileId(db, user, data.certificateEvidenceUrl);
+                    await db.query('UPDATE trainer_profiles SET certificate_file_id=$2 WHERE id=$1', [data.id, fileId]);
+                }
+                const details = (await db.query('SELECT * FROM trainer_profiles WHERE id=$1 FOR UPDATE', [data.id])).rows[0];
+                data.assessmentResult ??= details.assessment_result;
+                if (data.healthcareProfessional === undefined) data.healthcareProfessional = details.healthcare_professional;
+                data.independentTeachingScope ??= details.independent_teaching_scope;
+                if (typeof data.assessmentResult !== 'string' || data.assessmentResult.length > 5000 || ![true, false, null].includes(data.healthcareProfessional) || typeof data.independentTeachingScope !== 'string' || data.independentTeachingScope.length > 5000) fail('Enter valid trainer assessment and professional details');
+                await db.query('UPDATE trainer_profiles SET assessment_result=$2,healthcare_professional=$3,independent_teaching_scope=$4 WHERE id=$1', [data.id, data.assessmentResult.trim(), data.healthcareProfessional, data.independentTeachingScope.trim()]);
                 if (data.certifiedStatus !== "certified") {
                     await db.query("DELETE FROM sessions WHERE user_id=$1", [
                         data.id,

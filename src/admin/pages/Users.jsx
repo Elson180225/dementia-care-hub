@@ -1,3 +1,5 @@
+import { Field } from '../../trainer-portal/ui';
+import UploadField from '../../trainer-portal/UploadField';
 import { useState } from 'react';
 import { api, useTrainer } from '../../trainer-portal/TrainerContext';
 
@@ -8,6 +10,7 @@ export default function Users() {
   const { state, refresh } = useTrainer();
   const [editing, setEditing] = useState(null);
   const [message, setMessage] = useState('');
+  const [uploading, setUploading] = useState(false);
   const [busy, setBusy] = useState(false);
   const [link, setLink] = useState('');
 
@@ -53,10 +56,8 @@ export default function Users() {
       <section className="tp-card">
         <h2>RCBC admins</h2>
         <form className="tp-toolbar" onSubmit={invite}>
-          <label className="tp-field" style={{ flex: 1 }}>Invite a new admin by email
-            <input name="email" type="email" required placeholder="name@example.com" />
-          </label>
-          <button className="tp-btn" disabled={busy}>Create invitation link</button>
+          <Field id="invite-email" label="Invite a new admin by email"><input id="invite-email" name="email" type="email" required placeholder="name@example.com" /></Field>
+          <button className="tp-btn" disabled={busy || uploading}>Create invitation link</button>
         </form>
         {link && <p>Invitation link: <a href={link}>{link}</a></p>}
         <div className="tp-table-wrap">
@@ -94,7 +95,7 @@ export default function Users() {
                   <td>{u.enabled ? 'Can sign in' : 'Access turned off'}</td>
                   <td>
                     <button className="tp-btn tp-btn-ghost" style={{ minHeight: 36, padding: '4px 12px' }}
-                      onClick={() => setEditing({ ...u, certifiedStatus: u.certified_status || 'pending', certificateRef: u.certificate_ref || '', comment: '' })}>
+                      disabled={busy || uploading} onClick={() => setEditing({ ...u, certifiedStatus: u.certified_status || 'pending', certificateRef: u.certificate_ref || '', assessmentResult: u.assessment_result || '', healthcareProfessional: u.healthcare_professional ?? null, independentTeachingScope: u.independent_teaching_scope || '', certificateEvidenceUrl: u.certificate_file_id ? '/api/files/'+u.certificate_file_id : '', comment: '' })}>
                       Manage access
                     </button>
                   </td>
@@ -108,29 +109,28 @@ export default function Users() {
         {editing && (
           <form className="tp-card" onSubmit={save}>
             <h2>Manage access: {editing.name}</h2>
-            <label className="tp-field"><span>Can sign in</span>
-              <input type="checkbox" checked={editing.enabled} onChange={(e) => setEditing({ ...editing, enabled: e.target.checked })} />
-            </label>
-            <label className="tp-field">Certification
-              <select value={editing.certifiedStatus} onChange={(e) => setEditing({ ...editing, certifiedStatus: e.target.value })}>
+            <Field id="user-enabled" label="Can sign in" example="Account access and public listing approval are separate decisions.">
+              <input id="user-enabled" type="checkbox" checked={editing.enabled} onChange={(e) => setEditing({ ...editing, enabled: e.target.checked })} />
+            </Field>
+            <Field id="user-certification" label="Certification" required example="Choose the certification status verified by RCBC."><select id="user-certification" value={editing.certifiedStatus} onChange={(e) => setEditing({ ...editing, certifiedStatus: e.target.value })}>
                 {Object.entries(CERT_LABEL).map(([value, label]) => <option key={value} value={value}>{label}</option>)}
-              </select>
-            </label>
-            <label className="tp-field">Official certificate reference
-              <input value={editing.certificateRef} onChange={(e) => setEditing({ ...editing, certificateRef: e.target.value })} />
-            </label>
-            <label className="tp-field">Note (optional)
-              <textarea value={editing.comment} onChange={(e) => setEditing({ ...editing, comment: e.target.value })} />
-            </label>
+              </select></Field>
+            <Field id="user-certificate-ref" label="Official certificate reference" required={editing.certifiedStatus==='certified'} example="Enter the reference exactly as recorded by RCBC. Required for certified trainers."><input required={editing.certifiedStatus==='certified'} id="user-certificate-ref" value={editing.certificateRef} onChange={(e) => setEditing({ ...editing, certificateRef: e.target.value })} /></Field>
+            <UploadField label="Certificate image or PDF (private, optional)" kind="document" value={editing.certificateEvidenceUrl} onChange={certificateEvidenceUrl=>setEditing({...editing,certificateEvidenceUrl})} onBusyChange={setUploading} disabled={busy || uploading} help="Attach a certificate matching the reference. Certificate evidence remains private and does not approve access or listing automatically."/>
+            <Field id="user-assessment-result" label="Assessment result" example="Record the RCBC-confirmed outcome, for example: Passed practical assessment. Leave blank until assessed."><textarea id="user-assessment-result" value={editing.assessmentResult} onChange={e=>setEditing({...editing,assessmentResult:e.target.value})}/></Field>
+            <Field id="user-healthcare-professional" label="Healthcare professional" example="Choose Yes or No based on confirmed information. Choose Not recorded if unknown."><select id="user-healthcare-professional" value={editing.healthcareProfessional===null?'unknown':String(editing.healthcareProfessional)} onChange={e=>setEditing({...editing,healthcareProfessional:e.target.value==='unknown'?null:e.target.value==='true'})}><option value="unknown">Not recorded</option><option value="true">Yes</option><option value="false">No</option></select></Field>
+            <Field id="user-teaching-scope" label="Approved scope for independent teaching" example="Record what RCBC permits the trainer to teach independently, for example: DCS-Family education."><textarea id="user-teaching-scope" value={editing.independentTeachingScope} onChange={e=>setEditing({...editing,independentTeachingScope:e.target.value})}/></Field>
+            <p>Public listing consent: {editing.listing_consent_at ? new Date(editing.listing_consent_at).toLocaleDateString('en-MY') : 'Not given'}. Listing requests are reviewed separately in Approvals.</p>
+            <Field id="user-note" label="Note (optional)"><textarea id="user-note" value={editing.comment} onChange={(e) => setEditing({ ...editing, comment: e.target.value })} /></Field>
             <div className="tp-actions">
-              <button className="tp-btn" disabled={busy}>Save</button>
+              <button className="tp-btn" disabled={busy || uploading}>Save</button>
               {editing.listing_status === 'approved' && (
-                <button type="button" className="tp-btn tp-btn-ghost" disabled={busy} onClick={() => changeListing('suspended')}>Suspend public listing</button>
+                <button type="button" className="tp-btn tp-btn-ghost" disabled={busy || uploading} onClick={() => changeListing('suspended')}>Suspend public listing</button>
               )}
               {editing.listing_status === 'suspended' && (
-                <button type="button" className="tp-btn tp-btn-ghost" disabled={busy} onClick={() => changeListing('approved')}>Restore public listing</button>
+                <button type="button" className="tp-btn tp-btn-ghost" disabled={busy || uploading} onClick={() => changeListing('approved')}>Restore public listing</button>
               )}
-              <button type="button" className="tp-btn tp-btn-ghost" onClick={() => setEditing(null)}>Cancel</button>
+              <button type="button" className="tp-btn tp-btn-ghost" disabled={busy || uploading} onClick={() => setEditing(null)}>Cancel</button>
             </div>
           </form>
         )}
