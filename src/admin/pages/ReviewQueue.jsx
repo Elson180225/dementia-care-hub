@@ -73,8 +73,11 @@ export default function ReviewQueue() {
             <p className="tp-dev">{item.kind}</p>
             <h2>{item.title}</h2>
             <p>{item.detail}</p>
-            {item.target === "profile" && (
+            {item.profile && (
               <dl className="tp-dl">
+                <dt>Assessment result</dt><dd>{item.profile.assessment_result || "Not recorded"}</dd>
+                <dt>Healthcare professional</dt><dd>{item.profile.healthcare_professional == null ? "Not recorded" : item.profile.healthcare_professional ? "Yes" : "No"}</dd>
+                <dt>Independent teaching scope</dt><dd>{item.profile.independent_teaching_scope || "Not recorded"}</dd>
                 <dt>Short profile</dt><dd>{item.profile.shortProfile || "–"}</dd>
                 <dt>Qualifications</dt><dd>{item.profile.qualifications || "–"}</dd>
                 <dt>Relevant experience</dt><dd>{item.profile.experience || "–"}</dd>
@@ -89,6 +92,8 @@ export default function ReviewQueue() {
                 </dd>
               </dl>
             )}
+            {item.certificateEvidenceUrl && <p><a href={item.certificateEvidenceUrl} target="_blank" rel="noreferrer">Open private certificate image or PDF</a></p>}
+            {item.profile?.certificateEvidenceUrl && <p><a href={item.profile.certificateEvidenceUrl} target="_blank" rel="noreferrer">Open private certificate image or PDF</a></p>}
             {item.target === "access" && (
                 <Field
                     id={`ref-${item.key}`}

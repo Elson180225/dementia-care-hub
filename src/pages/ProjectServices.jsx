@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
+import { Field } from '../trainer-portal/ui';
 import { api } from '../trainer-portal/TrainerContext';
 import { useLanguage } from '../i18n/LanguageContext';
 
@@ -64,48 +65,26 @@ export default function ProjectServices({ certificate = false }) {
         <form className="tp-card" onSubmit={submit}>
           {!token && (
             <>
-              <label className="tp-field">
-                {certificate ? ps.nameOnCertificate || 'Name on certificate' : ps.name || 'Name'}
-                <input name="name" required />
-              </label>
+              <Field id="updates-name" label={certificate ? ps.nameOnCertificate || 'Name on certificate' : ps.name || 'Name'} required><input id="updates-name" name="name" required /></Field>
               {certificate ? (
-                <label className="tp-field">
-                  {ps.certificateRef || 'Certificate reference'}
-                  <input name="certificateRef" required />
-                </label>
+                <Field id="updates-certificateRef" label={ps.certificateRef || 'Certificate reference'} required><input id="updates-certificateRef" name="certificateRef" required /></Field>
               ) : (
                 <>
-                  <label className="tp-field">
-                    {ps.email || 'Email'}
-                    <input name="email" type="email" required />
-                  </label>
-                  <label className="tp-field">
-                    {ps.city || 'City'}
-                    <input name="city" required />
-                  </label>
-                  <label className="tp-field">
-                    {ps.state || 'State'}
-                    <input name="state" required />
-                  </label>
-                  <label className="tp-field">
-                    {ps.preferredLanguage || 'Preferred language'}
-                    <select name="language">
+                  <Field id="updates-email" label={ps.email || 'Email'} required><input id="updates-email" name="email" type="email" required /></Field>
+                  <Field id="updates-city" label={ps.city || 'City'} required><input id="updates-city" name="city" required /></Field>
+                  <Field id="updates-state" label={ps.state || 'State'} required><input id="updates-state" name="state" required /></Field>
+                  <Field id="updates-language" label={ps.preferredLanguage || 'Preferred language'} required><select required id="updates-language" name="language">
                       {langOptions.map((x) => (
                         <option key={x}>{x}</option>
                       ))}
-                    </select>
-                  </label>
+                    </select></Field>
                   <p>
                     {ps.consentInfo ||
                       'Receive updates and reminders about upcoming webinars, seminars, education and project activities. RCBC stores your name, email, locality, language and consent for this purpose. Authorised administrators and our email provider process these details. No public account is created. Every reminder includes an unsubscribe link. Contact RCBC through the Contact page for correction or deletion requests.'}
                   </p>
-                  <label className="tp-field">
-                    <span>
-                      <input name="consent" type="checkbox" required />{' '}
-                      {ps.consentCheckbox ||
-                        'I agree to receive project updates from RCBC by email.'}
-                    </span>
-                  </label>
+                  <Field id="updates-consent" label={ps.consentCheckbox || 'I agree to receive project updates from RCBC by email.'} required example="Tick this box only if you want email updates. You can unsubscribe using the link shown after signup or in any automatic reminder.">
+                    <input id="updates-consent" name="consent" type="checkbox" required />
+                  </Field>
                 </>
               )}
             </>

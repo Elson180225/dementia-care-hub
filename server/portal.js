@@ -2,6 +2,7 @@ import { pool, transaction } from './db.js';
 import { currentUser, body, fail } from './auth.js';
 import { isAllowedOrigin } from './origin.js';
 import { decision as logDecision } from './decisions.js';
+import { certificateFileId } from './certificate-evidence.js';
 import { validateFileLinks } from './uploads.js';
 function validateLinks(single, list = []) {
  if(!Array.isArray(list) || list.some(x=>typeof x!=='string')) fail('Document and photo links must be a list of URLs');
@@ -11,7 +12,7 @@ function validateLinks(single, list = []) {
   try { new URL(url); } catch { fail('Invalid file URL'); }
  }
 }
-const profile = p => p && ({...p, shortProfile:p.short_profile, certifiedStatus:p.certified_status, certificateRef:p.certificate_ref || '', adminComment:p.admin_comment, photoUrl:p.photo_url, supportingDocuments:p.supporting_documents, listingStatus:p.listing_status, listingConsentAt:p.listing_consent_at, listingComment:p.listing_comment});
+const profile = p => p && ({...p, shortProfile:p.short_profile, certifiedStatus:p.certified_status, certificateRef:p.certificate_ref || '', adminComment:p.admin_comment, certificateEvidenceUrl:p.certificate_file_id?'/api/files/'+p.certificate_file_id:'', photoUrl:p.photo_url, supportingDocuments:p.supporting_documents, listingStatus:p.listing_status, listingConsentAt:p.listing_consent_at, listingComment:p.listing_comment});
 export async function snapshot(user) {
  const admin=user.role==='admin';
  const profiles=(await pool.query('SELECT p.*,u.name,u.email FROM trainer_profiles p JOIN users u ON u.id=p.id WHERE $1 OR p.id=$2',[admin,user.id])).rows;
@@ -26,7 +27,7 @@ export async function snapshot(user) {
  registrationDeadline:a.registration_deadline?new Date(a.registration_deadline).toLocaleString('sv-SE',{timeZone:'Asia/Kuala_Lumpur'}).replace(' ','T').slice(0,16):'',capacity:a.capacity || '',
  role:a.trainers.find(t=>t.trainerId===user.id)?.role || 'Trainer',completion:{status:a.completion_status,venue:a.actual_venue,participants:a.participants,hours:Number(a.actual_hours),photos:a.photos || [],adminComment:a.completion_comment}})),
  accessRequests:admin?(await pool.query('SELECT *,claimed_certificate_ref AS "certificateRef",submitted_at AS "requestedAt",admin_comment AS "adminComment" FROM trainer_access_requests ORDER BY submitted_at DESC')).rows:[],
- users:admin?(await pool.query('SELECT u.id,u.name,u.email,u.role,u.enabled,p.certified_status,p.certificate_ref,p.listing_status FROM users u LEFT JOIN trainer_profiles p ON p.id=u.id ORDER BY u.created_at DESC')).rows:[],
+ users:admin?(await pool.query('SELECT u.id,u.name,u.email,u.role,u.enabled,p.certified_status,p.certificate_ref,p.listing_status,p.listing_consent_at,p.assessment_result,p.healthcare_professional,p.independent_teaching_scope,p.certificate_file_id FROM users u LEFT JOIN trainer_profiles p ON p.id=u.id ORDER BY u.created_at DESC')).rows:[],
  contributions:(await pool.query('SELECT * FROM annual_trainer_contributions WHERE $1 OR trainer_id=$2 ORDER BY year DESC',[admin,user.id])).rows,
  projectReach:admin?(await pool.query('SELECT * FROM annual_project_reach ORDER BY year DESC')).rows:[],
  maintenance:admin?(await pool.query(`SELECT 'Directory' AS kind,count(*)::int AS count FROM organisations WHERE review_status='needs review' OR (review_status<>'archived' AND next_review_at<=now())
@@ -55,6 +56,10 @@ export async function portalHandler(req,res,url,send) {
    // Trainers manage their own profile; no RCBC review step (team decision, Nov 2026).
    if(!p) fail('Trainer profile required',403);
    const v=action.values;
+   if(v.certificateEvidenceUrl!==undefined) {
+    const fileId=await certificateFileId(db,user,v.certificateEvidenceUrl);
+    await db.query('UPDATE trainer_profiles SET certificate_file_id=$2 WHERE id=$1',[user.id,fileId]);
+   }
    validateLinks(v.photoUrl,v.supportingDocuments || []);
    await validateFileLinks(db,user,[v.photoUrl,...(v.supportingDocuments || [])]);
    if(!v.city?.trim() || !v.shortProfile?.trim()) fail('City and short profile are required');
@@ -94,7 +99,7 @@ export async function portalHandler(req,res,url,send) {
     if(!old || old.status!=='submitted') fail('Request is not awaiting review',409);
     if(decision==='approved' && (!action.certificateRef?.trim() || old.city==='Not provided' || old.claimed_certificate_ref==='Not provided')) fail('Confirm the applicant city and official certificate reference before approving');
     await db.query('UPDATE trainer_access_requests SET status=$2,admin_comment=$3,reviewed_by=$4,reviewed_at=now(),updated_at=now() WHERE id=$1',[id,decision,comment,user.id]);
-    if(decision==='approved') await db.query("UPDATE trainer_profiles SET certified_status='certified',certificate_ref=$2,city=$3 WHERE id=$1",[old.user_id,action.certificateRef.trim(),old.city]);
+    if(decision==='approved') await db.query("UPDATE trainer_profiles SET certified_status='certified',certificate_ref=$2,city=$3,certificate_file_id=$4 WHERE id=$1",[old.user_id,action.certificateRef.trim(),old.city,old.certificate_file_id]);
     else await db.query('DELETE FROM sessions WHERE user_id=$1',[old.user_id]);
     await logDecision(db,user,'trainer_access_requests',id,decision,comment,old.status,decision);return;
    }

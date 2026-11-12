@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { api } from "../../trainer-portal/TrainerContext";
 import { Field, describe } from "../../trainer-portal/ui";
 import { recordTypes } from "../../../shared/admin-records.js";
+import EmailInventory from '../EmailInventory';
 import SubscriberAudience from '../SubscriberAudience';
 
 const ABOUT_SECTIONS = { overview: 'About the project', mission: 'What we aim to do', journey: 'Our journey', organiser: 'Organiser', partner: 'Partner roles', advisors: 'Advisors', supported: 'Supporting organisations', acknowledgements: 'Our thanks' };
@@ -143,20 +144,26 @@ export default function Records() {
         <form className="tp-card" noValidate onSubmit={(e) => { e.preventDefault(); save(); }}>
           {config.fields.map(([name, label, type, required]) => {
             const id = `rec-${name}`;
+            const mandatory = required ||
+              (name === 'admin_comment' && kind === 'enquiries' && v.status !== 'new') ||
+              (name === 'last_reviewed_at' && (v.review_status === 'current' || v.publication_status === 'published')) ||
+              (name === 'source' && v.publication_status === 'published') ||
+              (name === 'reviewer' && kind === 'content_pages' && v.slug?.startsWith('about-') && v.publication_status === 'published') ||
+              (['copyright_permission', 'url'].includes(name) && kind === 'learning_resources' && v.publication_status === 'published');
             const common = {
               id, value: v[name], onChange: (e) => set(name, e.target.value),
+              required: Boolean(mandatory),
               "aria-invalid": Boolean(errors[name]), "aria-describedby": describe(id, errors[name]),
             };
-            const text = label + (required ? "" : " (optional)");
+            const text = label + (mandatory ? "" : " (optional)");
             if (type === "checkbox")
               return (
-                <label key={name} className="tp-field">
-                  <span>{label}</span>
-                  <input type="checkbox" checked={v[name]} onChange={(e) => set(name, e.target.checked)} />
-                </label>
+                <Field key={name} id={id} label={label} example={name === 'is_example' ? 'Keep this ticked for fictional demonstration records. These must not be presented as real services.' : 'Tick this option only when it applies to this record.'}>
+                  <input id={id} type="checkbox" checked={v[name]} onChange={(e) => set(name, e.target.checked)} />
+                </Field>
               );
             return (
-              <Field key={name} id={id} label={text} required={required} error={errors[name]}>
+              <Field key={name} id={id} label={text} required={Boolean(mandatory)} error={errors[name]}>
                 {Array.isArray(type) ? (
                   <select {...common}>{type.map((o) => <option key={o} value={o}>{kind === "enquiries" && name === "status" ? enquiryStatus(o) : o}</option>)}</select>
                 ) : type === "textarea" || type === "array" ? (
@@ -184,6 +191,7 @@ export default function Records() {
   return (
     <>
       <h1>Content &amp; records</h1>
+      <EmailInventory />
       <SubscriberAudience />
       <h2>Website records</h2>
       <p>

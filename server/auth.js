@@ -1,6 +1,7 @@
 import { randomBytes, scryptSync, timingSafeEqual, createHash } from 'node:crypto';
 import { pool, transaction } from './db.js';
 import { isAllowedOrigin } from './origin.js';
+import { storeCertificateEvidence } from './certificate-evidence.js';
 export const digest = value => createHash('sha256').update(value).digest('hex');
 export function hashPassword(password) {
  const salt = randomBytes(16).toString('hex');
@@ -13,9 +14,9 @@ export function checkPassword(password, hash) {
  return actual.length === expected.length && timingSafeEqual(actual,expected);
 }
 export function fail(message, status=400) { throw Object.assign(new Error(message),{status}); }
-export async function body(req) {
+export async function body(req, limit=100000) {
  let value='';
- for await (const chunk of req) { value+=chunk; if(Buffer.byteLength(value)>100000) fail('Request too large',413); }
+ for await (const chunk of req) { value+=chunk; if(Buffer.byteLength(value)>limit) fail('Request too large',413); }
  let parsed;try { parsed=JSON.parse(value || '{}'); } catch { fail('Invalid JSON'); }
  if(!parsed || typeof parsed!=='object' || Array.isArray(parsed)) fail('A JSON object is required');
  return parsed;
@@ -50,7 +51,7 @@ export async function authHandler(req,res,path,send) {
  for(const [ip,value] of attempts) if(value.until<now) attempts.delete(ip);
  const attempt=attempts.get(key) || {count:0,until:now+900000};
  attempts.set(key,attempt); if(++attempt.count>30) fail('Too many attempts. Try again in 15 minutes.',429);
- const data=await body(req);
+ const data=await body(req, ['/api/auth/register','/api/auth/resubmit'].includes(path) ? 12*1024*1024 : 100000);
  const email=String(data.email || '').trim().toLowerCase();
  const password=data.password;
  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || typeof password!=='string' || password.length>256) fail('Enter a valid email and password');
@@ -68,7 +69,8 @@ export async function authHandler(req,res,path,send) {
    await db.query("SELECT set_config('app.actor_id',$1,true)",[user.id]);
    if(!admin) {
     await db.query('INSERT INTO trainer_profiles(id,city) VALUES($1,$2)',[user.id,data.city.trim()]);
-    await db.query('INSERT INTO trainer_access_requests(user_id,name,email,city,claimed_certificate_ref) VALUES($1,$2,$3,$4,$5)',[user.id,data.name.trim(),email,data.city.trim(),data.certificateRef.trim()]);
+    const fileId=await storeCertificateEvidence(db,user.id,data.certificateEvidence);
+    await db.query('INSERT INTO trainer_access_requests(user_id,name,email,city,claimed_certificate_ref,certificate_file_id) VALUES($1,$2,$3,$4,$5,$6)',[user.id,data.name.trim(),email,data.city.trim(),data.certificateRef.trim(),fileId]);
    }
   });
   return send(res,201,{ok:true,message:admin?'Account created. Please sign in.':'Application submitted. RCBC must approve access before you can sign in.'});
@@ -84,9 +86,13 @@ export async function authHandler(req,res,path,send) {
    const old=(await db.query('SELECT * FROM trainer_access_requests WHERE user_id=$1 FOR UPDATE',[user.id])).rows[0];
    if(!old || !['returned','submitted'].includes(old.status)) fail('Only returned or pending applications can be updated',409);
    if(!data.city?.trim() || !data.certificateRef?.trim()) fail('City and certificate reference are required');
+   if(data.certificateEvidence) {
+    const fileId=await storeCertificateEvidence(db,user.id,data.certificateEvidence);
+    await db.query('UPDATE trainer_access_requests SET certificate_file_id=$2 WHERE user_id=$1',[user.id,fileId]);
+   }
    await db.query("UPDATE trainer_access_requests SET city=$2,claimed_certificate_ref=$3,status='submitted',admin_comment='',reviewed_by=NULL,reviewed_at=NULL,updated_at=now() WHERE user_id=$1",[user.id,data.city.trim(),data.certificateRef.trim()]);
   },user.id);
-  const application=(await pool.query('SELECT id,name,email,city,claimed_certificate_ref,status,admin_comment,submitted_at FROM trainer_access_requests WHERE user_id=$1',[user.id])).rows[0];
+  const application=(await pool.query('SELECT id,name,email,city,claimed_certificate_ref,status,admin_comment,submitted_at,certificate_file_id IS NOT NULL AS has_certificate_evidence FROM trainer_access_requests WHERE user_id=$1',[user.id])).rows[0];
   return send(res,200,{application});
  }
  if(user.role==='trainer' && !(await pool.query('SELECT 1 FROM approved_trainer_accounts WHERE id=$1',[user.id])).rowCount) fail('RCBC has not approved your trainer access. Use Check application to see the status and feedback.',403);

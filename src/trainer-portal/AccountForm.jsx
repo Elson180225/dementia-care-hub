@@ -1,3 +1,4 @@
+import CertificateEvidenceInput from "./CertificateEvidenceInput";
 import FieldInfo, { fieldExample } from "../components/FieldInfo";
 import FormFeedback from "../components/FormFeedback";
 import { useId, useState } from 'react';
@@ -9,11 +10,13 @@ export default function AccountForm({role='trainer',signup=false,application=fal
  const [params]=useSearchParams();const navigate=useNavigate();const {refresh,error:sessionError,clearError}=useTrainer();
  const [message,setMessage]=useState('');const [busy,setBusy]=useState(false);const [request,setRequest]=useState(null);
  const [fieldErrors,setFieldErrors]=useState({});const [messageTone,setMessageTone]=useState('error');
+ const [certificateEvidence,setCertificateEvidence]=useState(null),[readingCertificate,setReadingCertificate]=useState(false),[certificateError,setCertificateError]=useState('');
  const [showPassword,setShowPassword]=useState(false);const passwordId=useId();
  const base=role==='admin'?'/admin':'/trainer-portal';
  const signIn=!signup&&!application;
  async function submit(event) {
   event.preventDefault();setMessage('');clearError();setMessageTone('error');
+  if(readingCertificate || certificateError) {setMessage(certificateError || 'Please wait for the certificate file to finish loading.');return;}
   const errors={};
   for(const input of event.currentTarget.elements) {
    if(!input.name || input.disabled || input.validity?.valid) continue;
@@ -29,10 +32,10 @@ export default function AccountForm({role='trainer',signup=false,application=fal
   try {
    const intent=event.nativeEvent.submitter?.value;
    const endpoint=application?(intent==='resubmit'?'resubmit':'application'):signup?(role==='admin'?'admin-register':'register'):'login';
-   const result=await api('/api/auth/'+endpoint,{...values,role});
+   const result=await api('/api/auth/'+endpoint,{...values,role,...((signup && role==='trainer' || endpoint==='resubmit') && certificateEvidence ? {certificateEvidence} : {})});
    setMessageTone('success');
-   if(application) {setRequest(result.application);setMessage(intent==='resubmit'?'Amendments submitted to RCBC.':'Application status loaded.');}
-   else if(signup) setMessage(result.message);
+   if(application) {setRequest(result.application);if(intent==='resubmit') setCertificateEvidence(null);setMessage(intent==='resubmit'?'Amendments submitted to RCBC.':'Application status loaded.');}
+   else if(signup) {setMessage(result.message);setCertificateEvidence(null);}
    else {await refresh();clearError();navigate(base);}
   }catch(e){setMessageTone('error');setMessage(e.message);}finally{setBusy(false);}
  }
@@ -61,10 +64,10 @@ export default function AccountForm({role='trainer',signup=false,application=fal
  </div>
  {(signup && role==='trainer' || application && request && ['submitted','returned'].includes(request.status)) && <>
  <label className="tp-field"><span className="account-field-label">City <span className="required-marker" aria-label="required">*</span><FieldInfo label="City" example={fieldExample("city")} /></span><input name="city" aria-invalid={!!fieldErrors.city} aria-describedby={fieldErrors.city ? `${passwordId}-city-error` : undefined} required defaultValue={request?.city==='Not provided'?'':request?.city || ''}/><FormFeedback id={`${passwordId}-city-error`}>{fieldErrors.city}</FormFeedback></label>
- <label className="tp-field"><span className="account-field-label">Certificate reference <span className="required-marker" aria-label="required">*</span><FieldInfo label="Certificate reference" example={fieldExample("certificateRef")} /></span><input name="certificateRef" aria-invalid={!!fieldErrors.certificateRef} aria-describedby={fieldErrors.certificateRef ? `${passwordId}-certificateRef-error` : undefined} required defaultValue={request?.claimed_certificate_ref==='Not provided'?'':request?.claimed_certificate_ref || ''}/><FormFeedback id={`${passwordId}-certificateRef-error`}>{fieldErrors.certificateRef}</FormFeedback></label></>}
+ <label className="tp-field"><span className="account-field-label">Certificate reference <span className="required-marker" aria-label="required">*</span><FieldInfo label="Certificate reference" example={fieldExample("certificateRef")} /></span><input name="certificateRef" aria-invalid={!!fieldErrors.certificateRef} aria-describedby={fieldErrors.certificateRef ? `${passwordId}-certificateRef-error` : undefined} required defaultValue={request?.claimed_certificate_ref==='Not provided'?'':request?.claimed_certificate_ref || ''}/><FormFeedback id={`${passwordId}-certificateRef-error`}>{fieldErrors.certificateRef}</FormFeedback></label><CertificateEvidenceInput value={certificateEvidence} onChange={setCertificateEvidence} onBusyChange={setReadingCertificate} onError={setCertificateError} disabled={busy || readingCertificate} hasExisting={request?.has_certificate_evidence}/></>}
  {signup && role==='admin' && <label className="tp-field"><span className="account-field-label">RCBC invitation code <span className="required-marker" aria-label="required">*</span><FieldInfo label="RCBC invitation code" example={fieldExample("invitation")} /></span><input name="invitation" aria-invalid={!!fieldErrors.invitation} aria-describedby={fieldErrors.invitation ? `${passwordId}-invitation-error` : undefined} required defaultValue={params.get('invitation') || ''} autoComplete="off"/><FormFeedback id={`${passwordId}-invitation-error`}>{fieldErrors.invitation}</FormFeedback></label>}
- <button className="tp-btn account-submit" disabled={busy}>{busy?'Please wait...':application?'Check status':signup?'Submit registration':role==='admin'?'Sign in to dashboard':'Sign in to trainer portal'}</button>
- {application && request && ['submitted','returned'].includes(request.status) && <button className="tp-btn tp-btn-ghost" value="resubmit" disabled={busy}>Submit amendments</button>}
+ <button className="tp-btn account-submit" disabled={busy || readingCertificate}>{busy?'Please wait...':application?'Check status':signup?'Submit registration':role==='admin'?'Sign in to dashboard':'Sign in to trainer portal'}</button>
+ {application && request && ['submitted','returned'].includes(request.status) && <button className="tp-btn tp-btn-ghost" value="resubmit" disabled={busy || readingCertificate}>Submit amendments</button>}
  {!signIn && <FormFeedback tone={message ? messageTone : 'warning'}>{message || sessionError}</FormFeedback>}</form>
  {request && <section className="tp-note"><h2>Application: {request.status}</h2><p>{request.admin_comment || 'No admin comment.'}</p></section>}
  <div className="tp-actions account-links">{!signIn&&<Link to={base}>Sign in</Link>}{role==='trainer' && <><Link to={base+'/signup'}>Register as a trainer</Link><Link to={base+'/application'}>Check application / submit amendments</Link></>}</div>

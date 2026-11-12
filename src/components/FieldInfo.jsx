@@ -7,6 +7,9 @@ export function fieldExample(name, type) {
  if (/email/.test(key) || type === 'email') return 'Example: name@example.org';
  if (/message|enquiry/.test(key)) return 'Example: I would like to learn more about your upcoming caregiver workshops.';
  if (/invitation/.test(key)) return 'Example: paste the invitation code supplied by your RCBC administrator.';
+ if (/consent/.test(key)) return 'Give consent only when you agree to the stated use of your information. For an existing record, enter the actual consent evidence.';
+ if (/body|content/.test(key)) return 'Enter the approved text for this section. Save as unpublished while it is waiting for review.';
+ if (/organisation|facility/.test(key)) return 'Enter the organisation or facility name exactly as confirmed by your source.';
  if (/certificate/.test(key)) return 'Example: enter the reference exactly as printed on your certificate.';
  if (/name/.test(key)) return 'Example: Alex Tan';
  if (/city/.test(key)) return 'Example: Bintulu';
