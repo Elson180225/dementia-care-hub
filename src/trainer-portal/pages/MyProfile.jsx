@@ -4,6 +4,7 @@ import { useTrainer } from "../TrainerContext";
 import { LANGUAGES } from "../constants";
 import { Field } from "../ui";
 import "./MyProfile.css";
+import { ASSESSMENT_LABEL, teachingEligibility } from "../../../shared/teaching-eligibility";
 
 const CERT_LABEL = { pending: "Waiting for approval", certified: "Certified", suspended: "Suspended" };
 
@@ -62,8 +63,10 @@ export default function MyProfile() {
         <dl className="tp-dl">
           <dt>Name</dt><dd>{profile.name}</dd>
           <dt>Certification</dt><dd>{CERT_LABEL[profile.certifiedStatus] ?? profile.certifiedStatus}</dd>
-          <dt>Assessment result</dt><dd>{profile.assessment_result || "Not recorded"}</dd>
+          <dt>Assessment</dt><dd>{ASSESSMENT_LABEL[profile.assessment_status] ?? "Not assessed yet"}</dd>
+          <dt>Assessment notes</dt><dd>{profile.assessment_result || "Not recorded"}</dd>
           <dt>Healthcare professional</dt><dd>{profile.healthcare_professional == null ? "Not recorded" : profile.healthcare_professional ? "Yes" : "No"}</dd>
+          <dt>Teaching eligibility</dt><dd>{teachingEligibility(profile.assessment_status, profile.healthcare_professional)}</dd>    
           <dt>Independent teaching scope</dt><dd>{profile.independent_teaching_scope || "Not recorded"}</dd>
           <dt>Certificate evidence (private)</dt><dd>{profile.certificateEvidenceUrl ? <a href={profile.certificateEvidenceUrl} target="_blank" rel="noreferrer">Open certificate image or PDF</a> : "Not uploaded"}</dd>
           <dt>Certificate number</dt><dd>{profile.certificateRef}</dd>
