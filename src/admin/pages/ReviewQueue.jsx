@@ -64,10 +64,6 @@ export default function ReviewQueue() {
   return (
     <>
       <h1>Approvals</h1>
-      <p>
-        Approve, return or reject what trainers send in. If you return or reject something, add a
-        short comment so the trainer knows what to change.
-      </p>
 
       {queue.length === 0 && <p className="tp-card">Nothing is waiting for review.</p>}
 

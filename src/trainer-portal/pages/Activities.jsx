@@ -5,6 +5,7 @@ import { useTrainer } from "../TrainerContext";
 import { ACTIVITY_TYPES, LANGUAGES, MODES, STATUS_LABEL } from "../constants";
 import { fmtDate } from "../selectors";
 import { Field, StatusChip, describe } from "../ui";
+import EventCard from "../EventCard";
 
 const ALL_ADMIN_TYPES = [
   ...ACTIVITY_TYPES,
@@ -96,6 +97,7 @@ export default function Activities({
   const { state, dispatch } = useTrainer();
   const addLabel = newButtonLabel || (admin ? "+ New event / workshop" : "+ New workshop / seminar");
   const [uploading, setUploading] = useState(0);
+  const [view, setView] = useState("cards");
   const uploadBusy = (busy) => setUploading((n) => n + (busy ? 1 : -1));
   const [editing, setEditing] = useState(null); // { id?, values }
   const [errors, setErrors] = useState({});
@@ -527,6 +529,131 @@ export default function Activities({
     );
   }
 
+  // Action buttons for one activity, shared by the card and table views.
+  function renderActions(a) {
+    return (
+      <>
+        <div style={{ display: "inline-flex", gap: "6px", flexWrap: "wrap", justifyContent: "flex-end" }}>
+          {admin && <Link className="tp-btn tp-btn-ghost" to={'/admin/participants?activity='+a.id}>Participants</Link>}
+          {(admin ||
+            (!a.cancelledAt &&
+              ["draft", "returned"].includes(a.status) &&
+              a.created_by === state.session?.id)) && (
+            <button
+              type="button"
+              className="tp-btn tp-btn-ghost"
+              style={{ minHeight: "36px", padding: "4px 12px", fontSize: "0.85rem" }}
+              onClick={() => open(a)}
+            >
+              Edit
+            </button>
+          )}
+
+          {(admin ||
+            (["draft", "returned"].includes(a.status) &&
+              a.created_by === state.session?.id)) && (
+            <button
+              type="button"
+              className="tp-btn tp-btn-ghost"
+              style={{ minHeight: "36px", padding: "4px 12px", fontSize: "0.85rem", color: "#b91c1c", borderColor: "#fca5a5" }}
+              onClick={() => setDeletingActivity(a)}
+              title="Permanently delete this activity"
+            >
+              Delete
+            </button>
+          )}
+
+          {admin && (
+            <>
+              {a.status === "approved" && !a.cancelledAt && (
+                <button
+                  type="button"
+                  className="tp-btn"
+                  style={{ minHeight: "36px", padding: "4px 12px", fontSize: "0.85rem" }}
+                  onClick={() => review(a.id, "published")}
+                >
+                  Publish
+                </button>
+              )}
+
+              {a.status === "published" && !a.cancelledAt && (
+                <button
+                  type="button"
+                  className="tp-btn tp-btn-ghost"
+                  style={{ minHeight: "36px", padding: "4px 12px", fontSize: "0.85rem" }}
+                  onClick={() => review(a.id, "unpublished")}
+                >
+                  Unpublish
+                </button>
+              )}
+
+              {["approved", "published"].includes(a.status) &&
+                !a.cancelledAt &&
+                cancelling?.id !== a.id && (
+                  <button
+                    type="button"
+                    className="tp-btn tp-btn-ghost"
+                    style={{ minHeight: "36px", padding: "4px 12px", fontSize: "0.85rem", color: "#b91c1c", borderColor: "#fca5a5" }}
+                    onClick={() => setCancelling({ id: a.id, reason: "", error: "" })}
+                  >
+                    Cancel
+                  </button>
+                )}
+
+              {(a.status === "verified" || (a.cancelledAt && a.status !== "archived")) && (
+                <button
+                  type="button"
+                  className="tp-btn tp-btn-ghost"
+                  style={{ minHeight: "36px", padding: "4px 12px", fontSize: "0.85rem" }}
+                  onClick={() => review(a.id, "archived")}
+                >
+                  Archive
+                </button>
+              )}
+            </>
+          )}
+        </div>
+
+        {/* Cancel prompt sub-row */}
+        {cancelling?.id === a.id && (
+          <div style={{ marginTop: "10px", textAlign: "left", background: "#fef2f2", border: "1px solid #fecaca", padding: "10px", borderRadius: "8px" }}>
+            <Field id={`cancel-${a.id}`} label="Reason for cancellation" error={cancelling.error}>
+              <textarea
+                id={`cancel-${a.id}`}
+                rows="2"
+                value={cancelling.reason}
+                onChange={(e) =>
+                  setCancelling({ ...cancelling, reason: e.target.value, error: "" })
+                }
+                aria-invalid={Boolean(cancelling.error)}
+                aria-describedby={describe(`cancel-${a.id}`, cancelling.error)}
+                placeholder="e.g. Rescheduled due to speaker availability..."
+              />
+            </Field>
+            <div className="tp-actions" style={{ marginTop: "8px" }}>
+              <button
+                type="button"
+                className="tp-btn"
+                style={{ minHeight: "36px", padding: "4px 12px", fontSize: "0.85rem", background: "#b91c1c" }}
+                onClick={confirmCancel}
+              >
+                Confirm
+              </button>
+              <button
+                type="button"
+                className="tp-btn tp-btn-ghost"
+                style={{ minHeight: "36px", padding: "4px 12px", fontSize: "0.85rem" }}
+                onClick={() => setCancelling(null)}
+              >
+                Keep Activity
+              </button>
+            </div>
+          </div>
+        )}
+      </>
+    );
+  }
+
   // LISTING VIEW
   return (
     <>
@@ -676,6 +803,10 @@ export default function Activities({
           {hasActiveFilters && " (filtered)"}
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+          <div className="ev-view-toggle" role="group" aria-label="Choose view">
+            <button type="button" aria-pressed={view === "cards"} onClick={() => setView("cards")}>Cards</button>
+            <button type="button" aria-pressed={view === "table"} onClick={() => setView("table")}>Table</button>
+          </div>
           <label htmlFor="tp-page-size-select" style={{ fontSize: "0.88rem" }}>Rows per page:</label>
           <select
             id="tp-page-size-select"
@@ -712,6 +843,15 @@ export default function Activities({
             </button>
           )}
         </div>
+      ) : view === "cards" ? (
+        <ul className="ev-grid">
+          {pagedActivities.map((a) => (
+            <EventCard key={a.id} activity={a} wide={cancelling?.id === a.id}
+              status={<StatusChip status={a.status} labels={STATUS_LABEL} />}>
+              {renderActions(a)}
+            </EventCard>
+          ))}
+        </ul>
       ) : (
         <div className="tp-table-wrap">
           <table className="tp-table">
@@ -813,125 +953,7 @@ export default function Activities({
                       <StatusChip status={a.status} labels={STATUS_LABEL} />
                     </td>
 
-                    <td style={{ textAlign: "right" }}>
-                      <div style={{ display: "inline-flex", gap: "6px", flexWrap: "wrap", justifyContent: "flex-end" }}>
-                        {admin && <Link className="tp-btn tp-btn-ghost" to={'/admin/participants?activity='+a.id}>Participants</Link>}
-                        {(admin ||
-                          (!a.cancelledAt &&
-                            ["draft", "returned"].includes(a.status) &&
-                            a.created_by === state.session?.id)) && (
-                          <button
-                            type="button"
-                            className="tp-btn tp-btn-ghost"
-                            style={{ minHeight: "36px", padding: "4px 12px", fontSize: "0.85rem" }}
-                            onClick={() => open(a)}
-                          >
-                            Edit
-                          </button>
-                        )}
-
-                        {(admin ||
-                          (["draft", "returned"].includes(a.status) &&
-                            a.created_by === state.session?.id)) && (
-                          <button
-                            type="button"
-                            className="tp-btn tp-btn-ghost"
-                            style={{ minHeight: "36px", padding: "4px 12px", fontSize: "0.85rem", color: "#b91c1c", borderColor: "#fca5a5" }}
-                            onClick={() => setDeletingActivity(a)}
-                            title="Permanently delete this activity"
-                          >
-                            Delete
-                          </button>
-                        )}
-
-                        {admin && (
-                          <>
-                            {a.status === "approved" && !a.cancelledAt && (
-                              <button
-                                type="button"
-                                className="tp-btn"
-                                style={{ minHeight: "36px", padding: "4px 12px", fontSize: "0.85rem" }}
-                                onClick={() => review(a.id, "published")}
-                              >
-                                Publish
-                              </button>
-                            )}
-
-                            {a.status === "published" && !a.cancelledAt && (
-                              <button
-                                type="button"
-                                className="tp-btn tp-btn-ghost"
-                                style={{ minHeight: "36px", padding: "4px 12px", fontSize: "0.85rem" }}
-                                onClick={() => review(a.id, "unpublished")}
-                              >
-                                Unpublish
-                              </button>
-                            )}
-
-                            {["approved", "published"].includes(a.status) &&
-                              !a.cancelledAt &&
-                              cancelling?.id !== a.id && (
-                                <button
-                                  type="button"
-                                  className="tp-btn tp-btn-ghost"
-                                  style={{ minHeight: "36px", padding: "4px 12px", fontSize: "0.85rem", color: "#b91c1c", borderColor: "#fca5a5" }}
-                                  onClick={() => setCancelling({ id: a.id, reason: "", error: "" })}
-                                >
-                                  Cancel
-                                </button>
-                              )}
-
-                            {(a.status === "verified" || (a.cancelledAt && a.status !== "archived")) && (
-                              <button
-                                type="button"
-                                className="tp-btn tp-btn-ghost"
-                                style={{ minHeight: "36px", padding: "4px 12px", fontSize: "0.85rem" }}
-                                onClick={() => review(a.id, "archived")}
-                              >
-                                Archive
-                              </button>
-                            )}
-                          </>
-                        )}
-                      </div>
-
-                      {/* Cancel prompt sub-row */}
-                      {cancelling?.id === a.id && (
-                        <div style={{ marginTop: "10px", textAlign: "left", background: "#fef2f2", border: "1px solid #fecaca", padding: "10px", borderRadius: "8px" }}>
-                          <Field id={`cancel-${a.id}`} label="Reason for cancellation" error={cancelling.error}>
-                            <textarea
-                              id={`cancel-${a.id}`}
-                              rows="2"
-                              value={cancelling.reason}
-                              onChange={(e) =>
-                                setCancelling({ ...cancelling, reason: e.target.value, error: "" })
-                              }
-                              aria-invalid={Boolean(cancelling.error)}
-                              aria-describedby={describe(`cancel-${a.id}`, cancelling.error)}
-                              placeholder="e.g. Rescheduled due to speaker availability..."
-                            />
-                          </Field>
-                          <div className="tp-actions" style={{ marginTop: "8px" }}>
-                            <button
-                              type="button"
-                              className="tp-btn"
-                              style={{ minHeight: "36px", padding: "4px 12px", fontSize: "0.85rem", background: "#b91c1c" }}
-                              onClick={confirmCancel}
-                            >
-                              Confirm
-                            </button>
-                            <button
-                              type="button"
-                              className="tp-btn tp-btn-ghost"
-                              style={{ minHeight: "36px", padding: "4px 12px", fontSize: "0.85rem" }}
-                              onClick={() => setCancelling(null)}
-                            >
-                              Keep Activity
-                            </button>
-                          </div>
-                        </div>
-                      )}
-                    </td>
+                    <td style={{ textAlign: "right" }}>{renderActions(a)}</td>
                   </tr>
                 );
               })}
