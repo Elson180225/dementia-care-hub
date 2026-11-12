@@ -47,6 +47,12 @@ export function buildQueue({ accessRequests, profile, profiles = [profile], acti
   profile: p
   }));
 
+  profiles.filter(p => p.listingStatus === "requested").forEach(p => items.push({
+    key: `listing-${p.id}`, target: "listing", id: p.id, kind: "Public listing request", title: p.name,
+    detail: `${p.city} · consent given ${new Date(p.listingConsentAt).toLocaleDateString("en-MY")}`,
+    approveLabel: "Approve public listing", canReject: true,
+  }));
+
   activities
     .filter((a) => a.status === "submitted")
     .forEach((a) =>

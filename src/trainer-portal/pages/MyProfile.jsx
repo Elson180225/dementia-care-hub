@@ -6,6 +6,15 @@ import { Field, StatusChip } from "../ui";
 
 const CERT_LABEL = { pending: "Waiting for approval", certified: "Certified", suspended: "Suspended" };
 
+const LISTING_LABEL = {
+  none: "Not listed",
+  requested: "Waiting for RCBC review",
+  approved: "Listed on the public Certified Trainers page",
+  returned: "Returned – see RCBC's comment",
+  rejected: "Not approved",
+  suspended: "Removed by RCBC",
+};
+
 export default function MyProfile() {
   const { state, dispatch } = useTrainer();
   const [uploading,setUploading]=useState(0);
@@ -17,6 +26,7 @@ export default function MyProfile() {
     photoUrl: profile.photoUrl || "", supportingDocuments: profile.supportingDocuments || [],
   });
   const [message, setMessage] = useState("");
+  const [consent, setConsent] = useState(false);
   const locked = profile.status === "submitted";
 
   const change = (e) => { setValues({ ...values, [e.target.name]: e.target.value }); setMessage(""); };
@@ -48,6 +58,31 @@ export default function MyProfile() {
           <dt>Certification</dt><dd>{CERT_LABEL[profile.certifiedStatus] ?? profile.certifiedStatus}</dd>
           <dt>Certificate number</dt><dd>{profile.certificateRef}</dd>
         </dl>
+      </section>
+
+      <section className="tp-card">
+        <h2>Public listing</h2>
+        <p>Your portal access and your public listing are approved separately. You only appear on the public Certified Trainers page if you agree and RCBC approves it.</p>
+        <p><strong>Status:</strong> {LISTING_LABEL[profile.listingStatus] ?? profile.listingStatus}</p>
+        {profile.listingComment && <p className="tp-note">Comment from RCBC: {profile.listingComment}</p>}
+
+        {["none", "returned", "rejected"].includes(profile.listingStatus) && (
+          <>
+            <label style={{ display: "flex", gap: "12px", alignItems: "flex-start", margin: "16px 0" }}>
+              <input type="checkbox" checked={consent} onChange={(e) => setConsent(e.target.checked)} />
+              <span>I agree that RCBC may publish my name, city, language, profile, photo and certificate number on the public Certified Trainers page. I can withdraw at any time.</span>
+            </label>
+            <button className="tp-btn" disabled={!consent} onClick={() => dispatch({ type: "LISTING_REQUEST", consent: true })}>
+              Request public listing
+            </button>
+          </>
+        )}
+
+        {["requested", "approved"].includes(profile.listingStatus) && (
+          <button className="tp-btn tp-btn-ghost" onClick={() => dispatch({ type: "LISTING_WITHDRAW" })}>
+            Withdraw from public listing
+          </button>
+        )}
       </section>
 
       <form className="tp-card" onSubmit={submit} noValidate>
