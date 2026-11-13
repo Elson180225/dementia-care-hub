@@ -64,7 +64,9 @@ export function buildQueue({ accessRequests, profile, profiles = [profile], acti
         kind: "Workshop / Seminar submission",
         title: a.title,
         detail: `${fmtDate(a.date)} · ${a.mode} · ${a.language}`,
-        approveLabel: "Approve activity",
+        // One decision: approving a trainer's workshop also publishes it (RCBC: remove duplicate admin steps).
+        approveLabel: "Approve and publish",
+        approveDecision: "published",
       })
     );
 

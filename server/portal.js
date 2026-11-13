@@ -120,7 +120,7 @@ export async function portalHandler(req,res,url,send) {
     await logDecision(db,user,'trainer_listing',id,decision,comment,'requested',decision);return;
    }
    if(target==='activity') {
-    const transitions={approved:['submitted'],returned:['submitted'],published:['approved'],completed:['published'],archived:['verified','approved','published'],unpublished:['published'],cancelled:['approved','published']};
+    const transitions={approved:['submitted'],returned:['submitted'],published:['approved','submitted'],completed:['published'],archived:['verified','approved','published'],unpublished:['published'],cancelled:['approved','published']};
     if(!transitions[decision]) fail('Invalid activity transition');
     const old=(await db.query('SELECT * FROM activities WHERE id=$1 FOR UPDATE',[id])).rows[0];
     if(!old || !transitions[decision].includes(old.status) || (decision==='published' && old.cancelled_at)) fail('Invalid activity transition',409);
