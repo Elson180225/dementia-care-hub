@@ -860,6 +860,7 @@ function pageItems(items, filters, page) {
    SECTION 1: ONLINE EDUCATION
    ================================================================ */
 function OnlineEducation() {
+  const { search } = useLocation();
   const { t, language } = useLanguage();
   const activities = usePublicActivities();
   const cmsContent = useLearnEventsContent();
@@ -870,7 +871,12 @@ function OnlineEducation() {
   const [selected, setSelected] = useState(null);
   const [selectedQa, setSelectedQa] = useState(null);
   const defaultFilters = { query: "", language: "All", timing: "All" };
-  const [publicFilters, setPublicFilters] = useState(defaultFilters);
+  // Healthy & Active Living cards open this existing archive with a relevant
+  // webinar title prefilled in the search field. No separate health feed.
+  const [publicFilters, setPublicFilters] = useState(() => ({
+    ...defaultFilters,
+    query: new URLSearchParams(search).get("q") || "",
+  }));
   const [trainerFilters, setTrainerFilters] = useState(defaultFilters);
   const [resourceFilters, setResourceFilters] = useState(defaultFilters);
   const [publicPage, setPublicPage] = useState(1);

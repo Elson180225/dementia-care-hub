@@ -705,6 +705,10 @@
 
 
 /* Leave room for the fixed site header when navigating to a section. */
+.understand-page #normal-ageing,
+.understand-page #changes-to-watch,
+.understand-page #self-check,
+.understand-page #further-care,
 .understand-page #overview,
 .understand-page #common-types,
 .understand-page #early-signs,
@@ -716,6 +720,10 @@
   scroll-margin-top: 158px;
 }
 @media (max-width: 700px) {
+  .understand-page #normal-ageing,
+  .understand-page #changes-to-watch,
+  .understand-page #self-check,
+  .understand-page #further-care,
   .understand-page #overview,
   .understand-page #common-types,
   .understand-page #early-signs,
@@ -727,3 +735,48 @@
     scroll-margin-top: 132px;
   }
 }
+
+/* RCBC review: prominent self-check disclaimer; navigation lives in the site header. */
+.understand-brief-list { margin: 0; padding: 0; list-style: none; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+.understand-brief-list li { padding: 20px 22px; border: 1px solid var(--color-neutral-200); border-radius: 12px; background: white; color: var(--color-neutral-700); line-height: 1.6; }
+.understand-next-steps { display: flex; flex-wrap: wrap; gap: 16px; }
+.understand-next-steps a { padding: 15px 20px; border-radius: 9px; background: var(--color-purple-600); color: white; font-weight: 800; text-decoration: none; }
+.understand-next-steps a:hover, .understand-next-steps a:focus-visible { text-decoration: underline; }
+.understand-disclaimer-prominent { margin: 18px 0 16px; font-size: 1rem; border: 2px solid #9b6822; color: #5b401a; }
+#self-check { scroll-margin-top: 90px; }
+@media (max-width: 700px) { .understand-brief-list { grid-template-columns: 1fr; } }
+
+/* Sprint 2: each stage leads visitors to a clear next action. */
+.understand-step-next {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  margin-top: 25px;
+  padding: 11px 0;
+  color: var(--color-purple-600);
+  font-size: 1rem;
+  font-weight: 800;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+.understand-step-next:hover, .understand-step-next:focus-visible {
+  text-decoration-thickness: 2px;
+}
+.understand-result .understand-disclaimer-prominent {
+  margin: 14px 0 17px;
+  text-align: left;
+}
+.understand-living-description {
+  line-height: 1.65;
+  margin: 10px 0 17px;
+}
+.understand-living-webinar {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 4px;
+  font-weight: 700;
+  color: var(--color-purple-600);
+  text-underline-offset: 3px;
+}
+.understand-anchor-target { display: block; scroll-margin-top: 120px; }

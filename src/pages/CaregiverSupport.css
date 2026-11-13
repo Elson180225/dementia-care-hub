@@ -1087,3 +1087,42 @@
   color: var(--color-neutral-100);
   line-height: 1.7;
 }
+
+/* Plain-language course clarification requested by RCBC. */
+.caregiver-rcbc-notice { margin: 0 0 24px; padding: 21px 25px; border-radius: 12px; border: 1px solid #cdbadf; border-left: 5px solid var(--color-purple-600); background: #f8f5fb; color: var(--color-neutral-800); }
+.caregiver-rcbc-notice strong { display: block; margin-bottom: 6px; font-size: 1.05rem; }
+.caregiver-rcbc-notice p { margin: 0; line-height: 1.7; }
+
+/* Keep the multi-paragraph RCBC notice readable on all screen sizes. */
+.caregiver-rcbc-notice p + p { margin-top: 12px; }
+.caregiver-training-future h3 small { display: inline-block; font-size: .68em; font-weight: 650; color: var(--color-neutral-600); }
+
+/* Sprint 2: put the RCBC statement where visitors enter Caregiver Support. */
+.caregiver-programme-intro {
+  padding: clamp(30px, 5vw, 64px) 0 26px;
+  background: #fff;
+}
+.caregiver-programme-intro h2 {
+  margin: 0 0 18px;
+  color: var(--color-purple-700);
+  font-size: clamp(1.45rem, 3vw, 2rem);
+}
+.caregiver-programme-intro .caregiver-rcbc-notice {
+  margin: 0;
+}
+.caregiver-rcbc-notice {
+  font-size: 1rem;
+}
+.caregiver-rcbc-training-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  margin-top: 18px;
+  color: var(--color-purple-700);
+  font-weight: 750;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.caregiver-rcbc-training-link:focus-visible { outline-offset: 4px; }
+
+#rcbc-programme-notice { scroll-margin-top: 120px; }
