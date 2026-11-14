@@ -5,7 +5,7 @@ import { verifyUnsubscribeToken } from './subscriber-tokens.js';
 import { body, digest, fail } from './auth.js';
 import { isAllowedOrigin } from './origin.js';
 const publicColumns={
- organisations:'id,name,category,services,specialist_field,address,city,state,postcode,phone,email,website,languages,opening_hours,eligibility,fees,accepting_volunteers,volunteer_details,support_group,source,source_url,language,last_reviewed_at,review_status',
+ organisations:'is_example,id,name,category,services,specialist_field,address,city,state,postcode,phone,email,website,languages,opening_hours,eligibility,fees,accepting_volunteers,volunteer_details,support_group,source,source_url,language,last_reviewed_at,review_status',
  learning_resources:'id,activity_id,title,resource_type,topic,language,audience,description,url,source,source_url,last_reviewed_at,review_status',
  content_pages:'id,slug,language,title,body,source,source_url,last_reviewed_at,review_status',
  faqs:'id,slug,language,question,answer,category,source,source_url,last_reviewed_at,review_status',
@@ -15,7 +15,7 @@ export async function publicRecordsHandler(req,res,url,send) {
  const kind=url.pathname.split('/')[3];
  if(req.method==='GET' && publicColumns[kind]) {
   const category=url.searchParams.get('category');
-  const rows=(await pool.query(`SELECT ${publicColumns[kind]} FROM ${kind} WHERE publication_status='published' AND review_status<>'archived' ${kind==='organisations' && category?'AND category=$1':''} ORDER BY id LIMIT 500`,kind==='organisations' && category?[category]:[])).rows;
+  const rows=(await pool.query(`SELECT ${publicColumns[kind]} FROM ${kind} WHERE publication_status='published' AND review_status<>'archived' ${['content_pages','faqs'].includes(kind)?"AND language='English'":''} ${kind==='organisations' && category?'AND category=$1':''} ORDER BY id LIMIT 500`,kind==='organisations' && category?[category]:[])).rows;
   return send(res,200,rows);
  }
  if(req.method!=='POST') fail('Not found',404);

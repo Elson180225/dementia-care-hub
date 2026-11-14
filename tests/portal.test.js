@@ -21,7 +21,7 @@ test('PostgreSQL portal and administrative workflows',{skip:!process.env.TEST_DA
  const connection=new URL(process.env.TEST_DATABASE_URL);connection.searchParams.set('options',`-c search_path=${schema},public`);
  const db=new pg.Pool({connectionString:connection.toString()});let server;
  try {
-  for(const name of ['001_shared_records.sql','003_admin_auth.sql','004_record_details.sql','005_admin_workflow.sql','006_portal_operations.sql','007_content_feedback.sql','008_idle_sessions.sql','014_enquiry_notifications.sql']) await db.query(await readFile(new URL('../database/'+name,import.meta.url),'utf8'));
+  for(const name of ['001_shared_records.sql','003_admin_auth.sql','004_record_details.sql','005_admin_workflow.sql','006_portal_operations.sql','007_content_feedback.sql','008_idle_sessions.sql','014_enquiry_notifications.sql','015_trainer_listing_approval.sql','016_trainer_certificate_evidence.sql','017_trainer_details_and_resource_examples.sql','018_trainer_assessment_status.sql','012_participants.sql','015_event_registration.sql','016_registration_setup.sql','017_participant_history.sql','019_programme_intakes.sql']) await db.query(await readFile(new URL('../database/'+name,import.meta.url),'utf8'));
   server=spawn(process.execPath,['server/index.js'],{env:{...process.env,DATABASE_URL:connection.toString(),SUBSCRIBER_DATABASE_URL:'',SUBSCRIBER_TOKEN_SECRET:'test-secret-'.repeat(5),REMINDERS_ENABLED:'false',API_PORT:'3098'},stdio:['ignore','pipe','pipe']});
   let serverErrors='';server.stderr.on('data',d=>{serverErrors+=d;});
   await new Promise((resolve,reject)=>{server.stdout.once('data',resolve);server.once('error',reject);server.once('exit',()=>reject(new Error('Test API exited: '+serverErrors)));});
@@ -31,7 +31,8 @@ test('PostgreSQL portal and administrative workflows',{skip:!process.env.TEST_DA
   }
   function ok(result,status=200){assert.equal(result.status,status,JSON.stringify(result.data));return result;}
   const credentials={name:'Test Trainer',email:'trainer@test.example',password:'a sufficiently long password',city:'Bintulu',certificateRef:'CLAIM-1'};
-  ok(await request('auth/register',credentials),201);ok(await request('auth/register',credentials),409);
+  const certificateEvidence={name:'certificate.png',data:'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+j3ioAAAAASUVORK5CYII='};
+  ok(await request('auth/register',{...credentials,certificateEvidence}),201);ok(await request('auth/register',credentials),409);
   ok(await request('auth/login',credentials),403);
   ok(await request('auth/admin-register',{...credentials,email:'admin@test.example'}),403);
   await db.query('INSERT INTO admin_invitations(token_hash,email) VALUES($1,$2)',[digest('test-invite'),'admin@test.example']);
@@ -40,13 +41,27 @@ test('PostgreSQL portal and administrative workflows',{skip:!process.env.TEST_DA
   const admin=ok(await request('auth/login',{...adminData,role:'admin'}));
   const action=(data,cookie=admin.cookie)=>request('portal/actions',data,cookie);
   const pending=ok(await request('auth/application',credentials)).data.application;
+  assert.equal(pending.has_certificate_evidence,true);
+  const pendingSnapshot=ok(await request('portal',null,admin.cookie)).data;
+  const evidenceId=pendingSnapshot.accessRequests.find(r=>r.id===pending.id).certificate_file_id;
+  assert.ok(evidenceId);
+  assert.equal((await fetch('http://127.0.0.1:3098/api/files/'+evidenceId)).status,403);
+  const adminEvidence=await fetch('http://127.0.0.1:3098/api/files/'+evidenceId,{headers:{cookie:admin.cookie}});
+  assert.equal(adminEvidence.status,200);assert.equal(adminEvidence.headers.get('content-type'),'image/png');
+
   ok(await action({type:'ADMIN_REVIEW',target:'access',id:pending.id,decision:'returned',comment:'Confirm the reference'}));
   assert.equal(ok(await request('auth/application',credentials)).data.application.status,'returned');
-  ok(await request('auth/resubmit',{...credentials,certificateRef:'CLAIM-CORRECTED'}));
+  ok(await request('auth/resubmit',{...credentials,certificateRef:'CLAIM-CORRECTED',certificateEvidence:{name:'amended.pdf',data:Buffer.from('%PDF-1.4 amended').toString('base64')}}));
+  const amended=ok(await request('portal',null,admin.cookie)).data.accessRequests.find(r=>r.id===pending.id);
+  assert.notEqual(amended.certificate_file_id,evidenceId);
+
   ok(await action({type:'ADMIN_REVIEW',target:'access',id:pending.id,decision:'approved',certificateRef:'OFFICIAL-1'}));
   const trainer=ok(await request('auth/login',{...credentials,role:'trainer'}));const trainerId=trainer.data.user.id;
   ok(await request('portal'),401);ok(await request('admin/records/faqs',null,trainer.cookie),403);
   ok(await action({type:'ADMIN_REVIEW',target:'access',id:pending.id,decision:'rejected',comment:'test'},trainer.cookie),403);
+  const trainerSnapshot=ok(await request('portal',null,trainer.cookie)).data;
+  assert.equal(trainerSnapshot.profile.certificateEvidenceUrl,'/api/files/'+amended.certificate_file_id);
+  assert.equal((await fetch('http://127.0.0.1:3098'+trainerSnapshot.profile.certificateEvidenceUrl,{headers:{cookie:trainer.cookie}})).status,200);
   const profile={city:'Bintulu',language:'English',shortProfile:'Test profile',qualifications:'Test qualification',experience:'Test experience'};
   ok(await action({type:'PROFILE_SAVE',values:profile},trainer.cookie));
   async function upload(kind,data,cookie=trainer.cookie) {
@@ -57,16 +72,48 @@ test('PostgreSQL portal and administrative workflows',{skip:!process.env.TEST_DA
   const document=ok(await upload('document',Buffer.from('%PDF-1.4 test')),201).data.url;
   assert.equal((await fetch('http://127.0.0.1:3098'+document)).status,403);
   ok(await upload('photo',Buffer.from('<svg>bad</svg>')),400);
-  ok(await action({type:'PROFILE_SUBMIT',values:{...profile,photoUrl:photo,supportingDocuments:[document],certified_status:'suspended'}},trainer.cookie));
-  ok(await action({type:'PROFILE_SAVE',values:profile},trainer.cookie),409);
-  ok(await action({type:'ADMIN_REVIEW',target:'profile',id:trainerId,decision:'approved'}));
+  ok(await action({type:'PROFILE_SAVE',values:{...profile,photoUrl:photo,supportingDocuments:[document],certified_status:'suspended'}},trainer.cookie));
+  assert.equal(ok(await request('portal',null,trainer.cookie)).data.profile.certifiedStatus,'certified');
+  assert.equal(ok(await request('trainers')).data.length,0);
+  // A saved profile and portal approval do not grant a public listing.
+  ok(await action({type:'LISTING_REQUEST',consent:false},trainer.cookie),400);
+  ok(await action({type:'LISTING_REQUEST',consent:true},trainer.cookie));
+  assert.equal(ok(await request('trainers')).data.length,0);
+  ok(await action({type:'ADMIN_REVIEW',target:'listing',id:trainerId,decision:'approved'}));
   assert.equal(ok(await request('trainers')).data.length,1);
+  ok(await action({type:'ADMIN_LISTING',id:trainerId,listing:'suspended',comment:'Check updated certificate'}));
+  assert.equal(ok(await request('trainers')).data.length,0);
+  ok(await request('portal',null,trainer.cookie));
+  ok(await action({type:'ADMIN_LISTING',id:trainerId,listing:'approved'}));
+  assert.equal(ok(await request('trainers')).data.length,1);
+  // The new main workflow saves profile changes directly without another review.
+  ok(await action({type:'PROFILE_SAVE',values:{...profile,photoUrl:photo,supportingDocuments:[document],shortProfile:'Updated profile'}},trainer.cookie));
+  assert.equal(ok(await request('trainers')).data[0].short_profile,'Updated profile');
+  ok(await action({type:'LISTING_WITHDRAW'},trainer.cookie));
+  assert.equal(ok(await request('trainers')).data.length,0);
+  ok(await action({type:'LISTING_REQUEST',consent:true},trainer.cookie));
+  ok(await action({type:'ADMIN_REVIEW',target:'listing',id:trainerId,decision:'approved'}));
+  assert.equal(ok(await request('trainers')).data.length,1);
+  ok(await request('admin/users',{id:trainerId,enabled:true,certifiedStatus:'certified',certificateRef:'OFFICIAL-1',assessmentResult:'Passed practical assessment',healthcareProfessional:true,independentTeachingScope:'Family education'},admin.cookie));
+  const checked=ok(await request('portal',null,admin.cookie)).data.profiles.find(p=>p.id===trainerId);
+  assert.equal(checked.assessment_result,'Passed practical assessment');
+  assert.equal(checked.healthcare_professional,true);
+  assert.ok(checked.listingConsentAt);
+  assert.equal(ok(await request('public/organisations')).data.filter(r=>r.is_example).length,3);
+
   assert.equal((await fetch('http://127.0.0.1:3098'+photo)).status,200);
   assert.equal((await fetch('http://127.0.0.1:3098'+document)).status,403);
   const second={...credentials,name:'Second Trainer',email:'second@test.example'};ok(await request('auth/register',second),201);
   const secondRequest=ok(await request('auth/application',second)).data.application;
   ok(await action({type:'ADMIN_REVIEW',target:'access',id:secondRequest.id,decision:'approved',certificateRef:'OFFICIAL-2'}));
   const secondLogin=ok(await request('auth/login',second));const secondId=secondLogin.data.user.id;
+  assert.equal((await fetch('http://127.0.0.1:3098'+trainerSnapshot.profile.certificateEvidenceUrl,{headers:{cookie:secondLogin.cookie}})).status,403);
+  ok(await action({type:'PROFILE_SAVE',values:{...profile,certificateEvidenceUrl:trainerSnapshot.profile.certificateEvidenceUrl}},secondLogin.cookie),400);
+  ok(await action({type:'PROFILE_SAVE',values:{...profile,certificateEvidenceUrl:document}},trainer.cookie));
+  assert.equal(ok(await request('portal',null,trainer.cookie)).data.profile.certificateEvidenceUrl,document);
+  ok(await action({type:'PROFILE_SAVE',values:{...profile,certificateEvidenceUrl:''}},trainer.cookie));
+  assert.equal(ok(await request('portal',null,trainer.cookie)).data.profile.certificateEvidenceUrl,'');
+
   ok(await action({type:'PROFILE_SAVE',values:{...profile,photoUrl:photo}},secondLogin.cookie),403);
   const activity={id:randomUUID(),title:'Test workshop',date:'2026-01-01T10:00',type:'Workshop',mode:'Online',venue:'Online',language:'English',audience:'Caregivers',description:'Practical learning',plannedHours:3,trainers:[{trainerId,role:'Trainer'},{trainerId:secondId,role:'Co-Trainer'}]};
   ok(await action({type:'ACTIVITY_SAVE',activity},trainer.cookie));
@@ -106,9 +153,9 @@ test('PostgreSQL portal and administrative workflows',{skip:!process.env.TEST_DA
   }
   const organisation=record('organisations',{name:'Test facility',services:['Support'],category:'services'});
   const orgId=ok(await request('admin/records/organisations',{values:organisation},admin.cookie)).data.id;
-  assert.equal(ok(await request('public/organisations?category=services')).data.length,1);
+  assert.equal(ok(await request('public/organisations?category=services')).data.filter(r=>!r.is_example).length,1);
   ok(await request('admin/records/organisations',{id:orgId,values:{...organisation,review_status:'archived'}},admin.cookie));
-  assert.equal(ok(await request('public/organisations')).data.length,0);
+  assert.equal(ok(await request('public/organisations')).data.filter(r=>!r.is_example).length,0);
   const resource=record('learning_resources',{title:'Test guide',url:'https://example.org/guide',copyright_permission:'RCBC permission recorded'});
   const resourceId=ok(await request('admin/records/learning_resources',{values:resource},admin.cookie)).data.id;
   assert.equal(ok(await request('public/learning_resources')).data.length,1);
@@ -150,7 +197,7 @@ test('PostgreSQL portal and administrative workflows',{skip:!process.env.TEST_DA
   assert.equal(ok(await request('public/verify-certificate',{name:'Wrong name',certificateRef:'DCS-1'})).data.certificate,null);
   ok(await request('admin/users',{id:trainerId,enabled:false,certifiedStatus:'certified',certificateRef:'OFFICIAL-1'},admin.cookie));
   ok(await request('portal',null,trainer.cookie),401);
-  ok(await request('admin/users',{id:admin.data.user.id,enabled:false},admin.cookie),400);
+  ok(await request('admin/users',{id:admin.data.user.id,enabled:false},admin.cookie),403);
   assert.ok((await db.query("SELECT * FROM audit_log WHERE operation='DECISION' AND decision='verified' AND actor_id=$1",[admin.data.user.id])).rowCount);
   assert.ok(!(await db.query("SELECT * FROM audit_log WHERE after_data ? 'password_hash'")).rowCount);
   ok(await request('auth/logout',{},admin.cookie));ok(await request('portal',null,admin.cookie),401);

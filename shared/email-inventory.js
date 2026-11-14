@@ -1,0 +1,6 @@
+export const emailInventory = [
+ {name:'Contact enquiry notification',trigger:'A visitor submits the Contact form; queued notifications are checked every minute.',recipient:'The RCBC address configured as ENQUIRY_ADMIN_EMAIL. Replies go to the visitor.',off:'Clear ENQUIRY_ADMIN_EMAIL on the server and restart. Messages remain available in Content & records > Enquiries.'},
+ {name:'Automatic activity reminder',trigger:'A published upcoming activity reaches the configured reminder window and matches subscriber language and locality.',recipient:'Consenting Get Updated subscribers who have not unsubscribed.',off:'Set REMINDERS_ENABLED=false and restart the API. Each recipient can also use the unsubscribe link in any reminder.'},
+ {name:'Participant reminder',trigger:'An authorised admin or activity owner selects participants and explicitly sends a reminder.',recipient:'Selected registered participants for that activity.',off:'Do not use Send reminder in Participants. These messages are not scheduled.'},
+ {name:'Brevo campaigns managed by RCBC',trigger:'RCBC exports or syncs subscribers and separately sends a campaign in Brevo.',recipient:'The audience selected by RCBC in Brevo.',off:'Pause campaigns and automations in Brevo. Sync current opt-outs before sending; a CSV export does not update past imports.'},
+];

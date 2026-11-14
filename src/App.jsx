@@ -12,6 +12,8 @@ import ScrollToTop from "./components/ScrollToTop/ScrollToTop";
 
 import ProjectServices from "./pages/ProjectServices";
 import Home from "./pages/Home";
+import Translations from "./admin/pages/Translations";
+import TranslationNotice from "./i18n/TranslationNotice";
 import LearnEvents from "./pages/LearnEvents";
 import NotFound from "./pages/NotFound";
 import Contact from "./pages/Contact";
@@ -61,6 +63,7 @@ function App() {
       <LanguageProvider>
         <PublicOnly>
           <Header />
+          <TranslationNotice />
         </PublicOnly>
         <TrainerProvider>
 
@@ -234,6 +237,7 @@ function App() {
           ========================== */}
 
           <Route path="/trainer-portal" element={<TrainerLayout />}>
+            <Route path="translations" element={<Translations />} />
             <Route index element={<TrainerDashboard />} />
             <Route path="profile" element={<MyProfile />} />
             <Route path="activities" element={<TrainerActivities />} />
@@ -246,6 +250,7 @@ function App() {
 ========================== */}
 
 <Route path="/admin" element={<AdminLayout />}>
+  <Route path="translations" element={<Translations />} />
   <Route index element={<AdminOverview />} />
   <Route path="learn-events" element={<LearnEventsCMS />} />
   <Route path="participants" element={<Participants />} />

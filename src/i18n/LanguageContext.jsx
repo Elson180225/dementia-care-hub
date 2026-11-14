@@ -1,6 +1,7 @@
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useCallback, useEffect, useMemo, useState } from "react";
 import { translations } from "./translations";
 
+import {translateTree} from '../../shared/translation-review';
 const LanguageContext = createContext(null);
 
 export const SUPPORTED_LANGUAGES = [
@@ -8,23 +9,6 @@ export const SUPPORTED_LANGUAGES = [
   { code: "ms", label: "Bahasa Malaysia", nativeLabel: "Bahasa Malaysia" },
   { code: "zh", label: "Chinese (中文)", nativeLabel: "中文" },
 ];
-
-function deepMerge(target, source) {
-  if (!target) return source;
-  const result = Array.isArray(target) ? [...target] : { ...target };
-  for (const key of Object.keys(source)) {
-    if (source[key] instanceof Object && !Array.isArray(source[key])) {
-      result[key] = deepMerge(result[key] || {}, source[key]);
-    } else if (
-      result[key] === undefined ||
-      result[key] === "" ||
-      (Array.isArray(result[key]) && result[key].length === 0 && Array.isArray(source[key]) && source[key].length > 0)
-    ) {
-      result[key] = source[key];
-    }
-  }
-  return result;
-}
 
 export function LanguageProvider({ children }) {
   const [language, setLanguageState] = useState(() => {
@@ -54,7 +38,18 @@ export function LanguageProvider({ children }) {
     document.documentElement.lang = language === "zh" ? "zh-Hans" : language;
   }, [language]);
 
-  const t = deepMerge(translations[language] || {}, translations.en);
+  const [bundles,setBundles]=useState({});
+  useEffect(()=>{
+    if(language==='en')return;
+    let active=true;
+    const refresh=()=>fetch('/api/public/translations?language='+language,{cache:'no-store'}).then(r=>{if(!r.ok)throw Error();return r.json();}).then(d=>{if(active)setBundles(current=>({...current,[language]:d.approved||{}}));}).catch(()=>{if(active)setBundles(current=>({...current,[language]:{}}));});
+    refresh();window.addEventListener('focus',refresh);
+    const timer=setInterval(refresh,30000);
+    return()=>{active=false;clearInterval(timer);window.removeEventListener('focus',refresh);};
+  },[language]);
+  const approved=useMemo(()=>language==='en'?{}:bundles[language]||{},[language,bundles]);
+  const translateContent=useCallback((value,prefix)=>translateTree(value,prefix,approved),[approved]);
+  const t=useMemo(()=>translateTree(translations.en,'ui',approved),[approved]);
 
   return (
     <LanguageContext.Provider
@@ -62,6 +57,7 @@ export function LanguageProvider({ children }) {
         language,
         setLanguage,
         t,
+        translateContent,
         languages: SUPPORTED_LANGUAGES,
         currentLanguageConfig:
           SUPPORTED_LANGUAGES.find((l) => l.code === language) ||

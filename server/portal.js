@@ -2,8 +2,11 @@ import { pool, transaction } from './db.js';
 import { currentUser, body, fail } from './auth.js';
 import { isAllowedOrigin } from './origin.js';
 import { decision as logDecision } from './decisions.js';
+import { certificateFileId } from './certificate-evidence.js';
 import { validateFileLinks } from './uploads.js';
 import {validateEventPricing} from '../shared/event-registration.js';
+import {getLearnEventsData} from './learn-events-content.js';
+import {isPlannedProgramme} from '../shared/programme-intakes.js';
 function validateLinks(single, list = []) {
  if(!Array.isArray(list) || list.some(x=>typeof x!=='string')) fail('Document and photo links must be a list of URLs');
  for(const url of [single,...list].filter(Boolean)) {
@@ -12,7 +15,7 @@ function validateLinks(single, list = []) {
   try { new URL(url); } catch { fail('Invalid file URL'); }
  }
 }
-const profile = p => p && ({...p, shortProfile:p.short_profile, certifiedStatus:p.certified_status, certificateRef:p.certificate_ref || '', adminComment:p.admin_comment, photoUrl:p.photo_url, supportingDocuments:p.supporting_documents});
+const profile = p => p && ({...p, shortProfile:p.short_profile, certifiedStatus:p.certified_status, certificateRef:p.certificate_ref || '', adminComment:p.admin_comment, certificateEvidenceUrl:p.certificate_file_id?'/api/files/'+p.certificate_file_id:'', photoUrl:p.photo_url, supportingDocuments:p.supporting_documents, listingStatus:p.listing_status, listingConsentAt:p.listing_consent_at, listingComment:p.listing_comment});
 export async function snapshot(user) {
  const admin=user.role==='admin';
  const profiles=(await pool.query('SELECT p.*,u.name,u.email FROM trainer_profiles p JOIN users u ON u.id=p.id WHERE $1 OR p.id=$2',[admin,user.id])).rows;
@@ -23,11 +26,11 @@ export async function snapshot(user) {
  return {session:admin?null:{id:user.id},adminSession:admin?user:null,
  profile:profile(profiles.find(p=>p.id===user.id) || profiles[0]) || {name:user.name}, profiles:profiles.map(profile),
  activities:activities.map(a=>({...a,date:new Date(a.starts_at).toLocaleString('sv-SE',{timeZone:'Asia/Kuala_Lumpur'}).replace(' ','T').slice(0,16),
- registrationType:a.registration_settings?(a.registration_settings.paid?'paid-in-person':'free-online'):'',registrationFee:a.registration_settings?.fee||'',paymentInstructions:a.registration_settings?.instructions||'',registrationInstructions:a.registration_settings?.generalInstructions||'',registrationMethod:a.registration_settings?.enabled?(a.registration_settings.website?'website':'google'):'closed',registrationGoogleUrl:a.registration_settings?.googleUrl||a.registration_link||'',registrationPhone:!!a.registration_settings?.askPhone,registrationNotes:!!a.registration_settings?.askNotes,audience:a.audience,registrationLink:a.registration_link || '',plannedHours:Number(a.planned_hours),adminComment:a.admin_comment,posterUrl:a.poster_url || '',cancelledAt:a.cancelled_at,
+ programmeId:a.programme_id||'',registrationType:a.registration_settings?(a.registration_settings.paid?'paid-in-person':'free-online'):'',registrationFee:a.registration_settings?.fee||'',paymentInstructions:a.registration_settings?.instructions||'',registrationInstructions:a.registration_settings?.generalInstructions||'',registrationMethod:a.registration_settings?.enabled?(a.registration_settings.website?'website':'google'):'closed',registrationGoogleUrl:a.registration_settings?.googleUrl||a.registration_link||'',registrationPhone:!!a.registration_settings?.askPhone,registrationNotes:!!a.registration_settings?.askNotes,audience:a.audience,registrationLink:a.registration_link || '',plannedHours:Number(a.planned_hours),adminComment:a.admin_comment,posterUrl:a.poster_url || '',cancelledAt:a.cancelled_at,
  registrationDeadline:a.registration_deadline?new Date(a.registration_deadline).toLocaleString('sv-SE',{timeZone:'Asia/Kuala_Lumpur'}).replace(' ','T').slice(0,16):'',capacity:a.capacity || '',
  role:a.trainers.find(t=>t.trainerId===user.id)?.role || 'Trainer',completion:{status:a.completion_status,venue:a.actual_venue,participants:a.participants,hours:Number(a.actual_hours),photos:a.photos || [],adminComment:a.completion_comment}})),
  accessRequests:admin?(await pool.query('SELECT *,claimed_certificate_ref AS "certificateRef",submitted_at AS "requestedAt",admin_comment AS "adminComment" FROM trainer_access_requests ORDER BY submitted_at DESC')).rows:[],
- users:admin?(await pool.query('SELECT u.id,u.name,u.email,u.role,u.enabled,p.certified_status,p.certificate_ref FROM users u LEFT JOIN trainer_profiles p ON p.id=u.id ORDER BY u.created_at DESC')).rows:[],
+ users:admin?(await pool.query('SELECT u.id,u.name,u.email,u.role,u.enabled,p.certified_status,p.certificate_ref,p.listing_status,p.listing_consent_at,p.assessment_result, p.assessment_status, p.healthcare_professional,p.independent_teaching_scope,p.certificate_file_id FROM users u LEFT JOIN trainer_profiles p ON p.id=u.id ORDER BY u.created_at DESC')).rows:[],
  contributions:(await pool.query('SELECT * FROM annual_trainer_contributions WHERE $1 OR trainer_id=$2 ORDER BY year DESC',[admin,user.id])).rows,
  projectReach:admin?(await pool.query('SELECT * FROM annual_project_reach ORDER BY year DESC')).rows:[],
  maintenance:admin?(await pool.query(`SELECT 'Directory' AS kind,count(*)::int AS count FROM organisations WHERE review_status='needs review' OR (review_status<>'archived' AND next_review_at<=now())
@@ -43,7 +46,7 @@ export async function snapshot(user) {
 }
 export async function portalHandler(req,res,url,send) {
  if(req.method==='GET' && url.pathname==='/api/trainers') return send(res,200,(await pool.query('SELECT * FROM public_trainers')).rows);
- if(req.method==='GET' && url.pathname==='/api/activities') return send(res,200,(await pool.query("SELECT (SELECT jsonb_build_object('paid',s.paid,'enabled',s.enabled,'fee',s.fee) FROM event_registration_settings s WHERE s.activity_id=a.id) AS registration_settings,a.id,a.title,a.starts_at,a.type,a.mode,a.venue,a.city,a.language,a.audience,a.description,a.poster_url,CASE WHEN a.cancelled_at IS NULL THEN a.registration_link ELSE NULL END AS registration_link,a.status,a.cancelled_at,a.cancellation_reason,a.registration_deadline,a.capacity,coalesce((SELECT jsonb_agg(jsonb_build_object('trainerId',t.trainer_id,'role',t.role,'name',u.name)) FROM activity_trainers t LEFT JOIN users u ON u.id=t.trainer_id WHERE t.activity_id=a.id),'[]') AS trainers FROM activities a WHERE a.status IN ('published','completed','verified','archived') AND a.published_at IS NOT NULL")).rows);
+ if(req.method==='GET' && url.pathname==='/api/activities') return send(res,200,(await pool.query("SELECT (SELECT jsonb_build_object('paid',s.paid,'enabled',s.enabled,'fee',s.fee) FROM event_registration_settings s WHERE s.activity_id=a.id) AS registration_settings,a.programme_id,a.id,a.title,a.starts_at,a.type,a.mode,a.venue,a.city,a.language,a.audience,a.description,a.poster_url,CASE WHEN a.cancelled_at IS NULL THEN a.registration_link ELSE NULL END AS registration_link,a.status,a.cancelled_at,a.cancellation_reason,a.registration_deadline,a.capacity,coalesce((SELECT jsonb_agg(jsonb_build_object('trainerId',t.trainer_id,'role',t.role,'name',u.name)) FROM activity_trainers t LEFT JOIN users u ON u.id=t.trainer_id WHERE t.activity_id=a.id),'[]') AS trainers FROM activities a WHERE a.status IN ('published','completed','verified','archived') AND a.published_at IS NOT NULL")).rows);
  const user=await currentUser(req); if(!user) fail('Please sign in',401);
  if(req.method==='GET' && url.pathname==='/api/portal/trainers') return send(res,200,(await pool.query("SELECT u.id,u.name,p.city,p.language FROM approved_trainer_accounts u JOIN trainer_profiles p ON p.id=u.id ORDER BY u.name")).rows);
  if(req.method==='GET' && url.pathname==='/api/portal') return send(res,200,await snapshot(user));
@@ -52,13 +55,41 @@ export async function portalHandler(req,res,url,send) {
  const action=await body(req); const admin=user.role==='admin';
  await transaction(async db=>{
   const p=(await db.query('SELECT * FROM trainer_profiles WHERE id=$1 FOR UPDATE',[user.id])).rows[0];
-  if(action.type==='PROFILE_SUBMIT' || action.type==='PROFILE_SAVE') {
-   if(!p || p.status==='submitted') fail('Profile is awaiting review',409);
+  if(action.type==='PROFILE_SAVE') {
+   // Trainers manage their own profile; no RCBC review step (team decision, Nov 2026).
+   if(!p) fail('Trainer profile required',403);
    const v=action.values;
+   if(v.certificateEvidenceUrl!==undefined) {
+    const fileId=await certificateFileId(db,user,v.certificateEvidenceUrl);
+    await db.query('UPDATE trainer_profiles SET certificate_file_id=$2 WHERE id=$1',[user.id,fileId]);
+   }
    validateLinks(v.photoUrl,v.supportingDocuments || []);
    await validateFileLinks(db,user,[v.photoUrl,...(v.supportingDocuments || [])]);
-   if(action.type==='PROFILE_SUBMIT' && (!v.city?.trim() || !v.shortProfile?.trim())) fail('City and short profile are required');
-   await db.query("UPDATE trainer_profiles SET city=$2,language=$3,short_profile=$4,qualifications=$5,experience=$6,photo_url=$7,supporting_documents=$8,status=$9,admin_comment='',updated_at=now() WHERE id=$1",[user.id,v.city,v.language,v.shortProfile,v.qualifications,v.experience,v.photoUrl || null,JSON.stringify(v.supportingDocuments || []),action.type==='PROFILE_SAVE'?'draft':'submitted']); return;
+   if(!v.city?.trim() || !v.shortProfile?.trim()) fail('City and short profile are required');
+   await db.query("UPDATE trainer_profiles SET city=$2,language=$3,short_profile=$4,qualifications=$5,experience=$6,photo_url=$7,supporting_documents=$8,status='approved',admin_comment='',updated_at=now() WHERE id=$1",[user.id,v.city.trim(),v.language,v.shortProfile.trim(),v.qualifications,v.experience,v.photoUrl || null,JSON.stringify(v.supportingDocuments || [])]); return;
+  }
+  if(action.type==='LISTING_REQUEST' || action.type==='LISTING_WITHDRAW') {
+   if(admin || !p) fail('Trainer profile required',403);
+   if(action.type==='LISTING_REQUEST') {
+    if(action.consent!==true) fail('Please tick the consent box to request a public listing');
+    if(!['none','returned','rejected'].includes(p.listing_status)) fail('Your listing request is already with RCBC',409);
+    await db.query("UPDATE trainer_profiles SET listing_status='requested',listing_consent_at=now(),listing_comment='' WHERE id=$1",[user.id]);
+   } else {
+    await db.query("UPDATE trainer_profiles SET listing_status='none',listing_consent_at=NULL WHERE id=$1",[user.id]);
+   }
+   return;
+  }
+  if(action.type==='ADMIN_LISTING') {
+   if(!admin) fail('Admin access required',403);
+   const {id,listing,comment=''}=action;
+   if(!['suspended','approved'].includes(listing)) fail('Invalid listing change');
+   if(listing==='suspended' && !comment.trim()) fail('A comment is required');
+   const old=(await db.query('SELECT * FROM trainer_profiles WHERE id=$1 FOR UPDATE',[id])).rows[0];
+   if(!old) fail('Trainer not found',404);
+   if(listing==='suspended' && old.listing_status!=='approved') fail('Only an approved listing can be suspended',409);
+   if(listing==='approved' && (old.listing_status!=='suspended' || !old.listing_consent_at)) fail('Only a suspended listing with consent can be restored',409);
+   await db.query('UPDATE trainer_profiles SET listing_status=$2,listing_comment=$3,listing_reviewed_by=$4,listing_reviewed_at=now() WHERE id=$1',[id,listing,comment,user.id]);
+   await logDecision(db,user,'trainer_listing',id,listing==='suspended'?'unpublished':'published',comment,old.listing_status,listing);return;
   }
   if(action.type==='ADMIN_REVIEW') {
    if(!admin) fail('Admin access required',403);
@@ -71,7 +102,7 @@ export async function portalHandler(req,res,url,send) {
     if(!old || old.status!=='submitted') fail('Request is not awaiting review',409);
     if(decision==='approved' && (!action.certificateRef?.trim() || old.city==='Not provided' || old.claimed_certificate_ref==='Not provided')) fail('Confirm the applicant city and official certificate reference before approving');
     await db.query('UPDATE trainer_access_requests SET status=$2,admin_comment=$3,reviewed_by=$4,reviewed_at=now(),updated_at=now() WHERE id=$1',[id,decision,comment,user.id]);
-    if(decision==='approved') await db.query("UPDATE trainer_profiles SET certified_status='certified',certificate_ref=$2,city=$3 WHERE id=$1",[old.user_id,action.certificateRef.trim(),old.city]);
+    if(decision==='approved') await db.query("UPDATE trainer_profiles SET certified_status='certified',certificate_ref=$2,city=$3,certificate_file_id=$4 WHERE id=$1",[old.user_id,action.certificateRef.trim(),old.city,old.certificate_file_id]);
     else await db.query('DELETE FROM sessions WHERE user_id=$1',[old.user_id]);
     await logDecision(db,user,'trainer_access_requests',id,decision,comment,old.status,decision);return;
    }
@@ -82,6 +113,14 @@ export async function portalHandler(req,res,url,send) {
     const result=await db.query("UPDATE trainer_profiles SET status=$2,admin_comment=$3,updated_at=now() WHERE id=$1 AND status='submitted' RETURNING id",[targetId,decision,comment]);
     if(!result.rowCount) fail('Profile is not awaiting review',409);
     await logDecision(db,user,'trainer_profiles',targetId,decision,comment,'submitted',decision);return;
+   }
+   if(target==='listing') {
+    if(!['approved','returned','rejected'].includes(decision)) fail('Invalid listing decision');
+    const old=(await db.query('SELECT * FROM trainer_profiles WHERE id=$1 FOR UPDATE',[id])).rows[0];
+    if(!old || old.listing_status!=='requested' || !old.listing_consent_at) fail('Listing is not awaiting review',409);
+    if(decision==='approved' && (old.certified_status!=='certified' || old.status!=='approved')) fail('Approve portal access and the trainer profile before approving the public listing',409);
+    await db.query('UPDATE trainer_profiles SET listing_status=$2,listing_comment=$3,listing_reviewed_by=$4,listing_reviewed_at=now() WHERE id=$1',[id,decision,comment,user.id]);
+    await logDecision(db,user,'trainer_listing',id,decision,comment,'requested',decision);return;
    }
    if(target==='activity') {
     const transitions={approved:['submitted'],returned:['submitted'],published:['approved'],completed:['published'],archived:['verified','approved','published'],unpublished:['published'],cancelled:['approved','published']};
@@ -119,6 +158,14 @@ export async function portalHandler(req,res,url,send) {
     WHERE activities.created_by=$2 OR $15::boolean RETURNING id`,[id,user.id,a.title,a.date,a.type,a.mode,a.venue,a.language,a.audience,a.description,a.registrationLink,a.plannedHours,a.city || '',a.posterUrl || null,admin]);
    if(!saved.rowCount) fail('Only the activity owner can edit this record',403);
    if(admin){
+    const programmeId=String(a.programmeId||'').trim();
+    if(programmeId){
+     const cms=await getLearnEventsData(),programme=cms.physicalEducation?.programmes?.find(p=>p.id===programmeId);
+     if(!programme)fail('Choose an existing Physical Education programme.');
+     if(a.mode!=='Physical')fail('Programme intakes must use Physical delivery.');
+     if(isPlannedProgramme(programme)&&a.registrationMethod!=='closed')fail('This programme is planned. Keep registration closed until RCBC changes its availability.');
+    }
+    await db.query('UPDATE activities SET programme_id=$2 WHERE id=$1',[id,programmeId||null]);
     let paid;try{paid=validateEventPricing(a.registrationType,a.mode);}catch(e){fail(e.message);}
     const oldSettings=(await db.query('SELECT paid FROM event_registration_settings WHERE activity_id=$1 FOR UPDATE',[id])).rows[0];
     if(oldSettings&&oldSettings.paid!==paid&&(await db.query('SELECT 1 FROM event_participants WHERE activity_id=$1 LIMIT 1',[id])).rowCount)fail('Cannot change free/paid classification after registrations exist.');

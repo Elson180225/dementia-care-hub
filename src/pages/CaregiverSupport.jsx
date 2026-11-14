@@ -154,7 +154,7 @@ function CaregiverSupport() {
     () => new URLSearchParams(search).get("volunteers") === "1",
   );
   const [selectedVolunteer, setSelectedVolunteer] = useState(0);
-  const [supportGroups, setSupportGroups] = useState([]);
+  const [rawSupportGroups, setSupportGroups] = useState([]);
   const [groupsLoading, setGroupsLoading] = useState(true);
   const [groupsError, setGroupsError] = useState("");
   const [reloadGroups, setReloadGroups] = useState(0);
@@ -193,7 +193,8 @@ function CaregiverSupport() {
     return () => controller.abort();
   }, [reloadGroups, page]);
 
-  const { t } = useLanguage();
+  const { t,translateContent } = useLanguage();
+  const supportGroups=translateContent(rawSupportGroups,'records/organisations');
   const cs = t.caregiverSupport;
   const m = t.header.menu;
   const currentGuidanceTopics = cs.guidanceTopics || guidanceTopics;

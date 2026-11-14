@@ -29,6 +29,8 @@ npm run db:migrate:subscribers
 
 See [Get Updated and email setup](docs/GET_UPDATED_EMAIL_SETUP.md) for Supabase connections, Brevo configuration and reminder testing.
 
+See [Client feedback implementation and testing](docs/client-feedback-implementation-and-testing.md) for trainer consent, contact follow-up, subscription, Resource Finder and About page acceptance tests.
+
 ## Run the website
 
 Both the API and frontend must be running. Open two terminals in the project folder.

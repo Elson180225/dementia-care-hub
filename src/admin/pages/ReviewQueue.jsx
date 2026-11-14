@@ -30,6 +30,7 @@ const RECORD_LABEL = {
   completions: "Completed activity",
   activity_trainers: "Activity trainers",
   subscribers: "Get Updated subscriber",
+  trainer_listing: "Public listing"
 };
 
 export default function ReviewQueue() {
@@ -63,10 +64,6 @@ export default function ReviewQueue() {
   return (
     <>
       <h1>Approvals</h1>
-      <p>
-        Approve, return or reject what trainers send in. If you return or reject something, add a
-        short comment so the trainer knows what to change.
-      </p>
 
       {queue.length === 0 && <p className="tp-card">Nothing is waiting for review.</p>}
 
@@ -76,8 +73,11 @@ export default function ReviewQueue() {
             <p className="tp-dev">{item.kind}</p>
             <h2>{item.title}</h2>
             <p>{item.detail}</p>
-            {item.target === "profile" && (
+            {item.profile && (
               <dl className="tp-dl">
+                <dt>Assessment result</dt><dd>{item.profile.assessment_result || "Not recorded"}</dd>
+                <dt>Healthcare professional</dt><dd>{item.profile.healthcare_professional == null ? "Not recorded" : item.profile.healthcare_professional ? "Yes" : "No"}</dd>
+                <dt>Independent teaching scope</dt><dd>{item.profile.independent_teaching_scope || "Not recorded"}</dd>
                 <dt>Short profile</dt><dd>{item.profile.shortProfile || "–"}</dd>
                 <dt>Qualifications</dt><dd>{item.profile.qualifications || "–"}</dd>
                 <dt>Relevant experience</dt><dd>{item.profile.experience || "–"}</dd>
@@ -92,6 +92,8 @@ export default function ReviewQueue() {
                 </dd>
               </dl>
             )}
+            {item.certificateEvidenceUrl && <p><a href={item.certificateEvidenceUrl} target="_blank" rel="noreferrer">Open private certificate image or PDF</a></p>}
+            {item.profile?.certificateEvidenceUrl && <p><a href={item.profile.certificateEvidenceUrl} target="_blank" rel="noreferrer">Open private certificate image or PDF</a></p>}
             {item.target === "access" && (
                 <Field
                     id={`ref-${item.key}`}

@@ -68,9 +68,6 @@ export default function LearnEventsCMS() {
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1.25rem", flexWrap: "wrap", gap: "1rem" }}>
         <div>
           <h1 style={{ margin: 0 }}>Learn &amp; Events Management</h1>
-          <p style={{ margin: "0.25rem 0 0", color: "#666" }}>
-            Manage scheduled live sessions, online webinars, physical programmes, roadmap timelines, media stories, and certified trainers.
-          </p>
         </div>
         {!["sessions","online","physical","roadmap","outreach","trainers"].includes(activeTab) && (
           <button
@@ -149,83 +146,12 @@ export default function LearnEventsCMS() {
         </button>
       </nav>
 
-      {/* TAB 1: EVENTS & WORKSHOP */}
-      {activeTab === "sessions" && (
-        <div>
-          <div style={{ background: "var(--color-neutral-50)", padding: "1rem 1.25rem", borderRadius: "8px", border: "1px solid var(--color-neutral-200)", marginBottom: "1.5rem" }}>
-            <h3 style={{ margin: "0 0 0.5rem" }}>📅 Events &amp; Workshop Hub</h3>
-            <p style={{ margin: 0, fontSize: "0.95rem", color: "var(--color-neutral-600)" }}>
-              Create, update, and manage all project activities, community workshops, dialogues, and online sessions. Published activities immediately reflect across the public <strong>Explore Community Events &amp; Workshops</strong> directory and <strong>Upcoming Calendar</strong>.
-            </p>
-          </div>
-          <Activities admin={true} />
-        </div>
-      )}
-
-      {/* TAB 2: ONLINE EDUCATION */}
-      {activeTab === "online" && (
-        <div>
-          <div style={{ background: "var(--color-neutral-50)", padding: "1rem 1.25rem", borderRadius: "8px", border: "1px solid var(--color-neutral-200)", marginBottom: "1.5rem" }}>
-            <h3 style={{ margin: "0 0 0.5rem" }}>💻 Online Education Management</h3>
-            <p style={{ margin: 0, fontSize: "0.95rem", color: "var(--color-neutral-600)" }}>
-              Manage upcoming online webinars, preview cards, and permanent Q&amp;A learning resources with full CRUD operations, keyword search, and pagination.
-            </p>
-          </div>
-          <OnlineEducationAdmin content={content} onSave={handleSave} />
-        </div>
-      )}
-
-      {/* TAB 3: PHYSICAL EDUCATION */}
-      {activeTab === "physical" && (
-        <div>
-          <div style={{ background: "var(--color-neutral-50)", padding: "1rem 1.25rem", borderRadius: "8px", border: "1px solid var(--color-neutral-200)", marginBottom: "1.5rem" }}>
-            <h3 style={{ margin: "0 0 0.5rem" }}>🏋️ Physical Education Management</h3>
-            <p style={{ margin: 0, fontSize: "0.95rem", color: "var(--color-neutral-600)" }}>
-              Configure in-person DCS tracks, target roles, syllabus pillars, and scheduled intakes with full CRUD operations, keyword search, and pagination.
-            </p>
-          </div>
-          <PhysicalEducationAdmin content={content} onSave={handleSave} />
-        </div>
-      )}
-
-      {/* TAB 4: ANNUAL ROADMAP */}
-      {activeTab === "roadmap" && (
-        <div>
-          <div style={{ background: "var(--color-neutral-50)", padding: "1rem 1.25rem", borderRadius: "8px", border: "1px solid var(--color-neutral-200)", marginBottom: "1.5rem" }}>
-            <h3 style={{ margin: "0 0 0.5rem" }}>🗺️ Annual Activity Roadmap Management</h3>
-            <p style={{ margin: 0, fontSize: "0.95rem", color: "var(--color-neutral-600)" }}>
-              Manage multi-edition roadmaps, milestone stepper tracks, and high-resolution calendar posters with full CRUD operations.
-            </p>
-          </div>
-          <RoadmapAdmin content={content} onSave={handleSave} />
-        </div>
-      )}
-
-      {/* TAB 5: OUTREACH & NEWS */}
-      {activeTab === "outreach" && (
-        <div>
-          <div style={{ background: "var(--color-neutral-50)", padding: "1rem 1.25rem", borderRadius: "8px", border: "1px solid var(--color-neutral-200)", marginBottom: "1.5rem" }}>
-            <h3 style={{ margin: "0 0 0.5rem" }}>🗣️ Community Outreach &amp; Press News</h3>
-            <p style={{ margin: 0, fontSize: "0.95rem", color: "var(--color-neutral-600)" }}>
-              Manage community dialogue photo stories and regional press clipping articles with full CRUD operations, search, and pagination.
-            </p>
-          </div>
-          <OutreachNewsAdmin content={content} onSave={handleSave} />
-        </div>
-      )}
-
-      {/* TAB 6: CERTIFIED TRAINERS & GOVERNANCE */}
-      {activeTab === "trainers" && (
-        <div>
-          <div style={{ background: "var(--color-neutral-50)", padding: "1rem 1.25rem", borderRadius: "8px", border: "1px solid var(--color-neutral-200)", marginBottom: "1.5rem" }}>
-            <h3 style={{ margin: "0 0 0.5rem" }}>👨‍⚕️ Certified Trainers &amp; Governance Directory</h3>
-            <p style={{ margin: 0, fontSize: "0.95rem", color: "var(--color-neutral-600)" }}>
-              Manage clinical facilitators and advisory specialists displayed on the public carousel and directory with search, category filters, and CRUD modals.
-            </p>
-          </div>
-          <CertifiedTrainersAdmin content={content} onSave={handleSave} />
-        </div>
-      )}
+      {activeTab === "sessions" && <Activities admin={true} />}
+      {activeTab === "online" && <OnlineEducationAdmin content={content} onSave={handleSave} />}
+      {activeTab === "physical" && <PhysicalEducationAdmin content={content} onSave={handleSave} />}
+      {activeTab === "roadmap" && <RoadmapAdmin content={content} onSave={handleSave} />}
+      {activeTab === "outreach" && <OutreachNewsAdmin content={content} onSave={handleSave} />}
+      {activeTab === "trainers" && <CertifiedTrainersAdmin content={content} onSave={handleSave} />}
     </div>
   );
 }

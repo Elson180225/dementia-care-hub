@@ -1,6 +1,7 @@
 import FormFeedback from "../components/FormFeedback";
 import { useState } from 'react';
-export default function UploadField({label,kind,value=[],onChange,multiple=false,disabled=false,onBusyChange}) {
+import FieldInfo from '../components/FieldInfo';
+export default function UploadField({label,kind,value=[],onChange,multiple=false,disabled=false,onBusyChange,help}) {
  const [busy,setBusy]=useState(false);const [error,setError]=useState('');
  const links=Array.isArray(value)?value:value?[value]:[];
  async function upload(event) {
@@ -14,8 +15,8 @@ export default function UploadField({label,kind,value=[],onChange,multiple=false
   }catch(e){setError(e.message);}
   finally {if(added.length) onChange(multiple?[...links,...added]:added[0]);setBusy(false);onBusyChange?.(false);event.target.value='';}
  }
- return <fieldset className="tp-upload"><legend>{label}</legend><p>PNG, JPEG, WebP{kind==='document'?' or PDF':''}. Maximum 8 MB each.</p>
+ return <fieldset className="tp-upload"><legend>{label}<FieldInfo label={label} example={help || (kind==='document' ? 'Attach a clear image or PDF as supporting evidence. Documents are private to the uploader and RCBC administrators.' : 'Choose a clear image relevant to this field. PNG, JPEG or WebP, up to 8 MB.')} /></legend><p>PNG, JPEG, WebP{kind==='document'?' or PDF':''}. Maximum 8 MB each.</p>
  <input aria-label={label} type="file" accept={kind==='document'?'.png,.jpg,.jpeg,.webp,.pdf':'.png,.jpg,.jpeg,.webp'} multiple={multiple} disabled={disabled || busy} onChange={upload}/>
  {busy && <p role="status">Uploading...</p>}<FormFeedback>{error}</FormFeedback>
- <ul>{links.filter(Boolean).map((link,i)=><li key={link+i}><a href={link} target="_blank" rel="noreferrer">View {kind} {i+1}</a>{!disabled && <button type="button" className="tp-btn tp-btn-ghost" onClick={()=>onChange(multiple?links.filter((_,j)=>i!==j):'')}>Remove</button>}</li>)}</ul></fieldset>;
+ <ul>{links.filter(Boolean).map((link,i)=><li key={link+i}><a href={link} target="_blank" rel="noreferrer">View {kind} {i+1}</a>{!disabled && !busy && <button type="button" className="tp-btn tp-btn-ghost" onClick={()=>onChange(multiple?links.filter((_,j)=>i!==j):'')}>Remove</button>}</li>)}</ul></fieldset>;
 }

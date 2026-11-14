@@ -4,6 +4,7 @@ import { useTrainer } from "../TrainerContext";
 import { COMPLETION_LABEL } from "../constants";
 import { fmtDate } from "../selectors";
 import { Field, StatusChip, describe } from "../ui";
+import EventCard from "../EventCard";
 
 export default function Conducted({admin=false}) {
   const { state, dispatch } = useTrainer();
@@ -43,17 +44,14 @@ export default function Conducted({admin=false}) {
   return (
     <>
       <h1>Completed workshops</h1>
-      <p>When a workshop or seminar has finished, add how it went here. The title, date and language are filled in for you.</p>
-      <ul className="tp-cards">
+           <ul className="ev-grid">
         {eligible.map((a) => (
-          <li key={a.id} className="tp-card">
-            <h2>{a.title}</h2>
-            <p>{fmtDate(a.date)} · {a.language}</p>
-            <p><StatusChip status={a.completion.status} labels={COMPLETION_LABEL} /></p>
+          <EventCard key={a.id} activity={a} wide={openId === a.id}
+            status={<StatusChip status={a.completion.status} labels={COMPLETION_LABEL} />}>
             {a.completion.status === "returned" && a.completion.adminComment && (
               <p className="tp-note">Comment from RCBC: {a.completion.adminComment}</p>
             )}
-            {["none", "draft", "returned"].includes(a.completion.status) && (admin || a.created_by===state.session?.id) && openId !== a.id && (
+            {["none", "draft", "returned"].includes(a.completion.status) && (admin || a.created_by === state.session?.id) && openId !== a.id && (
               <button className="tp-btn tp-btn-ghost" onClick={() => open(a)}>Record how it went</button>
             )}
             {openId === a.id && (
@@ -77,9 +75,11 @@ export default function Conducted({admin=false}) {
                 </div>
               </form>
             )}
-          </li>
+          </EventCard>
         ))}
-        {eligible.length === 0 && <li className="tp-card">No finished workshops yet. Published workshops appear here once their date has passed.</li>}
+        {eligible.length === 0 && (
+          <li className="tp-card" style={{ gridColumn: "1 / -1" }}>No finished workshops yet. Published workshops appear here once their date has passed.</li>
+        )}
       </ul>
     </>
   );

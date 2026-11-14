@@ -1,5 +1,4 @@
-import PublishedRecords from "../../components/PublishedRecords";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 
 import supportServices from "../../data/supportServices";
@@ -110,10 +109,18 @@ function ResourceNeedIcon({ type }) {
 }
 
 function ResourceFinder() {
-  const { t } = useLanguage();
+  const { t,translateContent } = useLanguage();
   const rf = t.resourceFinderPage || {};
   const currentNeeds = rf.needs || needs;
 
+  const [rawDirectory, setDirectory] = useState([]);
+  const directory=translateContent(rawDirectory,'records/organisations');
+  const [directoryError, setDirectoryError] = useState('');
+  useEffect(() => {
+    const controller = new AbortController();
+    fetch('/api/public/organisations', {signal:controller.signal}).then(r=>{if(!r.ok) throw new Error();return r.json();}).then(rows=>setDirectory(rows)).catch(e=>{if(e.name!=='AbortError') setDirectoryError('Managed directory records could not be loaded. Please try again later.');});
+    return ()=>controller.abort();
+  }, []);
   const [step, setStep] = useState(1);
 
   const [need, setNeed] = useState("");
@@ -220,11 +227,12 @@ function ResourceFinder() {
       }));
 
     return [
+      ...directory.flatMap(r => (r.services?.length ? r.services : ['Other']).map(type=>({id:r.id+'-'+type, source:r.category==='support-group'?'services':r.category,title:r.name,type,location:r.city,state:r.state,description:r.specialist_field,secondary:r.is_example?'Example only - not a real service.':r.source,verificationStatus:r.is_example?'example':r.review_status==='current'?'verified':'pending',path:({services:'/find-help/support-services',financial:'/find-help/government-financial',equipment:'/find-help/equipment-practical'})[r.category] || '/find-help/support-services'}))),
       ...supportRecords,
       ...governmentRecords,
       ...equipmentRecords,
     ];
-  }, []);
+  }, [directory]);
 
   /* =========================================================
      FILTER
@@ -327,7 +335,7 @@ function ResourceFinder() {
 
   return (
     <main className="rf-page">
-      <PublishedRecords kind="organisations" category="" title="Published directory records" />
+      {directoryError && <p role="status">{directoryError}</p>}
       {/* =====================================================
           INTRO
       ====================================================== */}
@@ -968,7 +976,7 @@ function ResourceFinder() {
                         <span
                           className={`rf-verification rf-verification-${resource.verificationStatus}`}
                         >
-                          {resource.verificationStatus ===
+                          {resource.verificationStatus === "example" ? "Example only" : resource.verificationStatus ===
                           "verified"
                             ? (rf.verified || "Verified")
                             : (rf.pendingVerification || "Pending verification")}

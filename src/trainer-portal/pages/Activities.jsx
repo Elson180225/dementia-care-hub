@@ -1,11 +1,12 @@
 import UploadField from "../UploadField";
-import {validateEventPricing} from '../../../shared/event-registration';
+import {validateEventPricing} from "../../../shared/event-registration";
 import { Link } from "react-router-dom";
 import { useEffect, useMemo, useState } from "react";
 import { useTrainer } from "../TrainerContext";
 import { ACTIVITY_TYPES, LANGUAGES, MODES, STATUS_LABEL } from "../constants";
 import { fmtDate } from "../selectors";
 import { Field, StatusChip, describe } from "../ui";
+import EventCard from "../EventCard";
 
 const ALL_ADMIN_TYPES = [
   ...ACTIVITY_TYPES,
@@ -47,6 +48,7 @@ const blank = {
   description: "",
   registrationLink: "",
   registrationType: "",
+  programmeId: "",
   registrationFee: "",
   registrationMethod: "closed",
   registrationGoogleUrl: "",
@@ -95,6 +97,7 @@ function validate(v) {
 
 export default function Activities({
   admin = false,
+  programmeId = null,
   initialFilterType = "all",
   initialFilterMode = "all",
   defaultValues = null,
@@ -105,10 +108,13 @@ export default function Activities({
   const { state, dispatch } = useTrainer();
   const addLabel = newButtonLabel || (admin ? "+ New event / workshop" : "+ New workshop / seminar");
   const [uploading, setUploading] = useState(0);
+  const [view, setView] = useState("cards");
   const uploadBusy = (busy) => setUploading((n) => n + (busy ? 1 : -1));
   const [editing, setEditing] = useState(null); // { id?, values }
   const [errors, setErrors] = useState({});
   const [availableTrainers, setAvailableTrainers] = useState([]);
+  const [programmes,setProgrammes]=useState([]);
+  useEffect(()=>{if(!admin)return;let active=true;fetch('/api/admin/learn-events-content').then(r=>{if(!r.ok)throw Error();return r.json();}).then(c=>{if(active)setProgrammes(c.physicalEducation?.programmes||[]);}).catch(()=>{});return()=>{active=false;};},[admin]);
   const [assigned, setAssigned] = useState([]);
   const [cancelling, setCancelling] = useState(null); // { id, reason, error }
   const [deletingActivity, setDeletingActivity] = useState(null);
@@ -203,7 +209,7 @@ export default function Activities({
     const payload = {
       id,
       ...editing.values,
-      status: admin ? resolvedStatus : editing.values.status,
+      status: admin ? (saveMode === "draft" ? "draft" : resolvedStatus) : editing.values.status,
       venue,
       trainers: assigned,
     };
@@ -238,6 +244,7 @@ export default function Activities({
 
   const filteredActivities = useMemo(() => {
     return state.activities.filter((a) => {
+      if (programmeId !== null && (a.programmeId || "") !== programmeId) return false;
       if (filterType !== "all" && a.type !== filterType) return false;
       if (filterMode !== "all" && a.mode !== filterMode) return false;
       if (filterStatus !== "all") {
@@ -261,7 +268,7 @@ export default function Activities({
       }
       return true;
     });
-  }, [state.activities, filterType, filterMode, filterStatus, filterCity, searchQuery]);
+  }, [state.activities, programmeId, filterType, filterMode, filterStatus, filterCity, searchQuery]);
 
   const totalCount = filteredActivities.length;
   const totalPages = Math.ceil(totalCount / pageSize) || 1;
@@ -375,6 +382,7 @@ export default function Activities({
             />
           </Field>
 
+          {admin&&<label className="tp-field">Physical Education programme (optional)<select disabled={Boolean(programmeId)} value={editing.values.programmeId||''} onChange={e=>setEditing({...editing,values:{...editing.values,programmeId:e.target.value}})}><option value="">Standalone event — no programme</option>{programmes.map(p=><option key={p.id} value={p.id}>{p.code||p.title} — {p.title}</option>)}</select><small>Link this dated intake to a programme so visitors can register from its overview page.</small></label>}
           {admin&&<fieldset className="tp-field"><legend>Registration</legend><label htmlFor="registrationType">Free or paid (required)</label><select id="registrationType" value={editing.values.registrationType||''} aria-invalid={!!errors.registrationType} onChange={e=>setEditing({...editing,values:{...editing.values,registrationType:e.target.value,...(e.target.value==='free-online'?{registrationFee:'',paymentInstructions:''}:{})}})}><option value="">Choose event type</option><option value="free-online">Free online webinar</option><option value="paid-in-person">Paid in-person programme</option></select>{errors.registrationType&&<p className="tp-error">{errors.registrationType}</p>}{editing.values.registrationType==='paid-in-person'?<><label>Fee description<input maxLength={100} value={editing.values.registrationFee||''} onChange={e=>setEditing({...editing,values:{...editing.values,registrationFee:e.target.value}})}/></label><label>Payment instructions<textarea maxLength={4000} value={editing.values.paymentInstructions||''} onChange={e=>setEditing({...editing,values:{...editing.values,paymentInstructions:e.target.value}})}/></label></>:<p>Free — no payment required.</p>}<label>Registration method<select value={editing.values.registrationMethod||'closed'} onChange={e=>setEditing({...editing,values:{...editing.values,registrationMethod:e.target.value}})}><option value="closed">Registration closed</option><option value="google">Google Form</option><option value="website">Website registration</option></select></label>{editing.values.registrationMethod==='google'&&<label>Google Form link (required)<input type="url" value={editing.values.registrationGoogleUrl||''} onChange={e=>setEditing({...editing,values:{...editing.values,registrationGoogleUrl:e.target.value}})}/></label>}{editing.values.registrationMethod==='website'&&<><p>Visitors register directly on the website. No external link or account is required.</p>{[['registrationPhone','Require phone number'],['registrationNotes','Allow optional notes']].map(([key,label])=><label key={key}><span><input type="checkbox" checked={!!editing.values[key]} onChange={e=>setEditing({...editing,values:{...editing.values,[key]:e.target.checked}})}/> {label}</span></label>)}</>}<label>General registration instructions (optional)<textarea maxLength={4000} value={editing.values.registrationInstructions||''} onChange={e=>setEditing({...editing,values:{...editing.values,registrationInstructions:e.target.value}})}/></label><small>Changing the registration method affects new submissions only. Existing participant records are preserved. Paid bookings require RCBC payment verification.</small></fieldset>}
           {!admin&&input("registrationLink", "External registration link (optional)", {
             type: "url",
@@ -484,6 +492,7 @@ export default function Activities({
             onChange={(posterUrl) => setEditing({ ...editing, values: { ...v, posterUrl } })}
           />
 
+          {admin&&<aside className="tp-card" aria-label="Intake preview"><h3>Public intake preview</h3><h4>{v.title||"Intake title"}</h4><p>{v.date||"Choose a date"} · {v.venue||"Venue to be confirmed"} {v.city}</p><p>{v.registrationType==="paid-in-person"?v.registrationFee||"Fee to be confirmed":"Free online webinar"}</p><p>{v.registrationMethod==="website"?"Register directly on the website":v.registrationMethod==="google"?"Register through Google Form":"Registration closed"}</p><p>Paid submissions require RCBC payment verification and approval. This preview does not create a booking.</p></aside>}
           <div className="tp-actions" style={{ marginTop: "1.5rem" }}>
             {admin ? (
               <>
@@ -538,18 +547,142 @@ export default function Activities({
     );
   }
 
+  // Action buttons for one activity, shared by the card and table views.
+  function renderActions(a) {
+    return (
+      <>
+        <div style={{ display: "inline-flex", gap: "6px", flexWrap: "wrap", justifyContent: "flex-end" }}>
+          {admin && <Link className="tp-btn tp-btn-ghost" to={'/admin/participants?activity='+a.id}>View participants</Link>}
+          {(admin ||
+            (!a.cancelledAt &&
+              ["draft", "returned"].includes(a.status) &&
+              a.created_by === state.session?.id)) && (
+            <button
+              type="button"
+              className="tp-btn tp-btn-ghost"
+              style={{ minHeight: "36px", padding: "4px 12px", fontSize: "0.85rem" }}
+              onClick={() => open(a)}
+            >
+              Edit
+            </button>
+          )}
+
+          {(admin ||
+            (["draft", "returned"].includes(a.status) &&
+              a.created_by === state.session?.id)) && (
+            <button
+              type="button"
+              className="tp-btn tp-btn-ghost"
+              style={{ minHeight: "36px", padding: "4px 12px", fontSize: "0.85rem", color: "#b91c1c", borderColor: "#fca5a5" }}
+              onClick={() => setDeletingActivity(a)}
+              title="Permanently delete this activity"
+            >
+              Delete
+            </button>
+          )}
+
+          {admin && (
+            <>
+              {a.status === "approved" && !a.cancelledAt && (
+                <button
+                  type="button"
+                  className="tp-btn"
+                  style={{ minHeight: "36px", padding: "4px 12px", fontSize: "0.85rem" }}
+                  onClick={() => review(a.id, "published")}
+                >
+                  Publish
+                </button>
+              )}
+
+              {a.status === "published" && !a.cancelledAt && (
+                <button
+                  type="button"
+                  className="tp-btn tp-btn-ghost"
+                  style={{ minHeight: "36px", padding: "4px 12px", fontSize: "0.85rem" }}
+                  onClick={() => review(a.id, "unpublished")}
+                >
+                  Unpublish
+                </button>
+              )}
+
+              {["approved", "published"].includes(a.status) &&
+                !a.cancelledAt &&
+                cancelling?.id !== a.id && (
+                  <button
+                    type="button"
+                    className="tp-btn tp-btn-ghost"
+                    style={{ minHeight: "36px", padding: "4px 12px", fontSize: "0.85rem", color: "#b91c1c", borderColor: "#fca5a5" }}
+                    onClick={() => setCancelling({ id: a.id, reason: "", error: "" })}
+                  >
+                    Cancel
+                  </button>
+                )}
+
+              {(a.status === "verified" || (a.cancelledAt && a.status !== "archived")) && (
+                <button
+                  type="button"
+                  className="tp-btn tp-btn-ghost"
+                  style={{ minHeight: "36px", padding: "4px 12px", fontSize: "0.85rem" }}
+                  onClick={() => review(a.id, "archived")}
+                >
+                  Archive
+                </button>
+              )}
+            </>
+          )}
+        </div>
+
+        {/* Cancel prompt sub-row */}
+        {cancelling?.id === a.id && (
+          <div style={{ marginTop: "10px", textAlign: "left", background: "#fef2f2", border: "1px solid #fecaca", padding: "10px", borderRadius: "8px" }}>
+            <Field id={`cancel-${a.id}`} label="Reason for cancellation" error={cancelling.error}>
+              <textarea
+                id={`cancel-${a.id}`}
+                rows="2"
+                value={cancelling.reason}
+                onChange={(e) =>
+                  setCancelling({ ...cancelling, reason: e.target.value, error: "" })
+                }
+                aria-invalid={Boolean(cancelling.error)}
+                aria-describedby={describe(`cancel-${a.id}`, cancelling.error)}
+                placeholder="e.g. Rescheduled due to speaker availability..."
+              />
+            </Field>
+            <div className="tp-actions" style={{ marginTop: "8px" }}>
+              <button
+                type="button"
+                className="tp-btn"
+                style={{ minHeight: "36px", padding: "4px 12px", fontSize: "0.85rem", background: "#b91c1c" }}
+                onClick={confirmCancel}
+              >
+                Confirm
+              </button>
+              <button
+                type="button"
+                className="tp-btn tp-btn-ghost"
+                style={{ minHeight: "36px", padding: "4px 12px", fontSize: "0.85rem" }}
+                onClick={() => setCancelling(null)}
+              >
+                Keep Activity
+              </button>
+            </div>
+          </div>
+        )}
+      </>
+    );
+  }
+
   // LISTING VIEW
   return (
     <>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem", flexWrap: "wrap", gap: "1rem" }}>
         <div>
           <h1 style={{ margin: 0 }}>{pageTitle || (admin ? "Events & workshops" : "My workshops")}</h1>
-          <p style={{ margin: "0.25rem 0 0", color: "var(--color-neutral-600)", fontSize: "0.95rem" }}>
-            {pageSubtitle ||
-              (admin
-                ? "Add and manage community events, workshops, dialogues and online sessions."
-                : "Add the workshops and seminars you will run. RCBC checks them before they appear on the public Education & Events page.")}
-          </p>
+          {(admin || pageSubtitle) && (
+            <p style={{ margin: "0.25rem 0 0", color: "var(--color-neutral-600)", fontSize: "0.95rem" }}>
+              {pageSubtitle || "Add and manage community events, workshops, dialogues and online sessions."}
+            </p>
+          )}
         </div>
         <button
           className="tp-btn"
@@ -688,6 +821,10 @@ export default function Activities({
           {hasActiveFilters && " (filtered)"}
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+          <div className="ev-view-toggle" role="group" aria-label="Choose view">
+            <button type="button" aria-pressed={view === "cards"} onClick={() => setView("cards")}>Cards</button>
+            <button type="button" aria-pressed={view === "table"} onClick={() => setView("table")}>Table</button>
+          </div>
           <label htmlFor="tp-page-size-select" style={{ fontSize: "0.88rem" }}>Rows per page:</label>
           <select
             id="tp-page-size-select"
@@ -724,6 +861,15 @@ export default function Activities({
             </button>
           )}
         </div>
+      ) : view === "cards" ? (
+        <ul className="ev-grid">
+          {pagedActivities.map((a) => (
+            <EventCard key={a.id} activity={a} wide={cancelling?.id === a.id}
+              status={<StatusChip status={a.status} labels={STATUS_LABEL} />}>
+              {renderActions(a)}
+            </EventCard>
+          ))}
+        </ul>
       ) : (
         <div className="tp-table-wrap">
           <table className="tp-table">
@@ -825,125 +971,7 @@ export default function Activities({
                       <StatusChip status={a.status} labels={STATUS_LABEL} />
                     </td>
 
-                    <td style={{ textAlign: "right" }}>
-                      <div style={{ display: "inline-flex", gap: "6px", flexWrap: "wrap", justifyContent: "flex-end" }}>
-                        {admin && <Link className="tp-btn tp-btn-ghost" to={'/admin/participants?activity='+a.id}>Participants</Link>}
-                        {(admin ||
-                          (!a.cancelledAt &&
-                            ["draft", "returned"].includes(a.status) &&
-                            a.created_by === state.session?.id)) && (
-                          <button
-                            type="button"
-                            className="tp-btn tp-btn-ghost"
-                            style={{ minHeight: "36px", padding: "4px 12px", fontSize: "0.85rem" }}
-                            onClick={() => open(a)}
-                          >
-                            Edit
-                          </button>
-                        )}
-
-                        {(admin ||
-                          (["draft", "returned"].includes(a.status) &&
-                            a.created_by === state.session?.id)) && (
-                          <button
-                            type="button"
-                            className="tp-btn tp-btn-ghost"
-                            style={{ minHeight: "36px", padding: "4px 12px", fontSize: "0.85rem", color: "#b91c1c", borderColor: "#fca5a5" }}
-                            onClick={() => setDeletingActivity(a)}
-                            title="Permanently delete this activity"
-                          >
-                            Delete
-                          </button>
-                        )}
-
-                        {admin && (
-                          <>
-                            {a.status === "approved" && !a.cancelledAt && (
-                              <button
-                                type="button"
-                                className="tp-btn"
-                                style={{ minHeight: "36px", padding: "4px 12px", fontSize: "0.85rem" }}
-                                onClick={() => review(a.id, "published")}
-                              >
-                                Publish
-                              </button>
-                            )}
-
-                            {a.status === "published" && !a.cancelledAt && (
-                              <button
-                                type="button"
-                                className="tp-btn tp-btn-ghost"
-                                style={{ minHeight: "36px", padding: "4px 12px", fontSize: "0.85rem" }}
-                                onClick={() => review(a.id, "unpublished")}
-                              >
-                                Unpublish
-                              </button>
-                            )}
-
-                            {["approved", "published"].includes(a.status) &&
-                              !a.cancelledAt &&
-                              cancelling?.id !== a.id && (
-                                <button
-                                  type="button"
-                                  className="tp-btn tp-btn-ghost"
-                                  style={{ minHeight: "36px", padding: "4px 12px", fontSize: "0.85rem", color: "#b91c1c", borderColor: "#fca5a5" }}
-                                  onClick={() => setCancelling({ id: a.id, reason: "", error: "" })}
-                                >
-                                  Cancel
-                                </button>
-                              )}
-
-                            {(a.status === "verified" || (a.cancelledAt && a.status !== "archived")) && (
-                              <button
-                                type="button"
-                                className="tp-btn tp-btn-ghost"
-                                style={{ minHeight: "36px", padding: "4px 12px", fontSize: "0.85rem" }}
-                                onClick={() => review(a.id, "archived")}
-                              >
-                                Archive
-                              </button>
-                            )}
-                          </>
-                        )}
-                      </div>
-
-                      {/* Cancel prompt sub-row */}
-                      {cancelling?.id === a.id && (
-                        <div style={{ marginTop: "10px", textAlign: "left", background: "#fef2f2", border: "1px solid #fecaca", padding: "10px", borderRadius: "8px" }}>
-                          <Field id={`cancel-${a.id}`} label="Reason for cancellation" error={cancelling.error}>
-                            <textarea
-                              id={`cancel-${a.id}`}
-                              rows="2"
-                              value={cancelling.reason}
-                              onChange={(e) =>
-                                setCancelling({ ...cancelling, reason: e.target.value, error: "" })
-                              }
-                              aria-invalid={Boolean(cancelling.error)}
-                              aria-describedby={describe(`cancel-${a.id}`, cancelling.error)}
-                              placeholder="e.g. Rescheduled due to speaker availability..."
-                            />
-                          </Field>
-                          <div className="tp-actions" style={{ marginTop: "8px" }}>
-                            <button
-                              type="button"
-                              className="tp-btn"
-                              style={{ minHeight: "36px", padding: "4px 12px", fontSize: "0.85rem", background: "#b91c1c" }}
-                              onClick={confirmCancel}
-                            >
-                              Confirm
-                            </button>
-                            <button
-                              type="button"
-                              className="tp-btn tp-btn-ghost"
-                              style={{ minHeight: "36px", padding: "4px 12px", fontSize: "0.85rem" }}
-                              onClick={() => setCancelling(null)}
-                            >
-                              Keep Activity
-                            </button>
-                          </div>
-                        </div>
-                      )}
-                    </td>
+                    <td style={{ textAlign: "right" }}>{renderActions(a)}</td>
                   </tr>
                 );
               })}

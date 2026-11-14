@@ -13,7 +13,9 @@ import { publicRecordsHandler } from './public-records.js';
 import { learnEventsContentHandler } from './learn-events-content.js';
 import { createHash } from 'node:crypto';
 import { participantsHandler } from './participants.js';
+import { eventRegistrationHandler } from './event-registration.js';
 import { trackApplicationsHandler } from './track-applications.js';
+import {translationsHandler} from './translations.js';
 
 const port = Number(process.env.API_PORT || 3001);
 const handleEnquiry = enquiryHandler({persist:async data=>{
@@ -35,8 +37,10 @@ const server = createServer(async (req, res) => {
  try {
   const url = new URL(req.url, `http://${req.headers.host || 'localhost'}`);
   if(url.pathname==='/api/uploads' || url.pathname.startsWith('/api/files/')) return await filesHandler(req,res,url,sendJson);
+  if(['/api/admin/translations','/api/public/translations'].includes(url.pathname))return await translationsHandler(req,res,url,sendJson);
   if(url.pathname==='/api/admin/learn-events-content' || url.pathname==='/api/public/learn-events-content') return await learnEventsContentHandler(req,res,url,sendJson);
   if(url.pathname==='/api/admin/participants') return await participantsHandler(req,res,url,sendJson);
+  if(['/api/admin/event-registration','/api/public/event-registration'].includes(url.pathname)) return await eventRegistrationHandler(req,res,url,sendJson);
   if(['/api/admin/track-applications','/api/public/track-applications'].includes(url.pathname)) return await trackApplicationsHandler(req,res,url,sendJson);
   if(url.pathname.startsWith('/api/admin/')) return await managementHandler(req,res,url,sendJson);
   if(url.pathname.startsWith('/api/public/')) return await publicRecordsHandler(req,res,url,sendJson);

@@ -33,6 +33,9 @@ export async function filesHandler(req,res,url,send) {
  const file=(await pool.query('SELECT * FROM files WHERE id=$1',[url.pathname.split('/').at(-1)])).rows[0];
  if(!file) fail('File not found',404);
  let allowed=user && (user.role==='admin' || user.id===file.owner_id);
+ if(!allowed && user && file.kind==='document') {
+  allowed=!!(await pool.query('SELECT 1 FROM trainer_profiles WHERE id=$1 AND certificate_file_id=$2',[user.id,file.id])).rowCount;
+ }
  if(!allowed && file.kind!=='document') {
   const link=url.pathname;
   allowed=!!(await pool.query(`SELECT 1 FROM public_trainers WHERE photo_url=$1

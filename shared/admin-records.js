@@ -8,7 +8,7 @@ const review = [
 ];
 export const recordTypes = {
  organisations:{label:'Directory',table:'organisations',title:'name',fields:[
- ['name','Organisation / facility name','text',true],['category','Category',['healthcare','services','financial','equipment','support-group']],
+ ['is_example','Example only (not a real service)','checkbox'],['name','Organisation / facility name','text',true],['category','Category',['healthcare','services','financial','equipment','support-group']],
  ['services','Services (one per line)','array'],['specialist_field','Specialist field','text'],
  ['address','Address','textarea'],['city','City','text'],['state','State','text'],['postcode','Postcode','text'],
  ['contact_name','Contact person','text'],['phone','Phone','text'],['email','Email','email'],['website','Website','url'],

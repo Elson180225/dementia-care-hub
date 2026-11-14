@@ -1,0 +1,14 @@
+/* Read-only profile card on My profile. */
+.mp-view { display: grid; grid-template-columns: 140px minmax(0, 1fr); gap: 28px; align-items: start; }
+.mp-photo { width: 140px; height: 140px; border-radius: 50%; object-fit: cover; border: 3px solid var(--color-purple-100); background: var(--color-purple-50); }
+.mp-initials { display: grid; place-items: center; font-family: Georgia, "Times New Roman", serif; font-size: 2.6rem; font-weight: 700; color: var(--color-purple-600); }
+.mp-details h2 { margin-bottom: 4px; }
+.mp-meta { margin: 0 0 16px; color: var(--color-neutral-600); }
+.mp-details h3 { margin: 18px 0 4px; font-size: 1rem; color: var(--color-purple-700); }
+.mp-details p { margin: 0; white-space: pre-line; }
+.mp-docs { margin: 0; padding-left: 1.2rem; }
+.mp-actions { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 24px; }
+@media (max-width: 640px) {
+  .mp-view { grid-template-columns: minmax(0, 1fr); justify-items: start; }
+  .mp-photo { width: 110px; height: 110px; }
+}

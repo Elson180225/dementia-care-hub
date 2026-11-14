@@ -1,0 +1,58 @@
+.event-registration-card{width:100%;padding:24px;border:1px solid #ddcfe9;border-radius:16px;background:#fff;color:#3a244b;text-align:left}
+.registration-window-backdrop{position:fixed;inset:0;z-index:17000;display:flex;align-items:center;justify-content:center;padding:24px;background:#21102dbf;backdrop-filter:blur(5px)}
+.registration-window{width:min(760px,100%);max-height:92vh;max-height:92dvh;overflow:auto;background:#fff;border:1px solid #e1d7eb;border-radius:18px;box-shadow:0 24px 100px #16082366;color:#3a244b;text-align:left;overscroll-behavior:contain}
+.registration-window *{box-sizing:border-box}.registration-window:focus{outline:none}
+.registration-window-header{position:sticky;top:0;z-index:2;display:flex;align-items:flex-start;justify-content:space-between;gap:20px;padding:22px 28px;background:#fff;border-bottom:1px solid #e5dcec}
+.registration-window-header h2{font-size:1.5rem;line-height:1.35;margin:8px 0;color:#432557}.registration-window-header p{font-size:.95rem;line-height:1.5;margin:0;color:#6a5778;overflow-wrap:anywhere}
+.registration-window .registration-window-close{width:44px;height:44px;flex:0 0 44px;border:1px solid #ded2e9;border-radius:50%;font-size:28px;background:#f5f0fa;color:#59308c;cursor:pointer}
+.registration-window-body{padding:24px 28px 30px}.registration-window-summary{padding:16px 20px;background:#f5f0fa;border:1px solid #e1d6eb;border-radius:12px}.registration-window-summary>strong{font-size:1rem;color:#59308c}.registration-window-summary p{line-height:1.65;margin:8px 0 0;color:#665272;font-size:.95rem}
+.registration-saved-summary{padding:16px;background:#edf8f1;border:1px solid #c1dccb;border-radius:10px;color:#24583b;line-height:1.65}
+@media(max-width:600px){.registration-window-backdrop{padding:10px}.registration-window{max-height:96dvh;border-radius:14px}.registration-window-header{padding:18px}.registration-window-body{padding:20px 18px}.registration-window-header h2{font-size:1.25rem}}
+.event-registration .registration-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap;margin:0 0 20px}
+.event-registration .registration-eyebrow{font-size:.72rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#785a90}
+.event-registration .registration-heading h3{font-size:1.3rem;margin:7px 0 8px;line-height:1.35;color:#432557}
+.event-registration .registration-heading p{font-size:.9rem;margin:0;color:#6a5778;line-height:1.6}
+.event-registration .registration-fee{padding:9px 13px;font-size:.9rem;font-weight:750;color:#245d43;background:#e9f6ee;border:1px solid #c4dfcf;border-radius:9px;overflow-wrap:anywhere}
+.event-registration .registration-fee--paid{color:#603d17;background:#fff5e6;border-color:#ead3b2}
+.event-registration .registration-explainer{display:flex;align-items:flex-start;gap:12px;padding:15px;background:#f5f0fa;border-radius:10px;margin-bottom:18px}
+.event-registration .registration-explainer>span{color:#79519d;line-height:1.7}.event-registration .registration-explainer p{margin:0;font-size:.9rem;line-height:1.65;color:#5c456f}
+.event-registration .registration-instructions{white-space:pre-wrap;line-height:1.7;font-size:.95rem;color:#594565;overflow-wrap:anywhere}
+.event-registration .registration-payment{border:1px solid #e5dbea;border-radius:10px;padding:12px 16px;margin:18px 0}
+.event-registration .registration-payment summary{min-height:32px;font-size:.95rem;font-weight:700;cursor:pointer;color:#593b70}
+.event-registration .registration-entry-actions{display:grid;gap:10px;margin:20px 0}.event-registration .registration-entry-actions small{font-size:.85rem;color:#695778}
+.event-registration :is(.registration-primary,.registration-secondary){display:inline-flex;align-items:center;justify-content:center;gap:12px;min-height:48px;padding:12px 18px;border:1px solid #59308c;border-radius:9px;font:inherit;font-size:.95rem;font-weight:650;text-decoration:none;cursor:pointer;line-height:1.5;white-space:normal}
+.event-registration .registration-primary{background:#59308c;color:#fff}.event-registration .registration-primary:hover:not(:disabled){background:#482573}.event-registration .registration-secondary{background:#faf7fd;color:#59308c;border-color:#d9cce5}
+.event-registration button:disabled{opacity:.6;cursor:not-allowed}.event-registration form[hidden]{display:none!important}
+.event-registration .registration-fieldset{padding:24px 0 0;margin:22px 0 0;border:0;border-top:1px solid #e4dbea;min-width:0}
+.event-registration .registration-fieldset legend{font-size:1.05rem;font-weight:700;color:#472b5d;padding:0 12px 0 0}
+.event-registration .registration-form-hint{font-size:.85rem;line-height:1.6;color:#6d5a79;margin:10px 0 18px}
+.event-registration .registration-field-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
+.event-registration .registration-field{display:flex;flex-direction:column;gap:8px;font-size:.95rem;font-weight:650;text-transform:none;letter-spacing:normal;color:#442b56;margin:0}
+.event-registration .registration-field>span{font-size:.8rem;font-weight:400;color:#6d5a79}.event-registration .registration-field-wide{grid-column:1/-1}
+.event-registration .registration-field :is(input,textarea){width:100%;min-width:0;min-height:48px;font:inherit;font-weight:400;color:#35223e;background:#fdfbff;border:1px solid #c9b7d8;border-radius:9px;padding:12px;box-sizing:border-box;line-height:1.5}
+.event-registration .registration-field textarea{resize:vertical}.event-registration .registration-field small{font-size:.8rem;font-weight:400;line-height:1.5;color:#6d5a79}.event-registration .registration-field input[aria-invalid=true]{border:2px solid #a83c20;background:#fff8f5}
+.event-registration .registration-consent-box{padding:16px;background:#f7f3fa;border:1px solid #e3d8eb;border-radius:10px;margin:24px 0}
+.event-registration .registration-form-footer{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:20px 0}
+.event-registration :is(button,a,input,textarea,summary):focus-visible{outline:3px solid #a66b00;outline-offset:3px}
+.registration-loading,.registration-load-error,.registration-closed{padding:20px;border:1px solid #e1d7eb;border-radius:12px;background:#f7f3fb;line-height:1.65;color:#574264;text-align:left;width:100%}
+.registration-load-error button{font:inherit;padding:10px 16px;border:1px solid #cbb7db;border-radius:8px;background:white;color:#59308c;cursor:pointer;min-height:44px}
+@media(max-width:600px){.event-registration-card{padding:18px}.event-registration .registration-field-grid{grid-template-columns:1fr}.event-registration .registration-field{grid-column:1}.event-registration .registration-form-footer{flex-direction:column}.event-registration .registration-form-footer button{width:100%}}
+.event-registration .registration-notice{display:flex;gap:16px;margin:24px 0;padding:22px;border:1px solid #e7c784;border-left:5px solid #ae6900;border-radius:14px;background:#fff8e9;color:#573900;box-shadow:0 5px 18px #4730140a;scroll-margin:24px}
+.event-registration .registration-notice--duplicate{background:#fff4ef;border-color:#e8b49e;border-left-color:#a83c20;color:#702c19}
+.event-registration .registration-notice--error{background:#fff1f1;border-color:#e9b5b5;border-left-color:#b32626;color:#7b2323}
+.event-registration .registration-notice--success{background:#edf9f3;border-color:#acd8bf;border-left-color:#24734b;color:#20583c}
+.event-registration .registration-notice-icon{display:grid;place-items:center;width:36px;height:36px;flex:0 0 36px;border-radius:50%;background:currentColor;font-size:0}
+.event-registration .registration-notice-icon::after{content:"!";font-size:23px;font-weight:800;color:white}.event-registration .registration-notice--success .registration-notice-icon::after{content:"✓"}
+.event-registration .registration-notice-content{min-width:0;flex:1}
+.event-registration .registration-notice-eyebrow{font-size:.75rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase}
+.event-registration .registration-notice h4{font:inherit;font-size:1.15rem;font-weight:750;line-height:1.4;color:inherit;margin:6px 0 10px}
+.event-registration .registration-notice p{font-size:.95rem;line-height:1.65;color:inherit;margin:0 0 14px;overflow-wrap:anywhere}
+.event-registration .registration-notice-actions{display:flex;flex-wrap:wrap;gap:12px 20px;align-items:center}
+.event-registration .registration-notice-actions button,.event-registration .registration-notice-actions a{font:inherit;font-size:.9rem;font-weight:700;color:inherit;text-decoration:underline;text-underline-offset:4px;background:transparent;border:0;padding:8px 0;cursor:pointer;min-height:44px}
+.event-registration .registration-shared-consent{display:flex;gap:12px;align-items:flex-start;text-transform:none;letter-spacing:normal;font-size:.95rem;font-weight:500;line-height:1.6}
+.event-registration .registration-shared-consent input{width:22px;height:22px;flex:0 0 22px;margin:2px 0;accent-color:#59308c}
+.event-registration .registration-notice .registration-shared-consent{padding:14px;background:#ffffffb3;border:1px solid #dfc68e;border-radius:9px;margin:16px 0;color:inherit}
+.event-registration .registration-notice .registration-notice-footnote{border-top:1px solid #acd8bf;padding-top:12px;margin:8px 0 0;font-size:.85rem}
+.event-registration .registration-notice:focus{outline:3px solid #59308c;outline-offset:4px}
+.event-registration .registration-notice :is(a,button,input):focus-visible{outline:3px solid #59308c;outline-offset:4px}
+@media(max-width:600px){.event-registration .registration-notice{padding:16px;gap:12px}.event-registration .registration-notice-icon{width:28px;height:28px;flex-basis:28px}.event-registration .registration-notice h4{font-size:1.05rem}}

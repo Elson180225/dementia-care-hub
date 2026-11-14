@@ -1,7 +1,9 @@
-import { useState, useMemo } from "react";
+import { useState } from "react";
 import Activities from "../../../trainer-portal/pages/Activities";
 import TrackEditor from './TrackEditor';
 import TrackApplications from './TrackApplications';
+import './PhysicalEducationAdmin.css';
+import {isPlannedProgramme} from '../../../../shared/programme-intakes';
 
 const BLANK_PROGRAMME = {
   id: "",
@@ -9,7 +11,8 @@ const BLANK_PROGRAMME = {
   trackNumber: "Track 01",
   title: "",
   roleCategory: "",
-  badge: "Open for Registration",
+  availability: "available",
+  badge: "Education programme",
   shortIntro: "",
   suitableFor: "",
   description: "",
@@ -29,53 +32,18 @@ const BLANK_PROGRAMME = {
 };
 
 export default function PhysicalEducationAdmin({ content, onSave }) {
-  // Sub-tabs: "tracks" | "sessions"
-  const [subSection, setSubSection] = useState("tracks");
-  const [editingProg, setEditingProg] = useState(null); // null or { values, isNew, rawHighlights }
-  const [deletingConfirm, setDeletingConfirm] = useState(null); // null or { id, title, code }
-  const [errors, setErrors] = useState({});
-
-  // Filter & Search states
-  const [searchQuery, setSearchQuery] = useState("");
-  const [badgeFilter, setBadgeFilter] = useState("all");
-  const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
-
-  const programmes = content?.physicalEducation?.programmes || [];
-
-  // Filter computation
-  const filteredProgrammes = useMemo(() => {
-    return programmes.filter((p) => {
-      if (badgeFilter !== "all" && p.badge !== badgeFilter) return false;
-      if (searchQuery.trim()) {
-        const q = searchQuery.toLowerCase().trim();
-        const match =
-          p.title?.toLowerCase().includes(q) ||
-          p.code?.toLowerCase().includes(q) ||
-          p.trackNumber?.toLowerCase().includes(q) ||
-          p.roleCategory?.toLowerCase().includes(q) ||
-          p.location?.toLowerCase().includes(q) ||
-          p.shortIntro?.toLowerCase().includes(q);
-        if (!match) return false;
-      }
-      return true;
-    });
-  }, [programmes, badgeFilter, searchQuery]);
-
-  const totalPages = Math.ceil(filteredProgrammes.length / pageSize) || 1;
-  const safePage = Math.min(page, totalPages);
-  const pagedProgrammes = useMemo(() => {
-    const start = (safePage - 1) * pageSize;
-    return filteredProgrammes.slice(start, start + pageSize);
-  }, [filteredProgrammes, safePage, pageSize]);
-
+  const [selectedId,setSelectedId]=useState('');
+  const [editingProg,setEditingProg]=useState(null);
+  const [errors,setErrors]=useState({});
+  const [searchQuery,setSearchQuery]=useState('');
+  const programmes=content?.physicalEducation?.programmes||[];
   // Open Edit Modal
   const openEdit = (prog) => {
     setErrors({});
     const hl = Array.isArray(prog.highlights) ? prog.highlights.join("\n") : prog.highlights || "";
     setEditingProg({
       isNew: false,
-      values: JSON.parse(JSON.stringify(prog)),
+      values: {...JSON.parse(JSON.stringify(prog)),availability:isPlannedProgramme(prog)?'planned':'available'},
       rawHighlights: hl,
     });
   };
@@ -92,7 +60,7 @@ export default function PhysicalEducationAdmin({ content, onSave }) {
         id: `dcs-track-${Date.now()}`,
         trackNumber: `Track ${pad}`,
       },
-      rawHighlights: "Module 1 – Basic Dementia Understanding\nModule 2 – Person-Centred Care\nModule 3 – Effective Communication",
+      rawHighlights: "",
     });
   };
 
@@ -139,335 +107,15 @@ export default function PhysicalEducationAdmin({ content, onSave }) {
     return ok;
   };
 
-  // Confirm Delete
-  const handleDeleteConfirm = async () => {
-    if (!deletingConfirm) return;
-    const copy = JSON.parse(JSON.stringify(content));
-    if (copy.physicalEducation?.programmes) {
-      copy.physicalEducation.programmes = copy.physicalEducation.programmes.filter(
-        (p) => p.id !== deletingConfirm.id
-      );
-    }
-    const ok = await onSave(copy);
-    if (ok) setDeletingConfirm(null);
-  };
-
-  if (editingProg) return <TrackEditor editing={editingProg} onChange={setEditingProg} onSave={handleSaveModal} onClose={()=>setEditingProg(null)} errors={errors} />;
-  return (
-    <div className="physical-education-admin">
-      {/* Sub-navigation bar */}
-      <div style={{ display: "flex", gap: "0.5rem", borderBottom: "1px solid var(--color-neutral-200)", marginBottom: "1.25rem" }}>
-        <button
-          type="button"
-          onClick={() => setSubSection("tracks")}
-          style={{
-            padding: "0.6rem 1.25rem",
-            background: "none",
-            border: "none",
-            borderBottom: subSection === "tracks" ? "3px solid var(--color-purple-600)" : "3px solid transparent",
-            color: subSection === "tracks" ? "var(--color-purple-600)" : "var(--color-neutral-600)",
-            fontWeight: subSection === "tracks" ? 700 : 500,
-            cursor: "pointer",
-            fontSize: "0.95rem",
-          }}
-        >
-          🏛️ DCS Certification Tracks ({programmes.length})
-        </button>
-        <button
-          type="button"
-          onClick={() => setSubSection("sessions")}
-          style={{
-            padding: "0.6rem 1.25rem",
-            background: "none",
-            border: "none",
-            borderBottom: subSection === "sessions" ? "3px solid var(--color-purple-600)" : "3px solid transparent",
-            color: subSection === "sessions" ? "var(--color-purple-600)" : "var(--color-neutral-600)",
-            fontWeight: subSection === "sessions" ? 700 : 500,
-            cursor: "pointer",
-            fontSize: "0.95rem",
-          }}
-        >
-          🏋️ Physical Workshops &amp; In-Person Sessions
-        </button>
-        <button type="button" className="tp-btn tp-btn-ghost" aria-current={subSection==='applications'?'page':undefined} onClick={()=>setSubSection('applications')}>Applications</button>
-      </div>
-      {subSection==='applications' && <TrackApplications />}
-
-      {/* SUB-SECTION 1: DCS TRACKS TABLE */}
-      {subSection === "tracks" && (
-        <div>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem", flexWrap: "wrap", gap: "1rem" }}>
-            <div>
-              <h2 style={{ margin: 0, fontSize: "1.25rem" }}>DCS Learning Tracks Management</h2>
-              <p style={{ margin: "0.25rem 0 0", color: "var(--color-purple-600)", fontSize: "0.9rem" }}>
-                Configure in-person training pathways, module pillars, schedules, and registration criteria.
-              </p>
-            </div>
-            <button
-              type="button"
-              className="tp-btn"
-              onClick={openCreate}
-              style={{ minWidth: "180px", whiteSpace: "nowrap" }}
-            >
-              + Add New DCS Track
-            </button>
-          </div>
-
-          {/* Search & Filter Toolbar */}
-          <div className="tp-filter-bar">
-            <input
-              type="text"
-              className="tp-search-input"
-              placeholder="🔍 Search tracks by code, title, audience, location..."
-              value={searchQuery}
-              onChange={(e) => {
-                setSearchQuery(e.target.value);
-                setPage(1);
-              }}
-              aria-label="Search programmes"
-            />
-
-            <select
-              className="tp-select-filter"
-              value={badgeFilter}
-              onChange={(e) => {
-                setBadgeFilter(e.target.value);
-                setPage(1);
-              }}
-              aria-label="Filter by badge"
-            >
-              <option value="all">All Status Badges</option>
-              <option value="Open for Registration">Open for Registration</option>
-              <option value="By Application & Review">By Application &amp; Review</option>
-              <option value="Future Track • Priority Waitlist">Future Track • Priority Waitlist</option>
-            </select>
-
-            {(searchQuery.trim() !== "" || badgeFilter !== "all") && (
-              <button
-                type="button"
-                className="tp-btn tp-btn-ghost"
-                onClick={() => {
-                  setSearchQuery("");
-                  setBadgeFilter("all");
-                  setPage(1);
-                }}
-              >
-                Reset Filters
-              </button>
-            )}
-          </div>
-
-          {/* Results Counter & Page Size */}
-          <div className="tp-table-meta">
-            <div>
-              Showing <strong>{filteredProgrammes.length === 0 ? 0 : (safePage - 1) * pageSize + 1}</strong>–
-              <strong>{Math.min(safePage * pageSize, filteredProgrammes.length)}</strong> of{" "}
-              <strong>{filteredProgrammes.length}</strong> tracks
-            </div>
-            <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-              <label htmlFor="pe-pagesize" style={{ fontSize: "0.88rem" }}>Rows per page:</label>
-              <select
-                id="pe-pagesize"
-                value={pageSize}
-                onChange={(e) => {
-                  setPageSize(Number(e.target.value));
-                  setPage(1);
-                }}
-                style={{ padding: "4px 8px", borderRadius: "6px", border: "1px solid var(--color-purple-400)" }}
-              >
-                <option value="10">10</option>
-                <option value="25">25</option>
-              </select>
-            </div>
-          </div>
-
-          {/* Table */}
-          {filteredProgrammes.length === 0 ? (
-            <div className="tp-card" style={{ textAlign: "center", padding: "40px 20px" }}>
-              <p style={{ color: "var(--color-purple-600)", margin: 0 }}>No DCS programmes match your search criteria.</p>
-            </div>
-          ) : (
-            <div className="tp-table-wrap">
-              <table className="tp-table">
-                <thead>
-                  <tr>
-                    <th style={{ minWidth: "120px" }}>Track #</th>
-                    <th style={{ minWidth: "220px" }}>Code &amp; Title</th>
-                    <th style={{ minWidth: "180px" }}>Target Audience</th>
-                    <th style={{ minWidth: "160px" }}>Mode &amp; Sessions</th>
-                    <th style={{ minWidth: "150px" }}>Scheduled Intake</th>
-                    <th style={{ minWidth: "130px" }}>Status Badge</th>
-                    <th style={{ minWidth: "140px", textAlign: "right" }}>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {pagedProgrammes.map((p) => (
-                    <tr key={p.id}>
-                      <td>
-                        <span style={{ fontWeight: 700, color: "var(--color-purple-600)", background: "#f0fdf4", padding: "2px 8px", borderRadius: "4px", fontSize: "0.82rem" }}>
-                          {p.trackNumber || "Track"}
-                        </span>
-                      </td>
-                      <td>
-                        <div style={{ fontWeight: 700, color: "var(--color-neutral-900)", marginBottom: "2px" }}>
-                          {p.code}
-                        </div>
-                        <div style={{ fontSize: "0.88rem", color: "var(--color-neutral-600)" }}>
-                          {p.title}
-                        </div>
-                      </td>
-                      <td>
-                        <div style={{ fontSize: "0.85rem", color: "var(--color-neutral-700)" }}>
-                          {p.roleCategory}
-                        </div>
-                      </td>
-                      <td>
-                        <div style={{ fontSize: "0.82rem", fontWeight: 600, color: "var(--color-purple-600)" }}>
-                          {p.mode}
-                        </div>
-                        <div style={{ fontSize: "0.78rem", color: "var(--color-neutral-500)" }}>
-                          {p.sessions}
-                        </div>
-                      </td>
-                      <td>
-                        <div style={{ fontSize: "0.85rem", fontWeight: 600, color: "var(--color-neutral-900)" }}>
-                          {p.schedule?.date || "TBD"}
-                        </div>
-                        <div style={{ fontSize: "0.78rem", color: "var(--color-neutral-500)" }}>
-                          {p.schedule?.time}
-                        </div>
-                        {p.location && (
-                          <div style={{ fontSize: "0.78rem", color: "var(--color-neutral-600)", marginTop: "2px" }}>
-                            📍 {p.location}
-                          </div>
-                        )}
-                      </td>
-                      <td>
-                        <span
-                          style={{
-                            fontSize: "0.78rem",
-                            fontWeight: 700,
-                            padding: "3px 8px",
-                            borderRadius: "12px",
-                            background: p.badge?.includes("Open") ? "#ecfdf5" : p.badge?.includes("Review") ? "#fef3c7" : "#f3f4f6",
-                            color: p.badge?.includes("Open") ? "#047857" : p.badge?.includes("Review") ? "#b45309" : "#4b5563",
-                            border: "1px solid",
-                            borderColor: p.badge?.includes("Open") ? "#a7f3d0" : p.badge?.includes("Review") ? "#fde68a" : "#e5e7eb",
-                          }}
-                        >
-                          {p.badge}
-                        </span>
-                      </td>
-                      <td style={{ textAlign: "right" }}>
-                        <div style={{ display: "inline-flex", gap: "6px", justifyContent: "flex-end" }}>
-                          <button
-                            type="button"
-                            className="tp-btn tp-btn-ghost"
-                            style={{ minHeight: "34px", padding: "4px 10px", fontSize: "0.82rem" }}
-                            onClick={() => openEdit(p)}
-                          >
-                            Edit
-                          </button>
-                          <button
-                            type="button"
-                            className="tp-btn tp-btn-ghost"
-                            style={{ minHeight: "34px", padding: "4px 10px", fontSize: "0.82rem", color: "#b91c1c", borderColor: "#fca5a5" }}
-                            onClick={() => setDeletingConfirm({ id: p.id, title: p.title, code: p.code })}
-                          >
-                            Delete
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-
-          {/* Pagination */}
-          {totalPages > 1 && (
-            <div className="tp-pagination">
-              <button
-                type="button"
-                className="tp-page-btn"
-                disabled={safePage <= 1}
-                onClick={() => setPage((p) => Math.max(1, p - 1))}
-              >
-                ‹ Prev
-              </button>
-              {Array.from({ length: totalPages }, (_, i) => i + 1).map((num) => (
-                <button
-                  key={num}
-                  type="button"
-                  className={`tp-page-btn ${num === safePage ? "active" : ""}`}
-                  onClick={() => setPage(num)}
-                >
-                  {num}
-                </button>
-              ))}
-              <button
-                type="button"
-                className="tp-page-btn"
-                disabled={safePage >= totalPages}
-                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-              >
-                Next ›
-              </button>
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* SUB-SECTION 2: LIVE PHYSICAL SESSIONS DB TABLE */}
-      {subSection === "sessions" && (
-        <div>
-          <div style={{ background: "var(--color-neutral-50)", padding: "1rem 1.25rem", borderRadius: "8px", border: "1px solid var(--color-neutral-200)", marginBottom: "1.5rem" }}>
-            <h3 style={{ margin: "0 0 0.5rem" }}>🏋️ In-Person Training &amp; Community Workshop Hub</h3>
-            <p style={{ margin: 0, fontSize: "0.95rem", color: "var(--color-neutral-600)" }}>
-              Manage in-person sessions, community workshops, hospital cohorts, and public roadshows. Live entries automatically synchronize with the main website events directory and upcoming calendar.
-            </p>
-          </div>
-          <Activities
-            admin={true}
-            initialFilterMode="Physical"
-            pageTitle="Physical Workshops & In-Person Sessions"
-            pageSubtitle="Scheduled physical events, DCS cohorts, and venue-based community trainings across Sarawak."
-            newButtonLabel="+ New In-Person Session"
-            defaultValues={{ mode: "Physical", type: "Workshop" }}
-          />
-        </div>
-      )}
-
-
-      {/* DELETE CONFIRMATION MODAL */}
-      {deletingConfirm && (
-        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 99999, padding: "1rem" }}>
-          <div style={{ background: "#fff", borderRadius: "10px", maxWidth: "480px", width: "100%", padding: "1.5rem", boxShadow: "0 20px 25px -5px rgba(0,0,0,0.2)" }}>
-            <h3 style={{ margin: "0 0 0.5rem", color: "#991b1b" }}>Confirm Track Deletion</h3>
-            <p style={{ margin: "0 0 1rem", color: "var(--color-neutral-600)", fontSize: "0.95rem" }}>
-              Are you sure you want to delete <strong>{deletingConfirm.code} — {deletingConfirm.title}</strong>? This track will be removed from the public website showcase.
-            </p>
-            <div style={{ display: "flex", justifyContent: "flex-end", gap: "0.75rem" }}>
-              <button
-                type="button"
-                className="tp-btn tp-btn-ghost"
-                onClick={() => setDeletingConfirm(null)}
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                className="tp-btn"
-                style={{ background: "#dc2626", borderColor: "#dc2626", color: "#fff" }}
-                onClick={handleDeleteConfirm}
-              >
-                Yes, Delete Track
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
-  );
+  const selected=programmes.find(p=>p.id===selectedId);
+  if(editingProg)return <TrackEditor editing={editingProg} onChange={setEditingProg} onSave={handleSaveModal} onClose={()=>setEditingProg(null)} errors={errors}/>;
+  return <div className="physical-education-admin">
+    <header className="tp-card"><h2>Physical Education programmes</h2><p>Edit what people learn, then schedule intakes. Trainer Portal access is managed separately.</p><button className="tp-btn" onClick={openCreate}>Add programme</button></header>
+    {selected?<section><button className="tp-btn tp-btn-ghost" onClick={()=>setSelectedId('')}>← All programmes</button><h2>{selected.code} — Intakes &amp; registration</h2>{isPlannedProgramme(selected)&&<p className="tp-note">Planned programme: you can prepare intake drafts, but registration stays closed until RCBC changes programme availability.</p>}<p>Each intake has its own date, venue, fee and participants. Published intakes also appear in the shared calendar.</p>
+      <Activities key={selected.id} admin programmeId={selected.id} initialFilterMode="Physical" pageTitle={selected.code+' intakes'} newButtonLabel="+ Add intake" defaultValues={{mode:'Physical',type:'Workshop',programmeId:selected.id,title:selected.code+' — ',registrationType:'paid-in-person',registrationMethod:'closed',language:selected.language||'',audience:selected.suitableFor||selected.roleCategory||''}}/>
+    </section>:<section aria-label="Programmes"><label className="tp-field">Search programmes<input value={searchQuery} onChange={e=>setSearchQuery(e.target.value)} placeholder="Programme code or title"/></label>
+    <div className="programme-admin-grid">{programmes.filter(p=>(p.code+' '+p.title).toLowerCase().includes(searchQuery.toLowerCase())).map(p=><article className="tp-card" key={p.id}><span className="track-kicker">{p.trackNumber} · {isPlannedProgramme(p)?'Planned programme':'Education programme'}</span><h3>{p.code} — {p.title}</h3><p>{p.roleCategory}</p><p>{p.shortIntro}</p><p>{p.sessions} · {p.language}</p><div className="tp-actions"><button className="tp-btn tp-btn-ghost" onClick={()=>openEdit(p)}>Edit programme</button><button className="tp-btn" onClick={()=>setSelectedId(p.id)}>Manage intakes</button></div></article>)}</div></section>}
+    <details className="tp-note"><summary>Other physical events and existing unlinked intakes</summary><p>Edit an existing event to link it to its programme, rather than creating a duplicate.</p><Activities admin programmeId="" initialFilterMode="Physical" pageTitle="Other physical events" defaultValues={{mode:'Physical',type:'Workshop'}}/></details>
+    <details className="tp-note"><summary>Legacy applications (read-only archive)</summary><TrackApplications/></details>
+  </div>;
 }
