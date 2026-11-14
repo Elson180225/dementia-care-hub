@@ -109,11 +109,12 @@ function ResourceNeedIcon({ type }) {
 }
 
 function ResourceFinder() {
-  const { t } = useLanguage();
+  const { t,translateContent } = useLanguage();
   const rf = t.resourceFinderPage || {};
   const currentNeeds = rf.needs || needs;
 
-  const [directory, setDirectory] = useState([]);
+  const [rawDirectory, setDirectory] = useState([]);
+  const directory=translateContent(rawDirectory,'records/organisations');
   const [directoryError, setDirectoryError] = useState('');
   useEffect(() => {
     const controller = new AbortController();

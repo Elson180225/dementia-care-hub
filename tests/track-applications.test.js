@@ -17,3 +17,12 @@ test('application records are inaccessible to anonymous visitors',async()=>{
 test('public application endpoint rejects unrelated origins before accepting data',async()=>{
  await assert.rejects(trackApplicationsHandler({method:'POST',headers:{origin:'https://unrelated.invalid'}},{},new URL('http://localhost/api/public/track-applications'),()=>assert.fail()),e=>e.status===403);
 });
+
+test('retired public application route directs visitors to dated intakes',async()=>{
+ for(const method of ['GET','POST']){
+  let response;
+  await trackApplicationsHandler({method,headers:{}},{},new URL('http://localhost/api/public/track-applications'),(_res,status,body)=>{response={status,body};});
+  assert.equal(response.status,410);
+  assert.match(response.body.error,/dated intake/);
+ }
+});

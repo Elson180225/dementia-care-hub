@@ -2,6 +2,13 @@ import PublishedRecords from "../components/PublishedRecords";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { orderWebinars, publicLink, resourceQaFolder, topicDateFields } from '../../shared/online-education';
 import { onlineHeadingText } from '../../shared/online-headings';
+import EventRegistration from '../components/EventRegistration';
+import EventPriceLabel from '../components/EventPriceLabel';
+import ProgrammeIntakes from '../components/ProgrammeIntakes';
+import '../components/EventDetails.css';
+import {lockDialogScroll} from '../components/dialogScroll';
+import {eventDate,eventTime,eventDateTime} from '../../shared/event-dates';
+import {isPlannedProgramme} from '../../shared/programme-intakes';
 import { createPortal } from "react-dom";
 import { Link, useLocation } from "react-router-dom";
 import { useLanguage } from "../i18n/LanguageContext";
@@ -55,46 +62,9 @@ import {
 import defaultCmsContent from "../../shared/learn-events-content.json";
 import "./LearnEvents.css";
 
-function formatActivityDate(val) {
-  if (!val) return "";
-  const d = new Date(val);
-  if (Number.isNaN(d.getTime())) return val;
-  return d.toLocaleDateString("en-MY", {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-    timeZone: "Asia/Kuala_Lumpur",
-  });
-}
-
-function formatActivityTime(val) {
-  if (!val) return "";
-  const d = new Date(val);
-  if (Number.isNaN(d.getTime())) return "";
-  return d.toLocaleTimeString("en-MY", {
-    hour: "numeric",
-    minute: "2-digit",
-    hour12: true,
-    timeZone: "Asia/Kuala_Lumpur",
-  });
-}
-
-function formatDeadlineDate(val) {
-  if (!val) return "";
-  const d = new Date(val);
-  if (Number.isNaN(d.getTime())) return val;
-  return d.toLocaleDateString("en-MY", {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-    timeZone: "Asia/Kuala_Lumpur",
-  }) + ", " + d.toLocaleTimeString("en-MY", {
-    hour: "numeric",
-    minute: "2-digit",
-    hour12: true,
-    timeZone: "Asia/Kuala_Lumpur",
-  });
-}
+function formatActivityDate(val) { return val ? eventDate(val) : ''; }
+function formatActivityTime(val) { return val ? eventTime(val) : ''; }
+function formatDeadlineDate(val) { return val ? eventDateTime(val)+' (Malaysia time)' : ''; }
 
 function isEventClosed(event) {
   if (!event) return false;
@@ -108,6 +78,7 @@ function isEventClosed(event) {
 }
 
 function usePublicActivities() {
+  const {translateContent}=useLanguage();
   const [rows, setRows] = useState(defaultActivities);
   useEffect(() => {
     let active = true;
@@ -164,10 +135,14 @@ function usePublicActivities() {
       .catch(() => { });
     return () => { active = false; };
   }, []);
-  return rows;
+  return translateContent(rows,'activities').map(row=>{
+    const location=row.mode==='Online'?'Online':row.venue&&row.city&&!row.venue.toLowerCase().includes(row.city.toLowerCase())?row.venue+', '+row.city:row.venue||row.city||row.location;
+    return {...row,suitableFor:row.audience||row.suitableFor,location,fullLocation:location};
+  });
 }
 
 function useLearnEventsContent() {
+  const {translateContent}=useLanguage();
   const [content, setContent] = useState(defaultCmsContent);
   useEffect(() => {
     let active = true;
@@ -183,7 +158,7 @@ function useLearnEventsContent() {
     window.addEventListener('focus',refresh);
     return () => { active = false; window.removeEventListener('focus',refresh); };
   }, []);
-  return content;
+  return translateContent(content,'cms');
 }
 
 function resolveMediaImage(src, fallback) {
@@ -405,174 +380,61 @@ function ModeIcon({ mode }) {
    Reusable detail view for any activity — matches PDF Section 4
    ================================================================ */
 function ActivityModal({ activity, onClose }) {
-  const { t } = useLanguage();
-  const am = t.learnEvents?.activityModal || {};
-  const dialogRef = useRef(null);
-
-  useEffect(() => {
-    if (!activity) return undefined;
-    dialogRef.current?.focus({ preventScroll: true });
-    const close = (e) => e.key === "Escape" && onClose();
-    document.addEventListener("keydown", close);
-    document.body.style.overflow = "hidden";
-    return () => {
-      document.removeEventListener("keydown", close);
-      document.body.style.overflow = "";
+  const [managedRegistration,setManagedRegistration]=useState(null);
+  const {t}=useLanguage();
+  const am=t.learnEvents?.activityModal||{};
+  const dialogRef=useRef(null),closeRef=useRef(onClose);
+  useEffect(()=>{closeRef.current=onClose;},[onClose]);
+  useEffect(()=>{
+    if(!activity)return;
+    const previous=document.activeElement,unlock=lockDialogScroll();
+    dialogRef.current?.focus({preventScroll:true});
+    const keyboard=e=>{
+      if(!dialogRef.current?.contains(e.target))return;
+      if(e.key==='Escape'){e.preventDefault();closeRef.current();return;}
+      if(e.key!=='Tab')return;
+      const controls=[...dialogRef.current.querySelectorAll('a[href],button:not(:disabled),input:not(:disabled),textarea:not(:disabled),select:not(:disabled),summary')].filter(el=>el.getClientRects().length);
+      const first=controls[0],last=controls.at(-1);
+      if(!first){e.preventDefault();return;}
+      if(e.shiftKey&&(document.activeElement===first||document.activeElement===dialogRef.current)){e.preventDefault();last.focus();}
+      else if(!e.shiftKey&&(document.activeElement===last||document.activeElement===dialogRef.current)){e.preventDefault();first.focus();}
     };
-  }, [activity, onClose]);
-
-  if (!activity) return null;
-
-  const isCompleted = activity.status === "completed";
-
-  return createPortal(
-    <div
-      className="modal-backdrop"
-      role="presentation"
-      onMouseDown={(e) => e.target === e.currentTarget && onClose()}
-    >
-      <div
-        className="webinar-modal activity-modal"
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="activity-title"
-        tabIndex={-1}
-        ref={dialogRef}
-      >
-        <button
-          className="modal-close"
-          type="button"
-          onClick={onClose}
-          aria-label="Close activity details"
-        >
-          {"\u00D7"}
-        </button>
-
-        <div className="activity-modal-header">
-          <span className="tag">{activity.type}</span>
-          <StatusBadge status={activity.status} />
-        </div>
-
-        <h2 id="activity-title">{activity.title}</h2>
-
-        <dl className="activity-details">
-          <div>
-            <dt>{am.suitableFor || "Suitable for"}</dt>
-            <dd>{activity.suitableFor || activity.audience || "Public, families and caregivers"}</dd>
-          </div>
-          <div>
-            <dt>{am.dateTime || "Date & time"}</dt>
-            <dd>
-              {activity.date || am.pastWebinar || "Past webinar"}
-              {activity.time && <><br />{activity.time}</>}
-            </dd>
-          </div>
-          {activity.capacity && (
-            <div>
-              <dt>Capacity</dt>
-              <dd>{activity.capacity} seats</dd>
-            </div>
-          )}
-          {(activity.registrationDeadlineFormatted || activity.registrationDeadline) && (
-            <div>
-              <dt>Registration Deadline</dt>
-              <dd>
-                {activity.registrationDeadlineFormatted || activity.registrationDeadline}
-                {isEventClosed(activity) && (
-                  <span style={{ color: "#dc2626", fontWeight: 700, marginLeft: "0.5rem" }}>
-                    (Registration Closed)
-                  </span>
-                )}
-              </dd>
-            </div>
-          )}
-          <div>
-            <dt>{am.mode || "Mode"}</dt>
-            <dd>
-              <ModeIcon mode={activity.mode} />
-            </dd>
-          </div>
-          <div>
-            <dt>{am.location || "Location"}</dt>
-            <dd>{activity.fullLocation || activity.location || (activity.mode === "Online" ? "Online" : activity.city || "Sarawak")}</dd>
-          </div>
-          <div>
-            <dt>{am.language || "Language"}</dt>
-            <dd>{activity.language}</dd>
-          </div>
-          <div>
-            <dt>{am.speakerTrainer || "Speaker / trainer"}</dt>
-            <dd>
-              {activity.speaker || "RCBC Education Team"}
-              {activity.trainerId && (
-                <>
-                  {" \u2014 "}
-                  <Link
-                    to="/learn-events/certified-trainers"
-                    onClick={onClose}
-                  >
-                    {am.viewTrainerProfile || "View trainer profile"}
-                  </Link>
-                </>
-              )}
-            </dd>
-          </div>
-        </dl>
-
-        <div className="activity-description">
-          <h3>{am.whatYouWillLearn || "What you will learn"}</h3>
-          <p>{activity.description}</p>
-        </div>
-
-        {activity.poster && (
-          <div className="activity-poster" aria-hidden="true">
-            <img src={activity.poster} alt="" />
-          </div>
-        )}
-
-        <div className="activity-modal-footer">
-          {activity.status === "cancelled" ? (
-            <button type="button" disabled className="activity-action-btn" style={{ opacity: 0.7, cursor: "not-allowed", background: "#fee2e2", color: "#991b1b", border: "1px solid #fecaca" }}>
-              Activity Cancelled
-            </button>
-          ) : isCompleted ? (
-            <>
-              {activity.recordingLink !== undefined &&
-                activity.recordingLink !== null && (
-                  <button type="button" className="activity-action-btn">
-                    {am.viewRecording || "View recording"}
-                  </button>
-                )}
-              {activity.materials && (
-                <p className="activity-materials">
-                  Available materials: {activity.materials}
-                </p>
-              )}
-            </>
-          ) : isEventClosed(activity) ? (
-            <button type="button" disabled className="activity-action-btn" style={{ opacity: 0.7, cursor: "not-allowed", background: "#fef3c7", color: "#92400e", border: "1px solid #fde68a" }}>
-              Registration Closed
-            </button>
-          ) : publicLink(activity.registrationLink) ? (
-            <a
-              href={publicLink(activity.registrationLink)}
-              target="_blank"
-              rel="noreferrer"
-              className="activity-action-btn activity-action-register"
-            >
-              {am.registerNow || "Register now"}
-              <small>{am.externalTabNote || "opens external form in a new tab"}</small>
-            </a>
-          ) : (
-            <button type="button" disabled className="activity-action-btn">
-              {am.registrationLinkPending || "Registration link to be added"}
-            </button>
-          )}
+    document.addEventListener('keydown',keyboard);
+    return()=>{document.removeEventListener('keydown',keyboard);unlock();previous?.focus?.();};
+  },[activity?.id]);
+  if(!activity)return null;
+  const completed=['completed','verified','archived'].includes(activity.status);
+  const poster=typeof activity.poster==='string'&&(/^https?:\/\//i.test(activity.poster)||activity.poster.startsWith('/'))?activity.poster:'';
+  const recording=publicLink(activity.recordingLink);
+  return createPortal(<div className="event-detail-backdrop" onMouseDown={e=>{if(e.target===e.currentTarget)onClose();}}>
+    <section className="event-detail-dialog" role="dialog" aria-modal="true" aria-labelledby="event-detail-title" tabIndex={-1} ref={dialogRef}>
+      <div className="event-detail-toolbar"><span>Education &amp; Events</span><button type="button" onClick={onClose} aria-label="Close event details">×</button></div>
+      <div className="event-detail-layout">
+        <aside className="event-detail-visual" aria-label="Event poster">
+          {poster?<><a href={poster} target="_blank" rel="noreferrer" aria-label={'Open full-size poster for '+activity.title+' in a new tab'}><img src={poster} alt={'Poster for '+activity.title}/></a><p>Event poster</p><a className="event-poster-link" href={poster} target="_blank" rel="noreferrer">View full-size poster ↗</a></>:<div className="event-detail-no-poster"><span aria-hidden="true">▤</span><p>RCBC Education &amp; Events</p><strong>{activity.title}</strong><p>Event information and registration details are shown alongside.</p></div>}
+        </aside>
+        <div className="event-detail-content">
+          <header><div className="event-detail-tags"><span className="tag">{activity.type||'Education & Events'}</span><StatusBadge status={activity.status}/></div><h2 id="event-detail-title">{activity.title}</h2><EventPriceLabel event={activity}/></header>
+          <dl className="event-detail-facts">
+            <div><dt>{am.suitableFor||'Suitable for'}</dt><dd>{activity.suitableFor||activity.audience||'Public, families and caregivers'}</dd></div>
+            <div><dt>{am.dateTime||'Date & time'}</dt><dd>{activity.rawDate?formatActivityDate(activity.rawDate):activity.date||'Date to be confirmed'}{(activity.rawDate||activity.time)&&<><br/>{activity.rawDate?formatActivityTime(activity.rawDate):activity.time}</>}<small>Malaysia time (MYT)</small></dd></div>
+            <div><dt>{am.mode||'Mode'}</dt><dd><ModeIcon mode={activity.mode}/></dd></div>
+            <div><dt>{am.location||'Location'}</dt><dd>{activity.fullLocation||activity.location||(activity.mode==='Online'?'Online':activity.city||'Venue to be confirmed')}</dd></div>
+            <div><dt>{am.language||'Language'}</dt><dd>{activity.language||'To be confirmed'}</dd></div>
+            {!!activity.capacity&&<div><dt>Capacity</dt><dd>{activity.capacity} seats</dd></div>}
+            {(activity.registrationDeadlineFormatted||activity.registrationDeadline)&&<div><dt>Registration deadline</dt><dd>{activity.registrationDeadlineFormatted||formatDeadlineDate(activity.registrationDeadline)}{isEventClosed(activity)&&<small>Registration closed</small>}</dd></div>}
+            <div><dt>{am.speakerTrainer||'Speaker / trainer'}</dt><dd>{activity.speaker||'RCBC Education Team'}{activity.trainerId&&<><br/><Link to="/learn-events/certified-trainers" onClick={onClose}>{am.viewTrainerProfile||'View trainer profile'} →</Link></>}</dd></div>
+          </dl>
+          {activity.description&&<section className="event-detail-description"><h3>{am.whatYouWillLearn||'What you will learn'}</h3><p>{activity.description}</p></section>}
+          <section className="event-detail-registration" aria-label="Registration and availability">
+            <EventRegistration key={activity.id} activityId={activity.id} onManaged={setManagedRegistration}/>
+            {managedRegistration===false&&(activity.status==='cancelled'?<p className="event-detail-state" role="status">This activity has been cancelled. Registration is unavailable.</p>:completed?<p className="event-detail-state" role="status">This activity has ended. Registration is closed.</p>:isEventClosed(activity)?<p className="event-detail-state" role="status">Registration is closed for this activity.</p>:publicLink(activity.registrationLink)?<div className="event-detail-external"><h3>Register for this event</h3><p>Complete the organiser’s registration form. No website account is needed.</p><a href={publicLink(activity.registrationLink)} target="_blank" rel="noreferrer" className="activity-action-btn activity-action-register">{am.registerNow||'Register now'} ↗<small>{am.externalTabNote||'Opens an external form in a new tab'}</small></a></div>:<p className="event-detail-state" role="status">Registration is not available yet. Please check back or <Link to="/about/contact" onClick={onClose}>contact RCBC</Link>.</p>)}
+          </section>
+          {completed&&(recording||activity.materials)&&<section className="event-detail-description"><h3>Learning materials</h3>{recording&&<a href={recording} target="_blank" rel="noreferrer">{am.viewRecording||'View recording'} ↗</a>}{activity.materials&&<p>{activity.materials}</p>}</section>}
         </div>
       </div>
-    </div>,
-    document.body
-  );
+    </section>
+  </div>,document.body);
 }
 
 function QAModal({ resource, onClose }) {
@@ -861,11 +723,11 @@ function pageItems(items, filters, page) {
    ================================================================ */
 function OnlineEducation() {
   const { search } = useLocation();
-  const { t, language } = useLanguage();
+  const { t } = useLanguage();
   const activities = usePublicActivities();
   const cmsContent = useLearnEventsContent();
   const onlineCms = cmsContent.onlineEducation || {};
-  const le = onlineHeadingText(t.learnEvents,onlineCms.sectionHeader,language);
+  const le = onlineHeadingText(t.learnEvents,onlineCms.sectionHeader,'en');
   const upcomingTopics = orderWebinars((onlineCms.upcomingTopics ?? plannedTopicsList).map(topic => ({...topic,...topicDateFields(topic.dateISO || topic.date)})));
   const approvedList = onlineCms.approvedResources ?? learningResources;
   const [selected, setSelected] = useState(null);
@@ -953,8 +815,10 @@ function OnlineEducation() {
                     <div className="activity-card-top">
                       <span className="tag">{a.type}</span>
                       <StatusBadge status={a.status} />
+                      <EventPriceLabel event={a} />
                     </div>
-                    <h3>{a.title}</h3>
+                  <h3>{a.title}</h3>
+                  <EventPriceLabel event={a} />
                     <p>{a.description}</p>
                     <div className="activity-card-meta">
                       <span>{a.date}</span>
@@ -1284,257 +1148,12 @@ function OnlineEducation() {
 /* ================================================================
    PROGRAM REGISTRATION / APPLICATION / WAITLIST MODAL
    ================================================================ */
-function ProgramModal({ program, onClose }) {
-  const { t } = useLanguage();
-  const le = t.learnEvents;
-  const [formData, setFormData] = useState({
-    fullName: "",
-    email: "",
-    phone: "",
-    role:
-      program.id === "dcs-family"
-        ? "Family Caregiver / Relative"
-        : program.id === "dcs-ttt"
-          ? "Healthcare Professional / Nurse"
-          : "Direct-Care Worker / Attendant",
-    preferredLanguage: "English",
-    intakeLocation:
-      program.cities && program.cities.length > 0 ? program.cities[0] : "Kuching",
-    notes: "",
-  });
-  const [isSubmitted, setIsSubmitted] = useState(false);
-  const [submitting,setSubmitting]=useState(false);
-  const [submitError,setSubmitError]=useState('');
-  const [consent,setConsent]=useState(false);
-
-  useEffect(() => {
-    const handleKeyDown = (e) => {
-      if (e.key === "Escape") onClose();
-    };
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [onClose]);
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if(submitting)return;
-    setSubmitting(true);setSubmitError('');
-    try {
-      const response=await fetch('/api/public/track-applications',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({...formData,trackId:program.id,consent})});
-      const result=await response.json();
-      if(!response.ok)throw new Error(result.error || 'Unable to save your application.');
-      setIsSubmitted(true);
-    }catch(error){setSubmitError(error.message || 'Connection failed. Please try again.');}finally{setSubmitting(false);}
-  };
-
-  const pm = le?.programModal || {};
-  const actionTitle =
-    program.actionType === "apply"
-      ? (pm.submitTtt || "Submit TTT Application")
-      : program.actionType === "waitlist"
-        ? (pm.submitWaitlist || "Join Priority Waitlist")
-        : (pm.submitFamily || "Confirm DCS-Family Registration");
-
-  return createPortal(
-    <div
-      className="modal-backdrop"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="program-modal-title"
-      onClick={(e) => {
-        if (e.target === e.currentTarget) onClose();
-      }}
-    >
-      <div className="activity-modal program-modal" tabIndex={-1}>
-        <button
-          type="button"
-          className="modal-close-btn"
-          onClick={onClose}
-          aria-label="Close modal"
-        >
-          &times;
-        </button>
-
-        <div className="program-modal-header">
-          <div className="program-modal-badges">
-            <span className="dcs-track-badge">{program.trackNumber}</span>
-            <span className="dcs-status-pill">{program.badge}</span>
-          </div>
-          <h2 id="program-modal-title">{program.title}</h2>
-          <p className="program-modal-role">{program.roleCategory}</p>
-        </div>
-
-        {isSubmitted ? (
-          <div className="program-modal-success">
-            <div className="success-icon-wrap" aria-hidden="true">
-              <svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="#0d716b" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
-                <polyline points="22 4 12 14.01 9 11.01" />
-              </svg>
-            </div>
-            <h3>Application received</h3>
-            <p>
-              Thank you, <strong>{formData.fullName}</strong>. Your interest in <strong>{program.title}</strong> is recorded. If you have already applied using this email, your original application is retained.
-            </p>
-            <p className="success-note">
-              RCBC will review your application. Submission does not confirm a place or certification.
-            </p>
-            <div className="program-modal-actions">
-              <button
-                type="button"
-                className="activity-action-btn"
-                onClick={onClose}
-              >
-                {le?.closeWindow || "Close Window"}
-              </button>
-            </div>
-          </div>
-        ) : (
-          <form className="program-modal-form" onSubmit={handleSubmit}>
-            <p>This application goes to RCBC for review. You do not need a website account, and submission does not guarantee a place.</p>
-            <div className="program-modal-summary">
-              <div>
-                <strong>{pm.scheduledIntake || "Scheduled Intake"}:</strong> {program.schedule?.date} ({program.schedule?.time})
-              </div>
-              <div>
-                <strong>{pm.locationLabel || "Location"}:</strong> {program.location}
-              </div>
-            </div>
-
-            <div className="form-grid">
-              <div className="form-field">
-                <label htmlFor="reg-name">{pm.fullName || "Full Name *"}</label>
-                <input
-                  id="reg-name"
-                  type="text"
-                  required
-                  placeholder={pm.fullNamePlaceholder || "e.g. Grace Wong"}
-                  value={formData.fullName}
-                  onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
-                />
-              </div>
-
-              <div className="form-field">
-                <label htmlFor="reg-phone">{pm.phone || "Phone / WhatsApp Number *"}</label>
-                <input
-                  id="reg-phone"
-                  type="tel"
-                  required
-                  placeholder={pm.phonePlaceholder || "e.g. +60 12-345 6789"}
-                  value={formData.phone}
-                  onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                />
-              </div>
-
-              <div className="form-field">
-                <label htmlFor="reg-email">{pm.email || "Email Address *"}</label>
-                <input
-                  id="reg-email"
-                  type="email"
-                  required
-                  placeholder="e.g. grace@example.com"
-                  value={formData.email}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                />
-              </div>
-
-              <div className="form-field">
-                <label htmlFor="reg-role">{pm.role || "Role / Background"}</label>
-                <select
-                  id="reg-role"
-                  value={formData.role}
-                  onChange={(e) => setFormData({ ...formData, role: e.target.value })}
-                >
-                  <option value="Family Caregiver / Relative">{pm.roles?.family || "Family Caregiver / Relative"}</option>
-                  <option value="Healthcare Professional / Nurse">{pm.roles?.healthcare || "Healthcare Professional / Nurse"}</option>
-                  <option value="Direct-Care Worker / Attendant">{pm.roles?.careWorker || "Direct-Care Worker / Attendant"}</option>
-                  <option value="Community Volunteer">{pm.roles?.volunteer || "Community Volunteer"}</option>
-                  <option value="Other">{pm.roles?.other || "Other"}</option>
-                </select>
-              </div>
-
-              <div className="form-field">
-                <label htmlFor="reg-lang">{pm.preferredLanguage || "Preferred Language"}</label>
-                <select
-                  id="reg-lang"
-                  value={formData.preferredLanguage}
-                  onChange={(e) => setFormData({ ...formData, preferredLanguage: e.target.value })}
-                >
-                  <option value="English">{pm.languages?.en || "English"}</option>
-                  <option value="Bahasa Melayu">{pm.languages?.ms || "Bahasa Melayu"}</option>
-                  <option value="Sarawak Malay / Local Dialect">{pm.languages?.sarawak || "Sarawak Malay / Local Dialect"}</option>
-                  <option value="Mandarin / Dialects">{pm.languages?.zh || "Mandarin / Dialects"}</option>
-                </select>
-              </div>
-
-              <div className="form-field">
-                <label htmlFor="reg-city">{pm.preferredCity || "Preferred City / Training Venue"}</label>
-                <select
-                  id="reg-city"
-                  value={formData.intakeLocation}
-                  onChange={(e) => setFormData({ ...formData, intakeLocation: e.target.value })}
-                >
-                  {program.cities && program.cities.length > 0 ? (
-                    program.cities.map((c) => (
-                      <option key={c} value={c}>{c}</option>
-                    ))
-                  ) : (
-                    <option value="Kuching">Kuching</option>
-                  )}
-                </select>
-              </div>
-            </div>
-
-            <div className="form-field">
-              <label htmlFor="reg-notes">{pm.notes || "Special Needs, Caregiving Challenges or Questions (Optional)"}</label>
-              <textarea
-                id="reg-notes"
-                rows={3}
-                placeholder={pm.notesPlaceholder || "Share any specific caregiving difficulties, dietary needs, or accessibility requests..."}
-                value={formData.notes}
-                onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-              />
-            </div>
-
-            <div className="program-consent-panel">
-              <label className="program-consent-label" htmlFor="program-consent"><input id="program-consent" type="checkbox" required checked={consent} disabled={submitting} aria-describedby="program-consent-help" onChange={e=>setConsent(e.target.checked)}/><span>I agree that RCBC may use my details to review this application and contact me about training.</span></label>
-              <p id="program-consent-help">Please avoid including medical records or unnecessary sensitive details.</p>
-            </div>
-              {submitError && <p className="program-submit-error" role="alert">{submitError}</p>}
-              {program.registrationOpen===false && <p role="status">Applications for this track are currently closed.</p>}
-            <div className="program-modal-footer">
-              <button
-                type="button"
-                className="activity-action-btn secondary"
-                onClick={onClose}
-              >
-                {pm.cancel || "Cancel"}
-              </button>
-              <button
-                type="submit"
-                className="activity-action-btn"
-                disabled={submitting || program.registrationOpen===false}
-              >
-                {submitting ? 'Submitting…' : actionTitle}
-              </button>
-            </div>
-          </form>
-        )}
-      </div>
-    </div>,
-    document.body
-  );
-}
-
-/* ================================================================
-   SECTION 2: PHYSICAL EDUCATION (INTERACTIVE 3-TRACK TABBED SHOWCASE)
-   ================================================================ */
 function PhysicalEducation() {
   const { t } = useLanguage();
   const le = t.learnEvents;
   const cmsContent = useLearnEventsContent();
   const [activeTrackId, setActiveTrackId] = useState("dcs-family");
-  const [activeModalProgram, setActiveModalProgram] = useState(null);
+  const [selectedIntake,setSelectedIntake]=useState(null);
 
   const trackImages = {
     "dcs-family": dcsFamilyImage,
@@ -1607,7 +1226,7 @@ function PhysicalEducation() {
               <div className="stage-header-meta">
                 <span className="stage-track-pill">{activeTrack.trackNumber}</span>
                 <span className="stage-role-pill">{activeTrack.roleCategory}</span>
-                <span className="stage-status-pill">{activeTrack.badge}</span>
+                <span className="stage-status-pill">{isPlannedProgramme(activeTrack)?'Planned programme':'Education programme'}</span>
               </div>
               <h3 className="stage-title">{activeTrack.title}</h3>
 
@@ -1685,10 +1304,9 @@ function PhysicalEducation() {
                   <button
                     type="button"
                     className="stage-btn-primary"
-                    disabled={activeTrack.registrationOpen===false}
-                    onClick={() => setActiveModalProgram(activeTrack)}
+                    onClick={() => document.getElementById('programme-intakes')?.scrollIntoView({behavior:'smooth',block:'start'})}
                   >
-                    {activeTrack.registrationOpen===false?'Applications closed':activeTrack.buttonLabel} <span aria-hidden="true">→</span>
+                    View available intakes <span aria-hidden="true">→</span>
                   </button>
 
                   {activeTrack.id === "dcs-family" && (
@@ -1790,7 +1408,7 @@ function PhysicalEducation() {
                           <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" />
                           <circle cx="12" cy="10" r="3" />
                         </svg>
-                        {le?.locationLabel || "Location"}
+                        General service area
                       </dt>
                       <dd>{activeTrack.location}</dd>
                     </div>
@@ -1803,16 +1421,10 @@ function PhysicalEducation() {
                           <line x1="8" x2="8" y1="2" y2="6" />
                           <line x1="3" x2="21" y1="10" y2="10" />
                         </svg>
-                        {le?.nextScheduledDateTime || "Next Scheduled Date & Time"}
+                        Scheduled intakes
                       </dt>
                       <dd className="spec-schedule-value">
-                        <strong>{activeTrack.schedule.date}</strong>
-                        <span>{activeTrack.schedule.time}</span>
-                        {activeTrack.schedule.calendarActivityId && (
-                          <small className="spec-calendar-badge">
-                            Linked to Upcoming Calendar Activity #{activeTrack.schedule.calendarActivityId}
-                          </small>
-                        )}
+                        <span>See upcoming intakes below for confirmed dates, venues and fees.</span>
                       </dd>
                     </div>
                   </dl>
@@ -1837,12 +1449,8 @@ function PhysicalEducation() {
       </section>
 
       {/* Reusable Program Modal (createPortal) */}
-      {activeModalProgram && (
-        <ProgramModal
-          program={activeModalProgram}
-          onClose={() => setActiveModalProgram(null)}
-        />
-      )}
+      <ProgrammeIntakes programme={activeTrack} onSelect={setSelectedIntake}/>
+      {selectedIntake&&<ActivityModal key={selectedIntake.id} activity={selectedIntake} onClose={()=>setSelectedIntake(null)}/>}
     </main>
   );
 }
@@ -2869,6 +2477,7 @@ function EventsSection() {
 
                     <div className="event-card-body">
                       <h3 className="event-card-title">{event.title}</h3>
+                      <EventPriceLabel event={event} />
                       <p className="event-card-desc">{event.description}</p>
 
                       <div className="event-meta-list">
@@ -2918,7 +2527,8 @@ function EventsSection() {
                     </div>
 
                     <div className="event-card-footer">
-                      {event.status === "cancelled" ? (
+                      {event.registration_settings&&<button type="button" className="event-register-btn" onClick={()=>setSelectedActivity(event)}>View registration details</button>}
+                      {!event.registration_settings&&(event.status === "cancelled" ? (
                         <span className="event-completed-tag" style={{ background: "#fee2e2", color: "#991b1b", border: "1px solid #fecaca" }}>Cancelled</span>
                       ) : event.status === "completed" ? (
                         <span className="event-completed-tag">{ev.sessionCompleted || "Session Completed"}</span>
@@ -2933,7 +2543,7 @@ function EventsSection() {
                         >
                           {ev.registerGoogleForm || "Register via Google Form ↗"}
                         </a>
-                      )}
+                      ))}
                       <button
                         type="button"
                         className="event-details-btn"
@@ -3721,6 +3331,7 @@ function UpcomingCalendar() {
   const [viewYear, setViewYear] = useState(today.getFullYear());
   const [viewMonth, setViewMonth] = useState(today.getMonth()); // 0-indexed
   const [selectedEvent, setSelectedEvent] = useState(null);
+  const [expandedDetails,setExpandedDetails]=useState(false);
   const [typeFilter, setTypeFilter] = useState("All types");
   const [modeFilter, setModeFilter] = useState("All modes");
   const [cityFilter, setCityFilter] = useState("All cities");
@@ -4143,7 +3754,11 @@ function UpcomingCalendar() {
 
                 {/* Action */}
                 <div className="uc-detail-action">
-                  {selectedEvent.status === "cancelled" ? (
+                  <button type="button" className="uc-register-btn" onClick={()=>setExpandedDetails(true)}>Open full event details &amp; registration →</button>
+                  {expandedDetails&&<ActivityModal activity={selectedEvent} onClose={()=>setExpandedDetails(false)}/>}
+                  <EventPriceLabel event={selectedEvent} />
+                  {selectedEvent.registration_settings&&<EventRegistration key={selectedEvent.id} activityId={selectedEvent.id}/>}
+                  {!selectedEvent.registration_settings&&(selectedEvent.status === "cancelled" ? (
                     <span className="uc-action-past">{le?.upcomingCalendarSection?.cancelled || "This activity has been cancelled."}</span>
                   ) : selectedEvent.status === "completed" ? (
                     <span className="uc-action-past">{le?.upcomingCalendarSection?.completed || "This session has been completed."}</span>
@@ -4165,7 +3780,7 @@ function UpcomingCalendar() {
                     <button type="button" className="uc-register-btn uc-register-btn-disabled" disabled>
                       {le?.upcomingCalendarSection?.registerLinkSoon || le?.activityModal?.registrationLinkPending || "Registration link coming soon"}
                     </button>
-                  )}
+                  ))}
                 </div>
               </div>
             ) : (

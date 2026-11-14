@@ -2,9 +2,10 @@ import { useEffect, useState } from 'react';
 import { useLanguage } from '../i18n/LanguageContext';
 
 export default function PublishedRecords({ kind, category, slug, title }) {
-  const { t } = useLanguage();
+  const { t,translateContent } = useLanguage();
   const pr = t.publishedRecords || {};
-  const [rows, setRows] = useState([]);
+  const [rawRows, setRows] = useState([]);
+  const rows=translateContent(rawRows,'records/'+kind);
   const [language, setLanguage] = useState('All');
 
   useEffect(() => {

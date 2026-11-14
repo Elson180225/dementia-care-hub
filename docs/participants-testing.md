@@ -1,5 +1,11 @@
 # Workshop participant management
 
+## Recoverable participant removal (migration 017)
+
+Apply `npm run db:migrate` in development and restart the API. The active list excludes removed participants. Select Remove and cancel the confirmation: nothing should change. Repeat and confirm: the record moves to History below the list with the admin name and removal time. Undo or Restore must return it to the active list, preserve payment verification/confirmation history, and send no email. Refresh after each action to check database persistence.
+
+Check that a selected participant is deselected on removal and cannot receive reminders or confirmation while removed. Reimporting the same email must not restore it. Restore, then remove again: the latest removal time is displayed, and audit records retain both actions. Legacy cancelled entries appear in History with unavailable removal metadata. Export active registrations and History separately; neither file should contain records from the other list. Test trainer and signed-out access restrictions. Removing is not a refund and does not reverse verified payment.
+
 ## Setup
 
 Run `npm run db:migrate` against your development database, then start/restart the API with `npm run server` and frontend with `npm run dev`. Migration 012 adds three tables; no existing registrations are changed. Do not run this against production before validating it in development.
@@ -37,3 +43,14 @@ Signed-out requests must return 401; signed-in trainers must return 403 for part
 ## Automated checks
 
 `node --test tests/participants.test.js` tests CSV edge cases, validation, duplicate normalization, and unauthenticated access without a database or sending email. Run `npm run build` and `npm run lint` for frontend checks. Database persistence, trainer permissions, and Brevo sending require the manual integration checks above; unit tests do not establish those outcomes.
+# Duplicate registration notices
+
+Checks apply per dated intake. Email comparison ignores case and surrounding spaces. Phone matching ignores formatting and equates Malaysian 01..., +601... and 00601... formats; original contact text is preserved.
+
+- Website: submit once, then repeat with the same email in different casing. Expect a duplicate notice, no second record, and no changes to payment, confirmation or History.
+- Use a different email with the same phone. Expect a shared-phone warning and acknowledgement checkbox. Continue only for another participant sharing the family number. Editing email or phone clears acknowledgement and rechecks.
+- Use the same contacts for a different intake. Expect a separate registration to be allowed.
+- Remove the original participant to History, then repeat their email. Expect the original record to remain in History; no silent restoration.
+- Import preview identifies existing emails, History matches and duplicates within the CSV. These rows are excluded. Shared phones are warnings and remain importable after admin review. The import result reports added/skipped rows and shared-phone warnings.
+- Website submissions and imports lock the same intake row while checking/inserting. The existing email uniqueness constraint remains as a safeguard. Concurrent live database requests still require integration verification.
+- Google Forms itself does not receive website validation. Matches are checked when responses are imported.

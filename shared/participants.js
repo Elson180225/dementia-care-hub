@@ -1,3 +1,4 @@
+import {registrationDuplicates} from './registration-duplicates.js';
 // CSV reader supporting Google Sheets exports, including quoted commas and newlines.
 export function parseParticipantCsv(text) {
   const rows = []; let row = [], value = '', quoted = false;
@@ -23,13 +24,15 @@ export function parseParticipantCsv(text) {
   return { headers, rows };
 }
 
-export function validateParticipants(rows) {
+export function validateParticipants(rows,existing=[]) {
   if (!Array.isArray(rows) || !rows.length || rows.length > 500) throw new Error('Provide between 1 and 500 rows.');
-  const seen = new Set();
+  const seen = new Set(),contacts=[...existing];
   return rows.map((row, index) => {
     const name = String(row.name || '').trim(), email = String(row.email || '').trim().toLowerCase(), phone = String(row.phone || '').trim();
-    const error = !name || name.length > 200 ? 'Name is required (maximum 200 characters)' : !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || email.length > 254 ? 'Valid email required' : phone.length > 80 ? 'Phone is too long' : seen.has(email) ? 'Duplicate email in this file' : '';
+    const match=registrationDuplicates({email,phone},contacts);
+    const error = !name || name.length > 200 ? 'Name is required (maximum 200 characters)' : !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || email.length > 254 ? 'Valid email required' : phone.length > 80 ? 'Phone is too long' : seen.has(email) ? 'Duplicate email in this file' : match.email ? (match.email.status==='cancelled'?'Email already exists in History — review or restore the original record':'Email already registered for this intake') : '';
     if (!error) seen.add(email);
-    return { name, email, phone, row: index + 2, error };
+    if(!error)contacts.push({email,phone});
+    return { name, email, phone, row: index + 2, error,warning:!error&&match.phone?'Phone number matches another record in this intake. Shared family numbers are allowed.':'' };
   });
 }
