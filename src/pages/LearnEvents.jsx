@@ -12,6 +12,7 @@ import {isPlannedProgramme} from '../../shared/programme-intakes';
 import { createPortal } from "react-dom";
 import { Link, useLocation } from "react-router-dom";
 import { useLanguage } from "../i18n/LanguageContext";
+import TrainerDisclaimer from "../components/TrainerDisclaimer";
 
 import educationImage from "../assets/understand-dementia.jpg";
 import trainingImage from "../assets/Group_Photo_2.png";
@@ -721,6 +722,7 @@ function pageItems(items, filters, page) {
    SECTION 1: ONLINE EDUCATION
    ================================================================ */
 function OnlineEducation() {
+  const { search } = useLocation();
   const { t } = useLanguage();
   const activities = usePublicActivities();
   const cmsContent = useLearnEventsContent();
@@ -731,7 +733,12 @@ function OnlineEducation() {
   const [selected, setSelected] = useState(null);
   const [selectedQa, setSelectedQa] = useState(null);
   const defaultFilters = { query: "", language: "All", timing: "All" };
-  const [publicFilters, setPublicFilters] = useState(defaultFilters);
+  // Healthy & Active Living cards open this existing archive with a relevant
+  // webinar title prefilled in the search field. No separate health feed.
+  const [publicFilters, setPublicFilters] = useState(() => ({
+    ...defaultFilters,
+    query: new URLSearchParams(search).get("q") || "",
+  }));
   const [trainerFilters, setTrainerFilters] = useState(defaultFilters);
   const [resourceFilters, setResourceFilters] = useState(defaultFilters);
   const [publicPage, setPublicPage] = useState(1);
@@ -3229,6 +3236,13 @@ function CertifiedTrainers() {
               );
             })}
           </div>
+        </div>
+      </section>
+
+      {/* RCBC disclaimer for independently conducted training */}
+      <section>
+        <div className="section-container">
+          <TrainerDisclaimer />
         </div>
       </section>
 

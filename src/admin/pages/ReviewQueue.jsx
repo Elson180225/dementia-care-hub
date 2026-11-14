@@ -45,7 +45,7 @@ export default function ReviewQueue() {
 
   async function decide(item, decision) {
     const comment = (comments[item.key] ?? "").trim();
-    if (decision !== "approved" && !comment) {
+    if (!["approved", "published"].includes(decision) && !comment) {
       setErrors((e) => ({ ...e, [item.key]: "Please add a short comment so the trainer knows why." }));
       return;
     }
@@ -121,7 +121,7 @@ export default function ReviewQueue() {
               />
             </Field>
             <div className="tp-actions">
-              <button className="tp-btn" onClick={() => decide(item, "approved")}>
+              <button className="tp-btn" onClick={() => decide(item, item.approveDecision || "approved")}>
                 {item.approveLabel}
               </button>
               <button className="tp-btn tp-btn-ghost" onClick={() => decide(item, "returned")}>

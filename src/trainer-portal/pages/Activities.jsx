@@ -7,6 +7,7 @@ import { ACTIVITY_TYPES, LANGUAGES, MODES, STATUS_LABEL } from "../constants";
 import { fmtDate } from "../selectors";
 import { Field, StatusChip, describe } from "../ui";
 import EventCard from "../EventCard";
+import TrainerDisclaimer from "../../components/TrainerDisclaimer";
 
 const ALL_ADMIN_TYPES = [
   ...ACTIVITY_TYPES,
@@ -691,7 +692,8 @@ export default function Activities({
         >
           {addLabel}
         </button>
-      </div>
+      </div>      
+      {!admin && <TrainerDisclaimer />}
 
       {/* Metric Stats Cards */}
       <div className="tp-stats">

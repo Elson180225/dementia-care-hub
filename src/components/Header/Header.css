@@ -1230,3 +1230,20 @@
     transition: none;
   }
 }
+
+/* Understanding Dementia: longer RCBC pathway belongs in the header menu,
+   not in a second "On this page" navigation block. */
+.dropdown-menu-understand {
+  width: min(680px, calc(100vw - 32px));
+}
+.dropdown-menu-understand .dropdown-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.dropdown-menu-understand .dropdown-visual-link {
+  min-height: 58px;
+}
+@media (max-width: 740px) {
+  .dropdown-menu-understand .dropdown-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

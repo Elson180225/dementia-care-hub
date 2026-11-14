@@ -1,5 +1,5 @@
 import PublishedRecords from "../components/PublishedRecords";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useLanguage } from "../i18n/LanguageContext";
 import "./UnderstandDementia.css";
@@ -16,7 +16,6 @@ const understandingDementiaContent = {
     "Different conditions can cause dementia symptoms.",
     "A healthcare professional can help assess changes in memory or thinking.",
   ],
-  onPage: "On this page",
   overview: "Overview",
   earlySigns: "Early signs",
   faq: "FAQs",
@@ -237,6 +236,31 @@ const understandingDementiaContent = {
   visitFindHelp: "Find help and support",
 };
 
+// Each approved section can be edited by RCBC in Admin > Records > Content pages.
+// Use these slugs and publish only reviewed material. Otherwise show neutral copy.
+const LIVING_SECTIONS = [
+  {
+    slug: "healthy-stay-healthy", title: "Stay Healthy",
+    description: "Explore RCBC education on ageing and general wellbeing.",
+    webinarTitle: "A Practical Webinar on Cataracts", webinarQuery: "Cataracts",
+  },
+  {
+    slug: "healthy-stay-active", title: "Stay Active",
+    description: "Explore educational sessions about activity and everyday wellbeing.",
+    webinarTitle: "Embracing Wellness: Ageing with Dignity in Sarawak", webinarQuery: "Embracing Wellness",
+  },
+  {
+    slug: "healthy-stay-connected", title: "Stay Connected & Engaged",
+    description: "Explore RCBC sessions about connection and community involvement.",
+    webinarTitle: "Alzheimer's Awareness Webinar", webinarQuery: "Alzheimer's Awareness",
+  },
+  {
+    slug: "healthy-mind-active", title: "Keep Your Brain & Mind Active",
+    description: "Explore webinars about learning, awareness and wellbeing.",
+    webinarTitle: "Alzheimer's 101: Eye-opening facts", webinarQuery: "Alzheimer's 101",
+  },
+];
+
 function UnderstandDementia() {
   const { hash } = useLocation();
 
@@ -260,7 +284,7 @@ function UnderstandDementia() {
     return () => window.cancelAnimationFrame(frame);
   }, [hash]);
 
-  const { t: translationsData } = useLanguage();
+  const { t: translationsData, language } = useLanguage();
   const rawT = translationsData.understandDementia || {};
   const t = {
     ...understandingDementiaContent,
@@ -276,17 +300,54 @@ function UnderstandDementia() {
       link: faq.link || understandingDementiaContent.faqs[idx]?.link,
     })),
   };
+  // New RCBC copy is intentionally in English pending RCBC approval of translations.
+  const reviewCopy = {
+    normalTitle: "Normal Ageing",
+    normalIntro: "Occasional forgetfulness can happen in everyday life. Dementia is not a normal part of ageing.",
+    normalNote: "These examples are for general information. They cannot confirm or rule out a condition.",
+    changesTitle: "Concerning Changes",
+    earlyTitle: "Early Signs",
+    earlyIntro: "Some changes in memory, communication or everyday activities may be worth discussing with a healthcare professional.",
+    earlyNote: "There is no single checklist that can tell whether someone has dementia.",
+    earlyExamples: ["Repeated changes in memory or thinking", "Growing difficulty with familiar activities or communication", "More frequent confusion about time or place"],
+    selfCheckTitle: "Self-Assessment",
+    selfCheckIntro: "This is a guide to help you think about changes. It is not a screening test, medical advice or a diagnosis.",
+    guideNotice: "For reference only — not a diagnosis.",
+    guideReminder: "These answers cannot diagnose or rule out dementia. If changes concern you, seek advice from a qualified healthcare professional.",
+    generalGuidance: "Your answers are a personal reflection, not a medical result or risk score. If you have concerns, consider speaking with a qualified healthcare professional, whatever your answers were.",
+    professionalTitle: "Professional Assessment",
+    professionalIntro: "If changes are ongoing, worrying or affect daily life, a qualified healthcare professional can discuss your concerns and advise on assessment. This website cannot determine the cause.",
+    furtherTitle: "Further Care",
+    furtherIntro: "Explore practical caregiver information and community support. A person's situation and preferences should guide any next steps.",
+    caregiverLink: "Explore Caregiver Support",
+    webinarLink: "Explore education and webinars",
+    healthNote: "RCBC will review and update educational content before publication. These sections link to the existing webinar archive rather than offering personal medical advice.",
+  };
+  const [publishedLivingCopy, setPublishedLivingCopy] = useState({});
+  useEffect(() => {
+    let active = true;
+    fetch("/api/public/content_pages")
+      .then((response) => response.ok ? response.json() : [])
+      .then((records) => {
+        if (!active || !Array.isArray(records)) return;
+        const currentLanguage = { en: "English", ms: "Bahasa Malaysia", zh: "Chinese" }[language] || "English";
+        const approved = {};
+        for (const { slug } of LIVING_SECTIONS) {
+          const matching = records.filter((record) => record.slug === slug && record.review_status === "current");
+          const record = matching.find((item) => item.language === currentLanguage)
+            || matching.find((item) => item.language === "English");
+          const text = typeof record?.body?.text === "string" ? record.body.text.trim() : "";
+          if (text) approved[slug] = text;
+        }
+        setPublishedLivingCopy(approved);
+      })
+      .catch(() => { if (active) setPublishedLivingCopy({}); });
+    return () => { active = false; };
+  }, [language]);
   const [selectedOverview, setSelectedOverview] = useState(0);
   const [answers, setAnswers] = useState({});
   const [showResult, setShowResult] = useState(false);
   const answeredCount = Object.keys(answers).length;
-  const result = useMemo(() => {
-    const values = Object.values(answers);
-    if (values.includes("often")) return "consider";
-    if (values.includes("sometimes")) return "observe";
-    return "wellbeing";
-  }, [answers]);
-
   const resetAssessment = () => {
     setAnswers({});
     setShowResult(false);
@@ -310,7 +371,7 @@ function UnderstandDementia() {
                 {t.exploreEarly} <span aria-hidden="true">↓</span>
               </a>
               <a className="understand-text-link" href="#healthy-living">
-                {t.healthyActive}
+                Healthy &amp; Active Living ↓
               </a>
             </div>
           </div>
@@ -328,6 +389,7 @@ function UnderstandDementia() {
         </div>
       </section>
 
+      {/* Introduce what dementia means before RCBC's six-stage journey. */}
       <section className="understand-section" id="overview">
         <div className="understand-container">
           <div className="understand-section-heading">
@@ -375,50 +437,83 @@ function UnderstandDementia() {
           <p className="understand-note">
             <strong>{t.youngerOnset}</strong> {t.youngerText}
           </p>
+          <a className="understand-step-next" href="#normal-ageing">
+            Next: {reviewCopy.normalTitle} <span aria-hidden="true">→</span>
+          </a>
         </div>
       </section>
 
-      <section
-        className="understand-section understand-tinted"
-        id="early-signs"
-      >
+
+      {/* RCBC's requested reading order: normal ageing, changes, early signs,
+          self-check, professional assessment, and further care. */}
+      <section className="understand-section" id="normal-ageing">
         <div className="understand-container">
           <div className="understand-section-heading">
-            <p className="understand-eyebrow">{t.signsEyebrow}</p>
-            <h2>{t.signsTitle}</h2>
+            <p className="understand-eyebrow">01 / {reviewCopy.normalTitle}</p>
+            <h2>{reviewCopy.normalTitle}</h2>
+            <p>{reviewCopy.normalIntro}</p>
+          </div>
+          <ul className="understand-brief-list">
+            {t.comparison.slice(0, 2).map(([everyday]) => <li key={everyday}>{everyday}</li>)}
+          </ul>
+          <p className="understand-note">{reviewCopy.normalNote}</p>
+          <a className="understand-step-next" href="#changes-to-watch">Next: {reviewCopy.changesTitle} <span aria-hidden="true">→</span></a>
+        </div>
+      </section>
+
+      <section className="understand-section understand-tinted" id="changes-to-watch">
+        <div className="understand-container">
+          <div className="understand-section-heading">
+            <p className="understand-eyebrow">02 / {reviewCopy.changesTitle}</p>
+            <h2>{reviewCopy.changesTitle}</h2>
             <p>{t.signsIntro}</p>
           </div>
-          <div
-            className="understand-comparison"
-            role="table"
-            aria-label={t.comparisonLabel}
-          >
+          <div className="understand-comparison" role="table" aria-label={t.comparisonLabel}>
             <div className="understand-comparison-head" role="row">
               <div role="columnheader">{t.comparisonHead[0]}</div>
               <div role="columnheader">{t.comparisonHead[1]}</div>
             </div>
             {t.comparison.map(([left, right]) => (
               <div className="understand-comparison-row" role="row" key={left}>
-                <p role="cell">
-                  <span className="comparison-mark calm" aria-hidden="true">
-                    ○
-                  </span>
-                  {left}
-                </p>
-                <p role="cell">
-                  <span className="comparison-mark notice" aria-hidden="true">
-                    !
-                  </span>
-                  {right}
-                </p>
+                <p role="cell"><span className="comparison-mark calm" aria-hidden="true">○</span>{left}</p>
+                <p role="cell"><span className="comparison-mark notice" aria-hidden="true">!</span>{right}</p>
               </div>
             ))}
+          </div>
+          <a className="understand-step-next" href="#early-signs">Next: {reviewCopy.earlyTitle} <span aria-hidden="true">→</span></a>
+        </div>
+      </section>
+
+      <section className="understand-section" id="early-signs">
+        <div className="understand-container">
+          <div className="understand-section-heading">
+            <p className="understand-eyebrow">03 / {t.signsEyebrow}</p>
+            <h2>{reviewCopy.earlyTitle}</h2>
+            <p>{reviewCopy.earlyIntro}</p>
+          </div>
+          <ul className="understand-brief-list">
+            {reviewCopy.earlyExamples.map((example) => <li key={example}>{example}</li>)}
+          </ul>
+          <p className="understand-note">{reviewCopy.earlyNote}</p>
+          <a className="understand-step-next" href="#self-check">Next: {reviewCopy.selfCheckTitle} <span aria-hidden="true">→</span></a>
+        </div>
+      </section>
+
+      <section className="understand-section understand-tinted" id="self-check">
+        <div className="understand-container">
+          <div className="understand-section-heading">
+            <p className="understand-eyebrow">04 / {t.selfAssessmentEyebrow}</p>
+            <h2>{reviewCopy.selfCheckTitle}</h2>
+            <p>{reviewCopy.selfCheckIntro}</p>
           </div>
           <div className="understand-assessment-card" id="why-changes-matter">
             <div className="understand-assessment-intro">
               <p className="understand-eyebrow">{t.selfAssessmentEyebrow}</p>
               <h3>{t.selfAssessmentTitle}</h3>
               <p>{t.selfAssessmentIntro}</p>
+              <p className="understand-disclaimer understand-disclaimer-prominent" role="note">
+                <strong>{reviewCopy.guideNotice}</strong> {reviewCopy.guideReminder}
+              </p>
               <div
                 className="understand-progress"
                 aria-label={`${answeredCount} / ${t.questions.length} ${t.answered}`}
@@ -489,40 +584,13 @@ function UnderstandDementia() {
             ) : (
               <div className="understand-result" aria-live="polite">
                 <h4>{t.resultTitle}</h4>
-                {result === "consider" ? (
-                  <>
-                    <p>
-                      <strong>{t.considerTitle}</strong> {t.considerText}
-                    </p>
-                    <Link
-                      className="understand-button"
-                      to="/find-help/assessment-healthcare"
-                    >
-                      {t.findHelp} →
-                    </Link>
-                  </>
-                ) : result === "observe" ? (
-                  <>
-                    <p>
-                      <strong>{t.observeTitle}</strong> {t.observeText}
-                    </p>
-                    <Link
-                      className="understand-button"
-                      to="/find-help/assessment-healthcare"
-                    >
-                      {t.healthcareLink} →
-                    </Link>
-                  </>
-                ) : (
-                  <>
-                    <p>
-                      <strong>{t.wellbeingTitle}</strong> {t.wellbeingText}
-                    </p>
-                    <a className="understand-button" href="#healthy-living">
-                      {t.healthyActive} →
-                    </a>
-                  </>
-                )}
+                <p className="understand-disclaimer understand-disclaimer-prominent" role="note">
+                  <strong>{reviewCopy.guideNotice}</strong> {reviewCopy.guideReminder}
+                </p>
+                <p>{reviewCopy.generalGuidance}</p>
+                <Link className="understand-button" to="/find-help/assessment-healthcare">
+                  {t.healthcareLink} →
+                </Link>
                 <button
                   className="understand-reset"
                   type="button"
@@ -532,17 +600,18 @@ function UnderstandDementia() {
                 </button>
               </div>
             )}
-            <p className="understand-disclaimer">{t.disclaimer}</p>
+            <p className="understand-disclaimer" role="note">{t.disclaimer}</p>
           </div>
+          <a className="understand-step-next" href="#medical-advice">Next: {reviewCopy.professionalTitle} <span aria-hidden="true">→</span></a>
         </div>
       </section>
 
       <section className="understand-section understand-advice-section" id="medical-advice">
         <div className="understand-container">
           <div className="understand-section-heading">
-            <p className="understand-eyebrow">{t.selfAssessmentEyebrow}</p>
-            <h2>{t.considerTitle}</h2>
-            <p>{t.considerText}</p>
+            <p className="understand-eyebrow">05 / {reviewCopy.professionalTitle}</p>
+            <h2>{reviewCopy.professionalTitle}</h2>
+            <p>{reviewCopy.professionalIntro}</p>
           </div>
           <div className="understand-callout">
             <div>
@@ -551,6 +620,21 @@ function UnderstandDementia() {
             </div>
             <Link to="/find-help/assessment-healthcare">{t.healthcareLink} →</Link>
           </div>
+          <a className="understand-step-next" href="#further-care">Next: {reviewCopy.furtherTitle} <span aria-hidden="true">→</span></a>
+        </div>
+      </section>
+
+      <section className="understand-section understand-tinted" id="further-care">
+        <div className="understand-container">
+          <div className="understand-section-heading">
+            <p className="understand-eyebrow">06 / {reviewCopy.furtherTitle}</p>
+            <h2>{reviewCopy.furtherTitle}</h2>
+            <p>{reviewCopy.furtherIntro}</p>
+          </div>
+          <div className="understand-next-steps">
+            <Link to="/caregiver-support">{reviewCopy.caregiverLink} →</Link>
+            <Link to="/find-help">{t.visitFindHelp} →</Link>
+          </div>
         </div>
       </section>
 
@@ -558,34 +642,34 @@ function UnderstandDementia() {
         <div className="understand-container">
           <div className="understand-section-heading">
             <p className="understand-eyebrow">{t.livingEyebrow}</p>
-            <h2>{t.livingTitle}</h2>
-            <p>{t.livingIntro}</p>
+            <h2>Healthy &amp; Active Living</h2>
+            <p>Explore four education topics and selected existing RCBC webinars. Webinar suggestions are provisional and await RCBC approval; they are not personal medical advice.</p>
           </div>
           <div className="understand-living-grid">
-            {t.livingCards.map((card, index) => (
-              <article key={card.title}>
+            {LIVING_SECTIONS.map((card, index) => (
+              <article key={card.slug}>
                 <span aria-hidden="true">{["♡", "↗", "◎", "✧"][index]}</span>
                 <h3>{card.title}</h3>
-                <ul>
-                  {card.items.map((item) => (
-                    <li key={item}>{item}</li>
-                  ))}
-                </ul>
+                <p className="understand-living-description">{publishedLivingCopy[card.slug] || card.description}</p>
+                <Link
+                  className="understand-living-webinar"
+                  to={`/learn-events/online-education?q=${encodeURIComponent(card.webinarQuery)}`}
+                >
+                  Suggested webinar (pending RCBC review): {card.webinarTitle} <span aria-hidden="true">→</span>
+                </Link>
               </article>
             ))}
           </div>
-          <div className="understand-risk" id="risk-reduction">
-            <h3>{t.riskTitle}</h3>
-            <p>{t.riskDescription}</p>
-          </div>
+          {/* Preserve existing deep links without creating a separate health-advice feed. */}
+          <span id="risk-reduction" className="understand-anchor-target" aria-hidden="true" />
           <div className="understand-callout">
             <div>
               <h3>{t.learnTogether}</h3>
               <p>{t.learnTogetherText}</p>
             </div>
-            <Link to="/learn-events">{t.learnEvents} →</Link>
+            <Link to="/learn-events/online-education">{reviewCopy.webinarLink} →</Link>
           </div>
-          <p className="understand-note">{t.riskNote}</p>
+          <p className="understand-note">{reviewCopy.healthNote}</p>
         </div>
       </section>
 
