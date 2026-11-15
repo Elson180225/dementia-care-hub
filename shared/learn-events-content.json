@@ -151,7 +151,8 @@
           "Module 5 – Meaningful Activities & Engagement",
           "Module 6 – Legal, Ethical Issues & Advance Care Planning"
         ],
-        "buttonLabel": "Register for DCS-Family"
+        "buttonLabel": "Register for DCS-Family",
+        "availability": "available"
       },
       {
         "id": "dcs-ttt",
