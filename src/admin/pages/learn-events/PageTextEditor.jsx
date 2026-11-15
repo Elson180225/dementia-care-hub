@@ -23,7 +23,7 @@ export default function PageTextEditor({content,onSave}) {
     catch{setMessage('Could not save. Your edits are still here; please try again.');}finally{setBusy(false);}
   }
   return <section className="page-text-editor">
-    <header><span className="pte-language">English content</span><h2>Page titles & descriptions</h2><p>Change the headings and introductions visitors see on Online Education. Event details stay the same. Other languages keep their existing translations.</p></header>
+    <header><span className="pte-language">English content</span><h2>Page titles & descriptions</h2><p>Change the headings and introductions visitors see on Online Education. Review corresponding translations under Language &amp; translations after changing English text.</p></header>
     <fieldset disabled={busy}><legend className="tp-sr">Edit page text</legend>
       <div className="pte-layout"><nav aria-label="Choose a section to edit">{headingSections.map((s,index)=><button type="button" key={s.id} aria-current={section===s.id?'page':undefined} onClick={()=>setSection(s.id)}><span>{index+1}</span>{s.name}</button>)}</nav>
       <div><h3>{info.name}</h3><p className="pte-hint">{info.hint}</p>

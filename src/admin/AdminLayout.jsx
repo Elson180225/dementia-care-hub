@@ -24,7 +24,7 @@ export default function AdminLayout() {
     ] },
     { label: "Events", links: [
       { to: "/admin/learn-events", label: "Events & learning", icon: "events" },
-      { to: "/admin/participants", label: "Participants", icon: "participants" },
+      { to: "/admin/participants", label: "Event registrations & participants", icon: "participants" },
       { to: "/admin/conducted", label: "Completed workshops", icon: "completed" },
     ] },
     { label: "Trainers & access", links: [
@@ -32,6 +32,7 @@ export default function AdminLayout() {
       { to: "/admin/users", label: "Users", icon: "users" },
     ] },
     { label: "Website", links: [
+      { to: "/admin/translations", label: "Language & translations", icon: "content" },
       { to: "/admin/records", label: "Content & records", icon: "content" },
     ] },
   ];

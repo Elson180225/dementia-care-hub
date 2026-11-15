@@ -1,4 +1,5 @@
 import UploadField from "../UploadField";
+import {validateEventPricing} from "../../../shared/event-registration";
 import { Link } from "react-router-dom";
 import { useEffect, useMemo, useState } from "react";
 import { useTrainer } from "../TrainerContext";
@@ -47,6 +48,15 @@ const blank = {
   audience: "",
   description: "",
   registrationLink: "",
+  registrationType: "",
+  programmeId: "",
+  registrationFee: "",
+  registrationMethod: "closed",
+  registrationGoogleUrl: "",
+  registrationInstructions: "",
+  registrationPhone: false,
+  registrationNotes: false,
+  paymentInstructions: "",
   plannedHours: "",
   city: "",
   posterUrl: "",
@@ -88,6 +98,7 @@ function validate(v) {
 
 export default function Activities({
   admin = false,
+  programmeId = null,
   initialFilterType = "all",
   initialFilterMode = "all",
   defaultValues = null,
@@ -103,6 +114,8 @@ export default function Activities({
   const [editing, setEditing] = useState(null); // { id?, values }
   const [errors, setErrors] = useState({});
   const [availableTrainers, setAvailableTrainers] = useState([]);
+  const [programmes,setProgrammes]=useState([]);
+  useEffect(()=>{if(!admin)return;let active=true;fetch('/api/admin/learn-events-content').then(r=>{if(!r.ok)throw Error();return r.json();}).then(c=>{if(active)setProgrammes(c.physicalEducation?.programmes||[]);}).catch(()=>{});return()=>{active=false;};},[admin]);
   const [assigned, setAssigned] = useState([]);
   const [cancelling, setCancelling] = useState(null); // { id, reason, error }
   const [deletingActivity, setDeletingActivity] = useState(null);
@@ -184,6 +197,7 @@ export default function Activities({
 
   async function save(saveMode = "draft") {
     const found = validate(editing.values);
+    if(admin){try{validateEventPricing(editing.values.registrationType,editing.values.mode);}catch(e){found.registrationType=e.message;}}
     setErrors(found);
     if (Object.keys(found).length) {
       document.getElementById(Object.keys(found)[0])?.focus();
@@ -196,7 +210,7 @@ export default function Activities({
     const payload = {
       id,
       ...editing.values,
-      status: admin ? resolvedStatus : editing.values.status,
+      status: admin ? (saveMode === "draft" ? "draft" : resolvedStatus) : editing.values.status,
       venue,
       trainers: assigned,
     };
@@ -231,6 +245,7 @@ export default function Activities({
 
   const filteredActivities = useMemo(() => {
     return state.activities.filter((a) => {
+      if (programmeId !== null && (a.programmeId || "") !== programmeId) return false;
       if (filterType !== "all" && a.type !== filterType) return false;
       if (filterMode !== "all" && a.mode !== filterMode) return false;
       if (filterStatus !== "all") {
@@ -254,7 +269,7 @@ export default function Activities({
       }
       return true;
     });
-  }, [state.activities, filterType, filterMode, filterStatus, filterCity, searchQuery]);
+  }, [state.activities, programmeId, filterType, filterMode, filterStatus, filterCity, searchQuery]);
 
   const totalCount = filteredActivities.length;
   const totalPages = Math.ceil(totalCount / pageSize) || 1;
@@ -368,7 +383,9 @@ export default function Activities({
             />
           </Field>
 
-          {input("registrationLink", "External registration link (optional)", {
+          {admin&&<label className="tp-field">Physical Education programme (optional)<select disabled={Boolean(programmeId)} value={editing.values.programmeId||''} onChange={e=>setEditing({...editing,values:{...editing.values,programmeId:e.target.value}})}><option value="">Standalone event — no programme</option>{programmes.map(p=><option key={p.id} value={p.id}>{p.code||p.title} — {p.title}</option>)}</select><small>Link this dated intake to a programme so visitors can register from its overview page.</small></label>}
+          {admin&&<fieldset className="tp-field"><legend>Registration</legend><label htmlFor="registrationType">Free or paid (required)</label><select id="registrationType" value={editing.values.registrationType||''} aria-invalid={!!errors.registrationType} onChange={e=>setEditing({...editing,values:{...editing.values,registrationType:e.target.value,...(e.target.value==='free-online'?{registrationFee:'',paymentInstructions:''}:{})}})}><option value="">Choose event type</option><option value="free-online">Free online webinar</option><option value="paid-in-person">Paid in-person programme</option></select>{errors.registrationType&&<p className="tp-error">{errors.registrationType}</p>}{editing.values.registrationType==='paid-in-person'?<><label>Fee description<input maxLength={100} value={editing.values.registrationFee||''} onChange={e=>setEditing({...editing,values:{...editing.values,registrationFee:e.target.value}})}/></label><label>Payment instructions<textarea maxLength={4000} value={editing.values.paymentInstructions||''} onChange={e=>setEditing({...editing,values:{...editing.values,paymentInstructions:e.target.value}})}/></label></>:<p>Free — no payment required.</p>}<label>Registration method<select value={editing.values.registrationMethod||'closed'} onChange={e=>setEditing({...editing,values:{...editing.values,registrationMethod:e.target.value}})}><option value="closed">Registration closed</option><option value="google">Google Form</option><option value="website">Website registration</option></select></label>{editing.values.registrationMethod==='google'&&<label>Google Form link (required)<input type="url" value={editing.values.registrationGoogleUrl||''} onChange={e=>setEditing({...editing,values:{...editing.values,registrationGoogleUrl:e.target.value}})}/></label>}{editing.values.registrationMethod==='website'&&<><p>Visitors register directly on the website. No external link or account is required.</p>{[['registrationPhone','Require phone number'],['registrationNotes','Allow optional notes']].map(([key,label])=><label key={key}><span><input type="checkbox" checked={!!editing.values[key]} onChange={e=>setEditing({...editing,values:{...editing.values,[key]:e.target.checked}})}/> {label}</span></label>)}</>}<label>General registration instructions (optional)<textarea maxLength={4000} value={editing.values.registrationInstructions||''} onChange={e=>setEditing({...editing,values:{...editing.values,registrationInstructions:e.target.value}})}/></label><small>Changing the registration method affects new submissions only. Existing participant records are preserved. Paid bookings require RCBC payment verification.</small></fieldset>}
+          {!admin&&input("registrationLink", "External registration link (optional)", {
             type: "url",
             placeholder: "https://forms.google.com/...",
             hint: "Google Form or external ticketing URL. If blank, 'Registration coming soon' is shown.",
@@ -476,6 +493,7 @@ export default function Activities({
             onChange={(posterUrl) => setEditing({ ...editing, values: { ...v, posterUrl } })}
           />
 
+          {admin&&<aside className="tp-card" aria-label="Intake preview"><h3>Public intake preview</h3><h4>{v.title||"Intake title"}</h4><p>{v.date||"Choose a date"} · {v.venue||"Venue to be confirmed"} {v.city}</p><p>{v.registrationType==="paid-in-person"?v.registrationFee||"Fee to be confirmed":"Free online webinar"}</p><p>{v.registrationMethod==="website"?"Register directly on the website":v.registrationMethod==="google"?"Register through Google Form":"Registration closed"}</p><p>Paid submissions require RCBC payment verification and approval. This preview does not create a booking.</p></aside>}
           <div className="tp-actions" style={{ marginTop: "1.5rem" }}>
             {admin ? (
               <>
@@ -535,7 +553,7 @@ export default function Activities({
     return (
       <>
         <div style={{ display: "inline-flex", gap: "6px", flexWrap: "wrap", justifyContent: "flex-end" }}>
-          {admin && <Link className="tp-btn tp-btn-ghost" to={'/admin/participants?activity='+a.id}>Participants</Link>}
+          {admin && <Link className="tp-btn tp-btn-ghost" to={'/admin/participants?activity='+a.id}>View participants</Link>}
           {(admin ||
             (!a.cancelledAt &&
               ["draft", "returned"].includes(a.status) &&

@@ -38,14 +38,15 @@ function ContributionList({ items }) {
 }
 
 export default function AboutProject() {
-  const { t, language } = useLanguage();
-  const [records, setRecords] = useState([]);
+  const { t,translateContent } = useLanguage();
+  const [rawRecords, setRecords] = useState([]);
+  const records=translateContent(rawRecords.filter(r=>r.language==='English'),'records/content_pages');
   useEffect(() => {
     const controller = new AbortController();
     fetch('/api/public/content_pages', { signal: controller.signal }).then(r => r.ok ? r.json() : []).then(data => setRecords(Array.isArray(data) ? data : [])).catch(() => {});
     return () => controller.abort();
   }, []);
-  const languageName = { en: 'English', ms: 'Bahasa Malaysia', zh: 'Chinese' }[language];
+  const languageName = 'English';
   const approved = id => records.filter(r => r.slug === `about-${id}` && r.language === languageName);
   const hasThanks = acknowledgements.some(group => group.items.length) || approved('acknowledgements').length > 0;
   const navigation = [{id:'overview',label:t.aboutProject.projectOverview},{id:'journey',label:t.aboutProject.ourJourney},{id:'organiser',label:t.aboutProject.peoplePartners},...(hasThanks ? [{id:'acknowledgements',label:t.aboutProject.acknowledgements}] : [])];
