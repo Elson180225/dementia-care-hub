@@ -1,7 +1,4 @@
-import PublishedRecords from "../../components/PublishedRecords";
-import { useMemo, useState } from "react";
-
-import governmentResources from "../../data/governmentResources";
+import { useEffect, useMemo, useState } from "react";
 import { useLanguage } from "../../i18n/LanguageContext";
 
 import "./GovernmentFinancial.css";
@@ -48,8 +45,78 @@ function GovernmentFinancial() {
 
   const [category, setCategory] = useState("All");
 
+  const [directory, setDirectory] = useState([]);
+  const [directoryLoading, setDirectoryLoading] = useState(true);
+  const [directoryError, setDirectoryError] = useState("");
+
+  useEffect(() => {
+    const controller = new AbortController();
+
+    fetch("/api/public/organisations?category=financial", {
+      signal: controller.signal,
+    })
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("Could not load published financial records.");
+        }
+        return response.json();
+      })
+      .then((rows) => {
+        setDirectory(Array.isArray(rows) ? rows : []);
+        setDirectoryError("");
+      })
+      .catch((error) => {
+        if (error.name !== "AbortError") {
+          setDirectoryError("Published financial records could not be loaded.");
+        }
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) {
+          setDirectoryLoading(false);
+        }
+      });
+
+    return () => controller.abort();
+  }, []);
+
+  const databaseResources = useMemo(() => {
+    return directory.flatMap((record) => {
+      const types =
+        Array.isArray(record.services) && record.services.length
+          ? record.services
+          : ["Financial Assistance"];
+
+      return types.map((type) => ({
+        id: `${record.id}-${type}`,
+        title: record.name || "Published financial resource",
+        agency: record.source || "Not provided",
+        category: type,
+        location: [record.city, record.state].filter(Boolean).join(", ") || "Sarawak",
+        summary: record.specialist_field || "No description provided.",
+        eligibility: record.eligibility || "Not provided",
+        access: record.website
+          ? "Use the published official website."
+          : "Not provided",
+        phone: record.phone || "",
+        email: record.email || "",
+        website: record.website || "",
+        verificationStatus: record.is_example
+          ? "example"
+          : record.review_status === "current"
+            ? "verified"
+            : "pending",
+        status: record.is_example ? "Example only" : "Published",
+        lastReviewed: record.last_reviewed_at
+          ? new Date(record.last_reviewed_at).toLocaleDateString("en-MY")
+          : "",
+        source: record.source || "",
+        isExample: Boolean(record.is_example),
+      }));
+    });
+  }, [directory]);
+
   const filteredResources = useMemo(() => {
-    return governmentResources.filter((resource) => {
+    return databaseResources.filter((resource) => {
       const searchableText = `
         ${resource.title}
         ${resource.agency}
@@ -68,7 +135,7 @@ function GovernmentFinancial() {
 
       return matchesSearch && matchesCategory;
     });
-  }, [search, category]);
+  }, [databaseResources, search, category]);
 
   const resetFilters = () => {
     setSearch("");
@@ -77,7 +144,6 @@ function GovernmentFinancial() {
 
   return (
     <main className="government-page">
-      <PublishedRecords kind="organisations" category="financial" title={gf.publishedTitle || "Published directory records"} />
       {/* =====================================================
           HERO
       ====================================================== */}
@@ -143,6 +209,25 @@ function GovernmentFinancial() {
               {gf.findProgrammesSub || "Search by programme, agency or support type."}
             </p>
           </div>
+
+          <div className="government-database-note">
+            <strong>Database-managed directory</strong>
+            <span>
+              Only published financial records from the RCBC admin database are shown here.
+            </span>
+          </div>
+
+          {directoryLoading && (
+            <p className="government-database-status" role="status">
+              Loading published resources…
+            </p>
+          )}
+
+          {directoryError && (
+            <p className="government-database-status" role="alert">
+              {directoryError}
+            </p>
+          )}
 
           {/* FILTERS */}
 
@@ -326,6 +411,9 @@ function GovernmentFinancial() {
                       {resource.verificationStatus ===
                       "verified"
                         ? (gf.verified || "Verified")
+                        : resource.verificationStatus ===
+                          "example"
+                        ? "Example only"
                         : resource.verificationStatus ===
                           "rejected"
                         ? (gf.notApproved || "Not approved")
