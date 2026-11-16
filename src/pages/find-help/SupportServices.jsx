@@ -1,7 +1,5 @@
-import PublishedRecords from "../../components/PublishedRecords";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
-import supportServices from "../../data/supportServices";
 import { useLanguage } from "../../i18n/LanguageContext";
 
 import "./SupportServices.css";
@@ -60,6 +58,15 @@ function SupportServices() {
   const { t } = useLanguage();
   const ss = t.supportServicesPage || {};
 
+  const [publishedServices, setPublishedServices] =
+    useState([]);
+
+  const [publishedLoading, setPublishedLoading] =
+    useState(true);
+
+  const [publishedError, setPublishedError] =
+    useState("");
+
   const [search, setSearch] = useState("");
 
   const [category, setCategory] =
@@ -68,8 +75,138 @@ function SupportServices() {
   const [city, setCity] =
     useState("All");
 
+  useEffect(() => {
+    const controller = new AbortController();
+
+    fetch(
+      "/api/public/organisations",
+      {
+        signal: controller.signal,
+      }
+    )
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error(
+            "Could not load published support services."
+          );
+        }
+
+        return response.json();
+      })
+      .then((rows) => {
+        setPublishedServices(
+          Array.isArray(rows)
+            ? rows
+            : []
+        );
+        setPublishedError("");
+      })
+      .catch((error) => {
+        if (error.name !== "AbortError") {
+          setPublishedError(
+            "Published services could not be loaded."
+          );
+        }
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) {
+          setPublishedLoading(false);
+        }
+      });
+
+    return () =>
+      controller.abort();
+  }, []);
+
+  const managedServices = useMemo(() => {
+    return publishedServices.flatMap(
+      (record) => {
+        const serviceTypes =
+          Array.isArray(record.services) &&
+          record.services.length
+            ? record.services
+            : ["Other"];
+
+        return serviceTypes.map(
+          (serviceType) => ({
+            id:
+              `${record.id}-${serviceType}`,
+            name:
+              record.name ||
+              "Published directory record",
+            service:
+              record.specialist_field ||
+              "Published directory information.",
+            specialistField:
+              serviceType,
+            category:
+              serviceType,
+            city:
+              record.city ||
+              record.state ||
+              "Sarawak",
+            state:
+              record.state ||
+              "Sarawak",
+            address:
+              [
+                record.address,
+                record.city,
+                record.state,
+              ]
+                .filter(Boolean)
+                .join(", ") ||
+              "Location pending",
+            phone:
+              record.phone ||
+              "",
+            email:
+              record.email ||
+              "",
+            verificationStatus:
+              record.is_example
+                ? "example"
+                : record.review_status ===
+                    "current"
+                  ? "verified"
+                  : "pending",
+            lastReviewed:
+              record.last_reviewed_at
+                ? new Date(
+                    record.last_reviewed_at
+                  ).toLocaleDateString(
+                    "en-MY"
+                  )
+                : "",
+            status:
+              record.is_example
+                ? "Example only"
+                : "Published",
+            source:
+              record.source ||
+              "",
+            databaseCategory:
+              record.category ||
+              "directory",
+            isDatabaseRecord:
+              true,
+            isExample:
+              Boolean(
+                record.is_example
+              ),
+          })
+        );
+      }
+    );
+  }, [publishedServices]);
+
+  const allServices = useMemo(
+    () => managedServices,
+    [managedServices]
+  );
+
   const filteredServices = useMemo(() => {
-    return supportServices.filter((service) => {
+    return allServices.filter((service) => {
       const searchableText = `
         ${service.name}
         ${service.service}
@@ -99,6 +236,7 @@ function SupportServices() {
       );
     });
   }, [
+    allServices,
     search,
     category,
     city,
@@ -112,7 +250,6 @@ function SupportServices() {
 
   return (
     <main className="support-services-page">
-      <PublishedRecords kind="organisations" category="services" title={ss.publishedTitle || "Published directory records"} />
       {/* =====================================================
           HERO
       ====================================================== */}
@@ -154,6 +291,32 @@ function SupportServices() {
               {ss.directorySub || "Search and filter available listings by service type and location."}
             </p>
           </div>
+
+          {/* MANAGED DIRECTORY STATUS */}
+
+          <div className="support-managed-note">
+            <div>
+              <strong>
+                Database-managed directory
+              </strong>
+
+              <span>
+                All published directory records added by RCBC will appear here automatically.
+              </span>
+            </div>
+
+            <span className="support-managed-count">
+              {publishedLoading
+                ? "Loading…"
+                : `${managedServices.length} published`}
+            </span>
+          </div>
+
+          {publishedError && (
+            <p className="support-managed-error" role="alert">
+              {publishedError}
+            </p>
+          )}
 
           {/* FILTERS */}
 
@@ -246,8 +409,8 @@ function SupportServices() {
             <span>
               {filteredServices.length ===
               1
-                ? (ss.serviceLabel || "service")
-                : (ss.servicesLabel || "services")}
+                ? "record"
+                : "records"}
             </span>
           </div>
 
@@ -267,11 +430,22 @@ function SupportServices() {
                     </div>
 
                     <div className="support-service-card-top">
-                      <span className="support-service-category">
-                        {
-                          service.category
-                        }
-                      </span>
+                      <div className="support-service-card-tags">
+                        <span className="support-service-category">
+                          {
+                            service.category ||
+                            service.databaseCategory
+                          }
+                        </span>
+
+                        {service.isDatabaseRecord && (
+                          <span className="support-database-badge">
+                            {service.isExample
+                              ? "Database sample"
+                              : "Database record"}
+                          </span>
+                        )}
+                      </div>
 
                       <span className="support-service-location">
                         ◎ {service.city}
@@ -336,6 +510,16 @@ function SupportServices() {
                       </div>
                     </div>
 
+                    {service.isDatabaseRecord && (
+                      <div className="support-service-source">
+                        <span>Source</span>
+                        <strong>
+                          {service.source ||
+                            "Pending"}
+                        </strong>
+                      </div>
+                    )}
+
                     {/* ADMIN / VERIFICATION STATUS */}
 
                     <div className="support-service-status">
@@ -345,6 +529,9 @@ function SupportServices() {
                         {service.verificationStatus ===
                         "verified"
                           ? (ss.verified || "Verified")
+                          : service.verificationStatus ===
+                            "example"
+                          ? "Example only"
                           : service.verificationStatus ===
                             "rejected"
                           ? (ss.notApproved || "Not approved")

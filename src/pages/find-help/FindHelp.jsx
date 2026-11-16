@@ -1,4 +1,3 @@
-import PublishedRecords from "../../components/PublishedRecords";
 import { Link } from "react-router-dom";
 import { useLanguage } from "../../i18n/LanguageContext";
 
@@ -102,7 +101,6 @@ function FindHelp() {
 
   return (
     <main className="find-help-page">
-      <PublishedRecords kind="organisations" category="" title="Published directory records" />
       {/* HERO */}
 
       <section className="find-help-hero">

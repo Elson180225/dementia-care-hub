@@ -1,4 +1,3 @@
-import PublishedRecords from "../../components/PublishedRecords";
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 
@@ -173,7 +172,6 @@ function AssessmentHealthcare() {
 
   return (
     <main className="assessment-page">
-      <PublishedRecords kind="organisations" category="healthcare" title="Published directory records" />
       {/* =====================================================
           HERO
       ====================================================== */}

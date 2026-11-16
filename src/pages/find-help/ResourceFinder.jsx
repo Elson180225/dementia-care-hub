@@ -1,9 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 
-import supportServices from "../../data/supportServices";
-import governmentResources from "../../data/governmentResources";
-import equipmentResources from "../../data/equipmentResources";
 import { useLanguage } from "../../i18n/LanguageContext";
 
 import "./ResourceFinder.css";
@@ -108,18 +105,68 @@ function ResourceNeedIcon({ type }) {
   return icons[type] || icons.services;
 }
 
+function normaliseValue(value = "") {
+  return String(value)
+    .trim()
+    .toLowerCase()
+    .replace(/\s+/g, " ");
+}
+
+function normaliseCategory(value = "") {
+  const category = normaliseValue(value);
+
+  if (category === "support-group" || category === "support group") {
+    return "services";
+  }
+
+  return category;
+}
+
 function ResourceFinder() {
-  const { t,translateContent } = useLanguage();
+  const { t } = useLanguage();
   const rf = t.resourceFinderPage || {};
   const currentNeeds = rf.needs || needs;
 
-  const [rawDirectory, setDirectory] = useState([]);
-  const directory=translateContent(rawDirectory,'records/organisations');
-  const [directoryError, setDirectoryError] = useState('');
+  const [directory, setDirectory] = useState([]);
+  const [directoryError, setDirectoryError] = useState("");
+  const [directoryLoading, setDirectoryLoading] =
+    useState(true);
+
   useEffect(() => {
     const controller = new AbortController();
-    fetch('/api/public/organisations', {signal:controller.signal}).then(r=>{if(!r.ok) throw new Error();return r.json();}).then(rows=>setDirectory(rows)).catch(e=>{if(e.name!=='AbortError') setDirectoryError('Managed directory records could not be loaded. Please try again later.');});
-    return ()=>controller.abort();
+
+    fetch("/api/public/organisations", {
+      signal: controller.signal,
+    })
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error(
+            "Could not load published directory records."
+          );
+        }
+
+        return response.json();
+      })
+      .then((rows) => {
+        setDirectory(
+          Array.isArray(rows) ? rows : []
+        );
+        setDirectoryError("");
+      })
+      .catch((error) => {
+        if (error.name !== "AbortError") {
+          setDirectoryError(
+            "Published directory records could not be loaded. Please try again later."
+          );
+        }
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) {
+          setDirectoryLoading(false);
+        }
+      });
+
+    return () => controller.abort();
   }, []);
   const [step, setStep] = useState(1);
 
@@ -137,101 +184,82 @@ function ResourceFinder() {
   const [showNeedGuide, setShowNeedGuide] =
     useState(false);
 
-  /* =========================================================
-     NORMALISE DATA FROM THE OTHER MODULES
+  const [expandedResource, setExpandedResource] =
+    useState(null);
 
-     Later these arrays can be replaced by API responses.
+  /* =========================================================
+     NORMALISE PUBLISHED DATABASE RECORDS
+
+     Services, financial support and equipment are loaded from
+     the managed organisations directory. Healthcare remains a
+     guided pathway rather than a directory result.
   ========================================================= */
 
   const allResources = useMemo(() => {
-    const supportRecords = supportServices.map(
-      (item) => ({
-        id: item.id,
+    return directory.flatMap((record) => {
+      const source = normaliseCategory(
+        record.category
+      );
 
-        source: "services",
+      if (
+        !["services", "financial", "equipment"].includes(
+          source
+        )
+      ) {
+        return [];
+      }
 
-        title: item.name,
+      const rawServices = Array.isArray(record.services)
+        ? record.services
+        : typeof record.services === "string"
+          ? [record.services]
+          : [];
 
-        type: item.category,
+      const types = rawServices.length
+        ? rawServices
+        : ["Other"];
 
-        location: item.city,
-
-        state: item.state,
-
-        description: item.service,
-
-        secondary:
-          item.specialistField,
-
-        verificationStatus:
-          item.verificationStatus,
-
-        status: item.status,
-
-        path: "/find-help/support-services",
-      })
-    );
-
-    const governmentRecords =
-      governmentResources.map((item) => ({
-        id: item.id,
-
-        source: "financial",
-
-        title: item.title,
-
-        type: item.category,
-
-        location: item.location,
-
-        state: item.location,
-
-        description: item.summary,
-
-        secondary: item.agency,
-
-        verificationStatus:
-          item.verificationStatus,
-
-        status: item.status,
-
-        path: "/find-help/government-financial",
-      }));
-
-    const equipmentRecords =
-      equipmentResources.map((item) => ({
-        id: item.id,
-
-        source: "equipment",
-
-        title: item.title,
-
-        type: item.category,
-
-        location: "Sarawak",
-
-        state: "Sarawak",
-
+      return types.map((type) => ({
+        id: `${record.id}-${type}`,
+        source,
+        title:
+          record.name ||
+          "Published resource",
+        type,
+        location:
+          record.city ||
+          record.state ||
+          "Sarawak",
+        state:
+          record.state ||
+          "Sarawak",
         description:
-          item.shortDescription,
-
+          record.specialist_field ||
+          "Published resource information.",
         secondary:
-          item.whereToFind,
-
+          record.is_example
+            ? "Example only — not a real service."
+            : record.source || "",
         verificationStatus:
-          item.verificationStatus,
-
-        status: item.status,
-
-        path: "/find-help/equipment-practical",
+          record.is_example
+            ? "example"
+            : record.review_status === "current"
+              ? "verified"
+              : "pending",
+        address: record.address || "",
+        postcode: record.postcode || "",
+        phone: record.phone || "",
+        email: record.email || "",
+        website: record.website || "",
+        openingHours: record.opening_hours || "",
+        eligibility: record.eligibility || "",
+        fees: record.fees || "",
+        sourceLabel: record.source || "",
+        reviewStatus: record.review_status || "",
+        lastReviewed: record.last_reviewed_at || "",
+        isExample: Boolean(record.is_example),
       }));
-
-    return [
-      ...directory.flatMap(r => (r.services?.length ? r.services : ['Other']).map(type=>({id:r.id+'-'+type, source:r.category==='support-group'?'services':r.category,title:r.name,type,location:r.city,state:r.state,description:r.specialist_field,secondary:r.is_example?'Example only - not a real service.':r.source,verificationStatus:r.is_example?'example':r.review_status==='current'?'verified':'pending',path:({services:'/find-help/support-services',financial:'/find-help/government-financial',equipment:'/find-help/equipment-practical'})[r.category] || '/find-help/support-services'}))),
-      ...supportRecords,
-      ...governmentRecords,
-      ...equipmentRecords,
-    ];
+    });
   }, [directory]);
 
   /* =========================================================
@@ -245,19 +273,37 @@ function ResourceFinder() {
 
     return allResources.filter(
       (resource) => {
+        const selectedNeed =
+          normaliseCategory(need);
+        const resourceNeed =
+          normaliseCategory(resource.source);
+
+        const selectedType =
+          normaliseValue(supportType);
+        const resourceType =
+          normaliseValue(resource.type);
+
+        const selectedLocation =
+          normaliseValue(location);
+        const resourceLocation =
+          normaliseValue(resource.location);
+        const resourceState =
+          normaliseValue(resource.state);
+
         const needMatch =
-          resource.source === need;
+          resourceNeed === selectedNeed;
 
         const typeMatch =
-          !supportType ||
-          resource.type === supportType;
+          !selectedType ||
+          resourceType === selectedType;
 
         const locationMatch =
-          !location ||
-          location === "Anywhere in Sarawak" ||
-          resource.location === location ||
-          resource.state === location ||
-          resource.location === "Sarawak";
+          !selectedLocation ||
+          selectedLocation ===
+            normaliseValue("Anywhere in Sarawak") ||
+          resourceLocation === selectedLocation ||
+          resourceState === selectedLocation ||
+          resourceLocation === "sarawak";
 
         return (
           needMatch &&
@@ -287,6 +333,7 @@ function ResourceFinder() {
     setShowResults(false);
 
     setShowNeedGuide(false);
+    setExpandedResource(null);
 
     setStep(2);
   };
@@ -297,11 +344,19 @@ function ResourceFinder() {
     setLocation("");
 
     setShowResults(false);
+    setExpandedResource(null);
 
     setStep(3);
   };
 
   const findResources = () => {
+    if (
+      need !== "healthcare" &&
+      directoryLoading
+    ) {
+      return;
+    }
+
     setShowResults(true);
 
     setTimeout(() => {
@@ -326,6 +381,7 @@ function ResourceFinder() {
     setShowResults(false);
 
     setShowNeedGuide(false);
+    setExpandedResource(null);
   };
 
   const selectedNeed =
@@ -335,7 +391,22 @@ function ResourceFinder() {
 
   return (
     <main className="rf-page">
-      {directoryError && <p role="status">{directoryError}</p>}
+      {(directoryLoading ||
+        directoryError) && (
+        <div className="rf-directory-status">
+          {directoryLoading && (
+            <p role="status">
+              Loading published resources…
+            </p>
+          )}
+
+          {directoryError && (
+            <p role="alert">
+              {directoryError}
+            </p>
+          )}
+        </div>
+      )}
       {/* =====================================================
           INTRO
       ====================================================== */}
@@ -765,7 +836,11 @@ function ResourceFinder() {
                     <button
                       type="button"
                       className="rf-find-button"
-                      disabled={!location}
+                      disabled={
+                        !location ||
+                        (need !== "healthcare" &&
+                          directoryLoading)
+                      }
                       onClick={
                         findResources
                       }
@@ -856,7 +931,8 @@ function ResourceFinder() {
                 </h2>
 
                 <p>
-                  {rf.resultsDesc || "These results are based on the choices you made above."}
+                  {rf.resultsDesc ||
+                    "These results are based on the choices you made above and published RCBC-managed directory records."}
                 </p>
               </div>
 
@@ -982,17 +1058,84 @@ function ResourceFinder() {
                             : (rf.pendingVerification || "Pending verification")}
                         </span>
 
-                        <Link
-                          to={
-                            resource.path
+                        <button
+                          type="button"
+                          className="rf-details-toggle"
+                          onClick={() =>
+                            setExpandedResource(
+                              expandedResource === resource.id
+                                ? null
+                                : resource.id
+                            )
+                          }
+                          aria-expanded={
+                            expandedResource === resource.id
                           }
                         >
-                          {rf.viewDetails || "View details"}
+                          {expandedResource === resource.id
+                            ? "Hide details"
+                            : "Show details"}
                           <span>
-                            →
+                            {expandedResource === resource.id ? "↑" : "↓"}
                           </span>
-                        </Link>
+                        </button>
                       </div>
+
+                      {expandedResource === resource.id && (
+                        <div className="rf-result-details">
+                          <div>
+                            <span>Location</span>
+                            <strong>
+                              {[resource.address, resource.location, resource.state]
+                                .filter(Boolean)
+                                .join(", ")}
+                            </strong>
+                          </div>
+
+                          <div>
+                            <span>Phone</span>
+                            <strong>{resource.phone || "Not provided"}</strong>
+                          </div>
+
+                          <div>
+                            <span>Email</span>
+                            <strong>{resource.email || "Not provided"}</strong>
+                          </div>
+
+                          <div>
+                            <span>Eligibility</span>
+                            <strong>{resource.eligibility || "Not provided"}</strong>
+                          </div>
+
+                          <div>
+                            <span>Fees</span>
+                            <strong>{resource.fees || "Not provided"}</strong>
+                          </div>
+
+                          <div>
+                            <span>Source</span>
+                            <strong>{resource.sourceLabel || "Not provided"}</strong>
+                          </div>
+
+                          <div>
+                            <span>Review status</span>
+                            <strong>{resource.reviewStatus || "Not provided"}</strong>
+                          </div>
+
+                          {resource.website && (
+                            <div className="rf-result-details-wide">
+                              <span>Website</span>
+                              <a
+                                href={resource.website}
+                                target="_blank"
+                                rel="noreferrer"
+                              >
+                                Visit published website ↗
+                              </a>
+                            </div>
+                          )}
+                        </div>
+                      )}
                     </article>
                   )
                 )}
@@ -1008,7 +1151,8 @@ function ResourceFinder() {
                 </h3>
 
                 <p>
-                  {rf.emptyDesc || "The directory does not currently contain a matching verified record for this combination."}
+                  {rf.emptyDesc ||
+                    "No published database record currently matches this support type and location."}
                 </p>
 
                 <button

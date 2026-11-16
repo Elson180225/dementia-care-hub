@@ -784,4 +784,102 @@
     animation: none !important;
     transition: none !important;
   }
+
+  
+/* Database-only page additions */
+
+.government-database-note,
+.equipment-database-note {
+  margin: 0 0 22px;
+  padding: 15px 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  border: 1px solid rgba(91, 43, 139, 0.18);
+  border-radius: 14px;
+  background: #fbf8ff;
+}
+
+.government-database-note strong,
+.equipment-database-note strong {
+  color: #4b2176;
+}
+
+.government-database-note span,
+.equipment-database-note span {
+  color: #5f5965;
+  font-size: 0.95rem;
+}
+
+.government-database-status,
+.equipment-database-status {
+  margin: -10px 0 20px;
+  color: #5f5965;
+}
+
+.rf-details-toggle {
+  border: 0;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.rf-result-details {
+  grid-column: 2 / -1;
+  margin-top: 4px;
+  padding: 22px 0 4px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px 28px;
+  border-top: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+.rf-result-details > div {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.rf-result-details span {
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  opacity: 0.72;
+}
+
+.rf-result-details strong,
+.rf-result-details a {
+  color: inherit;
+  line-height: 1.45;
+}
+
+.rf-result-details-wide {
+  grid-column: 1 / -1;
+}
+
+@media (max-width: 760px) {
+  .government-database-note,
+  .equipment-database-note {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .rf-result-details {
+    grid-column: 1 / -1;
+    grid-template-columns: 1fr;
+  }
+
+  .rf-result-details-wide {
+    grid-column: auto;
+  }
+}
+
 }

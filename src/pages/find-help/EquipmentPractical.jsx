@@ -1,9 +1,7 @@
-import PublishedRecords from "../../components/PublishedRecords";
 // src/pages/find-help/EquipmentPractical.jsx
 
 import { useEffect, useMemo, useState } from "react";
 
-import equipmentResources from "../../data/equipmentResources";
 import { useLanguage } from "../../i18n/LanguageContext";
 
 import "./EquipmentPractical.css";
@@ -80,6 +78,73 @@ function EquipmentPractical() {
   const [heroPaused, setHeroPaused] =
     useState(false);
 
+  const [directory, setDirectory] = useState([]);
+  const [directoryLoading, setDirectoryLoading] = useState(true);
+  const [directoryError, setDirectoryError] = useState("");
+
+  useEffect(() => {
+    const controller = new AbortController();
+
+    fetch("/api/public/organisations?category=equipment", {
+      signal: controller.signal,
+    })
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("Could not load published equipment records.");
+        }
+        return response.json();
+      })
+      .then((rows) => {
+        setDirectory(Array.isArray(rows) ? rows : []);
+        setDirectoryError("");
+      })
+      .catch((error) => {
+        if (error.name !== "AbortError") {
+          setDirectoryError("Published equipment records could not be loaded.");
+        }
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) {
+          setDirectoryLoading(false);
+        }
+      });
+
+    return () => controller.abort();
+  }, []);
+
+  const databaseResources = useMemo(() => {
+    return directory.flatMap((record) => {
+      const types =
+        Array.isArray(record.services) && record.services.length
+          ? record.services
+          : ["Daily Living Aids"];
+
+      return types.map((type) => ({
+        id: `${record.id}-${type}`,
+        title: record.name || "Published practical aid",
+        category: type,
+        shortDescription:
+          record.specialist_field || "No description provided.",
+        location:
+          [record.city, record.state].filter(Boolean).join(", ") || "Sarawak",
+        source: record.source || "Not provided",
+        phone: record.phone || "",
+        email: record.email || "",
+        website: record.website || "",
+        verificationStatus: record.is_example
+          ? "example"
+          : record.review_status === "current"
+            ? "verified"
+            : "pending",
+        lastReviewed: record.last_reviewed_at
+          ? new Date(record.last_reviewed_at).toLocaleDateString("en-MY")
+          : "",
+        status: record.is_example ? "Example only" : "Published",
+        isExample: Boolean(record.is_example),
+      }));
+    });
+  }, [directory]);
+
   /* =========================================================
      AUTOMATIC HERO CARD ROTATION
   ========================================================= */
@@ -107,24 +172,19 @@ function EquipmentPractical() {
   const categories = useMemo(() => {
     return [
       "All",
-      ...new Set(
-        equipmentResources.map(
-          (resource) => resource.category
-        )
-      ),
+      ...new Set(databaseResources.map((resource) => resource.category)),
     ];
-  }, []);
+  }, [databaseResources]);
 
   const filteredResources = useMemo(() => {
     if (selectedCategory === "All") {
-      return equipmentResources;
+      return databaseResources;
     }
 
-    return equipmentResources.filter(
-      (resource) =>
-        resource.category === selectedCategory
+    return databaseResources.filter(
+      (resource) => resource.category === selectedCategory
     );
-  }, [selectedCategory]);
+  }, [databaseResources, selectedCategory]);
 
   /* =========================================================
      RESOURCE ACCORDION
@@ -198,7 +258,6 @@ function EquipmentPractical() {
 
   return (
     <main className="equipment-page">
-      <PublishedRecords kind="organisations" category="equipment" title="Published directory records" />
       {/* =====================================================
           SPLIT HERO
       ====================================================== */}
@@ -454,6 +513,25 @@ function EquipmentPractical() {
         id="equipment-explore"
       >
         <div className="equipment-container">
+          <div className="equipment-database-note">
+            <strong>Database-managed directory</strong>
+            <span>
+              Only published equipment records from the RCBC admin database are shown here.
+            </span>
+          </div>
+
+          {directoryLoading && (
+            <p className="equipment-database-status" role="status">
+              Loading published resources…
+            </p>
+          )}
+
+          {directoryError && (
+            <p className="equipment-database-status" role="alert">
+              {directoryError}
+            </p>
+          )}
+
           <div className="equipment-explorer-layout">
             {/* LEFT SIDEBAR */}
 
@@ -617,72 +695,47 @@ function EquipmentPractical() {
                         {isOpen && (
                           <div className="equipment-resource-details">
                             <div className="equipment-examples">
-                              <span>
-                                {ep.examples || "Examples"}
-                              </span>
+                              <span>Published record details</span>
 
                               <ul>
-                                {resource.examples.map(
-                                  (
-                                    example
-                                  ) => (
-                                    <li
-                                      key={
-                                        example
-                                      }
-                                    >
-                                      {
-                                        example
-                                      }
-                                    </li>
-                                  )
-                                )}
+                                <li>
+                                  <strong>Location:</strong>{" "}
+                                  {resource.location}
+                                </li>
+                                <li>
+                                  <strong>Source:</strong>{" "}
+                                  {resource.source}
+                                </li>
+                                <li>
+                                  <strong>Status:</strong>{" "}
+                                  {resource.status}
+                                </li>
                               </ul>
                             </div>
 
                             <div className="equipment-source-panel">
-                              <span>
-                                {ep.whereToFind || "Where can I find this?"}
-                              </span>
+                              <span>Contact information</span>
 
                               <p>
-                                {
-                                  resource.whereToFind
-                                }
+                                {resource.phone
+                                  ? `Phone: ${resource.phone}`
+                                  : "Phone not provided"}
                               </p>
 
-                              {resource.supplierName ? (
-                                <div className="equipment-supplier">
-                                  <strong>
-                                    {
-                                      resource.supplierName
-                                    }
-                                  </strong>
+                              <p>
+                                {resource.email
+                                  ? `Email: ${resource.email}`
+                                  : "Email not provided"}
+                              </p>
 
-                                  {resource.supplierPhone && (
-                                    <span>
-                                      {
-                                        resource.supplierPhone
-                                      }
-                                    </span>
-                                  )}
-
-                                  {resource.supplierWebsite && (
-                                    <a
-                                      href={
-                                        resource.supplierWebsite
-                                      }
-                                      target="_blank"
-                                      rel="noreferrer"
-                                    >
-                                      {ep.visitSupplier || "Visit supplier ↗"}
-                                    </a>
-                                  )}
-                                </div>
-                              ) : (
-                                <span className="equipment-pending">
-                                  {ep.supplierPending || "Supplier information pending verification"}
-                                </span>
+                              {resource.website && (
+                                <a
+                                  href={resource.website}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                >
+                                  Visit published website ↗
+                                </a>
                               )}
                             </div>
 
@@ -690,18 +743,17 @@ function EquipmentPractical() {
                               <span
                                 className={`equipment-verification equipment-verification-${resource.verificationStatus}`}
                               >
-                                {resource.verificationStatus ===
-                                "verified"
-                                  ? (ep.verified || "Verified")
-                                  : (ep.verificationPending || "Verification pending")}
+                                {resource.verificationStatus === "example"
+                                  ? "Example only"
+                                  : resource.verificationStatus === "verified"
+                                    ? (ep.verified || "Verified")
+                                    : (ep.verificationPending || "Verification pending")}
                               </span>
 
                               {resource.lastReviewed && (
                                 <small>
                                   {ep.lastReviewed || "Last reviewed:"}{" "}
-                                  {
-                                    resource.lastReviewed
-                                  }
+                                  {resource.lastReviewed}
                                 </small>
                               )}
                             </div>
