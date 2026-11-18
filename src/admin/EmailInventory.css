@@ -1,0 +1,99 @@
+.email-inventory summary {
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.email-inventory-entries {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px 28px;
+}
+
+.email-inventory-entries dt {
+  font-weight: 600;
+}
+
+.email-inventory-entries dd {
+  margin: 4px 0 14px;
+  overflow-wrap: anywhere;
+}
+
+.email-inventory-sheet {
+  display: none;
+}
+
+@media (max-width: 800px) {
+  .email-inventory-entries {
+    grid-template-columns: 1fr;
+  }
+}
+
+@page email-inventory {
+  size: A4 landscape;
+  margin: 12mm;
+}
+
+@media print {
+  body.printing-email-inventory {
+    margin: 0;
+    min-height: 0;
+    background: white;
+  }
+
+  body.printing-email-inventory > :not(.email-inventory-sheet) {
+    display: none !important;
+  }
+
+  body.printing-email-inventory > .email-inventory-sheet {
+    display: block;
+    page: email-inventory;
+    color: black;
+    font: 9pt/1.3 Arial, sans-serif;
+  }
+
+  .email-inventory-sheet h1 {
+    margin: 0 0 3mm;
+    color: black;
+    font: bold 18pt/1.2 Arial, sans-serif;
+  }
+
+  .email-inventory-sheet p {
+    margin: 0 0 3mm;
+    font: inherit;
+  }
+
+  .email-inventory-sheet table {
+    width: 100%;
+    margin: 4mm 0;
+    border-collapse: collapse;
+    table-layout: fixed;
+  }
+
+  .email-inventory-sheet col:nth-child(1) { width: 15%; }
+  .email-inventory-sheet col:nth-child(2) { width: 22%; }
+  .email-inventory-sheet col:nth-child(3) { width: 19%; }
+  .email-inventory-sheet col:nth-child(4) { width: 20%; }
+  .email-inventory-sheet col:nth-child(5) { width: 24%; }
+
+  .email-inventory-sheet tr {
+    break-inside: avoid;
+  }
+
+  .email-inventory-sheet th,
+  .email-inventory-sheet td {
+    border: 1px solid #aaa;
+    padding: 2mm;
+    text-align: left;
+    vertical-align: top;
+    overflow-wrap: anywhere;
+  }
+
+  .email-inventory-sheet thead {
+    display: table-header-group;
+  }
+
+  .email-inventory-sheet thead th {
+    background: #eee;
+    print-color-adjust: exact;
+  }
+}

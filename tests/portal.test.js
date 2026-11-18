@@ -120,10 +120,15 @@ test('PostgreSQL portal and administrative workflows',{skip:!process.env.TEST_DA
   ok(await action({type:'ACTIVITY_SAVE',activity},secondLogin.cookie),403);
   ok(await action({type:'ACTIVITY_SUBMIT',id:activity.id},trainer.cookie));
   ok(await action({type:'ACTIVITY_SAVE',activity},trainer.cookie),409);
-  ok(await action({type:'ADMIN_REVIEW',target:'activity',id:activity.id,decision:'published'}),409);
-  ok(await action({type:'ADMIN_REVIEW',target:'activity',id:activity.id,decision:'approved'}));
   assert.equal(ok(await request('activities')).data.length,0);
+  // The admin approval action publishes a submitted workshop in one step.
+  ok(await action({type:'ADMIN_REVIEW',target:'activity',id:activity.id,decision:'published'},trainer.cookie),403);
   ok(await action({type:'ADMIN_REVIEW',target:'activity',id:activity.id,decision:'published'}));
+  const publishedActivity=(await db.query('SELECT status,published_at FROM activities WHERE id=$1',[activity.id])).rows[0];
+  assert.equal(publishedActivity.status,'published');
+  assert.ok(publishedActivity.published_at);
+  assert.equal(ok(await request('activities')).data[0].id,activity.id);
+  ok(await action({type:'ADMIN_REVIEW',target:'activity',id:activity.id,decision:'published'}),409);
   ok(await action({type:'COMPLETION_SAVE',id:activity.id,values:{venue:'Online',hours:2,participants:12}},trainer.cookie));
   assert.equal((await db.query('SELECT * FROM annual_trainer_contributions')).rowCount,0);
   ok(await action({type:'ADMIN_REVIEW',target:'completion',id:activity.id,decision:'returned',comment:'Add photo evidence'}));
@@ -134,7 +139,16 @@ test('PostgreSQL portal and administrative workflows',{skip:!process.env.TEST_DA
   const totals=(await db.query('SELECT * FROM annual_trainer_contributions')).rows;
   assert.equal(totals.length,2);assert.equal(Number(totals[0].hours),2);assert.equal(Number(totals[1].participants),12);
   assert.equal(Number((await db.query('SELECT * FROM annual_project_reach')).rows[0].participants),12);
-  const adminEvent={...activity,id:randomUUID(),title:'RCBC webinar',type:'RCBC Webinar',trainers:[],date:'2026-02-01T10:00'};
+  const adminEvent={
+   ...activity,
+   id:randomUUID(),
+   title:'RCBC webinar',
+   type:'RCBC Webinar',
+   trainers:[],
+   date:'2026-02-01T10:00',
+   registrationType:'free-online',
+   registrationMethod:'closed',
+  };
   ok(await action({type:'ACTIVITY_SAVE',activity:adminEvent}));ok(await action({type:'ACTIVITY_SUBMIT',id:adminEvent.id}));
   ok(await action({type:'ADMIN_REVIEW',target:'activity',id:adminEvent.id,decision:'approved'}));
   ok(await action({type:'ADMIN_REVIEW',target:'activity',id:adminEvent.id,decision:'published'}));
