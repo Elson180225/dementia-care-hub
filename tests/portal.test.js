@@ -21,7 +21,7 @@ test('PostgreSQL portal and administrative workflows',{skip:!process.env.TEST_DA
  const connection=new URL(process.env.TEST_DATABASE_URL);connection.searchParams.set('options',`-c search_path=${schema},public`);
  const db=new pg.Pool({connectionString:connection.toString()});let server;
  try {
-  for(const name of ['001_shared_records.sql','003_admin_auth.sql','004_record_details.sql','005_admin_workflow.sql','006_portal_operations.sql','007_content_feedback.sql','008_idle_sessions.sql','014_enquiry_notifications.sql','015_trainer_listing_approval.sql','016_trainer_certificate_evidence.sql','017_trainer_details_and_resource_examples.sql','018_trainer_assessment_status.sql','012_participants.sql','015_event_registration.sql','016_registration_setup.sql','017_participant_history.sql','019_programme_intakes.sql','023_trainer_governance.sql','024_trainer_archive.sql']) await db.query(await readFile(new URL('../database/'+name,import.meta.url),'utf8'));
+  for(const name of ['001_shared_records.sql','003_admin_auth.sql','004_record_details.sql','005_admin_workflow.sql','006_portal_operations.sql','007_content_feedback.sql','008_idle_sessions.sql','014_enquiry_notifications.sql','015_trainer_listing_approval.sql','016_trainer_certificate_evidence.sql','017_trainer_details_and_resource_examples.sql','018_trainer_assessment_status.sql','012_participants.sql','015_event_registration.sql','016_registration_setup.sql','017_participant_history.sql','019_programme_intakes.sql','022_password_reset.sql','023_trainer_governance.sql','024_trainer_archive.sql']) await db.query(await readFile(new URL('../database/'+name,import.meta.url),'utf8'));
   server=spawn(process.execPath,['server/index.js'],{env:{...process.env,DATABASE_URL:connection.toString(),SUBSCRIBER_DATABASE_URL:'',SUBSCRIBER_TOKEN_SECRET:'test-secret-'.repeat(5),REMINDERS_ENABLED:'false',API_PORT:'3098'},stdio:['ignore','pipe','pipe']});
   let serverErrors='';server.stderr.on('data',d=>{serverErrors+=d;});
   await new Promise((resolve,reject)=>{server.stdout.once('data',resolve);server.once('error',reject);server.once('exit',()=>reject(new Error('Test API exited: '+serverErrors)));});
@@ -235,6 +235,17 @@ test('PostgreSQL portal and administrative workflows',{skip:!process.env.TEST_DA
    ok(await request('portal',null,active.cookie),401);
    ok(await request('auth/activity',{idleMs:0},active.cookie),401);
   }
+  const resetSession=ok(await request('auth/login',adminData));
+  const resetToken='admin-reset-test-token-'.repeat(3);
+  await db.query("INSERT INTO password_reset_tokens(token_hash,user_id,expires_at) VALUES($1,$2,now()+interval '30 minutes')",[digest(resetToken),admin.data.user.id]);
+  ok(await request('auth/reset-password',{token:resetToken,password:'short'}),400);
+  ok(await request('auth/reset-password',{token:'invalid-token-'.repeat(4),password:'a new sufficiently long password'}),400);
+  const newPassword='a new sufficiently long password';
+  ok(await request('auth/reset-password',{token:resetToken,password:newPassword}));
+  ok(await request('portal',null,resetSession.cookie),401);
+  ok(await request('auth/login',adminData),401);
+  ok(await request('auth/login',{...adminData,password:newPassword}));
+  ok(await request('auth/reset-password',{token:resetToken,password:newPassword}),400);
   assert.equal(serverErrors,'');
  }finally{server?.kill();await db.end();await root.query(`DROP SCHEMA ${schema} CASCADE`);await root.end();}
 });
