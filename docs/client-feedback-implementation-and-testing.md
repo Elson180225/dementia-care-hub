@@ -135,3 +135,12 @@ npm run reminders:preview
 Reminder preview reads due activities and audience counts without sending emails. Unit tests use simulated providers. For database integration coverage, set `TEST_DATABASE_URL` to a PostgreSQL connection whose role can create isolated test schemas before running `npm test`; otherwise those tests are skipped. Integration tests create and remove their own schemas and do not send real email.
 
 Record each manual result as Pass, Fail or Waiting for RCBC, with the test date, tester and any issue. Passing automated checks does not replace RCBC acceptance testing.
+
+
+## Admin password reset
+
+Run `npm run db:migrate` to apply `022_password_reset.sql` before testing. Start the API with `npm run server` and open `/admin/forgot-password`. Use an existing enabled admin account whose inbox you can access. The API needs `APP_BASE_URL` pointing to the running frontend, `BREVO_API_KEY`, and a verified `BREVO_SENDER_EMAIL`.
+
+Request a reset, open the emailed link within 30 minutes, and choose a password of at least 12 characters. Verify the new password works, the old password fails, existing sessions are revoked, and the link cannot be reused. The generic request confirmation protects account privacy and does not prove email delivery; inspect the API log for `Password reset email failed:` and check Brevo logs if no email arrives. Each new request invalidates the previous reset link.
+
+The PostgreSQL portal integration test covers admin reset validation, password replacement, session revocation, and single-use tokens without sending email. Set `TEST_DATABASE_URL` to a PostgreSQL database where the test can create and remove its isolated schema, then run `node --test tests/portal.test.js`.
