@@ -1,6 +1,7 @@
 import { Field } from '../../trainer-portal/ui';
 import UploadField from '../../trainer-portal/UploadField';
 import { useState } from 'react';
+import './Users.css';
 import { api, useTrainer } from '../../trainer-portal/TrainerContext';
 import { ASSESSMENT_LABEL, teachingEligibility } from '../../../shared/teaching-eligibility';
 
@@ -82,23 +83,23 @@ export default function Users() {
       </section>
 
       <section className="tp-card">
-        <h2>Trainers</h2>
-        <div className="tp-table-wrap">
-          <table className="tp-table">
-            <thead><tr><th>Name</th><th>Email</th><th>Certification</th><th>Assessment</th><th>HCP</th><th>Teaching eligibility</th><th>Public listing</th><th>Sign-in</th><th>Actions</th></tr></thead>
+        <h2 id="users-trainers-heading">Trainers</h2>
+        <div className="tp-table-wrap users-trainers-wrap" role="region" aria-labelledby="users-trainers-heading" tabIndex={0}>
+          <table className="tp-table users-trainers-table">
+            <thead><tr><th scope="col">Name</th><th scope="col">Email</th><th scope="col">Certification</th><th scope="col">Assessment</th><th scope="col">HCP</th><th scope="col">Teaching eligibility</th><th scope="col">Public listing</th><th scope="col">Sign-in</th><th scope="col">Actions</th></tr></thead>
             <tbody>
               {trainers.map((u) => (
                 <tr key={u.id}>
-                  <td><strong>{u.name}</strong></td>
-                  <td>{u.email}</td>
-                  <td>{CERT_LABEL[u.certified_status] ?? 'Waiting for approval'}</td>
-                  <td>{ASSESSMENT_LABEL[u.assessment_status] ?? 'Not assessed yet'}</td>
-                  <td>{u.healthcare_professional == null ? 'Not recorded' : u.healthcare_professional ? 'Yes' : 'No'}</td>
-                  <td>{teachingEligibility(u.assessment_status, u.healthcare_professional,u.teaching_allowed)}</td>
-                  <td>{LISTING_LABEL[u.listing_status] ?? 'Not listed'}</td>
-                  <td>{u.enabled ? 'Can sign in' : 'Access turned off'}</td>
-                  <td>
-                    <button className="tp-btn tp-btn-ghost" style={{ minHeight: 36, padding: '4px 12px' }}
+                  <td data-label="Name"><strong>{u.name}</strong></td>
+                  <td data-label="Email">{u.email}</td>
+                  <td data-label="Certification">{CERT_LABEL[u.certified_status] ?? 'Waiting for approval'}</td>
+                  <td data-label="Assessment">{ASSESSMENT_LABEL[u.assessment_status] ?? 'Not assessed yet'}</td>
+                  <td data-label="HCP">{u.healthcare_professional == null ? 'Not recorded' : u.healthcare_professional ? 'Yes' : 'No'}</td>
+                  <td data-label="Teaching eligibility">{teachingEligibility(u.assessment_status, u.healthcare_professional,u.teaching_allowed)}</td>
+                  <td data-label="Public listing">{LISTING_LABEL[u.listing_status] ?? 'Not listed'}</td>
+                  <td data-label="Sign-in">{u.enabled ? 'Can sign in' : 'Access turned off'}</td>
+                  <td data-label="Actions">
+                    <button className="tp-btn tp-btn-ghost"
                       disabled={busy || uploading} onClick={() => setEditing({ ...u, certifiedStatus: u.certified_status || 'pending', certificateRef: u.certificate_ref || '', assessmentResult: u.assessment_result || '', assessmentStatus: u.assessment_status || 'not_assessed',  healthcareProfessional: u.healthcare_professional ?? null, independentTeachingScope: u.independent_teaching_scope || '', certificateEvidenceUrl: u.certificate_file_id ? '/api/files/'+u.certificate_file_id : '', comment: '' })}>
                       Manage access
                     </button>

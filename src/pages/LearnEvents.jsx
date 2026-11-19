@@ -412,7 +412,7 @@ function ActivityModal({ activity, onClose }) {
   const recording=publicLink(activity.recordingLink);
   return createPortal(<div className="event-detail-backdrop" onMouseDown={e=>{if(e.target===e.currentTarget)onClose();}}>
     <section className="event-detail-dialog" role="dialog" aria-modal="true" aria-labelledby="event-detail-title" tabIndex={-1} ref={dialogRef}>
-      <div className="event-detail-toolbar"><span>Education &amp; Events</span><button type="button" onClick={onClose} aria-label="Close event details">×</button></div>
+      <div className="event-detail-toolbar"><span>Education &amp; Events</span><button type="button" onClick={onClose} aria-label="Close event details"><span className="dialog-close-icon" aria-hidden="true" /></button></div>
       <div className="event-detail-layout">
         <aside className="event-detail-visual" aria-label="Event poster">
           {poster?<><a href={poster} target="_blank" rel="noreferrer" aria-label={'Open full-size poster for '+activity.title+' in a new tab'}><img src={poster} alt={'Poster for '+activity.title}/></a><p>Event poster</p><a className="event-poster-link" href={poster} target="_blank" rel="noreferrer">View full-size poster ↗</a></>:<div className="event-detail-no-poster"><span aria-hidden="true">▤</span><p>RCBC Education &amp; Events</p><strong>{activity.title}</strong><p>Event information and registration details are shown alongside.</p></div>}

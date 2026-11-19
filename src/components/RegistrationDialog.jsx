@@ -33,7 +33,7 @@ export default function RegistrationDialog({title,busy,onClose,children,id}){
  },[]);
  return createPortal(<div className="registration-window-backdrop" onMouseDown={e=>{if(e.target===e.currentTarget&&!busy)onClose();}}>
   <section id={id} ref={root} className="registration-window event-registration" role="dialog" aria-modal="true" aria-labelledby={titleId} aria-busy={busy} tabIndex={-1}>
-   <header className="registration-window-header"><div><span className="registration-eyebrow">{text.dialogEyebrow}</span><h2 id={titleId}>{text.dialogTitle}</h2><p>{title}</p></div><button type="button" className="registration-window-close" onClick={onClose} disabled={busy} aria-label={text.dialogClose}>×</button></header>
+   <header className="registration-window-header"><div><span className="registration-eyebrow">{text.dialogEyebrow}</span><h2 id={titleId}>{text.dialogTitle}</h2><p>{title}</p></div><button type="button" className="registration-window-close" onClick={onClose} disabled={busy} aria-label={text.dialogClose}><span className="dialog-close-icon" aria-hidden="true" /></button></header>
    <div className="registration-window-body">{children}</div>
   </section>
  </div>,document.body);

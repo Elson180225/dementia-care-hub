@@ -540,13 +540,13 @@ function Header() {
                       aria-expanded={openMenu === item.label}
                       aria-haspopup="true"
                     >
-                      {item.label}
-                      <span aria-hidden="true"> ⌄</span>
+                      <span className="nav-label">{item.label}</span>
+                      <span className="nav-chevron" aria-hidden="true" />
                     </button>
                   ) : (
                     <Link to={item.path} className="nav-link" onClick={() => setOpenMenu(null)}>
-                      {item.label}
-                      <span aria-hidden="true"> ⌄</span>
+                      <span className="nav-label">{item.label}</span>
+                      <span className="nav-chevron" aria-hidden="true" />
                     </Link>
                   )}
 
