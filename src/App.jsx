@@ -73,6 +73,10 @@ function App() {
           <Route path="/trainer-portal/application" element={<main className="tp-page"><div className="tp-container"><AccountForm application /></div></main>} />
           <Route path="/trainer-portal/signup" element={<main className="tp-page"><div className="tp-container"><AccountForm signup /></div></main>} />
           <Route path="/admin/signup" element={<main className="tp-page"><div className="tp-container"><AccountForm role="admin" signup /></div></main>} />
+          <Route path="/trainer-portal/forgot-password" element={<main className="tp-page"><div className="tp-container"><AccountForm forgot /></div></main>} />
+          <Route path="/trainer-portal/reset-password" element={<main className="tp-page"><div className="tp-container"><AccountForm reset /></div></main>} />
+          <Route path="/admin/forgot-password" element={<main className="tp-page"><div className="tp-container"><AccountForm role="admin" forgot /></div></main>} />
+          <Route path="/admin/reset-password" element={<main className="tp-page"><div className="tp-container"><AccountForm role="admin" reset /></div></main>} />
           <Route path="/about/contact" element={<Contact />} />
           <Route path="/contact" element={<Navigate to="/about/contact" replace />} />
           {/* =========================
