@@ -1,55 +1,53 @@
-# RCBC registration demonstration and testing
+# RCBC event registration and acceptance testing
 
-## Updated single-location setup
-Apply migration 016 and restart the API. Edit the event to configure classification, fee/payment instructions (paid only), general registration instructions, and ONE registration method: Google Form, Website registration, or Registration closed. Admin no longer configures registration in the participant page. Free saves clear payment fields on the server; entering “Free” is unnecessary. Existing Google links are retained where a legacy Google route can be identified; closed events remain closed until deliberately opened.
+## Event setup
+Run `npm run db:migrate` and restart the API after pulling these changes.
+In the event editor, choose delivery (Online / Physical) and pricing (Free / Paid) independently. All four combinations are supported. Free saves clear fee/payment fields; general joining instructions remain. Pricing changes are blocked once registrations exist to preserve payment history.
 
-After selecting the event under Workshop participants, the participant list is shown first. Open Registration review for approval and, for paid events, payment evidence. Free records do not show payment evidence controls. Existing saved records are preserved when the method changes.
+Choose one registration method per event: Website registration, Google Form, or Registration closed. Configure the Google URL in the event editor. Changing methods preserves existing participant records. Programme tracks are categories; registration belongs to a specific dated intake.
 
-Regression checks: switch a paid event with NO registrations to free and Online mode; verify stale fee and payment instructions disappear after saving/reloading. Add a general joining instruction and ensure it remains visible. Google method requires a valid link and opens that link from Register. Website method requires no link and opens the native form. Closed method shows no active Register action. Existing registrations must remain when changing methods. Pricing changes with existing registrations are deliberately blocked to protect payment history.
+## Shared registration rules
+- Every new registration needs a name, valid email, and WhatsApp phone number. Emails may be shared. Optional questions/notes are always available (2000-character maximum).
+- Normalised active phone numbers must be unique within one intake. Local Malaysian and +60 formats match; the same phone can register for different events.
+- Free website submissions are confirmed immediately. Free Google responses are confirmed when imported.
+- Paid submissions/imports start Submitted. Admin moves them to Pending payment verification, verifies payment, then confirms. Uploading evidence alone does not verify or confirm anything.
+- Registration review shows all active submissions. Participant list and reminder selection contain only active confirmed participants.
+- Capacity is advisory and counts only active confirmed participants. The admin warning shows the exact excess; new registrations and confirmations are still allowed.
+- Remove requires confirmation and moves a record into History. Restore retains payment/confirmation history, but is blocked if another active registration uses that phone. History records are not deleted.
+- Legacy shared-phone registrations are preserved and flagged for admin review. Migration 022 adds a database trigger and partial unique index to enforce the new rule without automatically cancelling older records.
 
-## Setup
-### Event editing and public labels
-In the admin event editor choose Free online webinar (Online delivery) or Paid in-person programme (Physical delivery). Set the fee description and payment instructions before saving. A mismatched mode must fail. Existing events with no saved classification show Registration details pending rather than being assumed free; edit those records to classify them. General community activities outside these two categories need RCBC agreement before a broader pricing taxonomy is introduced.
+## Google Form route
+RCBC maintains the external form, including required name/email/WhatsApp fields and an optional speaker questions/notes field. The website cannot edit an external Google Form or prevent its duplicate submissions.
 
-The event editor saves classification atomically with the activity; registration routes are enabled from Participants. Public Online Education/event cards and activity/calendar details show the saved category. Calendar and shared event details offer the managed website/Google routes. Topic-preview content and general Physical Education track expressions of interest remain separate from database-backed event bookings.
+Download Responses → View in Sheets → File → Download → CSV. In Import registrations, map name, email, phone and questions/notes. Invalid and duplicate-phone rows are excluded in preview. The server rechecks existing phones during import and reports added/skipped counts. Shared emails are accepted. Existing records retain their statuses.
 
-### Recommendation for RCBC review
-Recommend website registration as the primary route when its standard fields meet RCBC’s needs, because it avoids recurring CSV transfers and shares payment review and export. Recommend Google Forms if flexible question editing is essential and RCBC prefers maintaining the form and import process. Demonstrate both before RCBC chooses; this is a provisional recommendation, not a recorded client decision.
+This remains manual CSV transfer, without Google OAuth or automatic synchronisation. Google responses do not appear on the website until imported.
 
-### Four demonstrations to record
-1. Free online webinar through website: submit, confirm without payment, explicitly send confirmation, export.
-2. Same free webinar through RCBC’s Google Form: submit, export Sheets CSV, import, confirm and export.
-3. Paid DCS event through website: submit, move to pending, attempt confirmation before payment (must fail), verify payment evidence, confirm, explicitly send confirmation.
-4. Same paid event through Google Form/import: repeat review, duplicate import, confirmation and export.
-Use different controlled test emails for each route, plus one shared email to demonstrate cross-route deduplication. These demonstrations are pending until the development database, actual RCBC test forms and email configuration are available. Do not mark Accepted based on automated checks alone.
+## Payment evidence and communication
+Admin can upload PNG, JPEG, WebP or PDF evidence up to 8 MB. File types are checked by content; payment evidence files are admin-only. Choose Verify payment to attach the evidence to that registration and record reviewer/time. A text verification reference remains an alternative. Confirm registration is a separate action.
 
-Run `npm run db:migrate` against a development database to apply migration 015. Restart the API. Use two published future activities: one free online webinar and one paid physical programme. No sample records or payments are created automatically.
+Confirmation status and email delivery are separate. Registration submission, CSV import, verification and confirmation do not automatically send email. Send confirmation and reminders remain explicit administrator actions using configured Brevo credentials. Check delivery history/provider logs before retrying failed or uncertain sends.
 
-Open Admin → Workshop participants and choose an activity. Configure registration settings. Name and email are standard fields; phone and notes are optional configuration choices. Enter RCBC-approved fee descriptions, payment instructions and actual Google Form links. Both routes can be enabled for comparison; RCBC selects the final workflow. This is manual payment verification, not an online payment gateway.
+## Manual acceptance checks
+1. Create free online and free physical events with capacity 1. Submit two people using one email and different phone numbers. Both are confirmed; admin sees two participants and an excess of one.
+2. Submit a duplicate phone using local and +60 formats for the same event. The second submission shows an obvious duplicate-phone notice. Register that phone for another event: accepted.
+3. Import Google CSV with questions, shared emails and different phones. Free rows appear in Participant list. Re-importing the same phones adds no new records. Confirm questions appear in review, participant details and CSV export.
+4. Register for paid online and paid physical events using website and CSV routes. Records remain in Registration review and outside Participant list.
+5. Attempt paid confirmation before verification: rejected. Upload an image/PDF: still unverified. Move to pending payment, verify, then confirm: the record appears in Participant list.
+6. Open an evidence URL while signed out: denied. A signed-in admin can view it.
+7. Exceed planned capacity with free registrations and paid confirmations. Count only confirmed active participants. Remove one: count decreases. Restore: count returns.
+8. Remove a participant, register a new person with that phone, then restore the original: restoration is rejected and both histories are retained.
+9. Check that closed, cancelled, ended and deadline-expired events reject new website submissions. Capacity alone never closes registration.
+10. Confirm Certified Trainer details and workflows remain unchanged.
 
-## Website route
-Open the activity details from Online Education / Events and find Event registration. Choose Register on this website. Submit the form with consent. Expected: Submitted, never automatic confirmation. Repeat using the same email with different casing: one record is retained. Track applications remain separate in Physical Education → Applications and do not become event bookings.
+## RCBC demonstration and recommendation
+Demonstrate one free webinar and one paid programme through each route. Compare:
+- Editable fields: Google Forms is flexible; website standardises contact/questions.
+- Records/status: website updates immediately; Google requires CSV imports.
+- Payment: both use the same admin verification and confirmation workflow.
+- Export: admin CSV includes contact details, questions, source, status and payment/History audit information.
+- Duplicates: website blocks duplicate phones immediately; Google duplicates are detected during import.
+- Maintenance: website avoids repeated transfers; Google requires RCBC form ownership and regular CSV imports.
 
-## Google route
-RCBC creates a corresponding form with name, email and any agreed extra fields. Demonstrate both free and paid examples. Download responses from Sheets as CSV and import using the existing Import registrations tab. Expected: new rows start Submitted, source google-import. Existing emails are skipped even when originally submitted through the website. The importer currently maps name/email/phone only; additional Google answers remain in Google until further field mapping is agreed. Google Form configuration, ownership and ongoing updates remain RCBC responsibilities. No Google OAuth or automatic sync is added.
+Recommend website registration when the standard fields meet RCBC's needs. RCBC makes the final choice. Use controlled addresses for email demonstrations; automated checks alone do not constitute client acceptance.
 
-## Paid event acceptance
-1. Submitted registration → Await payment verification → Pending payment verification.
-2. Enter a reference to evidence RCBC checked. Verify payment. Expected: reviewer and verification time recorded; still not confirmed.
-3. Confirm registration. Expected: Confirmed with reviewer/time recorded. Direct API confirmation without verified payment must fail.
-4. Send confirmation after checking the recipient. Expected: Brevo provider acceptance recorded. Configure BREVO_API_KEY/BREVO_SENDER_EMAIL. Use addresses you control. Confirmation email is separate from reminders. Attempts are protected against duplicates, including ambiguous network failures. Check provider logs for sending/failed/uncertain entries before further action; no automatic retry is included.
-
-## Free event acceptance
-Submission stays Submitted. Admin confirms directly without payment evidence. This conservative review step is provisional until RCBC confirms the free-webinar rules. Confirmation is sent only by explicit administrator action, so no emails are sent just by importing or approving records.
-
-## Other checks
-- Export CSV includes source, lifecycle state, cancellation, payment reference and confirmation time. Check quoted commas and spreadsheet-formula protection.
-- Cancelled participants cannot be confirmed or emailed. Cancelled/past/deadline-expired activities reject public submissions.
-- Disabling phone/notes prevents those extra values being stored from website requests.
-- Registration settings and payment actions require admin access. Verify trainer 403 and anonymous 401.
-- Existing participant cancellation and import history are preserved. Existing records start Submitted, not assumed paid or confirmed.
-- Once managed registration is enabled, reminders accept only confirmed participants. Existing subscriber reminders use a separate workflow and are outside this change.
-- Test database persistence, publication visibility, export, real email receipt and browser layouts before RCBC acceptance. Automated unit tests do not establish these outcomes.
-
-## Comparison and recommendation
-Google Forms offers client-controlled question editing and Google exports, but requires manual CSV imports and two systems to maintain. Website registration stores responses directly and shares payment review/export, but field changes are limited to the agreed fixed fields and toggles. Demonstrate both using the same free and paid examples. Recommend one operational source per event to reduce reconciliation; retain both only for the comparison until RCBC chooses. Payment rules, participant fields, confirmation wording and the treatment of repeat/shared-email registrations require RCBC agreement. Capacity/waitlist automation and payment refunds are not included.

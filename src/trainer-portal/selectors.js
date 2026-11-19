@@ -26,7 +26,7 @@ export function buildQueue({ accessRequests, profile, profiles = [profile], acti
   const items = [];
 
   accessRequests
-    .filter((r) => r.status === "submitted")
+    .filter((r) => r.status === "submitted"&&!profiles.some(p=>p.id===r.user_id&&p.archived_at))
     .forEach((r) =>
       items.push({
         key: `access-${r.id}`,
@@ -42,13 +42,13 @@ export function buildQueue({ accessRequests, profile, profiles = [profile], acti
       })
     );
 
-  profiles.filter(p => p.status === "submitted").forEach(p => items.push({
+  profiles.filter(p => !p.archived_at&&p.status === "submitted").forEach(p => items.push({
     key:`profile-${p.id}`, target:"profile", id:p.id, kind:"Trainer profile update", title:p.name,
     detail:`${p.city} · ${p.language}`, approveLabel:"Approve update",
   profile: p
   }));
 
-  profiles.filter(p => p.listingStatus === "requested").forEach(p => items.push({
+  profiles.filter(p => !p.archived_at&&p.listingStatus === "requested").forEach(p => items.push({
     key: `listing-${p.id}`, target: "listing", id: p.id, kind: "Public listing request", title: p.name,
     detail: `${p.city} · consent given ${new Date(p.listingConsentAt).toLocaleDateString("en-MY")}`,
     approveLabel: "Approve public listing", canReject: true, profile: p,
@@ -77,7 +77,7 @@ export function buildQueue({ accessRequests, profile, profiles = [profile], acti
         key: `completion-${a.id}`,
         target: "completion",
         id: a.id,
-        kind: "Completed activity record",
+        kind: "Completed activity record",trainerHours:a.trainers,
         title: a.title,
         detail: `${a.completion.participants} participants · ${a.completion.hours} hours`,
         approveLabel: "Verify record",

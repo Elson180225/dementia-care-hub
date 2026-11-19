@@ -19,7 +19,7 @@ test('malformed and oversized imports are rejected',()=>{
   assert.throws(()=>parseParticipantCsv('Name,Email\n'+Array(501).fill('A,a@example.com').join('\n')));
 });
 test('validation normalizes email and identifies duplicates and invalid fields',()=>{
-  const rows=validateParticipants([{name:' Mei ',email:' MEI@example.com '},{name:'Mei',email:'mei@example.com'},{name:'',email:'b@example.com'},{name:'B',email:'invalid'},{name:'C',email:'c@example.com',phone:'0'.repeat(81)}]);
+  const rows=validateParticipants([{name:' Mei ',email:' MEI@example.com ',phone:'0123456789'},{name:'Mei',email:'mei@example.com',phone:'+60123456789'},{name:'',email:'b@example.com'},{name:'B',email:'invalid'},{name:'C',email:'c@example.com',phone:'0'.repeat(81)}]);
   assert.equal(rows[0].email,'mei@example.com');assert.equal(rows[0].name,'Mei');assert.equal(rows[0].error,'');
   assert.ok(rows.slice(1).every(r=>r.error));
 });

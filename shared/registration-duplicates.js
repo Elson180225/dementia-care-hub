@@ -9,6 +9,6 @@ export function registrationDuplicates(value,existing){
  const email=normaliseEmail(value.email),phone=normalisePhone(value.phone);
  return {
   email:existing.find(p=>email&&normaliseEmail(p.email)===email),
-  phone:existing.find(p=>phone&&normalisePhone(p.phone)===phone)
+  phone:existing.find(p=>p.status!=='cancelled'&&phone&&normalisePhone(p.phone)===phone)
  };
 }

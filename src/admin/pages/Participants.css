@@ -35,3 +35,25 @@
 .pm-empty{padding:60px 24px;text-align:center;background:#fff;border:1px solid var(--color-purple-200);border-radius:16px;margin-top:24px}.pm-empty>span{font-size:42px;color:var(--color-purple-600)}.pm-empty h2{margin-top:15px}.pm-empty p{max-width:500px;margin:12px auto;color:var(--pm-muted)}.pm-empty ol{display:flex;justify-content:center;gap:30px;flex-wrap:wrap;margin:28px 0 0;padding:0;list-style-position:inside;font-size:13px;color:var(--color-purple-600)}
 .pm-history h2{margin:5px 0 12px}.pm-history>p{font-size:13px;color:var(--pm-muted)}.pm-history>h2:not(:first-child){margin-top:32px}
 @media(max-width:700px){.pm-heading{align-items:flex-start}.pm-private{display:none}.pm-stats{grid-template-columns:1fr;gap:10px}.pm-stats article{padding:15px 18px}.pm-stats strong{margin:5px 0}.pm-workshop{padding:15px;gap:12px}.pm-workshop-icon{display:none}.participants-workspace fieldset,.pm-history{padding:18px 12px}.pm-toolbar{align-items:stretch;flex-direction:column}.pm-tabs button{flex:1 1 40%;padding:11px 7px;font-size:12px}.pm-empty ol{flex-direction:column;gap:10px}.pm-selection{padding:12px}.pm-selection>div{width:100%}.pm-selection .tp-btn{flex:1}.participants-workspace .pm-heading h1{font-size:28px}}
+.pm-table-scroll{overflow-x:auto;max-width:100%;border-radius:10px}
+.participants-workspace .pm-review-table{min-width:780px;width:100%;table-layout:auto}
+.participants-workspace .tp-table.pm-review-table td{vertical-align:top;min-width:150px;max-width:320px}
+.participants-workspace .pm-review-table td>label{display:block;margin:0 0 16px}
+.participants-workspace .pm-review-table th:first-child{min-width:190px}
+.pm-cell-stack{display:flex;flex-direction:column;align-items:flex-start;gap:12px}
+.participants-workspace .pm-registration-review .pm-review-actions{display:flex;flex-direction:column;align-items:stretch;gap:12px;border:0;border-radius:0;padding:0;margin:0;background:transparent;min-width:160px}
+.participants-workspace .pm-registration-review :is(.pm-review-actions,.pm-cell-stack) .tp-btn{margin:0;width:100%;white-space:normal;line-height:1.5;overflow-wrap:normal;text-align:center;box-sizing:border-box}
+.pm-status{display:inline-block;border:1px solid;border-radius:20px;padding:4px 10px;font-size:12px;font-weight:700;line-height:1.5}
+.pm-status-confirmed{background:#edf8f2;border-color:#b2d9c6;color:#246044}
+.pm-status-pending{background:#fff6df;border-color:#dfc27c;color:#715000}
+.pm-email-status{font-weight:700;display:block}
+.pm-cell-stack small{font-size:12px;line-height:1.6;color:var(--color-purple-800)}
+.pm-question{margin-top:10px;font-size:13px}
+.pm-question summary{cursor:pointer;color:var(--color-purple-600);font-weight:700;padding:8px 0;min-height:28px;line-height:1.5;list-style:none;text-decoration:underline;text-underline-offset:3px}
+.pm-question summary::-webkit-details-marker{display:none}
+.pm-question summary::after{content:' +';display:inline-block;margin-left:5px;text-decoration:none}
+.pm-question[open] summary::after{content:' −'}
+.pm-question-dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--color-purple-600);margin-right:7px;vertical-align:middle}
+.participants-workspace .pm-question p{margin:4px 0 0;padding:10px 12px;border:1px solid var(--color-purple-200);border-radius:8px;background:var(--color-neutral-50);white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.7;color:var(--color-purple-800);font-size:13px}
+.participants-workspace .pm-registration-review :is(.pm-review-actions,.pm-cell-stack) .tp-btn{width:auto;align-self:flex-start}
+.pm-sr-only{position:absolute!important;width:1px;height:1px;padding:0!important;margin:-1px!important;overflow:hidden;clip-path:inset(50%);white-space:nowrap;border:0}

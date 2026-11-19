@@ -55,8 +55,9 @@ function SupportServiceIcon({ category = "" }) {
 }
 
 function SupportServices() {
-  const { t } = useLanguage();
+  const { t, translateContent } = useLanguage();
   const ss = t.supportServicesPage || {};
+  const categoryLabel=value=>{const index=categories.indexOf(value)-1;return t.supportDirectory?.categories?.[index]||value;};
 
   const [publishedServices, setPublishedServices] =
     useState([]);
@@ -119,12 +120,12 @@ function SupportServices() {
   }, []);
 
   const managedServices = useMemo(() => {
-    return publishedServices.flatMap(
+    return translateContent(publishedServices, 'records/organisations').flatMap(
       (record) => {
         const serviceTypes =
-          Array.isArray(record.services) &&
-          record.services.length
-            ? record.services
+          Array.isArray(publishedServices.find(item=>item.id===record.id)?.services) &&
+          publishedServices.find(item=>item.id===record.id).services.length
+            ? publishedServices.find(item=>item.id===record.id).services
             : ["Other"];
 
         return serviceTypes.map(
@@ -198,7 +199,7 @@ function SupportServices() {
         );
       }
     );
-  }, [publishedServices]);
+  }, [publishedServices, translateContent]);
 
   const allServices = useMemo(
     () => managedServices,
@@ -211,7 +212,7 @@ function SupportServices() {
         ${service.name}
         ${service.service}
         ${service.specialistField}
-        ${service.category}
+        ${categoryLabel(service.category)}
         ${service.city}
         ${service.state}
       `.toLowerCase();
@@ -237,6 +238,7 @@ function SupportServices() {
     });
   }, [
     allServices,
+    t,
     search,
     category,
     city,
@@ -355,7 +357,7 @@ function SupportServices() {
                   >
                     {item === "All"
                       ? (ss.allServices || "All service types")
-                      : item}
+                      : categoryLabel(item)}
                   </option>
                 )
               )}
@@ -433,8 +435,7 @@ function SupportServices() {
                       <div className="support-service-card-tags">
                         <span className="support-service-category">
                           {
-                            service.category ||
-                            service.databaseCategory
+                            categoryLabel(service.category || service.databaseCategory)
                           }
                         </span>
 
@@ -446,6 +447,7 @@ function SupportServices() {
                           </span>
                         )}
                       </div>
+
 
                       <span className="support-service-location">
                         ◎ {service.city}
@@ -556,7 +558,7 @@ function SupportServices() {
                       </span>
 
                       <strong>
-                        {service.status}
+                        {t.supportDirectory?.statusLabels?.[service.status]||service.status}
                       </strong>
                     </div>
                   </article>
@@ -650,7 +652,7 @@ function SupportServices() {
                     </span>
 
                     <h3>
-                      {item}
+                      {categoryLabel(item)}
                     </h3>
 
                     <strong>
@@ -686,27 +688,27 @@ function SupportServices() {
 
             <div className="support-admin-fields">
               <span>
-                {ss.adminProvider || "Provider"}
+                {ss.adminFieldProvider || "Provider"}
               </span>
 
               <span>
-                {ss.adminCategory || "Category"}
+                {ss.adminFieldCategory || "Category"}
               </span>
 
               <span>
-                {ss.adminLocation || "Location"}
+                {ss.adminFieldLocation || "Location"}
               </span>
 
               <span>
-                {ss.adminContact || "Contact"}
+                {ss.adminFieldContact || "Contact"}
               </span>
 
               <span>
-                {ss.adminVerification || "Verification"}
+                {ss.adminFieldVerification || "Verification"}
               </span>
 
               <span>
-                {ss.adminStatus || "Publication status"}
+                {ss.adminFieldStatus || "Publication status"}
               </span>
             </div>
           </div>
@@ -730,11 +732,11 @@ function SupportServices() {
               </strong>
 
               <p>
-                {ss.disclaimerP1 || "Dementia Care Connect provides information and navigation to external providers. Inclusion in this directory does not constitute endorsement, recommendation or guarantee by RCBC."}
+                {ss.disclaimerText || "Dementia Care Connect provides information and navigation to external providers. Inclusion in this directory does not constitute endorsement, recommendation or guarantee by RCBC."}
               </p>
 
               <p>
-                {ss.disclaimerP2 || "Provider information should be verified and periodically reviewed before public publication."}
+                {ss.disclaimerSubText || "Provider information should be verified and periodically reviewed before public publication."}
               </p>
             </div>
           </div>

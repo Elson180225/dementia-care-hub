@@ -1,5 +1,6 @@
+import {teachingPermission} from "../../../shared/trainer-governance";
 import UploadField from "../UploadField";
-import {validateEventPricing} from "../../../shared/event-registration";
+import {validateEventPricing,normaliseRegistrationType} from "../../../shared/event-registration";
 import { Link } from "react-router-dom";
 import { useEffect, useMemo, useState } from "react";
 import { useTrainer } from "../TrainerContext";
@@ -7,6 +8,7 @@ import { ACTIVITY_TYPES, LANGUAGES, MODES, STATUS_LABEL } from "../constants";
 import { fmtDate } from "../selectors";
 import { Field, StatusChip, describe } from "../ui";
 import EventCard from "../EventCard";
+import EventPriceLabel from "../../components/EventPriceLabel";
 import TrainerDisclaimer from "../../components/TrainerDisclaimer";
 
 const ALL_ADMIN_TYPES = [
@@ -160,6 +162,7 @@ export default function Activities({
             values: {
               ...Object.fromEntries(Object.keys(blank).map((k) => [k, a[k] ?? ""])),
               status: a.status || "published",
+              registrationType: normaliseRegistrationType(a.registrationType),
             },
           }
         : { values: { ...blank, status: admin ? "published" : "draft", ...(defaultValues || {}) } }
@@ -383,14 +386,15 @@ export default function Activities({
             />
           </Field>
 
-          {admin&&<label className="tp-field">Physical Education programme (optional)<select disabled={Boolean(programmeId)} value={editing.values.programmeId||''} onChange={e=>setEditing({...editing,values:{...editing.values,programmeId:e.target.value}})}><option value="">Standalone event — no programme</option>{programmes.map(p=><option key={p.id} value={p.id}>{p.code||p.title} — {p.title}</option>)}</select><small>Link this dated intake to a programme so visitors can register from its overview page.</small></label>}
-          {admin&&<fieldset className="tp-field"><legend>Registration</legend><label htmlFor="registrationType">Free or paid (required)</label><select id="registrationType" value={editing.values.registrationType||''} aria-invalid={!!errors.registrationType} onChange={e=>setEditing({...editing,values:{...editing.values,registrationType:e.target.value,...(e.target.value==='free-online'?{registrationFee:'',paymentInstructions:''}:{})}})}><option value="">Choose event type</option><option value="free-online">Free online webinar</option><option value="paid-in-person">Paid in-person programme</option></select>{errors.registrationType&&<p className="tp-error">{errors.registrationType}</p>}{editing.values.registrationType==='paid-in-person'?<><label>Fee description<input maxLength={100} value={editing.values.registrationFee||''} onChange={e=>setEditing({...editing,values:{...editing.values,registrationFee:e.target.value}})}/></label><label>Payment instructions<textarea maxLength={4000} value={editing.values.paymentInstructions||''} onChange={e=>setEditing({...editing,values:{...editing.values,paymentInstructions:e.target.value}})}/></label></>:<p>Free — no payment required.</p>}<label>Registration method<select value={editing.values.registrationMethod||'closed'} onChange={e=>setEditing({...editing,values:{...editing.values,registrationMethod:e.target.value}})}><option value="closed">Registration closed</option><option value="google">Google Form</option><option value="website">Website registration</option></select></label>{editing.values.registrationMethod==='google'&&<label>Google Form link (required)<input type="url" value={editing.values.registrationGoogleUrl||''} onChange={e=>setEditing({...editing,values:{...editing.values,registrationGoogleUrl:e.target.value}})}/></label>}{editing.values.registrationMethod==='website'&&<><p>Visitors register directly on the website. No external link or account is required.</p>{[['registrationPhone','Require phone number'],['registrationNotes','Allow optional notes']].map(([key,label])=><label key={key}><span><input type="checkbox" checked={!!editing.values[key]} onChange={e=>setEditing({...editing,values:{...editing.values,[key]:e.target.checked}})}/> {label}</span></label>)}</>}<label>General registration instructions (optional)<textarea maxLength={4000} value={editing.values.registrationInstructions||''} onChange={e=>setEditing({...editing,values:{...editing.values,registrationInstructions:e.target.value}})}/></label><small>Changing the registration method affects new submissions only. Existing participant records are preserved. Paid bookings require RCBC payment verification.</small></fieldset>}
+          {admin&&<label className="tp-field">Physical Education programme (optional)<select disabled={Boolean(programmeId)} value={editing.values.programmeId||''} onChange={e=>setEditing({...editing,values:{...editing.values,programmeId:e.target.value}})}><option value="">Standalone event — no programme</option>{programmes.map(p=><option key={p.id} value={p.id} disabled={!teachingPermission(p,editing.values)}>{p.code||p.title} — {p.title}</option>)}</select><small>Link this dated intake to a programme so visitors can register from its overview page.</small></label>}
+          {admin&&<fieldset className="tp-field"><legend>Registration</legend><label htmlFor="registrationType">Registration fee (required)</label><select id="registrationType" value={editing.values.registrationType||''} aria-invalid={!!errors.registrationType} onChange={e=>setEditing({...editing,values:{...editing.values,registrationType:e.target.value,...(e.target.value==='free'?{registrationFee:'',paymentInstructions:''}:{})}})}><option value="">Choose Free or Paid</option><option value="free">Free — no payment required</option><option value="paid">Paid — payment required</option></select>{errors.registrationType&&<p className="tp-error">{errors.registrationType}</p>}{editing.values.registrationType==='paid'?<><label>Fee description<input maxLength={100} value={editing.values.registrationFee||''} onChange={e=>setEditing({...editing,values:{...editing.values,registrationFee:e.target.value}})}/></label><label>Payment instructions<textarea maxLength={4000} value={editing.values.paymentInstructions||''} onChange={e=>setEditing({...editing,values:{...editing.values,paymentInstructions:e.target.value}})}/></label></>:<p>{editing.values.registrationType==='free'?'Free — no payment required, for either online or physical delivery.':'Choose whether participants need to pay.'}</p>}<label>Registration method<select value={editing.values.registrationMethod||'closed'} onChange={e=>setEditing({...editing,values:{...editing.values,registrationMethod:e.target.value}})}><option value="closed">Registration closed</option><option value="google">Google Form</option><option value="website">Website registration</option></select></label>{editing.values.registrationMethod==='google'&&<label>Google Form link (required) — include a required WhatsApp number and optional questions / notes<input type="url" value={editing.values.registrationGoogleUrl||''} onChange={e=>setEditing({...editing,values:{...editing.values,registrationGoogleUrl:e.target.value}})}/></label>}{editing.values.registrationMethod==='website'&&<><p>Visitors register directly on the website. No external link or account is required.</p><p>A WhatsApp phone number is required. Optional questions / notes are always available.</p></>}<label>General registration instructions (optional)<textarea maxLength={4000} value={editing.values.registrationInstructions||''} onChange={e=>setEditing({...editing,values:{...editing.values,registrationInstructions:e.target.value}})}/></label><small>Changing the registration method affects new submissions only. Existing participant records are preserved. Paid bookings require RCBC payment verification.</small></fieldset>}
           {!admin&&input("registrationLink", "External registration link (optional)", {
             type: "url",
             placeholder: "https://forms.google.com/...",
             hint: "Google Form or external ticketing URL. If blank, 'Registration coming soon' is shown.",
           })}
 
+          {input("teachingModule","Teaching module (when restricted)",{hint:"Use the module name recorded in the assigned trainer’s approved teaching permissions."})}
           {input("plannedHours", "Planned contribution hours", { type: "number", min: "0", step: "0.5" })}
 
           <fieldset className="tp-field">
@@ -411,7 +415,7 @@ export default function Activities({
                 >
                   {availableTrainers.map((p) => (
                     <option key={p.id} value={p.id}>
-                      {p.name} ({p.city || "Sarawak"})
+                      {p.name} ({p.city || "Sarawak"}){!teachingPermission(p,editing.values)?" — not approved for this scope":""}
                     </option>
                   ))}
                 </select>
@@ -477,7 +481,7 @@ export default function Activities({
             type: "datetime-local",
             hint: "Optional. Once this date passes, the public card displays 'Registration Closed' and disables registration.",
           })}
-          {input("capacity", "Seat Capacity (optional)", {
+          {input("capacity", "Planned capacity (advisory, optional)", {
             type: "number",
             min: "1",
             step: "1",
@@ -493,7 +497,7 @@ export default function Activities({
             onChange={(posterUrl) => setEditing({ ...editing, values: { ...v, posterUrl } })}
           />
 
-          {admin&&<aside className="tp-card" aria-label="Intake preview"><h3>Public intake preview</h3><h4>{v.title||"Intake title"}</h4><p>{v.date||"Choose a date"} · {v.venue||"Venue to be confirmed"} {v.city}</p><p>{v.registrationType==="paid-in-person"?v.registrationFee||"Fee to be confirmed":"Free online webinar"}</p><p>{v.registrationMethod==="website"?"Register directly on the website":v.registrationMethod==="google"?"Register through Google Form":"Registration closed"}</p><p>Paid submissions require RCBC payment verification and approval. This preview does not create a booking.</p></aside>}
+          {admin&&<aside className="tp-card" aria-label="Intake preview"><h3>Public intake preview</h3><h4>{v.title||"Intake title"}</h4><p>{v.date||"Choose a date"} · {v.venue||"Venue to be confirmed"} {v.city}</p><p>{v.registrationType?<EventPriceLabel event={{mode:v.mode,registration_settings:{paid:v.registrationType==="paid",fee:v.registrationFee}}}/>:"Choose Free or Paid to preview pricing"}</p><p>{v.registrationMethod==="website"?"Register directly on the website":v.registrationMethod==="google"?"Register through Google Form":"Registration closed"}</p><p>Paid submissions require RCBC payment verification and approval. This preview does not create a booking.</p></aside>}
           <div className="tp-actions" style={{ marginTop: "1.5rem" }}>
             {admin ? (
               <>

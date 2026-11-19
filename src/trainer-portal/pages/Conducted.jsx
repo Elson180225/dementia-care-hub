@@ -23,7 +23,8 @@ export default function Conducted({admin=false}) {
     setValues({
       venue: a.completion.venue ?? a.venue,
       participants: a.completion.participants ?? "",
-      hours: a.completion.hours || a.plannedHours,
+      hours: a.completion.eventHours || a.plannedHours,
+      trainerHours:Object.fromEntries((a.trainers||[]).map(t=>[t.trainerId,a.completion.trainerHours?.[t.trainerId]??a.completion.eventHours??a.plannedHours])),
       photos: a.completion.photos || [],
     });
   }
@@ -64,10 +65,11 @@ export default function Conducted({admin=false}) {
                   <input id="participants" name="participants" type="number" min="0" value={values.participants} onChange={change}
                     aria-invalid={Boolean(errors.participants)} aria-describedby={describe("participants", errors.participants)} />
                 </Field>
-                <Field id="hours" label="Actual contribution hours" error={errors.hours}>
+                <Field id="hours" label="Actual event duration (hours)" error={errors.hours}>
                   <input id="hours" name="hours" type="number" min="0" step="0.5" value={values.hours} onChange={change}
                     aria-invalid={Boolean(errors.hours)} aria-describedby={describe("hours", errors.hours)} />
                 </Field>
+                <fieldset><legend>Individual trainer contribution hours</legend><p>Suggested from the event duration. Record each person's actual contribution; RCBC verifies these figures.</p>{(eligible.find(a=>a.id===openId)?.trainers||[]).map(t=><label key={t.trainerId}>{t.name||state.profiles.find(p=>p.id===t.trainerId)?.name||'Assigned trainer'} — {t.role}<input type="number" min="0" step="0.5" value={values.trainerHours[t.trainerId]} onChange={e=>setValues({...values,trainerHours:{...values.trainerHours,[t.trainerId]:e.target.value}})}/></label>)}</fieldset>
                 <UploadField onBusyChange={uploadBusy} label="Activity photos" kind="activity-photo" value={values.photos} onChange={photos=>setValues({...values,photos})} multiple/>
                 <div className="tp-actions">
                   <button type="button" className="tp-btn" disabled={uploading>0} onClick={submit}>Submit for verification</button>

@@ -1,8 +1,11 @@
 import {useEffect,useId,useRef} from 'react';
+import {useLanguage} from '../i18n/LanguageContext';
 import {createPortal} from 'react-dom';
 import {lockDialogScroll} from './dialogScroll';
 
 export default function RegistrationDialog({title,busy,onClose,children,id}){
+ const {t}=useLanguage();
+ const text=t.learnEvents.registrationCopy;
  const root=useRef(null),close=useRef(onClose),working=useRef(busy),titleId=useId();
  useEffect(()=>{close.current=onClose;working.current=busy;},[onClose,busy]);
  useEffect(()=>{
@@ -30,7 +33,7 @@ export default function RegistrationDialog({title,busy,onClose,children,id}){
  },[]);
  return createPortal(<div className="registration-window-backdrop" onMouseDown={e=>{if(e.target===e.currentTarget&&!busy)onClose();}}>
   <section id={id} ref={root} className="registration-window event-registration" role="dialog" aria-modal="true" aria-labelledby={titleId} aria-busy={busy} tabIndex={-1}>
-   <header className="registration-window-header"><div><span className="registration-eyebrow">Event registration</span><h2 id={titleId}>Complete your registration</h2><p>{title}</p></div><button type="button" className="registration-window-close" onClick={onClose} disabled={busy} aria-label="Close registration form">×</button></header>
+   <header className="registration-window-header"><div><span className="registration-eyebrow">{text.dialogEyebrow}</span><h2 id={titleId}>{text.dialogTitle}</h2><p>{title}</p></div><button type="button" className="registration-window-close" onClick={onClose} disabled={busy} aria-label={text.dialogClose}>×</button></header>
    <div className="registration-window-body">{children}</div>
   </section>
  </div>,document.body);

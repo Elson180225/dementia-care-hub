@@ -15,7 +15,7 @@ export function translationPage(key){
  const [root,section]=key.split('/');
  if(['cms','activities','registration'].includes(root))return 'education';
  if(root==='records')return 'resources';
- return {home:'home',statistics:'home',understandDementia:'understanding',learnEvents:'education',findHelp:'help',assessmentHealthcare:'help',supportServicesPage:'help',governmentFinancialPage:'help',equipmentPracticalPage:'help',resourceFinderPage:'help',caregiverSupport:'caregiver',aboutProject:'about',contact:'contact',projectServices:'updates',faq:'resources',publishedRecords:'resources'}[section]||'shared';
+ return {home:'home',statistics:'home',understandDementia:'understanding',learnEvents:'education',findHelp:'help',assessmentHealthcare:'help',supportDirectory:'help',supportServicesPage:'help',governmentFinancialPage:'help',equipmentPracticalPage:'help',resourceFinderPage:'help',caregiverSupport:'caregiver',aboutProject:'about',contact:'contact',projectServices:'updates',faq:'resources',publishedRecords:'resources'}[section]||'shared';
 }
 export function friendlyField(key,sources={}){
  const parts=key.split('/').map(decodeURIComponent),field=parts.at(-1);

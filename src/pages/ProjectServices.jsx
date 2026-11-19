@@ -74,8 +74,8 @@ export default function ProjectServices({ certificate = false }) {
                   <Field id="updates-city" label={ps.city || 'City'} required><input id="updates-city" name="city" required /></Field>
                   <Field id="updates-state" label={ps.state || 'State'} required><input id="updates-state" name="state" required /></Field>
                   <Field id="updates-language" label={ps.preferredLanguage || 'Preferred language'} required><select required id="updates-language" name="language">
-                      {langOptions.map((x) => (
-                        <option key={x}>{x}</option>
+                      {['English','Bahasa Malaysia','Chinese'].map((x,index) => (
+                        <option key={x} value={x}>{langOptions[index]||x}</option>
                       ))}
                     </select></Field>
                   <p>

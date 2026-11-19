@@ -5,7 +5,7 @@ import SearchOverlay from "../Search/SearchOverlay";
 import { useLanguage } from "../../i18n/LanguageContext";
 import "./Header.css";
 
-function getMenuItems(m) {
+function getMenuItems(m,u) {
   return [
     {
       label: m.understand,
@@ -13,15 +13,15 @@ function getMenuItems(m) {
       children: [
         // RCBC reading order. Keep the basics first so visitors have context.
         // New labels stay in English until RCBC approves translations.
-        { label: "The Basics", path: "/understand-dementia#overview" },
-        { label: "Normal Ageing", path: "/understand-dementia#normal-ageing" },
-        { label: "Concerning Changes", path: "/understand-dementia#changes-to-watch" },
-        { label: "Early Signs", path: "/understand-dementia#early-signs" },
-        { label: "Self-Assessment", path: "/understand-dementia#self-check" },
-        { label: "Professional Assessment", path: "/understand-dementia#medical-advice" },
-        { label: "Further Care", path: "/understand-dementia#further-care" },
-        { label: "Healthy & Active Living", path: "/understand-dementia#healthy-living" },
-        { label: "FAQs", path: "/understand-dementia#understand-faq" },
+        { label: u.basics, path: "/understand-dementia#overview" },
+        { label: u.reviewCopy.normalTitle, path: "/understand-dementia#normal-ageing" },
+        { label: u.reviewCopy.changesTitle, path: "/understand-dementia#changes-to-watch" },
+        { label: u.reviewCopy.earlyTitle, path: "/understand-dementia#early-signs" },
+        { label: u.reviewCopy.selfCheckTitle, path: "/understand-dementia#self-check" },
+        { label: u.reviewCopy.professionalTitle, path: "/understand-dementia#medical-advice" },
+        { label: u.reviewCopy.furtherTitle, path: "/understand-dementia#further-care" },
+        { label: u.healthyTitle, path: "/understand-dementia#healthy-living" },
+        { label: u.faq, path: "/understand-dementia#understand-faq" },
       ],
     },
     {
@@ -408,7 +408,7 @@ function Header() {
     setOpenMenu(null);
   };
 
-  const menuItems = getMenuItems(t.header.menu);
+  const menuItems = getMenuItems(t.header.menu,t.understandDementia);
 
   return (
     <>

@@ -30,17 +30,17 @@ export default function Contribution() {
     const year = new Date(a.date).getFullYear();
     acc[year] ??= { activities: 0, hours: 0, participants: 0 };
     acc[year].activities += 1;
-    acc[year].hours += Number(a.completion.hours || 0);
+    acc[year].hours += (a.trainers||[]).reduce((total,t)=>total+Number(t.hours||0),0);
     acc[year].participants += Number(a.completion.participants || 0);
     return acc;
   }, {});
 
-  const trainerRows=rows.flatMap(a=>(a.trainers || []).map(t=>({...a,trainerId:t.trainerId,trainerName:state.profiles.find(p=>p.id===t.trainerId)?.name || t.trainerId,role:t.role})));
+  const trainerRows=rows.flatMap(a=>(a.trainers || []).map(t=>({...a,trainerId:t.trainerId,trainerName:state.profiles.find(p=>p.id===t.trainerId)?.name || t.trainerId,role:t.role,individualHours:Number(t.hours||0)})));
   function exportCsv() {
     const head = ["Year", "Trainer", "Activity", "Role", "Hours", "Participants"];
     const body = trainerRows.map((a) => [
       new Date(a.date).getFullYear(), a.trainerName, a.title, a.role,
-      a.completion.hours, a.completion.participants,
+      a.individualHours, a.completion.participants,
     ]);
     download("trainer-contribution.csv", toCsv([head, ...body]));
   }
@@ -77,7 +77,7 @@ export default function Contribution() {
                 <td>{a.trainerName}</td>
                 <td>{a.title}</td>
                 <td>{a.role}</td>
-                <td>{a.completion.hours}</td>
+                <td>{a.individualHours}</td>
                 <td>{a.completion.participants}</td>
               </tr>
             ))}

@@ -24,7 +24,7 @@ export default function MyProfile() {
   const uploadBusy=busy=>setUploading(n=>n+(busy?1:-1));
   const { profile } = state;
   const fromProfile = (p) => ({
-    city: p.city || "", language: p.language || "English", shortProfile: p.shortProfile || "",
+    name:p.name||"",contactEmail:p.contact_email||"",contactPhone:p.contact_phone||"",city: p.city || "", language: p.language || "English", shortProfile: p.shortProfile || "",
     qualifications: p.qualifications || "", experience: p.experience || "",
     certificateEvidenceUrl: p.certificateEvidenceUrl || "",
     photoUrl: p.photoUrl || "", supportingDocuments: p.supportingDocuments || [],
@@ -51,7 +51,7 @@ export default function MyProfile() {
     }
     if (!await dispatch({ type: "PROFILE_SAVE", values })) return;
     setEditing(false);
-    setMessage("Profile saved.");
+    setMessage("Profile submitted for RCBC review. Your previously approved public profile remains visible.");
   }
 
   const initials = (profile.name || "?").split(" ").map((w) => w[0]).join("").slice(0, 2).toUpperCase();
@@ -59,6 +59,7 @@ export default function MyProfile() {
   return (
     <>
       <h1>My profile</h1>
+      {profile.status==="submitted"&&<p className="tp-note" role="status">Profile changes are awaiting RCBC review. The previous approved public version remains visible.</p>}{profile.status==="returned"&&<p className="tp-note" role="status">Returned for amendment: {profile.adminComment}</p>}
       {message && <p className="tp-note" role="status">{message}</p>}
       {!editing ? (
         <section className="tp-card">
@@ -92,6 +93,7 @@ export default function MyProfile() {
       ) : (
         <form className="tp-card" onSubmit={save} noValidate>
           <h2>{profile.status === "approved" ? "Edit your profile" : "Complete your profile"}</h2>
+          <p>Changes are submitted for approval. RCBC controls verified information and public contact visibility.</p><Field id="profile-name" label="Name"><input id="profile-name" name="name" value={values.name} onChange={change}/></Field><Field id="contact-email" label="Contact email"><input id="contact-email" name="contactEmail" type="email" value={values.contactEmail} onChange={change}/></Field><Field id="contact-phone" label="Contact phone"><input id="contact-phone" name="contactPhone" value={values.contactPhone} onChange={change}/></Field>
           <Field id="city" label="City / Location (required)">
             <input id="city" name="city" value={values.city} onChange={change} />
           </Field>
@@ -113,7 +115,7 @@ export default function MyProfile() {
           <UploadField onBusyChange={uploadBusy} label="Certificate image or PDF (private, optional)" kind="document" value={values.certificateEvidenceUrl} onChange={certificateEvidenceUrl=>setValues({...values,certificateEvidenceUrl})} help="Upload a clear certificate photo or PDF matching your reference. Only you and RCBC administrators can access it."/>
           <UploadField onBusyChange={uploadBusy} label="Supporting documents (private)" kind="document" value={values.supportingDocuments} onChange={supportingDocuments=>setValues({...values,supportingDocuments})} multiple />
           <div className="mp-actions">
-            <button className="tp-btn" disabled={uploading > 0}>Save profile</button>
+            <button className="tp-btn" disabled={uploading > 0}>Submit profile for review</button>
             {profile.status === "approved" && (
               <button type="button" className="tp-btn tp-btn-ghost" disabled={uploading > 0} onClick={() => { setEditing(false); setMessage(""); }}>Cancel</button>
             )}
@@ -127,8 +129,8 @@ export default function MyProfile() {
           <dt>Assessment</dt><dd>{ASSESSMENT_LABEL[profile.assessment_status] ?? "Not assessed yet"}</dd>
           <dt>Assessment notes</dt><dd>{profile.assessment_result || "Not recorded"}</dd>
           <dt>Healthcare professional</dt><dd>{profile.healthcare_professional == null ? "Not recorded" : profile.healthcare_professional ? "Yes" : "No"}</dd>
-          <dt>Teaching eligibility</dt><dd>{teachingEligibility(profile.assessment_status, profile.healthcare_professional)}</dd>
-          <dt>Independent teaching scope</dt><dd>{profile.independent_teaching_scope || "Not recorded"}</dd>
+          <dt>Teaching eligibility</dt><dd>{teachingEligibility(profile.assessment_status, profile.healthcare_professional,profile.teaching_allowed)}</dd>
+          <dt>Permitted programmes / modules</dt><dd>{profile.teaching_allowed?(profile.teaching_permissions||[]).map(p=><p key={p.scope}>{p.scope}{p.modules.length?': '+p.modules.join(', '):''}</p>):'Not approved'}</dd><dt>Teaching conditions</dt><dd>{profile.independent_teaching_scope || "Not recorded"}</dd>
           <dt>Certificate evidence (private)</dt><dd>{profile.certificateEvidenceUrl ? <a href={profile.certificateEvidenceUrl} target="_blank" rel="noreferrer">Open certificate image or PDF</a> : "Not uploaded"}</dd>
           <dt>Certificate number</dt><dd>{profile.certificateRef}</dd>
         </dl>
