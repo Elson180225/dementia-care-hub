@@ -49,19 +49,14 @@ import adfmPoster from "../assets/Certified_Trainer_Webinar/ADFM_Certified_Train
 import facilitatorInfo from "../assets/Certified_Trainer_Webinar/Facilitator_Certified_ADFM_Trainer/Facilitator_Information.jpg";
 
 import {
-  activities as defaultActivities,
-  trainers as defaultTrainers,
   pageInfo,
   sectionOrder,
   pathFor,
-  physicalProgrammes,
-  learningResources,
   activityTypes,
   modes,
   cities,
   languages,
 } from "../data/learn-events-data";
-import defaultCmsContent from "../../shared/learn-events-content.json";
 import "./LearnEvents.css";
 
 function formatActivityDate(val) { return val ? eventDate(val) : ''; }
@@ -81,13 +76,15 @@ function isEventClosed(event) {
 
 function usePublicActivities() {
   const {translateContent}=useLanguage();
-  const [rows, setRows] = useState(defaultActivities);
+  const [rows, setRows] = useState([]);
+  const [loadError,setLoadError]=useState('');
   useEffect(() => {
     let active = true;
     fetch('/api/activities')
       .then(r => { if (!r.ok) throw new Error('Activities unavailable'); return r.json(); })
       .then(data => {
-        if (active && Array.isArray(data) && data.length > 0) {
+        if(!Array.isArray(data))throw new Error('Invalid event response');
+        if (active) {
           setRows(data.map(a => {
             const isCancelled = Boolean(a.cancelled_at);
             const isCompleted = ['completed', 'verified', 'archived'].includes(a.status);
@@ -134,18 +131,20 @@ function usePublicActivities() {
           }));
         }
       })
-      .catch(() => { });
+      .catch(() => { if(active)setLoadError('Unable to load events. Please refresh to try again.'); });
     return () => { active = false; };
   }, []);
-  return translateContent(rows,'activities').map(row=>{
+  const result=translateContent(rows,'activities').map(row=>{
     const location=row.mode==='Online'?'Online':row.venue&&row.city&&!row.venue.toLowerCase().includes(row.city.toLowerCase())?row.venue+', '+row.city:row.venue||row.city||row.location;
     return {...row,suitableFor:row.audience||row.suitableFor,location,fullLocation:location};
   });
+  result.loadError=loadError;
+  return result;
 }
 
 function useLearnEventsContent() {
   const {translateContent}=useLanguage();
-  const [content, setContent] = useState(defaultCmsContent);
+  const [content, setContent] = useState({});
   useEffect(() => {
     let active = true;
     const refresh = () => fetch('/api/public/learn-events-content', {cache:'no-store'})
@@ -155,7 +154,7 @@ function useLearnEventsContent() {
           setContent(data);
         }
       })
-      .catch(() => { });
+      .catch(() => { if(active)setContent({_loadError:'Unable to load page content. Please refresh to try again.'}); });
     refresh();
     window.addEventListener('focus',refresh);
     return () => { active = false; window.removeEventListener('focus',refresh); };
@@ -201,38 +200,6 @@ const imageMap = {
   "Adelaide-Beach-volunteers": beachImage,
 };
 
-const onlineWebinars = [
-  { id: "webinar-alzheimers-101", title: "Alzheimer's 101: Eye-opening facts", type: "RCBC Webinar", status: "completed", date: "15 Mar 2024", rawDate: "2024-03-15T09:00:00+08:00", mode: "Online", language: "English", description: "A public introduction to Alzheimer’s disease and the facts families should know.", poster: alzheimers101Poster },
-  { id: "webinar-awareness", title: "Alzheimer's Awareness Webinar", type: "RCBC Webinar", status: "completed", date: "18 May 2024", rawDate: "2024-05-18T10:00:00+08:00", mode: "Online", language: "English", description: "An accessible session for building awareness and understanding in the community.", poster: awarenessPoster },
-  { id: "webinar-early-detection", title: "Early Detection & Monitoring of Dementia", type: "RCBC Webinar", status: "completed", date: "20 Jul 2024", rawDate: "2024-07-20T14:00:00+08:00", mode: "Online", language: "中文", description: "Information about recognising changes early and discussing concerns with a healthcare professional.", poster: earlyDetectionPoster },
-  { id: "webinar-wellness", title: "Embracing Wellness: Ageing with Dignity in Sarawak", type: "RCBC Webinar", status: "completed", date: "21 Sep 2024", rawDate: "2024-09-21T10:00:00+08:00", mode: "Online", language: "English", description: "A conversation about wellbeing, dignity, and support as people age.", poster: wellnessPoster },
-  { id: "webinar-care", title: "Essential Care: Practical Tips for Alzheimer’s Caregivers", type: "RCBC Webinar", status: "completed", date: "16 Nov 2024", rawDate: "2024-11-16T10:00:00+08:00", mode: "Online", language: "English", description: "Practical ideas for caregivers supporting everyday routines and care needs.", poster: caregiverPoster },
-  { id: "webinar-women", title: "Peranan Wanita Dalam Penjagaan Alzheimer", type: "RCBC Webinar", status: "completed", date: "18 Jan 2025", rawDate: "2025-01-18T10:00:00+08:00", mode: "Online", language: "Bahasa Melayu", description: "A Malay-language conversation about women’s roles and experiences in Alzheimer’s care.", poster: womenCarePoster },
-  { id: "webinar-safe-home", title: "Safe Space: Adapting the Home for Alzheimer’s Care", type: "RCBC Webinar", status: "completed", date: "15 Mar 2025", rawDate: "2025-03-15T10:00:00+08:00", mode: "Online", language: "English", description: "Ideas for making everyday home environments safer and more supportive.", poster: safeHomePoster },
-  { id: "webinar-decisions", title: "Making the Most Suitable Decision", type: "RCBC Webinar", status: "completed", date: "17 May 2025", rawDate: "2025-05-17T10:00:00+08:00", mode: "Online", language: "English", description: "A reflective session about making informed care decisions with families.", poster: decisionPoster },
-  { id: "webinar-cataracts", title: "A Practical Webinar on Cataracts", type: "RCBC Webinar", status: "completed", date: "19 Jul 2025", rawDate: "2025-07-19T10:00:00+08:00", mode: "Online", language: "English", description: "A practical health education session on cataracts and ageing.", poster: cataractsPoster },
-  { id: "webinar-tooth-loss", title: "Is Tooth Loss Really Part of Getting Older?", type: "RCBC Webinar", status: "completed", date: "20 Sep 2025", rawDate: "2025-09-20T10:00:00+08:00", mode: "Online", language: "English", description: "A public education session about oral health and ageing.", poster: toothLossPoster },
-  { id: "webinar-osteoporosis", title: "Silent but Serious: Understanding Osteoporosis", type: "RCBC Webinar", status: "completed", date: "15 Nov 2025", rawDate: "2025-11-15T10:00:00+08:00", mode: "Online", language: "English", description: "An educational session about osteoporosis prevention and awareness.", poster: osteoporosisPoster },
-];
-
-const trainerWebinars = [
-  {
-    id: "trainer-dcs-family",
-    title: "Basic Dementia Care Skill (Family) Course — DCS-Family Online Webinar",
-    type: "CT Webinar",
-    status: "upcoming",
-    date: "16 May 2026",
-    time: "9:00 AM – 1:00 PM",
-    mode: "Online",
-    location: "Online",
-    venue: "Online",
-    city: "Online",
-    language: "English / Bahasa Melayu / 中文",
-    description: "Online Foundation Dementia Care Course for family caregivers delivered by ADFM-Certified Trainers covering core person-centred care modules.",
-    poster: dcsFamilyPoster,
-  },
-];
-
 const qaResources = [
   { title: "Oral Health Webinar Q&A", language: "English", image: oralHealthQa, pages: 14, images: [oralHealthQa] },
   { title: "Prevention & Early Detection Q&A", language: "中文", image: preventionQa, pages: 5, images: [preventionQa] },
@@ -258,65 +225,6 @@ qaResources[1].images = getQaImages("Prevention&Early Detection (Chinese)", qaRe
 qaResources[2].images = getQaImages("Understanding the Missing Pieces", qaResources[2].images);
 qaResources.forEach(resource => { resource.pages = resource.images.length; });
 
-const plannedTopicsList = [
-  {
-    id: "topic-webinar-season-1-2026",
-    month: "APR",
-    day: "11",
-    year: "2026",
-    title: "Webinar – Season 1 (Alzheimer's Care Project)",
-    date: "11 Apr 2026",
-    time: "80 minutes",
-    mode: "Online",
-    location: "Online",
-    language: "English / Bahasa Melayu",
-    speaker: "RCBC & ADFM Specialists",
-    suitableFor: "General public, families and caregivers",
-    description: "Opening online education webinar for the 2026 Season under the Alzheimer's Care Project 'Finding the Missing Pieces'. Conducted primarily in English with Bahasa Malaysia support provided where appropriate.",
-    image: webinarImage,
-    poster: webinarImage,
-    type: "RCBC Webinar",
-    status: "upcoming",
-  },
-  {
-    id: "topic-dcs-family-2026",
-    month: "MAY",
-    day: "16",
-    year: "2026",
-    title: "Basic Dementia Care Skill (Family) Course — DCS-Family",
-    date: "16 May 2026",
-    time: "9:00 AM – 6:00 PM",
-    mode: "Physical",
-    location: "Hock Lee Hotel & Residence, Kuching",
-    language: "English / Bahasa Melayu / 中文",
-    speaker: "12 ADFM-Certified Trainers & Advisory Specialists",
-    suitableFor: "Family caregivers, community helpers, and those interested in dementia care",
-    description: "Foundation Dementia Care Course covering 6 core modules: Basic DCS, Person-Centred Care, Effective Communication, BPSD, Meaningful Activities, and Advance Care Planning. Limited to 100 seats only.",
-    image: dcsFamilyPoster,
-    poster: dcsFamilyPoster,
-    type: "DCS-Family",
-    status: "upcoming",
-  },
-  {
-    id: "topic-dcs-ttt-2026",
-    month: "JUN",
-    day: "26",
-    year: "2026",
-    title: "Dementia Care Skill – Train the Trainer Program — DCS-TTT",
-    date: "26 Jun 2026",
-    time: "9:00 AM – 5:00 PM (3-Day Program, 26–28 Jun 2026)",
-    mode: "Physical",
-    location: "Kuching",
-    language: "English / Bahasa Melayu",
-    speaker: "Dr. Tiong Ing Khieng & ADFM Training Team",
-    suitableFor: "Healthcare professionals, nurses, therapists, community educators",
-    description: "3-day Train-the-Trainer program in Kuching to train and certify healthcare educators and community champions across Sarawak under ADFM credentialing.",
-    image: adfmPoster,
-    poster: adfmPoster,
-    type: "DCS-TTT",
-    status: "upcoming",
-  },
-];
 
 /* ---- status badge ---- */
 function StatusBadge({ status }) {
@@ -732,8 +640,8 @@ function OnlineEducation() {
   const cmsContent = useLearnEventsContent();
   const onlineCms = cmsContent.onlineEducation || {};
   const le = onlineHeadingText(t.learnEvents,onlineCms.sectionHeader,'en');
-  const upcomingTopics = orderWebinars((onlineCms.upcomingTopics ?? plannedTopicsList).map(topic => ({...topic,...topicDateFields(topic.dateISO || topic.date)})));
-  const approvedList = onlineCms.approvedResources ?? learningResources;
+  const upcomingTopics = orderWebinars((onlineCms.upcomingTopics ?? []).map(topic => ({...topic,...topicDateFields(topic.dateISO || topic.date)})));
+  const approvedList = onlineCms.approvedResources ?? [];
   const [selected, setSelected] = useState(null);
   const [selectedQa, setSelectedQa] = useState(null);
   const defaultFilters = { query: "", language: "All", timing: "All" };
@@ -750,16 +658,8 @@ function OnlineEducation() {
   const [resourcePage, setResourcePage] = useState(1);
   const [topicView, setTopicView] = useState("list");
 
-  const rcbcWebinars = [
-    ...activities.filter((item) => item.type === "RCBC Webinar" || (item.mode === "Online" && item.type !== "CT Webinar")),
-    ...(activities.some((item) => item.type === "RCBC Webinar") ? [] : onlineWebinars),
-  ];
-  const ctWebinars = [
-    ...activities.filter((item) => (item.type === "CT Webinar" || item.type === "DCS-Family") && item.mode === "Online"),
-    ...(activities.some((item) => (item.type === "CT Webinar" || item.type === "DCS-Family") && item.mode === "Online")
-      ? []
-      : trainerWebinars.filter((item) => item.mode === "Online")),
-  ];
+  const rcbcWebinars = activities.filter(item=>item.type==="RCBC Webinar"||(item.mode==="Online"&&item.type!=="CT Webinar"));
+  const ctWebinars = activities.filter(item=>(item.type==="CT Webinar"||item.type==="DCS-Family")&&item.mode==="Online");
   const archiveResources = approvedList.map((resource) => ({ ...resource, status: "completed" }));
 
   const publicResults = pageItems(orderWebinars(rcbcWebinars), publicFilters, publicPage);
@@ -768,6 +668,8 @@ function OnlineEducation() {
 
   return (
     <main className="module-main">
+      {cmsContent._loadError&&<p className="tp-note" role="alert">{cmsContent._loadError}</p>}
+      {activities.loadError&&<p className="tp-note" role="alert">{activities.loadError}</p>}
       {/* ---- RCBC Annual Webinar Series ---- */}
       <section className="content-section content-section-light">
         <div className="section-container">
@@ -1165,12 +1067,12 @@ function PhysicalEducation() {
     "dcs-care-worker": healthcareSupportImg,
   };
 
-  const programmes = (cmsContent.physicalEducation?.programmes && cmsContent.physicalEducation.programmes.length > 0)
-    ? cmsContent.physicalEducation.programmes
-    : physicalProgrammes;
+  const programmes = cmsContent.physicalEducation?.programmes || [];
 
   const activeTrack =
     programmes.find((p) => p.id === activeTrackId) || programmes[0];
+
+  if(!activeTrack)return <main className="module-main"><p className="tp-note" role={cmsContent._loadError?'alert':'status'}>{cmsContent._loadError||'No programmes are available at the moment.'}</p></main>;
 
   return (
     <main className="module-main physical-education-main">
@@ -1717,16 +1619,16 @@ function FacilitatorProfileModal({ facilitator, activities = [], onClose }) {
                     </div>
 
                     <div className="modal-act-right">
-                      {act.status === "upcoming" ? (
+                      {act.status === "upcoming" ? (publicLink(act.registrationLink)? (
                         <a
-                          href={act.registrationLink || "https://forms.google.com/"}
+                          href={publicLink(act.registrationLink)}
                           target="_blank"
                           rel="noreferrer"
                           className="modal-act-register-btn"
                         >
                           {am.registerNow || "Register Now"} ↗
                         </a>
-                      ) : (
+                      ):<span className="archived-pill">Registration not open yet</span>) : (
                         <div className="modal-act-archived-info">
                           <span className="archived-pill">{le?.completed || "Completed"}</span>
                           {act.materials && <small>{act.materials}</small>}
@@ -1790,116 +1692,7 @@ function EventsSection() {
   const [selectedActivity, setSelectedActivity] = useState(null);
   const [lightboxData, setLightboxData] = useState(null);
 
-  // Multi-calendar roadmap datasets
-  const roadmaps = [
-    {
-      id: "2026-half-1",
-      editionLabel: "2026 (1st Half)",
-      title: '1st Half Yearly Activity Calendar: "Finding The Missing Pieces"',
-      theme: "Finding The Missing Pieces",
-      period: "January 2026 – June 2026",
-      intro: "Official calendar published by Rotary Club of Bintulu Central and ADFM, featuring key public webinars and dementia care skills training.",
-      poster: yearlyCalendar2026Poster,
-      highlights: [
-        {
-          num: "01",
-          phase: "11 April 2026",
-          title: "Webinar – Season 1 (Online)",
-          desc: "Online interactive session (80 minutes) focusing on understanding dementia and finding the missing pieces of community care.",
-          tag: "Webinar",
-          dotClass: "dot-1",
-        },
-        {
-          num: "02",
-          phase: "16 May 2026",
-          title: "Basic Dementia Care Skill (Family) Course (DCS-Family)",
-          desc: "Full-day training (9:00 AM – 6:00 PM) at Hock Lee Hotel & Residence, Kuching, equipping 100 family caregivers with practical bedside care skills.",
-          tag: "Kuching",
-          dotClass: "dot-2",
-        },
-        {
-          num: "03",
-          phase: "26 – 28 June 2026",
-          title: "Dementia Care Skill – Train the Trainer Program (DCS-TTT)",
-          desc: "Three-day comprehensive Train-the-Trainer program in Kuching to expand the cadre of certified ADFM trainers across Sarawak.",
-          tag: "TTT Program",
-          dotClass: "dot-3",
-        },
-      ],
-    },
-    {
-      id: "2024-2025-ttt",
-      editionLabel: "2024–2025 Milestones",
-      title: 'DCS-TTT State-Wide Rollout: "68 Healthcare Workers Trained"',
-      theme: "Empowering Sarawak Healthcare Frontliners",
-      period: "November 2024 – November 2025",
-      intro: "Four completed cohorts of Dementia Care Skill Train-the-Trainer (DCS-TTT) programs across Sarawak documented in See Hua and Sin Chew Daily news.",
-      poster: yearlyCalendar2026Poster,
-      highlights: [
-        {
-          num: "01",
-          phase: "Nov 2024 & May 2025",
-          title: "Cohorts 1 & 2: Kuching & Sibu",
-          desc: "First 18 medical personnel trained in Kuching, followed by Cohort 2 in Sibu to build regional dementia care competence.",
-          tag: "Kuching & Sibu",
-          dotClass: "dot-1",
-        },
-        {
-          num: "02",
-          phase: "16 August 2025",
-          title: "Cohort 3 & Bintulu Community Dialogue",
-          desc: "DCS-TTT training in Bintulu paired with a large-scale public dialogue on dementia at Bintulu Civic Centre with local community leaders.",
-          tag: "Bintulu",
-          dotClass: "dot-2",
-        },
-        {
-          num: "03",
-          phase: "November 2025",
-          title: "Cohort 4: Miri (68 Total Certified)",
-          desc: "Final cohort of the initial phase conducted in Miri, successfully certifying 68 doctors, nurses, and allied healthcare professionals.",
-          tag: "Miri",
-          dotClass: "dot-3",
-        },
-      ],
-    },
-    {
-      id: "adfm-curriculum",
-      editionLabel: "ADFM & Rotary Framework",
-      title: 'Community Support Ecosystem: "Structured Care Pathways"',
-      theme: "Certified Training & Public Advocacy",
-      period: "Ongoing Initiative",
-      intro: "Collaborative mission between Rotary Club of Bintulu Central and Alzheimer’s Disease Foundation Malaysia (ADFM) to deliver certified dementia care education.",
-      poster: yearlyCalendar2026Poster,
-      highlights: [
-        {
-          num: "01",
-          phase: "ADFM Certified Trainers",
-          title: "9 Certified Trainers & 3 QA/QC Specialists",
-          desc: "Multidisciplinary team of certified clinical trainers delivering evidence-based dementia care modules with official CPD accreditation.",
-          tag: "Faculty",
-          dotClass: "dot-1",
-        },
-        {
-          num: "02",
-          phase: "DCS-Family Curriculum",
-          title: "6 Core Modules for Family Caregivers",
-          desc: "From understanding neurocognitive disorders and communication to behaviour management, daily living activities, and caregiver self-care.",
-          tag: "Curriculum",
-          dotClass: "dot-2",
-        },
-        {
-          num: "03",
-          phase: "Community & Dialect Outreach",
-          title: "Multilingual Community Dialogues",
-          desc: "Engaging local Sarawakian families in English, Bahasa Melayu, and Chinese dialects to eliminate stigma and foster supportive networks.",
-          tag: "Outreach",
-          dotClass: "dot-3",
-        },
-      ],
-    },
-  ];
-
-  const activeRoadmaps = (eventsCms.roadmap && eventsCms.roadmap.length > 0) ? eventsCms.roadmap : roadmaps;
+  const activeRoadmaps = eventsCms.roadmap || [];
 
   // Carousel state
   const [activeRoadmapIndex, setActiveRoadmapIndex] = useState(0);
@@ -2001,81 +1794,16 @@ function EventsSection() {
     setStatusFilter("all");
   };
 
-  const outreachStories = (eventsCms.communityOutreach?.stories && eventsCms.communityOutreach.stories.length > 0)
-    ? eventsCms.communityOutreach.stories
-    : [
-        {
-          id: "outreach-story-1",
-          title: "Alzheimer’s Care Project TTT Batch 2 (16/5/25 – 18/5/25)",
-          subtitle: "Sibu, Sarawak (16/5/25 – 18/5/25)",
-          date: "16–18 May 2025",
-          location: "Sibu, Sarawak",
-          description: "Participants from Kapit, Betong, and Sibu dedicated three days to learning, practicing, and preparing to serve their communities with evidence-based dementia care skills.",
-          image: dialogueImg1,
-        },
-        {
-          id: "outreach-story-2",
-          title: "Living Impact & Growing Caregiver Support",
-          subtitle: "Sibu, Sarawak (16/5/25 – 18/5/25)",
-          date: "16–18 May 2025",
-          location: "Sibu, Sarawak",
-          description: "Although months have passed, the impact, memories, and lessons from Sibu remain very much alive in the way trainers share their knowledge, caregivers feel supported, and communities open their hearts toward dementia care.",
-          image: dialogueImg2,
-        },
-      ];
+  const outreachStories = eventsCms.communityOutreach?.stories || [];
 
-  const outreachPillars = (eventsCms.communityOutreach?.pillars && eventsCms.communityOutreach.pillars.length > 0)
-    ? eventsCms.communityOutreach.pillars
-    : [
-        {
-          id: "pillar-1",
-          icon: "🌱",
-          title: ev.pillar1Title || "Kapit, Betong & Sibu",
-          desc: ev.pillar1Desc || "Uniting dedicated participants from across divisions who committed three days of intensive learning, roleplays, and community preparation.",
-        },
-        {
-          id: "pillar-2",
-          icon: "🤝",
-          title: ev.pillar2Title || "Enduring Grassroots Support",
-          desc: ev.pillar2Desc || "What was planted in Sibu continues to grow in the way trainers share their knowledge and family caregivers feel genuinely supported.",
-        },
-        {
-          id: "pillar-3",
-          icon: "🏛️",
-          title: ev.pillar3Title || "A Living Journey",
-          desc: ev.pillar3Desc || "Batch 2 is not just a past event; it is a living part of our journey shaping what we do today in building a dementia-friendly Sarawak.",
-        },
-      ];
+  const outreachPillars = eventsCms.communityOutreach?.pillars || [];
 
-  const newsArticles = (eventsCms.headlinesNews?.articles && eventsCms.headlinesNews.articles.length > 0)
-    ? eventsCms.headlinesNews.articles
-    : [
-        {
-          id: "news-sin-chew",
-          outlet: "Malaysia Sin Chew Daily",
-          langPill: "中文报道",
-          subtitle: "Sarawak Regional Press Feature",
-          mainTitle: "Empowering Families & Community Dementia Care in Sarawak",
-          intro: "In-depth reporting on the collaboration between Rotary Club of Bintulu Central, local clinicians, and ADFM trainers to establish support networks for elderly families.",
-          category: "Press Feature",
-          date: "Published Feature",
-          image: newsSinChew,
-        },
-        {
-          id: "news-see-hua",
-          outlet: "See Hua Daily News",
-          langPill: "Sarawak Press",
-          subtitle: "Community News Coverage",
-          mainTitle: "HopeCare Initiative: Bridging Gaps in Dementia Support",
-          intro: "Coverage detailing the expansion of dementia care education into secondary towns like Bintulu, Miri, and Sibu to prevent caregiver isolation.",
-          category: "Press Release",
-          date: "Press Release",
-          image: newsSeeHua,
-        },
-      ];
+  const newsArticles = eventsCms.headlinesNews?.articles || [];
 
   return (
     <main className="module-main events-experience-module">
+      {cmsContent._loadError&&<p className="tp-note" role="alert">{cmsContent._loadError}</p>}
+      {activities.loadError&&<p className="tp-note" role="alert">{activities.loadError}</p>}
       {/* ---- Interactive Jump Bar ---- */}
       <section className="events-subnav-section">
         <div className="section-container">
@@ -2100,7 +1828,7 @@ function EventsSection() {
       </section>
 
       {/* ---- Section 1: Yearly Activity Calendar (Clean & Modern Interactive Showcase) ---- */}
-      <section id="yearly-calendar" className="events-feature-section yearly-calendar-section">
+      {currentRoadmap&&<section id="yearly-calendar" className="events-feature-section yearly-calendar-section">
         <div className="section-container">
           {/* Header & Switcher Row */}
           <div className="yearly-calendar-header-row">
@@ -2267,7 +1995,7 @@ function EventsSection() {
             </div>
           </div>
         </div>
-      </section>
+      </section>}
 
       {/* ---- Section 2: Community Outreach Showcase ---- */}
       <section id="community-dialogues" className="events-feature-section dialogues-showcase-section">
@@ -2538,16 +2266,16 @@ function EventsSection() {
                         <span className="event-completed-tag">{ev.sessionCompleted || "Session Completed"}</span>
                       ) : closed ? (
                         <span className="event-completed-tag" style={{ background: "#fef3c7", color: "#92400e", border: "1px solid #fde68a" }}>Registration Closed</span>
-                      ) : (
+                      ) : publicLink(event.registrationLink) ? (
                         <a
-                          href={event.registrationLink || "https://forms.google.com/"}
+                          href={publicLink(event.registrationLink)}
                           target="_blank"
                           rel="noreferrer"
                           className="event-register-btn"
                         >
                           {ev.registerGoogleForm || "Register via Google Form ↗"}
                         </a>
-                      ))}
+                      ) : <span className="event-completed-tag">Registration not open yet</span>)}
                       <button
                         type="button"
                         className="event-details-btn"
@@ -2869,6 +2597,7 @@ function CertifiedTrainers() {
 
   return (
     <main className="module-main certified-trainers-module">
+      {activities.loadError&&<p className="tp-note" role="alert">{activities.loadError}</p>}
       {directoryError && <p role="alert">{directoryError}</p>}
 
       {/* ======================================================
@@ -3343,6 +3072,7 @@ function UpcomingCalendar() {
 
   return (
     <main className="module-main">
+      {activities.loadError&&<p className="tp-note" role="alert">{activities.loadError}</p>}
       <section className="uc-page">
         <div className="section-container">
 

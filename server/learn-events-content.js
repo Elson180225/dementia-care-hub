@@ -1,31 +1,20 @@
-import { readFile, writeFile } from 'node:fs/promises';
-import { resolve, dirname } from 'node:path';
-import { fileURLToPath } from 'node:url';
 import { body, currentUser, fail } from './auth.js';
 import { isAllowedOrigin } from './origin.js';
+import {pool,transaction} from './db.js';
 import { publicLink, topicDateFields } from '../shared/online-education.js';
 
-const __dirname = dirname(fileURLToPath(import.meta.url));
-const CONTENT_FILE = resolve(__dirname, '../shared/learn-events-content.json');
-
-let cachedContent = null;
-
 export async function getLearnEventsData() {
-  if (cachedContent) return cachedContent;
-  try {
-    const raw = await readFile(CONTENT_FILE, 'utf-8');
-    cachedContent = JSON.parse(raw);
-    return cachedContent;
-  } catch (err) {
-    console.error('Failed to read learn-events-content.json:', err.message);
-    return cachedContent || {};
-  }
+  const row=(await pool.query("SELECT data,revision FROM learn_events_content WHERE id='main'")).rows[0];
+  if(!row) fail('Learn & Events content is not initialized. Run database migrations.',503);
+  return {...row.data,_revision:row.revision};
 }
 
-export async function saveLearnEventsData(data) {
-  if (!data || typeof data !== 'object') {
-    fail('Invalid content data structure', 400);
+export async function saveLearnEventsData(data,actor=null) {
+  if (!data || typeof data !== 'object' || Array.isArray(data) ||
+      !['onlineEducation','physicalEducation','events','certifiedTrainers'].every(key=>data[key]&&typeof data[key]==='object')) {
+    fail('Invalid content data structure',400);
   }
+  if(!Number.isInteger(data._revision))fail('Reload the editor before saving.',409);
   for (const topic of data.onlineEducation?.upcomingTopics || []) {
     if (topic.registrationLink && !publicLink(topic.registrationLink)) fail('Registration link must be a valid HTTP or HTTPS URL.');
     const fields = topicDateFields(topic.dateISO || topic.date);
@@ -35,10 +24,14 @@ export async function saveLearnEventsData(data) {
   for (const resource of data.onlineEducation?.approvedResources || []) {
     for (const key of ['videoUrl','qaUrl']) if (resource[key] && !publicLink(resource[key])) fail('Recording and Q&A links must be valid HTTP or HTTPS URLs.');
   }
-  const jsonStr = JSON.stringify(data, null, 2);
-  await writeFile(CONTENT_FILE, jsonStr, 'utf-8');
-  cachedContent = data;
-  return data;
+  const {_revision,...content}=data;
+  await transaction(async db=>{
+    const old=(await db.query("SELECT data,revision FROM learn_events_content WHERE id='main' FOR UPDATE")).rows[0];
+    if(!old||old.revision!==_revision)fail('Another administrator changed this content. Reload before saving.',409);
+    await db.query('INSERT INTO learn_events_content_history(data,revision,actor_id) VALUES($1,$2,$3)',[old.data,old.revision,actor]);
+    await db.query("UPDATE learn_events_content SET data=$1,revision=revision+1,updated_by=$2,updated_at=now() WHERE id='main'",[content,actor]);
+  },actor);
+  return {...content,_revision:_revision+1};
 }
 
 export async function learnEventsContentHandler(req, res, url, send) {
@@ -61,8 +54,8 @@ export async function learnEventsContentHandler(req, res, url, send) {
     if (req.method === 'POST') {
       if (!isAllowedOrigin(req.headers.origin)) fail('Origin not allowed', 403);
       const payload = await body(req);
-      await saveLearnEventsData(payload);
-      return send(res, 200, { ok: true, message: 'Learn & Events content saved successfully' });
+      const content=await saveLearnEventsData(payload,user.id);
+      return send(res, 200, { ok: true, content, message: 'Learn & Events content saved successfully' });
     }
 
     fail('Method not allowed', 405);

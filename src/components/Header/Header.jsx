@@ -367,6 +367,13 @@ function Header() {
   const [showHeader, setShowHeader] = useState(false);
 
   const languageWrapperRef = useRef(null);
+  const mobileMenuButtonRef = useRef(null);
+  useEffect(()=>{
+    if(!mobileOpen)return;
+    const onKeyDown=event=>{if(event.key==='Escape'){setMobileOpen(false);mobileMenuButtonRef.current?.focus();}};
+    document.addEventListener('keydown',onKeyDown);
+    return()=>document.removeEventListener('keydown',onKeyDown);
+  },[mobileOpen]);
 
   /* Close language menu when clicking outside */
   useEffect(() => {
@@ -602,8 +609,10 @@ function Header() {
             <button
               type="button"
               className="mobile-menu-btn"
+              ref={mobileMenuButtonRef}
               onClick={() => setMobileOpen(!mobileOpen)}
-              aria-label="Open navigation menu"
+              aria-label={mobileOpen ? "Close navigation menu" : "Open navigation menu"}
+              aria-controls="mobile-navigation"
               aria-expanded={mobileOpen}
             >
               {mobileOpen ? "×" : "☰"}
@@ -614,7 +623,7 @@ function Header() {
               MOBILE NAVIGATION
           ================================================= */}
           {mobileOpen && (
-            <nav className="mobile-nav" aria-label="Mobile navigation">
+            <nav id="mobile-navigation" className="mobile-nav" aria-label="Mobile navigation">
               <Link to="/" onClick={closeMobileMenu}>
                 {t.header.home}
               </Link>

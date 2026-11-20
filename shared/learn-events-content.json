@@ -29,7 +29,9 @@
         "suitableFor": "General public, families and caregivers",
         "description": "Opening online education webinar for the 2026 Season under the Alzheimer's Care Project 'Finding the Missing Pieces'. Conducted primarily in English with Bahasa Malaysia support provided where appropriate.",
         "image": "/src/assets/education/webinar-learning.jpg",
-        "dateISO": "2026-04-11"
+        "dateISO": "2026-04-11",
+        "registrationOpen": false,
+        "registrationMethod": "closed"
       },
       {
         "id": "topic-dcs-family-2026",
@@ -46,7 +48,9 @@
         "suitableFor": "Family caregivers, community helpers, and those interested in dementia care",
         "description": "Foundation Dementia Care Course covering 6 core modules: Basic DCS, Person-Centred Care, Effective Communication, BPSD, Meaningful Activities, and Advance Care Planning. Limited to 100 seats only.",
         "image": "/src/assets/education/dcs-family-poster.jpg",
-        "dateISO": "2026-05-16"
+        "dateISO": "2026-05-16",
+        "registrationOpen": false,
+        "registrationMethod": "closed"
       },
       {
         "id": "topic-dcs-ttt-2026",
@@ -63,25 +67,9 @@
         "suitableFor": "Healthcare professionals, nurses, therapists, community educators",
         "description": "3-day Train-the-Trainer program in Kuching to train and certify healthcare educators and community champions across Sarawak under ADFM credentialing.",
         "image": "/src/assets/education/adfm-poster.jpg",
-        "dateISO": "2026-06-26"
-      },
-      {
-        "id": "topic-1793265675178",
-        "title": "Dementia Workshop",
-        "month": "FEB",
-        "day": "5",
-        "year": "2027",
-        "date": "5 Feb 2027",
-        "time": "7.00 AM",
-        "mode": "Online",
-        "location": "Online",
-        "language": "English / Bahasa Melayu",
-        "speaker": "RCBC & ADFM Specialists",
-        "suitableFor": "Students and Caregivers",
-        "description": "Know how to take care elderly who has dementia\n\n",
-        "image": "/api/files/b63d96c9-887c-4c9b-bdea-401f24451cbf",
-        "registrationLink": "https://docs.google.com/forms/d/e/1FAIpQLSeFwm4EB9iez8ZCf8ETo4c1317hh27FZyewWfk5Eay3PL5Tfg/viewform?usp=header",
-        "dateISO": "2027-02-05"
+        "dateISO": "2026-06-26",
+        "registrationOpen": false,
+        "registrationMethod": "closed"
       }
     ],
     "approvedResources": [
@@ -129,7 +117,7 @@
         "trackNumber": "Track 01",
         "title": "Basic Dementia Care Skill (Family) Course",
         "roleCategory": "Family Caregivers, Relatives & Community Helpers",
-        "badge": "Open for Registration",
+        "badge": "Programme information",
         "shortIntro": "To shift the daily caregiving focus away from rigid clinical routines and toward protecting personal dignity, emotional connection, and managing the progressive changes of dementia without burning out.",
         "suitableFor": "Family caregivers, relatives, community helpers, and those interested in or planning to further develop in dementia care.",
         "description": "Foundation Dementia Care Course for Family Caregivers covering 6 core modules, delivered by 12 ADFM-Certified Trainers with public healthcare experience. Pre-requisite for ADFM DCS-TTT certification. Limited to 100 seats only (subsidized from RM1,200 to RM120/pax). CPD points available.",
@@ -151,8 +139,10 @@
           "Module 5 – Meaningful Activities & Engagement",
           "Module 6 – Legal, Ethical Issues & Advance Care Planning"
         ],
-        "buttonLabel": "Register for DCS-Family",
-        "availability": "available"
+        "buttonLabel": "View programme details",
+        "availability": "available",
+        "registrationOpen": false,
+        "registrationMethod": "closed"
       },
       {
         "id": "dcs-ttt",
@@ -160,7 +150,7 @@
         "trackNumber": "Track 02",
         "title": "Dementia Care Skill — Train the Trainer Program",
         "roleCategory": "Healthcare Professionals, Expert Educators & Senior Volunteers",
-        "badge": "By Application & Review",
+        "badge": "Programme information",
         "shortIntro": "The Train-the-Trainer (TTT) framework equipping and certifying healthcare professionals so they are equipped to deliver community DCS courses across Sarawak.",
         "suitableFor": "Selected healthcare professionals (nurses, therapists, medical officers), certified educators, and senior community volunteers.",
         "description": "An intensive 3-day certification curriculum under ADFM credentialing. Across 2024–2025, 4 cohorts have trained 68 frontline healthcare personnel across Kuching, Sibu, Bintulu and Miri to lead grassroots education.",
@@ -180,7 +170,9 @@
           "Supervised mock teaching and clinical assessment under ADFM guidance",
           "Accreditation as ADFM Certified Trainer listed in the public directory"
         ],
-        "buttonLabel": "Apply for TTT Pathway"
+        "buttonLabel": "View programme details",
+        "registrationOpen": false,
+        "registrationMethod": "closed"
       },
       {
         "id": "dcs-care-worker",
@@ -188,7 +180,7 @@
         "trackNumber": "Track 03",
         "title": "Dementia Care Series — Care Worker",
         "roleCategory": "Professional Direct-Care Staff, Nursing Home Employees & Care Aides",
-        "badge": "Future Track • Priority Waitlist",
+        "badge": "Programme information",
         "shortIntro": "A comprehensive workshop focused on building formal clinical competency. It establishes standard protocols for managing BPSD (Behavioral and Psychological Symptoms of Dementia), interpreting distress as communication, and mastering safe, person-centered physical handling.",
         "suitableFor": "Professional direct-care staff, nursing home employees, paid home nurses, assisted living attendants, and community health volunteers.",
         "description": "A rigorous, hands-on clinical training track crafted for institutional and community direct-care teams. Standardises compassionate clinical care, person-centred dementia support, and injury-free mobility assistance.",
@@ -208,34 +200,9 @@
           "Mastering safe, person-centred transfers & physical handling ergonomics",
           "Institutional care dignity standards & care-plan documentation"
         ],
-        "buttonLabel": "Join Priority Waitlist / Express Interest"
-      },
-      {
-        "id": "dcs-track-1794038842414",
-        "code": "DCS",
-        "trackNumber": "Track 04",
-        "title": "Testing ",
-        "roleCategory": "Student",
-        "badge": "Open for Registration",
-        "shortIntro": "Ready to achieve your goal??",
-        "suitableFor": "Welcome to everyone",
-        "description": "",
-        "mode": "In-Person Physical Workshop",
-        "sessions": "1 Full Day (9:00 AM – 6:00 PM)",
-        "language": "English / Bahasa Melayu / 中文",
-        "location": "Kuching",
-        "schedule": {
-          "date": "",
-          "time": "9:00 AM – 5:00 PM",
-          "label": "Scheduled Intake"
-        },
-        "image": "",
-        "highlights": [
-          "Module 1 – Basic Dementia Understanding",
-          "Module 2 – Person-Centred Care",
-          "Module 3 – Effective Communication"
-        ],
-        "buttonLabel": "Register for Programme"
+        "buttonLabel": "View programme details",
+        "registrationOpen": false,
+        "registrationMethod": "closed"
       }
     ]
   },
@@ -371,14 +338,7 @@
           "image": "/src/assets/education/dialogue-2.jpg"
         }
       ],
-      "pillars": [
-        {
-          "id": "pillar-1794042812642",
-          "icon": "🌱",
-          "title": "Working together",
-          "desc": "To be brave"
-        }
-      ]
+      "pillars": []
     },
     "headlinesNews": {
       "eyebrow": "Media & News Highlights",

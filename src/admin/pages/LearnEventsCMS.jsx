@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { api } from "../../trainer-portal/TrainerContext";
 import Activities from "../../trainer-portal/pages/Activities";
-import defaultContent from "../../../shared/learn-events-content.json";
 import OnlineEducationAdmin from "./learn-events/OnlineEducationAdmin";
 import PhysicalEducationAdmin from "./learn-events/PhysicalEducationAdmin";
 import RoadmapAdmin from "./learn-events/RoadmapAdmin";
@@ -11,7 +10,7 @@ import "../../trainer-portal/TrainerPortal.css";
 
 export default function LearnEventsCMS() {
   const [activeTab, setActiveTab] = useState("sessions"); // sessions | online | physical | roadmap | outreach | trainers
-  const [content, setContent] = useState(defaultContent);
+  const [content, setContent] = useState(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("");
@@ -27,7 +26,7 @@ export default function LearnEventsCMS() {
         }
       })
       .catch((err) => {
-        console.warn("Using default Learn & Events content:", err.message);
+        if(active)setError(err.message || "Unable to load Learn & Events content.");
       })
       .finally(() => {
         if (active) setLoading(false);
@@ -43,8 +42,8 @@ export default function LearnEventsCMS() {
     setMessage("");
     setError("");
     try {
-      await api("/api/admin/learn-events-content", dataToSave);
-      if (newContent) setContent(newContent);
+      const result=await api("/api/admin/learn-events-content", dataToSave);
+      setContent(result.content);
       setMessage("All Learn & Events content saved successfully. Changes are now live on the website!");
       return true;
     } catch (err) {
@@ -63,6 +62,7 @@ export default function LearnEventsCMS() {
     );
   }
 
+  if(!content)return <div className="tp-card" role="alert"><h2>Unable to load Learn &amp; Events</h2><p>{error}</p><button className="tp-btn" onClick={()=>window.location.reload()}>Try again</button></div>;
   return (
     <div className="learn-events-cms-admin">
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1.25rem", flexWrap: "wrap", gap: "1rem" }}>

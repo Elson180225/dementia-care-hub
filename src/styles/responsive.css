@@ -1,0 +1,141 @@
+/* Shared responsive safeguards. Keep intentional table/carousel scrolling inside its region. */
+:where(.page, .page-container, .module-main, .section-container, .tp-shell, .tp-main,
+  .tp-container, .tp-card, .learn-events-cms-admin, .participants-workspace,
+  .tg-workspace, .cp-editor, .tr-workspace) {
+  min-width: 0;
+}
+:where(main, .tp-main) :is(h1, h2, h3, h4, p, dd, legend, label) {
+  overflow-wrap: anywhere;
+}
+:where(main, .tp-main) fieldset { min-inline-size: 0; }
+:where(main, .tp-main) :is(input:not([type=checkbox]):not([type=radio]), select, textarea) {
+  max-width: 100%;
+  min-width: 0;
+}
+:where(main, .tp-main) :is(iframe, video) { max-width: 100%; }
+:where(.tp-card, .tp-main, .section-container) > * { min-width: 0; }
+.tp-table-wrap {
+  position: relative;
+  max-width: 100%;
+  min-width: 0;
+  overscroll-behavior-inline: contain;
+  scrollbar-width: thin;
+}
+.tp-table :is(th, td) { overflow-wrap: anywhere; }
+.tp-table td .tp-actions { min-width: 0; }
+.pm-table-scroll { position: relative; min-width: 0; overscroll-behavior-inline: contain; }
+.pm-review-actions, .pm-question { position: relative; }
+.tp-dl { grid-template-columns: minmax(0, auto) minmax(0, 1fr); }
+.tp-dl > * { min-width: 0; overflow-wrap: anywhere; }
+.activity-card-top, .event-card-badges {
+  flex-wrap: wrap;
+  justify-content: flex-start;
+}
+.activity-card-top > *, .event-card-badges > * {
+  max-width: 100%;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+.activity-card-body, .resource-card, .activity-card, .event-card { min-width: 0; }
+.event-detail-dialog, .registration-window { min-width: 0; }
+.event-detail-toolbar, .registration-window-header { gap: 12px; }
+.event-detail-toolbar > span, .registration-window-header > div { min-width: 0; overflow-wrap: anywhere; }
+
+@media (max-width: 1360px) {
+  /* Keep the phone/tablet menu reachable before the first scroll. */
+  .site-header { position: sticky; }
+  .site-header-hidden { transform: none; opacity: 1; pointer-events: auto; }
+}
+@media (max-width: 1024px) {
+  .module-main :is(.activity-grid, .resource-grid, .planned-topics-grid, .events-cards-grid) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .cp-preview { position: static; }
+  .tp-toolbar .tp-field { min-width: min(200px, 100%); }
+}
+@media (max-width: 768px) {
+  .module-hero-grid { grid-template-columns: minmax(0, 1fr); }
+  /* Avoid the intrinsic width of labels, filenames and translated options expanding grids. */
+  :where(.tp-main, .cp-editor, .tg-workspace, .tr-workspace) :is(input, select, textarea) {
+    font-size: max(16px, 1em);
+  }
+  .tp-sidebar, .tp-sidebar-nav { min-width: 0; max-width: 100%; }
+  .tp-sidebar-nav { overscroll-behavior-inline: contain; scrollbar-width: thin; padding-bottom: 6px; }
+  .tp-sidebar-group { flex: 0 0 auto; }
+  .tp-sidebar-nav a { min-height: 44px; }
+  .tp-filter-bar { align-items: stretch; }
+  .tp-search-input { min-width: 0; width: 100%; flex-basis: 100%; }
+  .tp-select-filter { min-width: 0; max-width: 100%; flex: 1 1 160px; }
+  .tp-toolbar > *, .tp-actions > :is(input, select) { max-width: 100%; }
+  .tp-table { min-width: 640px; }
+  .tp-card { padding: 20px; }
+  .pm-workshop { align-items: flex-start; padding: 16px; }
+  .pm-workshop label { min-width: 0; }
+  .pm-toolbar label:first-child, .pm-toolbar label:nth-child(2) { min-width: 0; max-width: 100%; }
+  .pm-tabs { gap: 0; }
+  .pm-tabs button { white-space: normal; text-align: left; }
+  .tg-grid > *, .tg-form-grid > *, .tg-toolbar > *, .cp-columns > *, .tr-copy-columns > * { min-width: 0; }
+  .tg-steps { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .tg-steps button { min-height: 60px; }
+  .tg-actions :is(button, a), .cp-editor footer :is(button, a) { white-space: normal; }
+  .cp-editor header { min-width: 0; }
+  .tr-editor :is(pre, p), .tr-page-card { overflow-wrap: anywhere; }
+  .mobile-nav { max-height: calc(100dvh - 160px); overflow-y: auto; overscroll-behavior: contain; }
+  .mobile-submenu a { min-height: 44px; display: flex; align-items: center; }
+  .header-search-input { min-width: 0; }
+  .uc-filter-group, .uc-filter-select { min-width: 0; max-width: 100%; }
+  .uc-filter-group { flex-wrap: wrap; gap: 8px; }
+  .uc-filter-select { width: 100%; }
+  .uc-month-nav { flex-wrap: wrap; gap: 10px; }
+  .uc-month-label { min-width: 0; }
+  .uc-today-btn, .uc-nav-btn { min-height: 44px; min-width: 44px; }
+}
+@media (max-width: 650px) {
+  .module-main :is(.activity-grid, .resource-grid, .planned-topics-grid, .events-cards-grid,
+    .dialogues-gallery-grid, .dialogue-pillars-grid, .news-clippings-grid,
+    .trainer-steps-grid, .ct-advisory-grid, .stage-grid, .dcs-tab-selector) {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .resource-card-top { flex-wrap: wrap; gap: 10px; }
+}
+@media (max-width: 480px) {
+  .tp-main { padding: 20px 12px 48px; }
+  .tp-container { width: calc(100% - 24px); }
+  .tp-card, .cp-editor, .tr-content-list, .tr-editor { padding: 16px; }
+  .tp-dl { grid-template-columns: minmax(0, 1fr); gap: 4px; }
+  .tp-dl dd { margin-bottom: 12px; }
+  .tp-toolbar { align-items: stretch; }
+  .tp-toolbar .tp-field { flex: 1 1 100%; width: 100%; }
+  .tp-actions > .tp-btn { flex: 1 1 100%; text-align: center; }
+  .tp-pagination { justify-content: center; }
+  .tp-page-btn { min-width: 44px; min-height: 44px; height: auto; }
+  .pm-heading { align-items: flex-start; flex-direction: column; gap: 10px; }
+  .pm-workshop { gap: 10px; }
+  .pm-workshop-icon { width: 36px; height: 36px; font-size: 22px; }
+  .pm-stats { grid-template-columns: minmax(0, 1fr); gap: 12px; }
+  .participants-workspace fieldset, .pm-history { padding: 16px; }
+  .pm-toolbar { align-items: stretch; }
+  .pm-toolbar label { flex-basis: 100%; }
+  .tg-overview { gap: 8px; }
+  .tg-overview button { min-width: 0; overflow-wrap: anywhere; }
+  .tg-panel, .tg-preview, .tg-archive-panel { padding: 16px; }
+  .cp-editor footer { align-items: stretch; }
+  .cp-editor footer > :is(button, a) { flex: 1 1 100%; }
+  .event-detail-backdrop, .registration-window-backdrop { padding: 6px; }
+  .event-detail-dialog, .registration-window {
+    max-height: calc(100vh - 12px);
+    max-height: calc(100dvh - 12px);
+    scroll-padding-block: 80px 24px;
+  }
+  .event-detail-content { padding: 18px 14px; }
+  .event-detail-registration .event-registration { padding: 16px; }
+  .registration-window-body { padding: 18px 14px; }
+  .event-registration .registration-form-footer { flex-direction: column; align-items: stretch; }
+  .registration-window :is(input, textarea), .event-detail-dialog :is(input, textarea) { scroll-margin-block: 100px 24px; }
+  .activity-card-top { gap: 7px; }
+  .activity-card-top .tag, .activity-card-top .status-badge { font-size: .78rem; }
+  .archive-pagination { flex-wrap: wrap; gap: 12px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+}
