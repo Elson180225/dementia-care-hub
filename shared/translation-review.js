@@ -1,9 +1,16 @@
 export const reviewLanguages=['ms','zh'];
-const excluded=new Set(['id','slug','code','trackNumber','language','languages','mode','status','availability','registrationMethod','registrationType','type','date','time','dateISO','year','month','day','city','phone','email','postcode','state','category','resource_type','certificate_ref']);
+const excluded=new Set(['id','slug','code','trackNumber','language','languages','mode','status','availability','registrationMethod','registrationType','type','date','time','dateISO','year','month','day','city','phone','email','postcode','state','category','resource_type','certificate_ref','webinarQuery']);
+function isDisplayLabel(prefix,key){
+ const uiLabel=prefix.startsWith('ui/')&&prefix.split('/').length===3
+  || /^ui\/learnEvents\/(activityModal|programModal|stageSpecs)\//.test(prefix);
+ const descriptiveProgramme=prefix.startsWith('cms/physicalEducation/programmes/')
+  && ['mode','language','status'].includes(key);
+ return descriptiveProgramme||uiLabel&&['email','phone','city','state','category','language','mode','status','type'].includes(key);
+}
 export function sourceLeaves(value,prefix='ui',result={}){
  if(typeof value==='string'){
   const key=prefix.split('/').at(-1);
-  if(value.trim()&&!excluded.has(key)&&!/(url|link|image|poster|path|href|src|At|_at|Id|_id)$/i.test(key)&&!/^https?:|^\/|^data:|^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value))result[prefix]=value;
+  if(value.trim()&&(!excluded.has(key)||isDisplayLabel(prefix,key))&&!/(url|image|poster|path|href|src|At|_at|Id|_id)$/i.test(key)&&!/^https?:|^\/|^#|^mailto:|^tel:|^data:|^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value))result[prefix]=value;
  }else if(Array.isArray(value)){
   value.forEach((v,i)=>sourceLeaves(v,prefix+'/'+encodeURIComponent(v?.id??i),result));
  }else if(value&&typeof value==='object'){

@@ -12,15 +12,15 @@ test('contact comparisons normalize Malaysian formats and ignore blank numbers',
  assert.equal(normalisePhone('+44 123456789'),'44123456789');
  assert.equal(registrationDuplicates({email:'new@example.com',phone:''},[{email:'old@example.com',phone:''}]).phone,undefined);
 });
-test('import preview excludes existing emails and History and warns on shared numbers within file',()=>{
+test('import preview allows shared emails and History but rejects active duplicate phones',()=>{
  const existing=[{email:'MEI@example.com',phone:'+60123456789',status:'cancelled'}];
  const rows=validateParticipants([{name:'Mei',email:'mei@example.com',phone:'0123456789'},{name:'Tan',email:'tan@example.com',phone:'0123456789'},{name:'Lin',email:'lin@example.com',phone:'0060123456789'}],existing);
- assert.match(rows[0].error,/History/);
- assert.equal(rows[1].error,'');assert.match(rows[1].warning,/Shared/);
- assert.match(rows[2].warning,/Shared/);
+ assert.equal(rows[0].error,'');
+ assert.match(rows[1].error,/Phone/);
+ assert.match(rows[2].error,/Phone/);
  assert.equal(existing.length,1);
 });
-test('website rejects existing emails, challenges shared phones, and leaves original states untouched',async()=>{
+test('website allows shared emails, rejects active duplicate phones and retains History',async()=>{
  const originalQuery=pool.query,originalConnect=pool.connect;
  const intake='11111111-1111-4111-8111-111111111111',other='22222222-2222-4222-8222-222222222222';
  const existing={activity_id:intake,email:'MEI@example.com',phone:'+60123456789',status:'cancelled',payment_verified_at:'retained',registration_state:'confirmed'};
@@ -44,15 +44,16 @@ test('website rejects existing emails, challenges shared phones, and leaves orig
   return result;
  }
  try{
+  assert.equal((await submit()).status,200);
   const duplicate=await submit();
-  assert.equal(duplicate.status,409);assert.equal(duplicate.body.code,'duplicate-registration');
+  assert.equal(duplicate.status,409);assert.equal(duplicate.body.code,'duplicate-phone');
   assert.doesNotMatch(JSON.stringify(duplicate.body),/MEI@|payment_verified_at|registration_state|cancelled/);
   const phone=await submit({email:'new@example.com'});
-  assert.equal(phone.status,409);assert.equal(phone.body.code,'shared-phone');assert.equal(rows.length,1);
-  assert.equal((await submit({email:'new@example.com',acknowledgeSharedPhone:true})).status,200);
+  assert.equal(phone.status,409);assert.equal(phone.body.code,'duplicate-phone');assert.equal(rows.length,2);
+  assert.equal((await submit({email:'mei@example.com',phone:'0133456789'})).status,200);
   assert.equal(rows[1].registration_state,'submitted');
   assert.equal((await submit({},other)).status,200);
   assert.equal(existing.status,'cancelled');assert.equal(existing.payment_verified_at,'retained');assert.equal(existing.registration_state,'confirmed');
-  assert.equal(locks,4);
+  assert.equal(locks,5);
  }finally{pool.query=originalQuery;pool.connect=originalConnect;}
 });

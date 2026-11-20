@@ -73,6 +73,7 @@ export default function ReviewQueue() {
             <p className="tp-dev">{item.kind}</p>
             <h2>{item.title}</h2>
             <p>{item.detail}</p>
+            {item.profile?.status==="submitted"&&<details open><summary>Compare submitted changes with the approved public profile</summary><div style={{overflowX:"auto"}}><table className="tp-table"><thead><tr><th>Field</th><th>Approved</th><th>Submitted</th></tr></thead><tbody>{["city","language","short_profile","qualifications","experience","photo_url","contact_email","contact_phone"].map(key=><tr key={key}><th>{key.replaceAll("_"," ")}</th><td>{item.profile.approved_snapshot?.[key]||"Not approved"}</td><td>{item.profile[key]||"—"}</td></tr>)}</tbody></table></div></details>}
             {item.profile && (
               <dl className="tp-dl">
                 <dt>Assessment result</dt><dd>{item.profile.assessment_result || "Not recorded"}</dd>
@@ -92,6 +93,7 @@ export default function ReviewQueue() {
                 </dd>
               </dl>
             )}
+            {item.trainerHours&&<ul>{item.trainerHours.map(t=><li key={t.trainerId}>{t.name||"Assigned trainer"}: {t.hours??"Not recorded"} hours ({t.role})</li>)}</ul>}
             {item.certificateEvidenceUrl && <p><a href={item.certificateEvidenceUrl} target="_blank" rel="noreferrer">Open private certificate image or PDF</a></p>}
             {item.profile?.certificateEvidenceUrl && <p><a href={item.profile.certificateEvidenceUrl} target="_blank" rel="noreferrer">Open private certificate image or PDF</a></p>}
             {item.target === "access" && (

@@ -471,9 +471,21 @@
   background: var(--color-purple-100, #f3eaf8);
 }
 
-.nav-link span {
-  font-size: 16px;
+.nav-link .nav-label {
+  text-box: trim-both cap alphabetic;
+}
+
+.nav-link .nav-chevron {
+  width: 8px;
+  height: 8px;
+  flex: none;
+  align-self: center;
+  margin-inline-start: 3px;
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  transform: translateY(-2px) rotate(45deg);
   opacity: 0.75;
+  pointer-events: none;
 }
 
 /* ============================================================

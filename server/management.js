@@ -159,7 +159,7 @@ export async function managementHandler(req, res, url, send) {
                 await db.query('UPDATE trainer_profiles SET assessment_result=$2,healthcare_professional=$3,independent_teaching_scope=$4 WHERE id=$1', [data.id, data.assessmentResult.trim(), data.healthcareProfessional, data.independentTeachingScope.trim()]);
                                 data.assessmentStatus ??= details.assessment_status;
                 if (!['not_assessed', 'completed', 'pass', 'independent', 'unsuccessful'].includes(data.assessmentStatus)) fail('Choose a valid assessment status');
-                await db.query('UPDATE trainer_profiles SET assessment_status=$2 WHERE id=$1', [data.id, data.assessmentStatus]);
+                await db.query('UPDATE trainer_profiles SET assessment_status=$2,revision=revision+1 WHERE id=$1', [data.id, data.assessmentStatus]);
                 if (data.certifiedStatus !== "certified") {
                     await db.query("DELETE FROM sessions WHERE user_id=$1", [
                         data.id,

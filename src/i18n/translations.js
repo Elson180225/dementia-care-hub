@@ -1,3 +1,4 @@
+import {publicCopy,addMissingCopy} from '../../shared/public-copy.js';
 export const translations = {
   "en": {
     "header": {
@@ -4897,3 +4898,4 @@ for (const [language, copy] of Object.entries(pageRefresh)) {
 Object.assign(translations.en.contact, { pendingDetails: 'Official contact details will be published once confirmed. Please use the enquiry form for now.' });
 Object.assign(translations.ms.contact, { pendingDetails: 'Maklumat hubungan rasmi akan dipaparkan selepas disahkan. Sila gunakan borang pertanyaan buat masa ini.' });
 Object.assign(translations.zh.contact, { pendingDetails: '官方联系方式将在确认后公布。目前请使用咨询表格。' });
+addMissingCopy(translations.en,publicCopy);

@@ -6,7 +6,7 @@ import {isPlannedProgramme} from '../shared/programme-intakes.js';
 import {registrationDuplicates} from '../shared/registration-duplicates.js';
 import {createBrevo} from './brevo.js';
 import {decision} from './decisions.js';
-import {validateEventRegistration,canConfirmRegistration,participantExport,registrationAvailability} from '../shared/event-registration.js';
+import {validateEventRegistration,canConfirmRegistration,participantExport,registrationAvailability,capacitySummary} from '../shared/event-registration.js';
 const attempts=new Map();
 export async function eventRegistrationHandler(req,res,url,send){
  const admin=url.pathname==='/api/admin/event-registration';let user;
@@ -23,10 +23,10 @@ export async function eventRegistrationHandler(req,res,url,send){
   if(!programme||isPlannedProgramme(programme))settings.enabled=false;
  }
  if(req.method==='GET'){
-  if(!admin)return send(res,200,{title:activity.title,starts_at:activity.starts_at,configured:!!settings.activity_id,closedReason:registrationAvailability(activity,settings),settings:{enabled:!registrationAvailability(activity,settings),paid:settings.paid,website_enabled:settings.website_enabled,google_url:settings.google_url,fee:settings.paid?settings.fee:'',instructions:settings.paid?settings.instructions:'',generalInstructions:settings.general_instructions||'',ask_phone:settings.ask_phone,ask_notes:settings.ask_notes}});
+  if(!admin)return send(res,200,{title:activity.title,starts_at:activity.starts_at,configured:!!settings.activity_id,closedReason:registrationAvailability(activity,settings),settings:{enabled:!registrationAvailability(activity,settings),paid:settings.paid,website_enabled:settings.website_enabled,google_url:settings.google_url,fee:settings.paid?settings.fee:'',instructions:settings.paid?settings.instructions:'',generalInstructions:settings.general_instructions||'',ask_phone:true,ask_notes:true}});
   const participants=(await pool.query('SELECT p.*,u.name AS removed_by_name,d.status AS confirmation_email_status,d.error AS confirmation_email_error FROM event_participants p LEFT JOIN users u ON u.id=p.removed_by LEFT JOIN event_confirmation_deliveries d ON d.participant_id=p.id WHERE p.activity_id=$1 ORDER BY p.imported_at DESC',[id])).rows;
   if(url.searchParams.get('export')==='csv'){res.writeHead(200,{'Content-Type':'text/csv; charset=utf-8','Content-Disposition':'attachment; filename="event-registrations.csv"','Cache-Control':'no-store'});return res.end(participantExport(participants.filter(p=>p.status===(url.searchParams.get('scope')==='history'?'cancelled':'registered'))));}
-  return send(res,200,{settings,participants});
+  return send(res,200,{settings,participants,capacitySummary:capacitySummary(activity,participants)});
  }
  const data=await body(req);
  if(!admin){
@@ -39,11 +39,9 @@ export async function eventRegistrationHandler(req,res,url,send){
    await db.query('SELECT id FROM activities WHERE id=$1 FOR UPDATE',[id]);
    const existing=(await db.query('SELECT email,phone,status FROM event_participants WHERE activity_id=$1',[id])).rows;
    const match=registrationDuplicates(values,existing);
-   if(match.email)return {status:409,body:{code:'duplicate-registration',error:'These details match an existing registration for this intake. The original record is retained. Please check your previous submission or contact RCBC for assistance.'}};
-   if(match.phone&&data.acknowledgeSharedPhone!==true)return {status:409,body:{code:'shared-phone',error:'This phone number has already been used for this intake. If your family shares a number and this is a different participant, acknowledge the shared number below to continue. Otherwise, check your previous submission or contact RCBC.'}};
-   const inserted=await db.query("INSERT INTO event_participants(activity_id,name,email,phone,notes,consent_at,registration_source) VALUES($1,$2,$3,$4,$5,now(),'website') ON CONFLICT(activity_id,email) DO NOTHING RETURNING id",[id,values.name,values.email,values.phone,values.notes]);
-   if(!inserted.rowCount)return {status:409,body:{code:'duplicate-registration',error:'These details match an existing registration for this intake. Please contact RCBC for assistance.'}};
-   return {status:200,body:{message:'Your submission has been received. RCBC will review it; this is not a confirmation of a place.'}};
+   if(match.phone)return {status:409,body:{code:'duplicate-phone',error:'This phone number is already registered for this intake. Use a different WhatsApp contact number or contact RCBC for help.'}};
+   await db.query("INSERT INTO event_participants(activity_id,name,email,phone,notes,consent_at,registration_source,registration_state,confirmed_at) VALUES($1,$2,$3,$4,$5,now(),'website',$6,CASE WHEN $7 THEN now() ELSE NULL END)",[id,values.name,values.email,values.phone,values.notes,settings.paid?'submitted':'confirmed',!settings.paid]);
+   return {status:200,body:{confirmed:!settings.paid,message:settings.paid?'Your registration has been received. Your place is pending RCBC payment verification and approval.':'Your registration is confirmed. No payment is required.'}};
   });
   return send(res,result.status,result.body);
  }
@@ -52,6 +50,7 @@ export async function eventRegistrationHandler(req,res,url,send){
  if(!/^[a-f0-9-]{36}$/i.test(data.id||''))fail('Invalid participant');
  if(['pending','verify-payment','confirm'].includes(data.action)){
   await transaction(async db=>{
+   await db.query('SELECT id FROM activities WHERE id=$1 FOR UPDATE',[id]);
    const p=(await db.query('SELECT * FROM event_participants WHERE id=$1 AND activity_id=$2 FOR UPDATE',[data.id,id])).rows[0];
    if(!p||p.status!=='registered')fail('Choose an active registration');
    if(activity.cancelled_at)fail('This event is cancelled');
@@ -60,8 +59,11 @@ export async function eventRegistrationHandler(req,res,url,send){
     await db.query("UPDATE event_participants SET registration_state='pending-payment' WHERE id=$1",[p.id]);
    }else if(data.action==='verify-payment'){
     if(!settings.paid||p.registration_state!=='pending-payment'||p.payment_verified_at)fail('Move this paid registration to pending payment verification first');
-    const reference=String(data.reference||'').trim();if(!reference||reference.length>200)fail('Enter payment verification evidence/reference (up to 200 characters)');
-    await db.query('UPDATE event_participants SET payment_reference=$2,payment_verified_by=$3,payment_verified_at=now() WHERE id=$1',[p.id,reference,user.id]);
+    const reference=String(data.reference||'').trim();if(reference.length>200)fail('Enter payment verification evidence/reference (up to 200 characters)');
+    const fileId=data.evidenceFileId||null;
+    if(!reference&&!fileId)fail('Upload payment evidence or enter a verification reference.');
+    if(fileId){if(!/^[a-f0-9-]{36}$/i.test(fileId))fail('Invalid payment evidence');const file=(await db.query("SELECT id FROM files WHERE id=$1 AND kind='payment-evidence'",[fileId])).rows[0];if(!file)fail('Upload an image or PDF payment evidence file first.');}
+    await db.query('UPDATE event_participants SET payment_reference=$2,payment_verified_by=$3,payment_verified_at=now(),payment_evidence_file_id=$4 WHERE id=$1',[p.id,reference,user.id,fileId]);
    }else{
     if(!canConfirmRegistration(settings,p))fail('RCBC must verify payment before confirmation');
     await db.query("UPDATE event_participants SET registration_state='confirmed',confirmed_by=$2,confirmed_at=coalesce(confirmed_at,now()) WHERE id=$1",[p.id,user.id]);

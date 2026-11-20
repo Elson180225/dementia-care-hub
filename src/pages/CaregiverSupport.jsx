@@ -136,29 +136,17 @@ function SectionHeading({ eyebrow, title, description }) {
 // Show RCBC's approved programme boundaries on both the main Caregiver Support
 // page and the dedicated training page, so visitors cannot miss the notice.
 function RcbcProgrammeNotice({ showTrainingLink = false }) {
+  const {t}=useLanguage();
+  const copy=t.caregiverSupport;
   return (
     <aside className="caregiver-rcbc-notice" aria-label="RCBC caregiver programme and platform information">
-      <strong>Important programme information from RCBC</strong>
-      <p>
-        DCS–Family provides family caregiver education and does not constitute
-        professional caregiver certification.
-      </p>
-      <p>
-        DCS–Worker training and public listing will be introduced following the
-        commencement of the programme in 2028. There is no public DCS–Worker
-        listing yet. In the future, verified graduates may have their names and
-        contact email addresses listed only with their consent and RCBC approval.
-      </p>
-      <p>
-        RCBC and Dementia Care Connect serve solely as a platform to verify and
-        display relevant training credentials and facilitate connections. They
-        do not act as employers, employment agents or intermediaries in any
-        employment or commercial arrangements. All such arrangements remain
-        the sole responsibility of the individuals and parties involved.
-      </p>
+      <strong>{copy.programmeNoticeTitle}</strong>
+      <p>{copy.programmeFamilyNotice}</p>
+      <p>{copy.programmeWorkerNotice}</p>
+      <p>{copy.programmePlatformNotice}</p>
       {showTrainingLink && (
         <Link className="caregiver-rcbc-training-link" to="/caregiver-support/training">
-          View DCS–Family and DCS–Worker programme details <span aria-hidden="true">→</span>
+          {copy.programmeDetailsLink} <span aria-hidden="true">→</span>
         </Link>
       )}
     </aside>
@@ -465,7 +453,7 @@ function CaregiverSupport() {
                 {cs.plannedFuture || "Planned for the future"}
               </span>
               <span className="caregiver-training-step">{cs.step2 || "STEP 02"}</span>
-              <h3>{cs.dcsWorkerTitle || "DCS–Worker"} <small>(planned for 2028)</small></h3>
+              <h3>{cs.dcsWorkerTitle || "DCS–Worker"} <small>{cs.workerPlannedLabel}</small></h3>
               <p>
                 {cs.dcsWorkerDesc || "A planned progression for people interested in developing skills to care for others."}
               </p>
@@ -479,7 +467,7 @@ function CaregiverSupport() {
                 ))}
               </ul>
               <p className="caregiver-training-footnote">
-                DCS–Worker is planned to commence in 2028. Training and public worker listings are not yet available; any future public listing requires verified credentials, individual consent and RCBC approval.
+                {cs.workerAvailabilityNotice}
               </p>
             </article>
           </div>
@@ -490,7 +478,7 @@ function CaregiverSupport() {
               →
             </span>
             <span>
-              DCS–Worker <small>(from 2028, subject to RCBC approval)</small>
+              DCS–Worker <small>{cs.workerApprovalLabel}</small>
             </span>
           </div>
         </div>

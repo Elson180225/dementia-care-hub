@@ -38,3 +38,29 @@
   --color-neutral-800: #36313b;
   --color-neutral-900: #28242b;
 }
+
+/* Draw close controls independently of font baselines. */
+.dialog-close-icon {
+  position: relative;
+  display: block;
+  width: 18px;
+  height: 18px;
+  pointer-events: none;
+}
+
+.dialog-close-icon::before,
+.dialog-close-icon::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 18px;
+  height: 2px;
+  border-radius: 1px;
+  background: currentColor;
+  transform: translate(-50%, -50%) rotate(45deg);
+}
+
+.dialog-close-icon::after {
+  transform: translate(-50%, -50%) rotate(-45deg);
+}

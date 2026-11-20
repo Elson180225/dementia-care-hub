@@ -32,6 +32,9 @@ test('translation database workflow: drafts, approvals, source changes, permissi
   }
   await assert.rejects(translationsHandler({method:'GET',headers:{}},{},new URL('http://localhost/api/admin/translations'),()=>{}),e=>e.status===401);
   const initial=(await call()).body;
+  for(const key of ['ui/contact/email','ui/projectServices/city','ui/understandDementia/reviewCopy/earlyTitle','ui/caregiverSupport/certReadyPrompt','ui/learnEvents/intakeLabels/upcoming']){
+   for(const language of ['ms','zh']){const entry=initial.entries.find(r=>r.key===key&&r.language===language);assert.ok(entry,key);assert.equal(entry.status,'missing');}
+  }
   const item=initial.entries.find(r=>r.key==='ui/header/search'&&r.language==='ms');
   assert.equal(item.status,'missing');
   const payload={key:item.key,language:'ms',source:item.source,revision:0,text:'Cari ujian',reviewType:'standard'};

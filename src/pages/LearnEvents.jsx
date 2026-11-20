@@ -1,4 +1,6 @@
 import PublishedRecords from "../components/PublishedRecords";
+import {publicTrainer} from '../../shared/trainer-governance';
+import {ASSESSMENT_LABEL} from '../../shared/teaching-eligibility';
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { orderWebinars, publicLink, resourceQaFolder, topicDateFields } from '../../shared/online-education';
 import { onlineHeadingText } from '../../shared/online-headings';
@@ -318,11 +320,12 @@ const plannedTopicsList = [
 
 /* ---- status badge ---- */
 function StatusBadge({ status }) {
+  const {t}=useLanguage();
   const labels = {
-    upcoming: "Upcoming",
-    completed: "Completed",
-    "registration-closed": "Registration closed",
-    cancelled: "Cancelled",
+    upcoming: t.learnEvents.statusLabels.upcoming,
+    completed: t.learnEvents.statusLabels.completed,
+    "registration-closed": t.learnEvents.statusLabels.closed,
+    cancelled: t.learnEvents.statusLabels.cancelled,
   };
   return (
     <span className={`status-badge status-${status}`}>
@@ -333,6 +336,7 @@ function StatusBadge({ status }) {
 
 /* ---- mode icon ---- */
 function ModeIcon({ mode }) {
+  const {t}=useLanguage();
   if (mode === "Online") {
     return (
       <span className="mode-tag mode-online">
@@ -350,7 +354,7 @@ function ModeIcon({ mode }) {
           <rect x="2" y="4" width="20" height="14" rx="2" />
           <path d="M8 21h8M12 18v3" />
         </svg>
-        Online
+        {t.learnEvents.priceLabels.online}
       </span>
     );
   }
@@ -370,7 +374,7 @@ function ModeIcon({ mode }) {
         <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
         <circle cx="12" cy="10" r="3" />
       </svg>
-      Physical
+      {t.learnEvents.priceLabels.physical}
     </span>
   );
 }
@@ -408,7 +412,7 @@ function ActivityModal({ activity, onClose }) {
   const recording=publicLink(activity.recordingLink);
   return createPortal(<div className="event-detail-backdrop" onMouseDown={e=>{if(e.target===e.currentTarget)onClose();}}>
     <section className="event-detail-dialog" role="dialog" aria-modal="true" aria-labelledby="event-detail-title" tabIndex={-1} ref={dialogRef}>
-      <div className="event-detail-toolbar"><span>Education &amp; Events</span><button type="button" onClick={onClose} aria-label="Close event details">×</button></div>
+      <div className="event-detail-toolbar"><span>Education &amp; Events</span><button type="button" onClick={onClose} aria-label="Close event details"><span className="dialog-close-icon" aria-hidden="true" /></button></div>
       <div className="event-detail-layout">
         <aside className="event-detail-visual" aria-label="Event poster">
           {poster?<><a href={poster} target="_blank" rel="noreferrer" aria-label={'Open full-size poster for '+activity.title+' in a new tab'}><img src={poster} alt={'Poster for '+activity.title}/></a><p>Event poster</p><a className="event-poster-link" href={poster} target="_blank" rel="noreferrer">View full-size poster ↗</a></>:<div className="event-detail-no-poster"><span aria-hidden="true">▤</span><p>RCBC Education &amp; Events</p><strong>{activity.title}</strong><p>Event information and registration details are shown alongside.</p></div>}
@@ -421,8 +425,8 @@ function ActivityModal({ activity, onClose }) {
             <div><dt>{am.mode||'Mode'}</dt><dd><ModeIcon mode={activity.mode}/></dd></div>
             <div><dt>{am.location||'Location'}</dt><dd>{activity.fullLocation||activity.location||(activity.mode==='Online'?'Online':activity.city||'Venue to be confirmed')}</dd></div>
             <div><dt>{am.language||'Language'}</dt><dd>{activity.language||'To be confirmed'}</dd></div>
-            {!!activity.capacity&&<div><dt>Capacity</dt><dd>{activity.capacity} seats</dd></div>}
-            {(activity.registrationDeadlineFormatted||activity.registrationDeadline)&&<div><dt>Registration deadline</dt><dd>{activity.registrationDeadlineFormatted||formatDeadlineDate(activity.registrationDeadline)}{isEventClosed(activity)&&<small>Registration closed</small>}</dd></div>}
+            {!!activity.capacity&&<div><dt>{t.learnEvents.capacityLabel}</dt><dd>{activity.capacity} {t.learnEvents.seatsLabel}</dd></div>}
+            {(activity.registrationDeadlineFormatted||activity.registrationDeadline)&&<div><dt>{t.learnEvents.deadlineLabel}</dt><dd>{activity.registrationDeadlineFormatted||formatDeadlineDate(activity.registrationDeadline)}{isEventClosed(activity)&&<small>{t.learnEvents.statusLabels.closed}</small>}</dd></div>}
             <div><dt>{am.speakerTrainer||'Speaker / trainer'}</dt><dd>{activity.speaker||'RCBC Education Team'}{activity.trainerId&&<><br/><Link to="/learn-events/certified-trainers" onClick={onClose}>{am.viewTrainerProfile||'View trainer profile'} →</Link></>}</dd></div>
           </dl>
           {activity.description&&<section className="event-detail-description"><h3>{am.whatYouWillLearn||'What you will learn'}</h3><p>{activity.description}</p></section>}
@@ -1226,7 +1230,7 @@ function PhysicalEducation() {
               <div className="stage-header-meta">
                 <span className="stage-track-pill">{activeTrack.trackNumber}</span>
                 <span className="stage-role-pill">{activeTrack.roleCategory}</span>
-                <span className="stage-status-pill">{isPlannedProgramme(activeTrack)?'Planned programme':'Education programme'}</span>
+                <span className="stage-status-pill">{isPlannedProgramme(activeTrack)?le.intakeLabels.planned:le.programmeLabel}</span>
               </div>
               <h3 className="stage-title">{activeTrack.title}</h3>
 
@@ -1585,7 +1589,7 @@ function FacilitatorProfileModal({ facilitator, activities = [], onClose }) {
         ? pastActs
         : trainerActivities;
 
-  const isAdvisory = facilitator.category === "advisory-support";
+  const isAdvisory = facilitator.category === "non-hcp";
 
   return createPortal(
     <div
@@ -1625,7 +1629,7 @@ function FacilitatorProfileModal({ facilitator, activities = [], onClose }) {
           <div className="facilitator-modal-hero-text">
             <div className="facilitator-modal-category-row">
               <span className={`facilitator-category-pill ${isAdvisory ? "is-advisory" : "is-clinical"}`}>
-                {isAdvisory ? "ADFM QA/QC Advisory Board" : "Certified Clinical Facilitator"}
+                {isAdvisory?le.trainerGovernance.nonHcp:le.trainerGovernance.hcp}
               </span>
             </div>
 
@@ -1656,7 +1660,7 @@ function FacilitatorProfileModal({ facilitator, activities = [], onClose }) {
           {/* Biography & Delivery Scope */}
           <div className="facilitator-bio-section">
             <h3>{fm.bioScope || "Facilitator Biography & Practice Scope"}</h3>
-            <p>{facilitator.bio}</p>
+            <p>{facilitator.bio}</p><TrainerPermissions trainer={facilitator}/>
           </div>
 
           {/* Activities Segment */}
@@ -1755,14 +1759,14 @@ function FacilitatorProfileModal({ facilitator, activities = [], onClose }) {
 
         {/* Modal Footer */}
         <div className="facilitator-modal-footer">
-          <a
-            href="https://forms.google.com/"
+          {facilitator.teaching_allowed&&<a
+            href="/about/contact"
             target="_blank"
             rel="noreferrer"
             className="primary-button"
           >
-            {le?.requestFacilitator || "Request Facilitator for Community Session ↗"}
-          </a>
+            {le.trainerGovernance.contact}
+          </a>}
           <button type="button" className="btn-secondary" onClick={onClose}>
             {le?.closeProfile || "Close Profile"}
           </button>
@@ -2682,144 +2686,54 @@ function EventsSection() {
    ================================================================ */
 function MedicalCarousel({ trainers: carouselTrainers, onSelect, onViewAll }) {
   const { t } = useLanguage();
-  const cs = t.learnEvents?.certifiedTrainersSection || {};
   const trackRef = useRef(null);
-  const autoRef = useRef(null);
   const isDragging = useRef(false);
   const startX = useRef(0);
   const startScroll = useRef(0);
   const hasDragged = useRef(false);
-  const isUserInteracting = useRef(false);
-  const resumeTimeout = useRef(null);
-
-  /* ---- Auto-scroll (continuous smooth flow like animation effect) ---- */
-  const startAuto = useCallback(() => {
-    if (autoRef.current) return;
-    autoRef.current = setInterval(() => {
-      const el = trackRef.current;
-      if (!el || isUserInteracting.current) return;
-      el.scrollLeft += 1;
-      if (el.scrollLeft >= el.scrollWidth / 2) {
-        el.scrollLeft = 0;
-      }
-    }, 16);
-  }, []);
-
-  const stopAuto = useCallback(() => {
-    if (autoRef.current) {
-      clearInterval(autoRef.current);
-      autoRef.current = null;
-    }
-  }, []);
-
-  useEffect(() => {
-    startAuto();
-    return () => {
-      stopAuto();
-      clearTimeout(resumeTimeout.current);
-    };
-  }, [startAuto, stopAuto]);
-
-  /* ---- Prev / Next ---- */
-  const scrollBy = useCallback((dir) => {
+  const scrollBy = dir => {
     const el = trackRef.current;
     if (!el) return;
-    isUserInteracting.current = true;
-    clearTimeout(resumeTimeout.current);
-    resumeTimeout.current = setTimeout(() => {
-      isUserInteracting.current = false;
-    }, 2500);
-
     const card = el.querySelector(".ct-mc-card");
-    const step = card ? card.offsetWidth + 20 : 280;
-    const halfWidth = el.scrollWidth / 2;
-
-    if (dir < 0 && el.scrollLeft <= 10) {
-      el.scrollLeft += halfWidth;
-    } else if (dir > 0 && el.scrollLeft >= halfWidth - 10) {
-      el.scrollLeft -= halfWidth;
-    }
-
-    el.scrollBy({ left: dir * step, behavior: "smooth" });
-  }, []);
-
-  /* ---- Drag (pointer events) ---- */
-  const onPointerDown = useCallback((e) => {
-    if (e.button !== 0) return;
+    el.scrollBy({left: dir * (card ? card.offsetWidth + 20 : 280), behavior: "smooth"});
+  };
+  const onPointerDown = e => {
+    if (e.button !== 0 || carouselTrainers.length < 2) return;
     isDragging.current = true;
     hasDragged.current = false;
-    isUserInteracting.current = true;
-    clearTimeout(resumeTimeout.current);
     startX.current = e.clientX;
     startScroll.current = trackRef.current?.scrollLeft ?? 0;
     trackRef.current?.setPointerCapture(e.pointerId);
-  }, []);
-
-  const onPointerMove = useCallback((e) => {
+  };
+  const onPointerMove = e => {
     if (!isDragging.current || !trackRef.current) return;
     const dx = e.clientX - startX.current;
     if (Math.abs(dx) > 4) hasDragged.current = true;
-
-    const el = trackRef.current;
-    const halfWidth = el.scrollWidth / 2;
-    let nextScroll = startScroll.current - dx;
-    if (halfWidth > 0) {
-      if (nextScroll >= halfWidth) {
-        nextScroll -= halfWidth;
-        startX.current = e.clientX;
-        startScroll.current = nextScroll;
-      } else if (nextScroll < 0) {
-        nextScroll += halfWidth;
-        startX.current = e.clientX;
-        startScroll.current = nextScroll;
-      }
-    }
-    el.scrollLeft = nextScroll;
-  }, []);
-
-  const onPointerUp = useCallback(() => {
+    trackRef.current.scrollLeft = startScroll.current - dx;
+  };
+  const onPointerUp = () => {
     isDragging.current = false;
     setTimeout(() => { hasDragged.current = false; }, 50);
-    clearTimeout(resumeTimeout.current);
-    resumeTimeout.current = setTimeout(() => {
-      isUserInteracting.current = false;
-    }, 1500);
-  }, []);
-
-  const onMouseEnter = useCallback(() => {
-    isUserInteracting.current = true;
-    clearTimeout(resumeTimeout.current);
-  }, []);
-
-  const onMouseLeave = useCallback(() => {
-    if (!isDragging.current) {
-      clearTimeout(resumeTimeout.current);
-      resumeTimeout.current = setTimeout(() => {
-        isUserInteracting.current = false;
-      }, 300);
-    }
-  }, []);
-
+  };
   if (!carouselTrainers || carouselTrainers.length === 0) return null;
+  const items = carouselTrainers;
 
-  // Duplicate the list to create a seamless infinite circular buffer
-  const items = [...carouselTrainers, ...carouselTrainers];
 
   return (
     <section className="ct-carousel-section">
       <div className="section-container">
         <div className="ct-carousel-header">
           <div className="ct-carousel-header-text">
-            <span className="ct-section-eyebrow">{cs.clinicalFrontline || "Clinical Frontline"}</span>
-            <h3 className="ct-section-title">{cs.medicalProfessionals || "Medical Professionals"}</h3>
+            <span className="ct-section-eyebrow">{t.learnEvents.trainerGovernance.hcp}</span>
+            <h3 className="ct-section-title">{t.learnEvents.trainerGovernance.hcp}</h3>
             <p className="ct-section-sub">
-              {carouselTrainers.length} certified trainers · Drag, use arrows, or let it flow
+              {carouselTrainers.length} certified {carouselTrainers.length === 1 ? "trainer" : "trainers · Drag or use the arrows to browse"}
             </p>
           </div>
-          <div className="ct-carousel-nav-btns">
+          {carouselTrainers.length > 1 && <div className="ct-carousel-nav-btns">
             <button type="button" className="ct-nav-btn" onClick={() => scrollBy(-1)} aria-label="Previous trainer">←</button>
             <button type="button" className="ct-nav-btn" onClick={() => scrollBy(1)} aria-label="Next trainer">→</button>
-          </div>
+          </div>}
         </div>
 
         <div className="ct-carousel-outer">
@@ -2830,38 +2744,36 @@ function MedicalCarousel({ trainers: carouselTrainers, onSelect, onViewAll }) {
             onPointerMove={onPointerMove}
             onPointerUp={onPointerUp}
             onPointerCancel={onPointerUp}
-            onMouseEnter={onMouseEnter}
-            onMouseLeave={onMouseLeave}
             role="list"
-            aria-label="Medical professional trainers"
+            aria-label={t.learnEvents.trainerGovernance.hcp}
           >
-            {items.map((t, idx) => (
+            {items.map((trainer, idx) => (
               <div
-                key={`mc-${t.id}-${idx}`}
+                key={`mc-${trainer.id}-${idx}`}
                 className="ct-mc-card"
-                style={{ "--mc-color": t.badgeColor || "#0d716b" }}
+                style={{ "--mc-color": trainer.badgeColor || "#0d716b" }}
                 role="listitem"
               >
                 <div className="ct-mc-top-bar" aria-hidden="true" />
                 <div className="ct-mc-avatar-wrap">
                   <div className="ct-mc-avatar">
-                    <span className="ct-mc-initials">{t.initials}</span>
+                    <span className="ct-mc-initials">{trainer.initials}</span>
                     <span className="ct-mc-verified" aria-hidden="true">✓</span>
                   </div>
                 </div>
                 <div className="ct-mc-body">
-                  <span className="ct-mc-badge">{cs.clinicalFacilitator || "Clinical Facilitator"}</span>
-                  <strong className="ct-mc-name">{t.name}</strong>
-                  <span className="ct-mc-role">{t.role}</span>
-                  <span className="ct-mc-inst">{t.institution.split(",")[0]}</span>
+                  <span className="ct-mc-badge">{t.learnEvents.trainerGovernance.hcp}</span>
+                  <strong className="ct-mc-name">{trainer.name}</strong>
+                  <span className="ct-mc-role">{trainer.role}</span>
+                  <span className="ct-mc-inst">{trainer.institution.split(",")[0]}</span>
                 </div>
                 <div className="ct-mc-footer">
                   <button
                     type="button"
                     className="ct-mc-cta"
-                    onClick={() => !hasDragged.current && onSelect(t)}
+                    onClick={() => !hasDragged.current && onSelect(trainer)}
                     onPointerDown={(e) => e.stopPropagation()}
-                    aria-label={`View profile of ${t.name}`}
+                    aria-label={`View profile of ${trainer.name}`}
                   >
                     View profile →
                   </button>
@@ -2882,41 +2794,22 @@ function MedicalCarousel({ trainers: carouselTrainers, onSelect, onViewAll }) {
 /* ================================================================
    SECTION 4: CERTIFIED TRAINERS
    ================================================================ */
+function TrainerPermissions({trainer}){
+ const {t}=useLanguage(),copy=t.learnEvents.trainerGovernance;
+ return <div className="trainer-permissions"><dl><dt>{copy.assessment}</dt><dd>{ASSESSMENT_LABEL[trainer.assessment_status]||'Not assessed yet'}</dd><dt>{copy.certificate}</dt><dd>{trainer.certificate_ref||'—'}</dd><dt>{copy.teaching}</dt><dd>{trainer.teaching_allowed?copy.approved:copy.notApproved}</dd></dl>{trainer.teaching_allowed&&<details><summary>{copy.scope}</summary><ul>{(trainer.teaching_permissions||[]).map(p=><li key={p.scope}>{p.scope}{p.modules.length?': '+p.modules.join(', '):''}</li>)}</ul></details>}{trainer.contact_email&&<p><a href={'mailto:'+trainer.contact_email}>{trainer.contact_email}</a></p>}{trainer.contact_phone&&<p>{trainer.contact_phone}</p>}</div>;
+}
 function CertifiedTrainers() {
   const { t: i18nData } = useLanguage();
   const le = i18nData.learnEvents;
   const cs = le?.certifiedTrainersSection || {};
   const activities = usePublicActivities();
-  const cmsContent = useLearnEventsContent();
-  const cmsTrainers = (cmsContent.certifiedTrainers?.trainersList && cmsContent.certifiedTrainers.trainersList.length > 0)
-    ? cmsContent.certifiedTrainers.trainersList
-    : defaultTrainers;
-  const [trainers, setTrainers] = useState(cmsTrainers);
-  const [directoryError, setDirectoryError] = useState("");
-
-  useEffect(() => {
-    if (cmsContent.certifiedTrainers?.trainersList?.length > 0) {
-      setTrainers(cmsContent.certifiedTrainers.trainersList);
-    }
-  }, [cmsContent]);
-
-  useEffect(() => {
-    let alive = true;
-    fetch('/api/trainers')
-      .then(r => { if (!r.ok) throw new Error('Trainer directory unavailable'); return r.json(); })
-      .then(rows => {
-        if (alive && Array.isArray(rows) && rows.length > 0) {
-          // If public projection exists, overlay certified portal profiles
-          setTrainers(prev => {
-            const extra = rows.map(t => ({ ...t, category: 'medical-professional', role: 'Certified Trainer', institution: 'RCBC', bio: t.short_profile, initials: t.name.split(' ').map(n => n[0]).join(''), photo: t.photo_url }));
-            return [...prev, ...extra.filter(x => !prev.some(p => p.id === x.id || p.name === x.name))];
-          });
-        }
-      })
-      .catch(e => { if (alive) setDirectoryError(e.message); });
-    return () => { alive = false; };
-  }, []);
-
+  const [trainers,setTrainers]=useState([]);
+  const [directoryError,setDirectoryError]=useState('');
+  useEffect(()=>{
+   let active=true;
+   const refresh=()=>fetch('/api/trainers',{cache:'no-store'}).then(r=>{if(!r.ok)throw Error('Trainer directory unavailable');return r.json();}).then(rows=>{if(active){setTrainers(Array.isArray(rows)?rows.map(publicTrainer):[]);setDirectoryError('');}}).catch(e=>{if(active)setDirectoryError(e.message);});
+   refresh();window.addEventListener('focus',refresh);return()=>{active=false;window.removeEventListener('focus',refresh);};
+  },[]);
   const [selectedFacilitatorModal, setSelectedFacilitatorModal] = useState(null);
   const [activeCategory, setActiveCategory] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
@@ -2926,8 +2819,8 @@ function CertifiedTrainers() {
   const [openFaq, setOpenFaq] = useState(null);
   const [trainerLightbox, setTrainerLightbox] = useState(null);
 
-  const clinicalFacilitators = useMemo(() => trainers.filter((t) => t.category === "medical-professional"), [trainers]);
-  const advisoryFacilitators = useMemo(() => trainers.filter((t) => t.category === "advisory-support"), [trainers]);
+  const clinicalFacilitators = useMemo(() => trainers.filter((t) => t.category === "hcp"), [trainers]);
+  const advisoryFacilitators = useMemo(() => trainers.filter((t) => t.category === "non-hcp"), [trainers]);
 
   const getTrainerActivities = (trainer) => activities.filter((a) => {
     const tid = typeof trainer === 'object' ? trainer?.id : trainer;
@@ -2989,12 +2882,12 @@ function CertifiedTrainers() {
               {cs.heroTitlePrefix || "Meet your"}<br /><em>{cs.heroTitleEm || "facilitators."}</em>
             </h2>
             <p className="ct-hero-sub">
-              {cs.heroSub || "Experienced medical professionals certified under the Dementia Care Series (DCS-TTT) framework — bringing real caregiving knowledge to every session."}
+              {le.trainerGovernance.intro}
             </p>
             <div className="ct-hero-stats">
-              <div className="ct-stat"><strong>9</strong><span>{cs.statTrainers || "Certified Trainers"}</span></div>
+              <div className="ct-stat"><strong>{clinicalFacilitators.length}</strong><span>{le.trainerGovernance.hcp}</span></div>
               <div className="ct-stat-divider" />
-              <div className="ct-stat"><strong>3</strong><span>{cs.statAdvisory || "Advisory Specialists"}</span></div>
+              <div className="ct-stat"><strong>{advisoryFacilitators.length}</strong><span>{le.trainerGovernance.nonHcp}</span></div>
             </div>
           </div>
         </div>
@@ -3006,7 +2899,7 @@ function CertifiedTrainers() {
       <MedicalCarousel
         trainers={clinicalFacilitators}
         onSelect={setSelectedFacilitatorModal}
-        onViewAll={() => scrollToDirectory("medical-professional")}
+        onViewAll={() => scrollToDirectory("hcp")}
       />
 
       {/* ======================================================
@@ -3015,10 +2908,10 @@ function CertifiedTrainers() {
       <section className="ct-advisory-section">
         <div className="section-container">
           <div className="ct-advisory-header">
-            <span className="ct-section-eyebrow advisory">{cs.clinicalGovernance || "Clinical Governance"}</span>
-            <h3 className="ct-section-title">{cs.advisoryTitle || "ADFM QA/QC Advisory Board"}</h3>
+            <span className="ct-section-eyebrow advisory">{le.trainerGovernance.nonHcp}</span>
+            <h3 className="ct-section-title">{le.trainerGovernance.nonHcp}</h3>
             <p className="ct-section-sub">
-              {cs.advisorySub || "Senior specialists overseeing curriculum fidelity and certification standards."}
+              {le.trainerGovernance.nonHcpIntro}
             </p>
           </div>
 
@@ -3036,7 +2929,7 @@ function CertifiedTrainers() {
                   <span className="ct-advisory-initials">{t.initials}</span>
                 </div>
                 <div className="ct-advisory-info">
-                  <span className="ct-advisory-badge">{cs.advisoryBoardBadge || "Advisory Board"}</span>
+                  <span className="ct-advisory-badge">{le.trainerGovernance.nonHcp}</span>
                   <strong className="ct-advisory-name">{t.name}</strong>
                   <span className="ct-advisory-role">{t.role}</span>
                   <span className="ct-advisory-inst">{t.institution.split(",")[0]}</span>
@@ -3075,8 +2968,8 @@ function CertifiedTrainers() {
           <div className="directory-controls-bar">
             <div className="directory-track-tabs" role="tablist" aria-label="Facilitator Category">
               <button type="button" className={`track-tab-btn ${activeCategory === "all" ? "is-active" : ""}`} onClick={() => setActiveCategory("all")} role="tab" aria-selected={activeCategory === "all"}>{le?.all || "All"} ({trainers.length})</button>
-              <button type="button" className={`track-tab-btn ${activeCategory === "medical-professional" ? "is-active" : ""}`} onClick={() => setActiveCategory("medical-professional")} role="tab" aria-selected={activeCategory === "medical-professional"}>{cs.categoryClinical || "Clinical"} ({clinicalFacilitators.length})</button>
-              <button type="button" className={`track-tab-btn ${activeCategory === "advisory-support" ? "is-active" : ""}`} onClick={() => setActiveCategory("advisory-support")} role="tab" aria-selected={activeCategory === "advisory-support"}>{cs.categoryAdvisory || "Advisory"} ({advisoryFacilitators.length})</button>
+              <button type="button" className={`track-tab-btn ${activeCategory === "hcp" ? "is-active" : ""}`} onClick={() => setActiveCategory("hcp")} role="tab" aria-selected={activeCategory === "hcp"}>{le.trainerGovernance.hcp} ({clinicalFacilitators.length})</button>
+              <button type="button" className={`track-tab-btn ${activeCategory === "non-hcp" ? "is-active" : ""}`} onClick={() => setActiveCategory("non-hcp")} role="tab" aria-selected={activeCategory === "non-hcp"}>{le.trainerGovernance.nonHcp} ({advisoryFacilitators.length})</button>
             </div>
             <div className="directory-filters-cluster">
               <div className="directory-search-input-wrap">
@@ -3101,7 +2994,7 @@ function CertifiedTrainers() {
                 const upcomingCount = trainerActivities.filter((a) => a.status === "upcoming").length;
                 const pastCount = trainerActivities.filter((a) => a.status === "completed").length;
                 const isOpen = expandedTrainer === t.id;
-                const isAdvisory = t.category === "advisory-support";
+                const isAdvisory = t.category === "non-hcp";
                 return (
                   <article className={`trainer-profile-card ${isAdvisory ? "card-advisory-theme" : ""} ${isOpen ? "is-expanded" : ""}`} key={t.id}>
                     <div className="trainer-card-topbar">
@@ -3110,7 +3003,7 @@ function CertifiedTrainers() {
                         <span className="trainer-verified-check" title="RCBC Verified">✓</span>
                       </div>
                       <div className="trainer-primary-info">
-                        <span className={`trainer-category-chip ${isAdvisory ? "chip-advisory" : "chip-clinical"}`}>{isAdvisory ? "Advisory Board" : "Certified Trainer"}</span>
+                        <span className={`trainer-category-chip ${isAdvisory ? "chip-advisory" : "chip-clinical"}`}>{isAdvisory?le.trainerGovernance.nonHcp:le.trainerGovernance.hcp}</span>
                         <h3>{t.name}</h3>
                         <p className="trainer-role-title"><strong>{t.role}</strong> &bull; {t.institution}</p>
                       </div>
@@ -3119,7 +3012,7 @@ function CertifiedTrainers() {
                       <div className="trainer-meta-col"><span className="meta-lbl">{le?.locationLabel || "Location"}</span><strong className="meta-val">📍 {t.city}</strong></div>
                       <div className="trainer-meta-col"><span className="meta-lbl">{le?.languageLabel || "Languages"}</span><strong className="meta-val">🌐 {t.language}</strong></div>
                     </div>
-                    <p className="trainer-biography">{t.bio}</p>
+                    <p className="trainer-biography">{t.bio}</p><TrainerPermissions trainer={t}/>
                     <div className="trainer-activity-counter-bar">
                       <div className="counter-col"><strong>{upcomingCount}</strong><span>{le?.upcoming || "Upcoming"}</span></div>
                       <div className="counter-divider" />
@@ -3148,7 +3041,7 @@ function CertifiedTrainers() {
                       <button type="button" className="trainer-full-profile-btn" onClick={() => setSelectedFacilitatorModal(t)}>{le?.viewTrainerProfile ? `${le.viewTrainerProfile} →` : "View Full Profile & Activities →"}</button>
                       <div className="trainer-sub-actions-row">
                         <button type="button" className="trainer-expand-toggle-btn" onClick={() => setExpandedTrainer(isOpen ? null : t.id)} aria-expanded={isOpen}>{isOpen ? "Hide Sessions ▲" : `Sessions (${trainerActivities.length}) ▼`}</button>
-                        <a href="https://forms.google.com/" target="_blank" rel="noreferrer" className="trainer-contact-btn">{le?.requestFacilitator || "Request Facilitator ↗"}</a>
+                        {t.teaching_allowed&&<Link to="/about/contact" className="trainer-contact-btn">{le.trainerGovernance.contact} →</Link>}
                       </div>
                     </div>
                   </article>
@@ -3695,13 +3588,13 @@ function UpcomingCalendar() {
                   </div>
                   {selectedEvent.capacity && (
                     <div className="uc-meta-row">
-                      <dt>Capacity</dt>
-                      <dd>{selectedEvent.capacity} seats</dd>
+                      <dt>{le.capacityLabel}</dt>
+                      <dd>{selectedEvent.capacity} {le.seatsLabel}</dd>
                     </div>
                   )}
                   {(selectedEvent.registrationDeadlineFormatted || selectedEvent.registrationDeadline) && (
                     <div className="uc-meta-row">
-                      <dt>Reg. Deadline</dt>
+                      <dt>{le.deadlineLabel}</dt>
                       <dd>
                         {selectedEvent.registrationDeadlineFormatted || selectedEvent.registrationDeadline}
                         {isEventClosed(selectedEvent) && (
@@ -3754,7 +3647,7 @@ function UpcomingCalendar() {
 
                 {/* Action */}
                 <div className="uc-detail-action">
-                  <button type="button" className="uc-register-btn" onClick={()=>setExpandedDetails(true)}>Open full event details &amp; registration →</button>
+                  <button type="button" className="uc-register-btn" onClick={()=>setExpandedDetails(true)}>{le.openFullDetails} →</button>
                   {expandedDetails&&<ActivityModal activity={selectedEvent} onClose={()=>setExpandedDetails(false)}/>}
                   <EventPriceLabel event={selectedEvent} />
                   {selectedEvent.registration_settings&&<EventRegistration key={selectedEvent.id} activityId={selectedEvent.id}/>}
