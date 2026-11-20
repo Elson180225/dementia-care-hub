@@ -558,6 +558,7 @@ export async function authHandler(req,res,path,send) {
     [user.id]
    );
 
+   if(admin) await db.query('SELECT seed_historical_webinars()');
    if(!admin) {
     await db.query(
      `INSERT INTO trainer_profiles(

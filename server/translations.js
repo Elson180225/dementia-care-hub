@@ -8,17 +8,21 @@ import {translationPages,translationPage,friendlyField} from '../shared/translat
 import {canBulkApprove} from '../shared/bulk-translation-approval.js';
 import {randomUUID} from 'node:crypto';
 
-export async function translationCatalogue(){
+export async function translationSources(db=pool,content=null){
  const sources=sourceLeaves(translations.en);
- sourceLeaves(await getLearnEventsData(),'cms',sources);
- const activities=(await pool.query("SELECT id,title,description,audience,venue,registration_link FROM activities WHERE published_at IS NOT NULL AND status IN ('published','completed','verified','archived')")).rows;
+ sourceLeaves(content || await getLearnEventsData(),'cms',sources);
+ const activities=(await db.query("SELECT id,title,description,audience,venue,registration_link FROM activities WHERE published_at IS NOT NULL AND status IN ('published','completed','verified','archived')")).rows;
  sourceLeaves(activities,'activities',sources);
- const settings=(await pool.query("SELECT s.activity_id AS id,s.fee,s.instructions,s.general_instructions FROM event_registration_settings s JOIN activities a ON a.id=s.activity_id WHERE a.published_at IS NOT NULL AND a.status IN ('published','completed','verified','archived')")).rows;
+ const settings=(await db.query("SELECT s.activity_id AS id,s.fee,s.instructions,s.general_instructions FROM event_registration_settings s JOIN activities a ON a.id=s.activity_id WHERE a.published_at IS NOT NULL AND a.status IN ('published','completed','verified','archived')")).rows;
  sourceLeaves(settings,'registration',sources);
  for(const [kind,fields]of Object.entries({content_pages:'id,title,body',faqs:'id,question,answer',learning_resources:'id,title,description,audience',organisations:'id,name,services,eligibility,fees,opening_hours,volunteer_details'})){
-  const rows=(await pool.query(`SELECT ${fields} FROM ${kind} WHERE publication_status='published' AND review_status<>'archived' AND language='English'`)).rows;
+  const rows=(await db.query(`SELECT ${fields} FROM ${kind} WHERE publication_status='published' AND review_status<>'archived' AND language='English' ${kind==='organisations'?'AND NOT is_example':''}`)).rows;
   sourceLeaves(rows,'records/'+kind,sources);
  }
+ return sources;
+}
+export async function translationCatalogue(){
+ const sources=await translationSources();
  await pool.query("UPDATE translation_entries SET status='needs-review',expert_reviewed_by=NULL,approved_by=NULL,expert_reviewed_at=NULL,approved_at=NULL,revision=revision+1,updated_at=now() WHERE status<>'needs-review' AND (NOT ($1::jsonb ? source_key) OR $1::jsonb->>source_key<>source_text)",[JSON.stringify(sources)]);
  return sources;
 }

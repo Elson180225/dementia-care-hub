@@ -21,7 +21,7 @@ test('PostgreSQL portal and administrative workflows',{skip:!process.env.TEST_DA
  const connection=new URL(process.env.TEST_DATABASE_URL);connection.searchParams.set('options',`-c search_path=${schema},public`);
  const db=new pg.Pool({connectionString:connection.toString()});let server;
  try {
-  for(const name of ['001_shared_records.sql','003_admin_auth.sql','004_record_details.sql','005_admin_workflow.sql','006_portal_operations.sql','007_content_feedback.sql','008_idle_sessions.sql','014_enquiry_notifications.sql','015_trainer_listing_approval.sql','016_trainer_certificate_evidence.sql','017_trainer_details_and_resource_examples.sql','018_trainer_assessment_status.sql','012_participants.sql','015_event_registration.sql','016_registration_setup.sql','017_participant_history.sql','019_programme_intakes.sql','022_password_reset.sql','023_trainer_governance.sql','024_trainer_archive.sql']) await db.query(await readFile(new URL('../database/'+name,import.meta.url),'utf8'));
+  for(const name of ['001_shared_records.sql','003_admin_auth.sql','004_record_details.sql','005_admin_workflow.sql','006_portal_operations.sql','007_content_feedback.sql','008_idle_sessions.sql','014_enquiry_notifications.sql','015_trainer_listing_approval.sql','016_trainer_certificate_evidence.sql','017_trainer_details_and_resource_examples.sql','018_trainer_assessment_status.sql','012_participants.sql','015_event_registration.sql','016_registration_setup.sql','017_participant_history.sql','019_programme_intakes.sql','022_password_reset.sql','023_trainer_governance.sql','024_trainer_archive.sql','025_persistent_learn_events.sql']) await db.query(await readFile(new URL('../database/'+name,import.meta.url),'utf8'));
   server=spawn(process.execPath,['server/index.js'],{env:{...process.env,DATABASE_URL:connection.toString(),SUBSCRIBER_DATABASE_URL:'',SUBSCRIBER_TOKEN_SECRET:'test-secret-'.repeat(5),REMINDERS_ENABLED:'false',API_PORT:'3098'},stdio:['ignore','pipe','pipe']});
   let serverErrors='';server.stderr.on('data',d=>{serverErrors+=d;});
   await new Promise((resolve,reject)=>{server.stdout.once('data',resolve);server.once('error',reject);server.once('exit',()=>reject(new Error('Test API exited: '+serverErrors)));});
@@ -103,7 +103,7 @@ test('PostgreSQL portal and administrative workflows',{skip:!process.env.TEST_DA
   assert.equal(checked.assessment_result,'Passed practical assessment');
   assert.equal(checked.healthcare_professional,true);
   assert.ok(checked.listingConsentAt);
-  assert.equal(ok(await request('public/organisations')).data.filter(r=>r.is_example).length,3);
+  assert.equal(ok(await request('public/organisations')).data.filter(r=>r.is_example).length,0);
 
   assert.equal((await fetch('http://127.0.0.1:3098'+photo)).status,200);
   assert.equal((await fetch('http://127.0.0.1:3098'+document)).status,403);
@@ -125,14 +125,14 @@ test('PostgreSQL portal and administrative workflows',{skip:!process.env.TEST_DA
   ok(await action({type:'ACTIVITY_SAVE',activity},secondLogin.cookie),403);
   ok(await action({type:'ACTIVITY_SUBMIT',id:activity.id},trainer.cookie));
   ok(await action({type:'ACTIVITY_SAVE',activity},trainer.cookie),409);
-  assert.equal(ok(await request('activities')).data.length,0);
+  assert.equal(ok(await request('activities')).data.some(a=>a.id===activity.id),false);
   // The admin approval action publishes a submitted workshop in one step.
   ok(await action({type:'ADMIN_REVIEW',target:'activity',id:activity.id,decision:'published'},trainer.cookie),403);
   ok(await action({type:'ADMIN_REVIEW',target:'activity',id:activity.id,decision:'published'}));
   const publishedActivity=(await db.query('SELECT status,published_at FROM activities WHERE id=$1',[activity.id])).rows[0];
   assert.equal(publishedActivity.status,'published');
   assert.ok(publishedActivity.published_at);
-  assert.equal(ok(await request('activities')).data[0].id,activity.id);
+  assert.ok(ok(await request('activities')).data.some(a=>a.id===activity.id));
   ok(await action({type:'ADMIN_REVIEW',target:'activity',id:activity.id,decision:'published'}),409);
   ok(await action({type:'COMPLETION_SAVE',id:activity.id,values:{venue:'Online',hours:2,trainerHours:{[trainerId]:2,[secondId]:2},participants:12}},trainer.cookie));
   assert.equal((await db.query('SELECT * FROM annual_trainer_contributions')).rowCount,0);
