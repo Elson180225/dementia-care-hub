@@ -1046,6 +1046,94 @@ export const translations = {
       "visitRotarySite": "Visit the Rotary Club website",
       "advisorLabel": "Project Advisor"
     },
+    "welcomeGuide": {
+      "title": "Welcome to Dementia Care Connect",
+      "intro": "Answer a few quick questions and we will show you where to start.",
+      "privacy": "Your answers are kept on this device only.",
+      "progress": "Question {current} of {total}",
+      "skip": "Skip",
+      "back": "Back",
+      "close": "Close",
+      "reopen": "Help me find where to start",
+      "questions": {
+        "language": "Which language do you prefer?",
+        "who": "Who are you looking for help for?",
+        "concern": "What would you like help with?",
+        "city": "Which city are you in?"
+      },
+      "who": {
+        "self": "Myself",
+        "family": "A family member",
+        "carer": "I am a carer",
+        "learning": "I am just learning"
+      },
+      "concern": {
+        "changes": "Noticing changes",
+        "diagnosed": "Recently diagnosed",
+        "service": "Looking for a service",
+        "learn": "I want to learn"
+      },
+      "city": {
+        "Bintulu": "Bintulu",
+        "Miri": "Miri",
+        "Sibu": "Sibu",
+        "Kuching": "Kuching",
+        "Other": "Other / not sure"
+      },
+      "anywhere": "your area",
+      "resultKicker": "Your next steps",
+      "checklistTitle": "Your checklist",
+      "print": "Print checklist",
+      "startAgain": "Start again",
+      "disclaimer": "This guide gives general information only. It is not a diagnosis. Please see a doctor if you are worried.",
+      "results": {
+        "changes": {
+    "title": "Start with: Concerned about changes",
+    "text": "Find out which changes are worth checking and how to get an assessment.",
+    "button": "Go to assessment and healthcare",
+    "steps": {
+      "notes": "Write down the changes you have noticed and when they started.",
+      "signs": "Read about the early signs of dementia.",
+      "talk": "Talk gently with your family member and offer to go to the appointment together.",
+      "doctor": "Book a visit with a doctor or clinic in {city}.",
+      "bring": "Bring your notes and a list of current medicines to the visit."
+    }
+        },
+        "diagnosed": {
+    "title": "Start with: After a diagnosis",
+    "text": "Find care, services and support for life after a dementia diagnosis.",
+    "button": "Go to care and support",
+    "steps": {
+      "ask": "Ask the doctor which type of dementia it is and what to expect next.",
+      "group": "Find a support group near {city}.",
+      "money": "Check the government and financial support you may be able to get.",
+      "plan": "Start planning ahead for future care and legal matters.",
+      "selfCare": "Look after yourself too. Read the tips for carers."
+    }
+        },
+        "service": {
+    "title": "Start with: Find a service",
+    "text": "Search clinics, support services, financial help and equipment in Sarawak.",
+    "button": "Open the Resource Finder",
+    "steps": {
+      "need": "Choose what you need: healthcare, support services, financial help or equipment.",
+      "place": "Choose {city} as your location, or Anywhere in Sarawak.",
+      "call": "Call the service before you visit to check opening hours and fees."
+    }
+        },
+        "learn": {
+    "title": "Start with: Learn about dementia",
+    "text": "Simple explanations, early signs and free learning sessions.",
+    "button": "Start learning",
+    "steps": {
+      "basics": "Read what dementia is, in simple words.",
+      "risk": "Learn the early signs and how to lower the risk.",
+      "webinar": "Join a free RCBC webinar or workshop.",
+      "updates": "Sign up to Get Updated to hear about new events."
+    }
+        }
+      }
+    },
     "findHelp": {
       "kicker": "Find Help & Support",
       "title": "Start from where you are.",
