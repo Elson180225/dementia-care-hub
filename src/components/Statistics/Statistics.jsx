@@ -1,3 +1,4 @@
+import Trans from "../../i18n/Trans";
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 
@@ -308,9 +309,9 @@ function BarChart({
                         )}%`,
                       }}
                     >
-                      {bar.value}%
+                      {bar.value}<Trans id="statsAged">%
                       aged 60+
-                    </div>
+                    </Trans></div>
                   )}
                 </div>
               </button>
@@ -319,11 +320,11 @@ function BarChart({
         )}
       </div>
 
-      <p className="bar-chart-caption">
+      <p className="bar-chart-caption"><Trans id="districtAgedCaption">
         Share of district
         population aged 60 years
         and above.
-      </p>
+      </Trans></p>
     </div>
   );
 }
@@ -374,7 +375,7 @@ function Statistics() {
       observer.disconnect();
   }, []);
 
-  const { t } = useLanguage();
+  const { t, translateLabel } = useLanguage();
   const statText = t.statistics || {};
 
   const activeStatistic =
@@ -456,7 +457,7 @@ function Statistics() {
         <div
           className="statistics-tabs"
           role="tablist"
-          aria-label="Statistics categories"
+          aria-label={translateLabel("Statistics categories", "statsCategories")}
         >
           {statistics.map((stat) => {
             const label = stat.id === "malaysia" 

@@ -1,3 +1,4 @@
+import Trans from "../i18n/Trans";
 import FieldInfo, { fieldExample } from "../components/FieldInfo";
 import FormFeedback from "../components/FormFeedback";
 import { useEffect, useRef, useState } from 'react';
@@ -99,7 +100,7 @@ export default function Contact() {
             {field === 'type' ? <select id={`contact-${field}`} name={field} value={values[field]} onChange={change} required aria-invalid={!!errors[field]} aria-describedby={errors[field] ? `${field}-error` : undefined}>{enquiryTypes.map((type,index) => <option key={type} value={type}>{c.enquiryOptions?.[index]||type}</option>)}</select> : field === 'message' ? <textarea id={`contact-${field}`} name={field} value={values[field]} onChange={change} required maxLength={5000} rows={6} aria-invalid={!!errors[field]} aria-describedby={errors[field] ? `${field}-error` : undefined} /> : <input id={`contact-${field}`} name={field} type={field === 'email' ? 'email' : 'text'} autoComplete={field} maxLength={field === 'name' ? 120 : 254} value={values[field]} onChange={change} required aria-invalid={!!errors[field]} aria-describedby={errors[field] ? `${field}-error` : undefined} />}
             <FormFeedback id={`${field}-error`}>{errors[field]}</FormFeedback>
           </div>)}
-          <div className="contact-trap" aria-hidden="true"><label htmlFor="contact-website">Leave this field empty</label><input id="contact-website" name="website" tabIndex={-1} autoComplete="off" value={values.website} onChange={change} /></div>
+          <div className="contact-trap" aria-hidden="true"><label htmlFor="contact-website"><Trans id="leaveBlank">Leave this field empty</Trans></label><input id="contact-website" name="website" tabIndex={-1} autoComplete="off" value={values.website} onChange={change} /></div>
           <button className="contact-submit" disabled={busy} type="submit">{busy ? (c.sending || 'Sending…') : (c.send || 'Send Enquiry')}</button>
           {status && <div ref={result} tabIndex={-1} role={status === 'failure' ? 'alert' : 'status'} className={`contact-result ${status}`}>{status === 'success' ? (c.success || 'Thank you. Your enquiry has been sent to the Alzheimer’s Care Project team.') : <><p>{c.failure || 'Your enquiry could not be sent. Your information has been retained. Please try again.'}</p><button type="submit" disabled={busy}>{c.retry || 'Retry enquiry'}</button></>}</div>}
         </form>

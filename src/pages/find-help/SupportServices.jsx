@@ -1,3 +1,4 @@
+import Trans from "../../i18n/Trans";
 import { useEffect, useMemo, useState } from "react";
 
 import { useLanguage } from "../../i18n/LanguageContext";
@@ -55,7 +56,7 @@ function SupportServiceIcon({ category = "" }) {
 }
 
 function SupportServices() {
-  const { t, translateContent } = useLanguage();
+  const { t, translateContent, translateLabel } = useLanguage();
   const ss = t.supportServicesPage || {};
   const categoryLabel=value=>{const index=categories.indexOf(value)-1;return t.supportDirectory?.categories?.[index]||value;};
 
@@ -298,13 +299,13 @@ function SupportServices() {
 
           <div className="support-managed-note">
             <div>
-              <strong>
+              <strong><Trans id="directoryTitle">
                 Database-managed directory
-              </strong>
+              </Trans></strong>
 
-              <span>
+              <span><Trans id="servicesDirectoryNote">
                 All published directory records added by RCBC will appear here automatically.
-              </span>
+              </Trans></span>
             </div>
 
             <span className="support-managed-count">
@@ -347,7 +348,7 @@ function SupportServices() {
                   event.target.value
                 )
               }
-              aria-label="Filter by service category"
+              aria-label={translateLabel("Filter by service category", "filterService")}
             >
               {categories.map(
                 (item) => (
@@ -357,7 +358,7 @@ function SupportServices() {
                   >
                     {item === "All"
                       ? (ss.allServices || "All service types")
-                      : categoryLabel(item)}
+                      : translateLabel(categoryLabel(item))}
                   </option>
                 )
               )}
@@ -370,7 +371,7 @@ function SupportServices() {
                   event.target.value
                 )
               }
-              aria-label="Filter by city"
+              aria-label={translateLabel("Filter by city", "otherCityFilter")}
             >
               {cities.map(
                 (item) => (
@@ -435,15 +436,15 @@ function SupportServices() {
                       <div className="support-service-card-tags">
                         <span className="support-service-category">
                           {
-                            categoryLabel(service.category || service.databaseCategory)
+                            translateLabel(categoryLabel(service.category || service.databaseCategory))
                           }
                         </span>
 
                         {service.isDatabaseRecord && (
                           <span className="support-database-badge">
                             {service.isExample
-                              ? "Database sample"
-                              : "Database record"}
+                              ? translateLabel("Database sample", "directorySample")
+                              : translateLabel("Database record", "directoryRecord")}
                           </span>
                         )}
                       </div>
@@ -460,7 +461,7 @@ function SupportServices() {
 
                     <p className="support-service-description">
                       {
-                        service.service
+                        translateLabel(service.service)
                       }
                     </p>
 
@@ -484,7 +485,7 @@ function SupportServices() {
 
                         <strong>
                           {
-                            service.specialistField
+                            translateLabel(service.specialistField)
                           }
                         </strong>
                       </div>
@@ -514,7 +515,7 @@ function SupportServices() {
 
                     {service.isDatabaseRecord && (
                       <div className="support-service-source">
-                        <span>Source</span>
+                        <span><Trans id="sourceLabel">Source</Trans></span>
                         <strong>
                           {service.source ||
                             "Pending"}
@@ -558,7 +559,7 @@ function SupportServices() {
                       </span>
 
                       <strong>
-                        {t.supportDirectory?.statusLabels?.[service.status]||service.status}
+                        {translateLabel(t.supportDirectory?.statusLabels?.[service.status]||service.status)}
                       </strong>
                     </div>
                   </article>
