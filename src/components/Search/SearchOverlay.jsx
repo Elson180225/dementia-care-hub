@@ -2,179 +2,52 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { useLanguage } from "../../i18n/LanguageContext";
 import "./SearchOverlay.css";
+import { searchItems } from "./searchItems";
+import { rankSearch, publicSearchItems } from "../../../shared/site-search";
+import { lockDialogScroll } from "../dialogScroll";
 
-const searchItems = [
-  {
-    title: "What is Dementia?",
-    description:
-      "Learn what dementia is and how it can affect memory, thinking and daily life.",
-    path: "/understand-dementia",
-    category: "Understand Dementia",
-    keywords: "dementia memory thinking symptoms information",
-  },
-  {
-    title: "Alzheimer's Disease",
-    description:
-      "Learn about Alzheimer's disease, the most common form of dementia.",
-    path: "/understand-dementia#common-types",
-    category: "Understand Dementia",
-    keywords: "alzheimer alzheimers disease dementia memory",
-  },
-  {
-    title: "Signs & Changes",
-    description:
-      "Explore common memory, behaviour and daily functioning changes.",
-    path: "/understand-dementia#early-signs",
-    category: "Understand Dementia",
-    keywords: "signs changes symptoms memory behaviour behavior",
-  },
-  {
-    title: "When to Seek Medical Advice",
-    description:
-      "Guidance on when changes may need assessment by a healthcare professional.",
-    path: "/understand-dementia#medical-advice",
-    category: "Understand Dementia",
-    keywords: "doctor medical help assessment healthcare advice",
-  },
-  {
-    title: "Healthy Ageing & Risk Reduction",
-    description:
-      "Information about healthy ageing and reducing dementia-related risks.",
-    path: "/understand-dementia#healthy-living",
-    category: "Understand Dementia",
-    keywords: "healthy ageing aging risk reduction prevention health",
-  },
-
-  {
-    title: "Healthcare Resources",
-    description:
-      "Find doctors, mental health professionals and healthcare organisations.",
-    path: "/find-help/healthcare-resources",
-    category: "Find Help",
-    keywords: "doctor hospital healthcare mental health professional medical",
-  },
-  {
-    title: "Financial Resources",
-    description:
-      "Explore organisations and financial resources you may consider contacting.",
-    path: "/find-help/financial-resources",
-    category: "Find Help",
-    keywords: "financial money assistance funding resources support",
-  },
-  {
-    title: "Equipment & Daily Living",
-    description:
-      "Find practical equipment and resources that may support daily living.",
-    path: "/find-help/equipment-resources",
-    category: "Find Help",
-    keywords: "equipment daily living home safety resources",
-  },
-  {
-    title: "Services Near You",
-    description:
-      "Explore available community services and support organisations.",
-    path: "/find-help/services",
-    category: "Find Help",
-    keywords: "services location organisation organization community nearby",
-  },
-
-  {
-    title: "Supporting Someone with Dementia",
-    description:
-      "Practical support for family members, friends and caregivers.",
-    path: "/caregiver-support/supporting-someone",
-    category: "Caregiver Support",
-    keywords: "caregiver carer family support loved one",
-  },
-  {
-    title: "Caregiver Wellbeing",
-    description:
-      "Resources focused on caregiver wellbeing and support.",
-    path: "/caregiver-support/wellbeing",
-    category: "Caregiver Support",
-    keywords: "caregiver wellbeing wellness stress support family",
-  },
-
-  {
-    title: "Dementia Education",
-    description:
-      "Explore learning materials about dementia and Alzheimer's disease.",
-    path: "/learn-events/dementia-education",
-    category: "Learn & Events",
-    keywords: "education learning dementia alzheimer resources",
-  },
-  {
-    title: "Training Resources",
-    description:
-      "Access training and educational resources.",
-    path: "/learn-events/training-resources",
-    category: "Learn & Events",
-    keywords: "training resources learning education",
-  },
-  {
-    title: "Webinars",
-    description:
-      "Explore dementia-related webinars and learning sessions.",
-    path: "/learn-events/webinars",
-    category: "Learn & Events",
-    keywords: "webinar online event learning education",
-  },
-  {
-    title: "Certified Trainer Events",
-    description:
-      "Find upcoming Certified Trainer-led events and workshops.",
-    path: "/learn-events/events",
-    category: "Learn & Events",
-    keywords: "event workshop trainer certified city language",
-  },
-
-  {
-    title: "About the Project",
-    description:
-      "Learn more about Rotary Hope Care and the Alzheimer's Care project.",
-    path: "/about",
-    category: "About the Project",
-    keywords: "about rotary hope care project",
-  },
-  {
-    title: "Contact Us",
-    description:
-      "Contact the project team if you need help finding information.",
-    path: "/about/contact",
-    category: "About the Project",
-    keywords: "contact email whatsapp help team",
-  },
-];
 
 function SearchOverlay({ isOpen, onClose }) {
-  const { t } = useLanguage();
+  const { t, translateContent } = useLanguage();
   const s = t.search;
   const [query, setQuery] = useState("");
   const inputRef = useRef(null);
+  const dialogRef = useRef(null);
+  const [remoteItems, setRemoteItems] = useState([]);
+  const [partial, setPartial] = useState(false);
+  const [announcement, setAnnouncement] = useState("");
+  useEffect(() => {
+    if (!isOpen) return;
+    const controller = new AbortController();
+    const sources = ['/api/activities', '/api/public/organisations', '/api/public/learning_resources'];
+    Promise.allSettled(sources.map(async url => {
+      const response = await fetch(url, { signal: controller.signal });
+      if (!response.ok) throw Error('Search source unavailable');
+      const data = await response.json();
+      if (!Array.isArray(data)) throw Error('Invalid search source');
+      return data;
+    })).then(results => {
+      if (controller.signal.aborted) return;
+      setPartial(results.some(result => result.status === 'rejected'));
+      setRemoteItems(publicSearchItems(...results.map(result => result.status === 'fulfilled' ? result.value : [])));
+    });
+    return () => controller.abort();
+  }, [isOpen]);
 
   useEffect(() => {
     if (!isOpen) return;
 
-    document.body.style.overflow = "hidden";
-
-    const timer = setTimeout(() => {
-      inputRef.current?.focus();
-    }, 100);
-
-    const handleEscape = (event) => {
-      if (event.key === "Escape") {
-        onClose();
-      }
-    };
-
-    window.addEventListener("keydown", handleEscape);
-
+    const previous = document.activeElement;
+    const unlock = lockDialogScroll();
+    const dialog = dialogRef.current;
+    dialog?.showModal();
+    inputRef.current?.focus();
     return () => {
-      clearTimeout(timer);
-      document.body.style.overflow = "";
-      window.removeEventListener("keydown", handleEscape);
+      dialog?.close();
+      unlock();
+      previous?.focus?.();
     };
-  }, [isOpen, onClose]);
+  }, [isOpen]);
 
   useEffect(() => {
     if (!isOpen) {
@@ -182,40 +55,31 @@ function SearchOverlay({ isOpen, onClose }) {
     }
   }, [isOpen]);
 
-  const results = useMemo(() => {
-    const searchQuery = query.trim().toLowerCase();
-
-    if (!searchQuery) {
-      return [];
-    }
-
-    return searchItems.filter((item) => {
-      const searchableText = `
-        ${item.title}
-        ${item.description}
-        ${item.category}
-        ${item.keywords}
-      `.toLowerCase();
-
-      return searchableText.includes(searchQuery);
-    });
-  }, [query]);
+  const results = useMemo(() => rankSearch([
+    ...translateContent(searchItems, 'search/pages'),
+    ...translateContent(remoteItems, 'search/content'),
+  ], query), [query, remoteItems, translateContent]);
+  useEffect(() => {
+    const timer = setTimeout(() => setAnnouncement(query.trim() ? `${results.length} ${results.length === 1 ? s.result : s.results}` : ''), 300);
+    return () => clearTimeout(timer);
+  }, [query, results.length, s.result, s.results]);
 
   if (!isOpen) {
     return null;
   }
 
   return (
-    <div
+    <dialog
+      ref={dialogRef}
       className="search-overlay"
-      role="dialog"
-      aria-modal="true"
+      onCancel={event => { event.preventDefault(); onClose(); }}
       aria-label="Search website"
     >
       <button
         className="search-backdrop"
         onClick={onClose}
         aria-label="Close search"
+        tabIndex={-1}
       />
 
       <div className="search-panel">
@@ -234,15 +98,25 @@ function SearchOverlay({ isOpen, onClose }) {
           </button>
         </div>
 
+        <label htmlFor="site-search-input">{s.label}</label>
+        <p className="search-status" role="status">{announcement}</p>
+        {partial && <p>Some event or resource results are unavailable. Page search is still available.</p>}
         <div className="search-input-wrapper">
           <span className="search-icon">⌕</span>
 
           <input
+            id="site-search-input"
             ref={inputRef}
             type="search"
             placeholder={s.placeholder}
             value={query}
             onChange={(event) => setQuery(event.target.value)}
+            onKeyDown={(event) => {
+              if (event.key !== 'Escape' || event.nativeEvent.isComposing) return;
+              // Chromium otherwise clears a filled search input before dismissing the dialog.
+              event.preventDefault();
+              onClose();
+            }}
             aria-label="Search website"
           />
 
@@ -294,7 +168,7 @@ function SearchOverlay({ isOpen, onClose }) {
               <div className="search-results-list">
                 {results.map((item) => (
                   <Link
-                    key={item.path}
+                    key={item.id || item.path}
                     to={item.path}
                     className="search-result"
                     onClick={onClose}
@@ -325,7 +199,7 @@ function SearchOverlay({ isOpen, onClose }) {
           </div>
         )}
       </div>
-    </div>
+    </dialog>
   );
 }
 

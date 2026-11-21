@@ -1,5 +1,6 @@
+import { LastReviewed } from '../../components/PublicFeatures';
 import { useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 
 import { useLanguage } from "../../i18n/LanguageContext";
 
@@ -124,6 +125,8 @@ function normaliseCategory(value = "") {
 
 function ResourceFinder() {
   const { t } = useLanguage();
+  const { search } = useLocation();
+  const linkedResource = new URLSearchParams(search).get("resource");
   const rf = t.resourceFinderPage || {};
   const currentNeeds = rf.needs || needs;
 
@@ -222,6 +225,7 @@ function ResourceFinder() {
       return types.map((type) => ({
         id: `${record.id}-${type}`,
         source,
+        recordId: String(record.id),
         title:
           record.name ||
           "Published resource",
@@ -261,6 +265,20 @@ function ResourceFinder() {
       }));
     });
   }, [directory]);
+
+  useEffect(() => {
+    if (!linkedResource) return;
+    const resource = allResources.find(row => row.recordId === linkedResource);
+    if (!resource) return;
+    setNeed(resource.source);
+    setSupportType('');
+    setLocation('');
+    setStep(3);
+    setShowResults(true);
+    setExpandedResource(resource.id);
+    const frame = requestAnimationFrame(() => document.getElementById('finder-results')?.scrollIntoView({ block: 'start' }));
+    return () => cancelAnimationFrame(frame);
+  }, [linkedResource, allResources]);
 
   /* =========================================================
      FILTER
@@ -1122,6 +1140,7 @@ function ResourceFinder() {
                             <strong>{resource.reviewStatus || "Not provided"}</strong>
                           </div>
 
+                          <LastReviewed value={resource.lastReviewed} />
                           {resource.website && (
                             <div className="rf-result-details-wide">
                               <span>Website</span>
