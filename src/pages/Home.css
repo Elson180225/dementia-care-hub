@@ -940,23 +940,3 @@ img {
     transition: none;
   }
 }
-
-
-/* Button that opens the welcome guide again */
-.hero-guide-link {
-  margin-top: 14px;
-  padding: 6px 0;
-  border: 0;
-  background: none;
-  color: inherit;
-  font: inherit;
-  font-weight: 600;
-  text-decoration: underline;
-  text-underline-offset: 4px;
-  cursor: pointer;
-}
-
-.hero-guide-link:focus-visible {
-  outline: 3px solid var(--color-gold-500, #f7a81b);
-  outline-offset: 3px;
-}
