@@ -1,3 +1,4 @@
+import Trans from "../../i18n/Trans";
 import { useEffect, useMemo, useState } from "react";
 import { useLanguage } from "../../i18n/LanguageContext";
 
@@ -38,7 +39,7 @@ function GovernmentResourceIcon({ category = "" }) {
 }
 
 function GovernmentFinancial() {
-  const { t } = useLanguage();
+  const { t, translateLabel } = useLanguage();
   const gf = t.governmentFinancialPage || {};
 
   const [search, setSearch] = useState("");
@@ -120,9 +121,9 @@ function GovernmentFinancial() {
       const searchableText = `
         ${resource.title}
         ${resource.agency}
-        ${resource.category}
+        ${translateLabel(resource.category)}
         ${resource.location}
-        ${resource.summary}
+        ${translateLabel(resource.summary)}
       `.toLowerCase();
 
       const matchesSearch = searchableText.includes(
@@ -211,16 +212,16 @@ function GovernmentFinancial() {
           </div>
 
           <div className="government-database-note">
-            <strong>Database-managed directory</strong>
-            <span>
+            <strong><Trans id="directoryTitle">Database-managed directory</Trans></strong>
+            <span><Trans id="financeDirectoryNote">
               Only published financial records from the RCBC admin database are shown here.
-            </span>
+            </Trans></span>
           </div>
 
           {directoryLoading && (
-            <p className="government-database-status" role="status">
+            <p className="government-database-status" role="status"><Trans id="publishedLoading">
               Loading published resources…
-            </p>
+            </Trans></p>
           )}
 
           {directoryError && (
@@ -252,7 +253,7 @@ function GovernmentFinancial() {
               onChange={(event) =>
                 setCategory(event.target.value)
               }
-              aria-label="Filter resource category"
+              aria-label={translateLabel("Filter resource category", "filterCategory")}
             >
               {categories.map((item) => (
                 <option
@@ -261,7 +262,7 @@ function GovernmentFinancial() {
                 >
                   {item === "All"
                     ? (gf.allCategories || "All resource types")
-                    : item}
+                    : translateLabel(item)}
                 </option>
               ))}
             </select>
@@ -303,12 +304,12 @@ function GovernmentFinancial() {
                   className="government-card"
                 >
                   <div className="government-card-visual" aria-hidden="true">
-                    <GovernmentResourceIcon category={resource.category} />
+                    <GovernmentResourceIcon category={translateLabel(resource.category)} />
                   </div>
 
                   <div className="government-card-top">
                     <span className="government-category">
-                      {resource.category}
+                      {translateLabel(resource.category)}
                     </span>
 
                     <span className="government-location">
@@ -331,7 +332,7 @@ function GovernmentFinancial() {
                   </div>
 
                   <p className="government-summary">
-                    {resource.summary}
+                    {translateLabel(resource.summary)}
                   </p>
 
                   {/* INFORMATION */}
@@ -343,7 +344,7 @@ function GovernmentFinancial() {
                       </span>
 
                       <p>
-                        {resource.eligibility}
+                        {translateLabel(resource.eligibility)}
                       </p>
                     </div>
 
@@ -353,7 +354,7 @@ function GovernmentFinancial() {
                       </span>
 
                       <p>
-                        {resource.access}
+                        {translateLabel(resource.access)}
                       </p>
                     </div>
                   </div>
@@ -421,7 +422,7 @@ function GovernmentFinancial() {
                     </span>
 
                     <span className="government-record-status">
-                      {resource.status}
+                      {translateLabel(resource.status)}
                     </span>
 
                     {resource.lastReviewed && (

@@ -1,3 +1,4 @@
+import { inlineCopyMeta } from './inline-copy-metadata.js';
 export const translationPages=[
  {id:'home',title:'Home',description:'Welcome text, visitor pathways and statistics'},
  {id:'understanding',title:'Understanding Dementia',description:'Dementia information and educational guidance'},
@@ -12,7 +13,8 @@ export const translationPages=[
 ];
 export const translationStatusLabels={missing:'Not translated',draft:'Work in progress',review:'Waiting for review',approved:'Published','needs-review':'English changed — please update'};
 export function translationPage(key){
- const [root,section]=key.split('/');
+ const [root,section,field]=key.split('/');
+ if(root==='ui' && section==='inlineCopy') return inlineCopyMeta(decodeURIComponent(field || ''))?.page || 'shared';
  if(['cms','activities','registration'].includes(root))return 'education';
  if(root==='records')return 'resources';
  return {home:'home',statistics:'home',understandDementia:'understanding',learnEvents:'education',findHelp:'help',assessmentHealthcare:'help',supportDirectory:'help',supportServicesPage:'help',governmentFinancialPage:'help',equipmentPracticalPage:'help',resourceFinderPage:'help',caregiverSupport:'caregiver',aboutProject:'about',contact:'contact',projectServices:'updates',faq:'resources',publishedRecords:'resources'}[section]||'shared';

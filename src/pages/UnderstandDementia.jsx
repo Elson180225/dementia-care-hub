@@ -1,3 +1,4 @@
+import Trans from "../i18n/Trans";
 import {understandingDementiaContent} from "../../shared/public-copy";
 import PublishedRecords from "../components/PublishedRecords";
 import { useEffect, useState } from "react";
@@ -87,7 +88,7 @@ function UnderstandDementia() {
       <PublishedRecords
         kind="content_pages"
         slug="understand-dementia"
-        title="Project updates"
+        title={translationsData.inlineCopy.projectUpdates}
       />
       <section className="understand-hero">
         <div className="understand-container understand-hero-grid">
@@ -99,9 +100,9 @@ function UnderstandDementia() {
               <a className="understand-button light" href="#early-signs">
                 {t.exploreEarly} <span aria-hidden="true">↓</span>
               </a>
-              <a className="understand-text-link" href="#healthy-living">
+              <a className="understand-text-link" href="#healthy-living"><Trans id="healthyActive">
                 Healthy &amp; Active Living ↓
-              </a>
+              </Trans></a>
             </div>
           </div>
           <aside className="understand-key-card" aria-label={t.keyPoints}>

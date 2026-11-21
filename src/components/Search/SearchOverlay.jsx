@@ -147,7 +147,7 @@ const searchItems = [
 ];
 
 function SearchOverlay({ isOpen, onClose }) {
-  const { t } = useLanguage();
+  const { t, translateLabel } = useLanguage();
   const s = t.search;
   const [query, setQuery] = useState("");
   const inputRef = useRef(null);
@@ -193,13 +193,16 @@ function SearchOverlay({ isOpen, onClose }) {
       const searchableText = `
         ${item.title}
         ${item.description}
-        ${item.category}
+        ${translateLabel(item.category)}
         ${item.keywords}
+        ${translateLabel(item.title)}
+        ${translateLabel(item.description)}
+        ${translateLabel(item.category)}
       `.toLowerCase();
 
       return searchableText.includes(searchQuery);
     });
-  }, [query]);
+  }, [query, translateLabel]);
 
   if (!isOpen) {
     return null;
@@ -301,12 +304,12 @@ function SearchOverlay({ isOpen, onClose }) {
                   >
                     <div>
                       <span className="search-result-category">
-                        {item.category}
+                        {translateLabel(item.category)}
                       </span>
 
-                      <h3>{item.title}</h3>
+                      <h3>{translateLabel(item.title)}</h3>
 
-                      <p>{item.description}</p>
+                      <p>{translateLabel(item.description)}</p>
                     </div>
 
                     <span className="search-result-arrow">
