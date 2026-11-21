@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "server": "node --env-file-if-exists=.env server/index.js",
-    "test": "node --test",
+    "test": "node --test \"tests/**/*.test.js\"",
     "dev": "vite",
     "build": "vite build",
     "lint": "oxlint",
@@ -17,7 +17,8 @@
     "reminders:run": "node --env-file-if-exists=.env scripts/reminders.js",
     "brevo:check": "node --env-file-if-exists=.env scripts/check-brevo.js",
     "brevo:setup": "node --env-file-if-exists=.env scripts/check-brevo.js --setup",
-    "admin:invite": "node --env-file-if-exists=.env scripts/invite-admin.js"
+    "admin:invite": "node --env-file-if-exists=.env scripts/invite-admin.js",
+    "test:browser": "playwright test"
   },
   "dependencies": {
     "db-migrate": "^1.9.0",
@@ -27,6 +28,7 @@
     "react-router-dom": "^7.18.4"
   },
   "devDependencies": {
+    "@playwright/test": "^1.65.1",
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.7",
     "@vitejs/plugin-react": "^6.1.1",

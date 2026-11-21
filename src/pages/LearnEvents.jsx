@@ -1,3 +1,5 @@
+import { WhatsAppShare, LastReviewed } from '../components/PublicFeatures';
+import { eventPath, eventSchema } from '../../shared/public-features';
 import PublishedRecords from "../components/PublishedRecords";
 import {publicTrainer} from '../../shared/trainer-governance';
 import {ASSESSMENT_LABEL} from '../../shared/teaching-eligibility';
@@ -12,7 +14,7 @@ import {lockDialogScroll} from '../components/dialogScroll';
 import {eventDate,eventTime,eventDateTime} from '../../shared/event-dates';
 import {isPlannedProgramme} from '../../shared/programme-intakes';
 import { createPortal } from "react-dom";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useParams } from "react-router-dom";
 import { useLanguage } from "../i18n/LanguageContext";
 import TrainerDisclaimer from "../components/TrainerDisclaimer";
 
@@ -78,6 +80,7 @@ function usePublicActivities() {
   const {translateContent}=useLanguage();
   const [rows, setRows] = useState([]);
   const [loadError,setLoadError]=useState('');
+  const [loaded, setLoaded] = useState(false);
   useEffect(() => {
     let active = true;
     fetch('/api/activities')
@@ -85,6 +88,7 @@ function usePublicActivities() {
       .then(data => {
         if(!Array.isArray(data))throw new Error('Invalid event response');
         if (active) {
+          setLoaded(true);
           setRows(data.map(a => {
             const isCancelled = Boolean(a.cancelled_at);
             const isCompleted = ['completed', 'verified', 'archived'].includes(a.status);
@@ -139,6 +143,7 @@ function usePublicActivities() {
     return {...row,suitableFor:row.audience||row.suitableFor,location,fullLocation:location};
   });
   result.loadError=loadError;
+  result.loaded=loaded || Boolean(loadError);
   return result;
 }
 
@@ -291,14 +296,14 @@ function ModeIcon({ mode }) {
    ACTIVITY LANDING PAGE MODAL
    Reusable detail view for any activity — matches PDF Section 4
    ================================================================ */
-function ActivityModal({ activity, onClose }) {
+function ActivityModal({ activity, onClose, standalone = false }) {
   const [managedRegistration,setManagedRegistration]=useState(null);
   const {t}=useLanguage();
   const am=t.learnEvents?.activityModal||{};
   const dialogRef=useRef(null),closeRef=useRef(onClose);
   useEffect(()=>{closeRef.current=onClose;},[onClose]);
   useEffect(()=>{
-    if(!activity)return;
+    if(!activity || standalone)return;
     const previous=document.activeElement,unlock=lockDialogScroll();
     dialogRef.current?.focus({preventScroll:true});
     const keyboard=e=>{
@@ -313,20 +318,23 @@ function ActivityModal({ activity, onClose }) {
     };
     document.addEventListener('keydown',keyboard);
     return()=>{document.removeEventListener('keydown',keyboard);unlock();previous?.focus?.();};
-  },[activity?.id]);
+  },[activity?.id, standalone]);
   if(!activity)return null;
   const completed=['completed','verified','archived'].includes(activity.status);
   const poster=typeof activity.poster==='string'&&(/^https?:\/\//i.test(activity.poster)||activity.poster.startsWith('/'))?activity.poster:'';
   const recording=publicLink(activity.recordingLink);
-  return createPortal(<div className="event-detail-backdrop" onMouseDown={e=>{if(e.target===e.currentTarget)onClose();}}>
-    <section className="event-detail-dialog" role="dialog" aria-modal="true" aria-labelledby="event-detail-title" tabIndex={-1} ref={dialogRef}>
-      <div className="event-detail-toolbar"><span>Education &amp; Events</span><button type="button" onClick={onClose} aria-label="Close event details"><span className="dialog-close-icon" aria-hidden="true" /></button></div>
+  const Heading = standalone ? "h1" : "h2";
+  const content = <div className={standalone ? "event-page" : "event-detail-backdrop"} onMouseDown={e=>{if(e.target===e.currentTarget)onClose?.();}}>
+    <section className="event-detail-dialog" role={standalone ? undefined : "dialog"} aria-modal={standalone ? undefined : true} aria-labelledby="event-detail-title" tabIndex={-1} ref={dialogRef}>
+      <div className="event-detail-toolbar"><span>Education &amp; Events</span>{standalone ? <Link to="/learn-events/upcoming-calendar">All events</Link> : <button type="button" onClick={onClose} aria-label="Close event details"><span className="dialog-close-icon" aria-hidden="true" /></button>}</div>
       <div className="event-detail-layout">
         <aside className="event-detail-visual" aria-label="Event poster">
           {poster?<><a href={poster} target="_blank" rel="noreferrer" aria-label={'Open full-size poster for '+activity.title+' in a new tab'}><img src={poster} alt={'Poster for '+activity.title}/></a><p>Event poster</p><a className="event-poster-link" href={poster} target="_blank" rel="noreferrer">View full-size poster ↗</a></>:<div className="event-detail-no-poster"><span aria-hidden="true">▤</span><p>RCBC Education &amp; Events</p><strong>{activity.title}</strong><p>Event information and registration details are shown alongside.</p></div>}
         </aside>
         <div className="event-detail-content">
-          <header><div className="event-detail-tags"><span className="tag">{activity.type||'Education & Events'}</span><StatusBadge status={activity.status}/></div><h2 id="event-detail-title">{activity.title}</h2><EventPriceLabel event={activity}/></header>
+          <header><div className="event-detail-tags"><span className="tag">{activity.type||'Education & Events'}</span><StatusBadge status={activity.status}/></div><Heading id="event-detail-title">{activity.title}</Heading><EventPriceLabel event={activity}/></header>
+          <div className="event-detail-links"><WhatsAppShare title={activity.title} path={eventPath(activity.id)} />{!standalone && <Link to={eventPath(activity.id)} onClick={onClose}>Open event page</Link>}</div>
+          <LastReviewed value={activity.last_reviewed_at} />
           <dl className="event-detail-facts">
             <div><dt>{am.suitableFor||'Suitable for'}</dt><dd>{activity.suitableFor||activity.audience||'Public, families and caregivers'}</dd></div>
             <div><dt>{am.dateTime||'Date & time'}</dt><dd>{activity.rawDate?formatActivityDate(activity.rawDate):activity.date||'Date to be confirmed'}{(activity.rawDate||activity.time)&&<><br/>{activity.rawDate?formatActivityTime(activity.rawDate):activity.time}</>}<small>Malaysia time (MYT)</small></dd></div>
@@ -346,7 +354,27 @@ function ActivityModal({ activity, onClose }) {
         </div>
       </div>
     </section>
-  </div>,document.body);
+  </div>;
+  return standalone ? content : createPortal(content,document.body);
+}
+
+export function PublicEventPage() {
+  const { eventId } = useParams();
+  const activities = usePublicActivities();
+  const activity = activities.find(row => String(row.id) === eventId);
+  const eventTitle = activity?.title;
+  useEffect(() => {
+    if (!eventTitle) return;
+    const previousTitle = document.title;
+    document.title = eventTitle + " | Rotary Hope Care";
+    return () => { document.title = previousTitle; };
+  }, [eventTitle]);
+  const schema = activity ? eventSchema(activity, window.location.origin) : null;
+  return <main>
+    {activity && <link rel="canonical" href={new URL(eventPath(activity.id), window.location.origin).href} />}
+    {schema && <script type="application/ld+json">{JSON.stringify(schema).replace(/</g, "\\u003c")}</script>}
+    {activity ? <ActivityModal key={activity.id} activity={activity} standalone /> : <section className="section-container"><h1>{activities.loadError ? "Events unavailable" : activities.loaded ? "Event not found" : "Loading event..."}</h1><p role="status">{activities.loadError || (activities.loaded ? "This event is not currently published." : "Please wait while we load the event details.")}</p><Link to="/learn-events/upcoming-calendar">View all events</Link></section>}
+  </main>;
 }
 
 function QAModal({ resource, onClose }) {
@@ -2208,7 +2236,7 @@ function EventsSection() {
                     </div>
 
                     <div className="event-card-body">
-                      <h3 className="event-card-title">{event.title}</h3>
+                      <h3 className="event-card-title"><Link to={eventPath(event.id)}>{event.title}</Link></h3>
                       <EventPriceLabel event={event} />
                       <p className="event-card-desc">{event.description}</p>
 
@@ -3298,7 +3326,7 @@ function UpcomingCalendar() {
                     </span>
                     <StatusBadge status={selectedEvent.status} />
                   </div>
-                  <h3 className="uc-detail-title">{selectedEvent.title}</h3>
+                  <h3 className="uc-detail-title"><Link to={eventPath(selectedEvent.id)}>{selectedEvent.title}</Link></h3>
                 </div>
 
                 {/* Meta list */}

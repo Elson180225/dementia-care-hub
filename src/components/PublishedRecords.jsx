@@ -1,9 +1,12 @@
+import { LastReviewed } from './PublicFeatures';
 import { useEffect, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import { useLanguage } from '../i18n/LanguageContext';
 
 export default function PublishedRecords({ kind, category, slug, title }) {
   const { t,translateContent } = useLanguage();
   const pr = t.publishedRecords || {};
+  const { hash } = useLocation();
   const [rawRows, setRows] = useState([]);
   const rows=translateContent(rawRows,'records/'+kind);
   const [language, setLanguage] = useState('All');
@@ -30,6 +33,12 @@ export default function PublishedRecords({ kind, category, slug, title }) {
     };
   }, [kind, category]);
 
+  useEffect(() => {
+    if (!hash.startsWith('#learning-resource-') || !rawRows.length) return;
+    const target = document.getElementById(decodeURIComponent(hash.slice(1)));
+    target?.scrollIntoView({ block: 'center' });
+  }, [hash, rawRows]);
+
   const shown = rows.filter(
     (r) => (!slug || r.slug === slug) && (language === 'All' || r.language === language)
   );
@@ -51,7 +60,7 @@ export default function PublishedRecords({ kind, category, slug, title }) {
         </select>
       </label>
       {shown.map((r) => (
-        <article className="tp-card" key={r.id}>
+        <article className="tp-card" key={r.id} id={kind === "learning_resources" ? `learning-resource-${r.id}` : undefined}>
           <p>{r.is_example ? "Example only - not a real service. RCBC can edit this record." : ""}</p>
           <h3>{r.name || r.title || r.question}</h3>
           <p>{r.answer || r.body?.text || r.description || r.specialist_field}</p>
@@ -107,12 +116,7 @@ export default function PublishedRecords({ kind, category, slug, title }) {
               </>
             )}
           </p>
-          {r.last_reviewed_at && (
-            <p>
-              {pr.lastReviewed || 'Last reviewed:'}{' '}
-              {new Date(r.last_reviewed_at).toLocaleDateString('en-MY')}
-            </p>
-          )}
+          <LastReviewed value={r.last_reviewed_at} />
           {r.review_status === 'needs review' && (
             <p>{pr.reviewPending || 'Review pending. Confirm current details with the organisation.'}</p>
           )}

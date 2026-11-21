@@ -1,0 +1,6 @@
+.public-page-actions{max-width:1200px;margin:24px auto;padding:0 24px;display:flex;justify-content:flex-end}
+.whatsapp-share{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:10px 16px;border:1px solid #237a4b;border-radius:999px;color:#165d38;background:#f0fbf4;text-decoration:none;font-weight:650;line-height:1.4}
+.whatsapp-share:hover{background:#dcf4e5}.whatsapp-share:focus-visible{outline:3px solid #a66b00;outline-offset:4px}
+.last-reviewed{font-size:.85rem;line-height:1.6;color:#65586c}
+.event-detail-links{display:flex;flex-wrap:wrap;align-items:center;gap:16px;margin:20px 0}
+.event-page{padding:32px 20px}.event-page>.event-detail-dialog{margin:auto;max-height:none;overflow:visible}.event-page .event-detail-content h1{font-size:clamp(1.7rem,2.8vw,2.4rem);line-height:1.22;margin:20px 0;color:#382044;overflow-wrap:anywhere}
