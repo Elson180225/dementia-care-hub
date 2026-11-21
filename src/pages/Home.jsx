@@ -6,7 +6,6 @@ import "./Home.css";
 
 import HeroSlideshow from "../components/HeroSlideshow/HeroSlideshow";
 import FadeIn from "../components/FadeIn/FadeIn";
-import { openWelcomeGuide } from "../components/WelcomeGuide/openWelcomeGuide";
 import Statistics from "../components/Statistics/Statistics";
 
 function Home() {
@@ -61,14 +60,6 @@ function Home() {
                 {h.understandDementia}
               </Link>
             </div>
-
-            <button
-              type="button"
-              className="hero-guide-link"
-              onClick={openWelcomeGuide}
-            >
-              {t.welcomeGuide.reopen} →
-            </button>
 
             <div className="hero-help-line">
               <span className="hero-help-dot" />

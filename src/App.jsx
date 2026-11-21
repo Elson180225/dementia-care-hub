@@ -14,7 +14,6 @@ import ProjectServices from "./pages/ProjectServices";
 import Home from "./pages/Home";
 import Translations from "./admin/pages/Translations";
 import TranslationNotice from "./i18n/TranslationNotice";
-import WelcomeGuide from "./components/WelcomeGuide/WelcomeGuide";
 import LearnEvents from "./pages/LearnEvents";
 import NotFound from "./pages/NotFound";
 import Contact from "./pages/Contact";
@@ -65,7 +64,6 @@ function App() {
         <PublicOnly>
           <Header />
           <TranslationNotice />
-          <WelcomeGuide />
         </PublicOnly>
         <TrainerProvider>
 
