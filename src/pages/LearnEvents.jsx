@@ -1,3 +1,4 @@
+import Trans from "../i18n/Trans";
 import { WhatsAppShare, LastReviewed } from '../components/PublicFeatures';
 import { eventPath, eventSchema } from '../../shared/public-features';
 import PublishedRecords from "../components/PublishedRecords";
@@ -233,7 +234,7 @@ qaResources.forEach(resource => { resource.pages = resource.images.length; });
 
 /* ---- status badge ---- */
 function StatusBadge({ status }) {
-  const {t}=useLanguage();
+  const {t,translateLabel}=useLanguage();
   const labels = {
     upcoming: t.learnEvents.statusLabels.upcoming,
     completed: t.learnEvents.statusLabels.completed,
@@ -249,7 +250,7 @@ function StatusBadge({ status }) {
 
 /* ---- mode icon ---- */
 function ModeIcon({ mode }) {
-  const {t}=useLanguage();
+  const {t,translateLabel}=useLanguage();
   if (mode === "Online") {
     return (
       <span className="mode-tag mode-online">
@@ -298,7 +299,7 @@ function ModeIcon({ mode }) {
    ================================================================ */
 function ActivityModal({ activity, onClose, standalone = false }) {
   const [managedRegistration,setManagedRegistration]=useState(null);
-  const {t}=useLanguage();
+  const {t,translateLabel}=useLanguage();
   const am=t.learnEvents?.activityModal||{};
   const dialogRef=useRef(null),closeRef=useRef(onClose);
   useEffect(()=>{closeRef.current=onClose;},[onClose]);
@@ -326,10 +327,10 @@ function ActivityModal({ activity, onClose, standalone = false }) {
   const Heading = standalone ? "h1" : "h2";
   const content = <div className={standalone ? "event-page" : "event-detail-backdrop"} onMouseDown={e=>{if(e.target===e.currentTarget)onClose?.();}}>
     <section className="event-detail-dialog" role={standalone ? undefined : "dialog"} aria-modal={standalone ? undefined : true} aria-labelledby="event-detail-title" tabIndex={-1} ref={dialogRef}>
-      <div className="event-detail-toolbar"><span>Education &amp; Events</span>{standalone ? <Link to="/learn-events/upcoming-calendar">All events</Link> : <button type="button" onClick={onClose} aria-label="Close event details"><span className="dialog-close-icon" aria-hidden="true" /></button>}</div>
+      <div className="event-detail-toolbar"><span><Trans id="learnSiteTitle">Education &amp; Events</Trans></span>{standalone ? <Link to="/learn-events/upcoming-calendar">All events</Link> : <button type="button" onClick={onClose} aria-label={translateLabel("Close event details", "eventDetailsClose")}><span className="dialog-close-icon" aria-hidden="true" /></button>}</div>
       <div className="event-detail-layout">
-        <aside className="event-detail-visual" aria-label="Event poster">
-          {poster?<><a href={poster} target="_blank" rel="noreferrer" aria-label={'Open full-size poster for '+activity.title+' in a new tab'}><img src={poster} alt={'Poster for '+activity.title}/></a><p>Event poster</p><a className="event-poster-link" href={poster} target="_blank" rel="noreferrer">View full-size poster ↗</a></>:<div className="event-detail-no-poster"><span aria-hidden="true">▤</span><p>RCBC Education &amp; Events</p><strong>{activity.title}</strong><p>Event information and registration details are shown alongside.</p></div>}
+        <aside className="event-detail-visual" aria-label={translateLabel("Event poster", "eventPoster")}>
+          {poster?<><a href={poster} target="_blank" rel="noreferrer" aria-label={'Open full-size poster for '+activity.title+' in a new tab'}><img src={poster} alt={'Poster for '+activity.title}/></a><p><Trans id="eventPoster">Event poster</Trans></p><a className="event-poster-link" href={poster} target="_blank" rel="noreferrer"><Trans id="fullPoster">View full-size poster ↗</Trans></a></>:<div className="event-detail-no-poster"><span aria-hidden="true">▤</span><p><Trans id="rcbcEvents">RCBC Education &amp; Events</Trans></p><strong>{activity.title}</strong><p><Trans id="eventSideInfo">Event information and registration details are shown alongside.</Trans></p></div>}
         </aside>
         <div className="event-detail-content">
           <header><div className="event-detail-tags"><span className="tag">{activity.type||'Education & Events'}</span><StatusBadge status={activity.status}/></div><Heading id="event-detail-title">{activity.title}</Heading><EventPriceLabel event={activity}/></header>
@@ -337,7 +338,7 @@ function ActivityModal({ activity, onClose, standalone = false }) {
           <LastReviewed value={activity.last_reviewed_at} />
           <dl className="event-detail-facts">
             <div><dt>{am.suitableFor||'Suitable for'}</dt><dd>{activity.suitableFor||activity.audience||'Public, families and caregivers'}</dd></div>
-            <div><dt>{am.dateTime||'Date & time'}</dt><dd>{activity.rawDate?formatActivityDate(activity.rawDate):activity.date||'Date to be confirmed'}{(activity.rawDate||activity.time)&&<><br/>{activity.rawDate?formatActivityTime(activity.rawDate):activity.time}</>}<small>Malaysia time (MYT)</small></dd></div>
+            <div><dt>{am.dateTime||'Date & time'}</dt><dd>{activity.rawDate?formatActivityDate(activity.rawDate):activity.date||'Date to be confirmed'}{(activity.rawDate||activity.time)&&<><br/>{activity.rawDate?formatActivityTime(activity.rawDate):activity.time}</>}<small><Trans id="malaysiaTime">Malaysia time (MYT)</Trans></small></dd></div>
             <div><dt>{am.mode||'Mode'}</dt><dd><ModeIcon mode={activity.mode}/></dd></div>
             <div><dt>{am.location||'Location'}</dt><dd>{activity.fullLocation||activity.location||(activity.mode==='Online'?'Online':activity.city||'Venue to be confirmed')}</dd></div>
             <div><dt>{am.language||'Language'}</dt><dd>{activity.language||'To be confirmed'}</dd></div>
@@ -346,11 +347,11 @@ function ActivityModal({ activity, onClose, standalone = false }) {
             <div><dt>{am.speakerTrainer||'Speaker / trainer'}</dt><dd>{activity.speaker||'RCBC Education Team'}{activity.trainerId&&<><br/><Link to="/learn-events/certified-trainers" onClick={onClose}>{am.viewTrainerProfile||'View trainer profile'} →</Link></>}</dd></div>
           </dl>
           {activity.description&&<section className="event-detail-description"><h3>{am.whatYouWillLearn||'What you will learn'}</h3><p>{activity.description}</p></section>}
-          <section className="event-detail-registration" aria-label="Registration and availability">
+          <section className="event-detail-registration" aria-label={translateLabel("Registration and availability", "registrationAvailability")}>
             <EventRegistration key={activity.id} activityId={activity.id} onManaged={setManagedRegistration}/>
-            {managedRegistration===false&&(activity.status==='cancelled'?<p className="event-detail-state" role="status">This activity has been cancelled. Registration is unavailable.</p>:completed?<p className="event-detail-state" role="status">This activity has ended. Registration is closed.</p>:isEventClosed(activity)?<p className="event-detail-state" role="status">Registration is closed for this activity.</p>:publicLink(activity.registrationLink)?<div className="event-detail-external"><h3>Register for this event</h3><p>Complete the organiser’s registration form. No website account is needed.</p><a href={publicLink(activity.registrationLink)} target="_blank" rel="noreferrer" className="activity-action-btn activity-action-register">{am.registerNow||'Register now'} ↗<small>{am.externalTabNote||'Opens an external form in a new tab'}</small></a></div>:<p className="event-detail-state" role="status">Registration is not available yet. Please check back or <Link to="/about/contact" onClick={onClose}>contact RCBC</Link>.</p>)}
+            {managedRegistration===false&&(activity.status==='cancelled'?<p className="event-detail-state" role="status"><Trans id="eventCancelled">This activity has been cancelled. Registration is unavailable.</Trans></p>:completed?<p className="event-detail-state" role="status"><Trans id="eventEnded">This activity has ended. Registration is closed.</Trans></p>:isEventClosed(activity)?<p className="event-detail-state" role="status"><Trans id="eventClosed">Registration is closed for this activity.</Trans></p>:publicLink(activity.registrationLink)?<div className="event-detail-external"><h3><Trans id="registerForEvent">Register for this event</Trans></h3><p><Trans id="externalForm">Complete the organiser’s registration form. No website account is needed.</Trans></p><a href={publicLink(activity.registrationLink)} target="_blank" rel="noreferrer" className="activity-action-btn activity-action-register">{am.registerNow||'Register now'} ↗<small>{am.externalTabNote||'Opens an external form in a new tab'}</small></a></div>:<p className="event-detail-state" role="status"><Trans id="eventNotYet">Registration is not available yet. Please check back or </Trans><Link to="/about/contact" onClick={onClose}><Trans id="contactRcbc">contact RCBC</Trans></Link>.</p>)}
           </section>
-          {completed&&(recording||activity.materials)&&<section className="event-detail-description"><h3>Learning materials</h3>{recording&&<a href={recording} target="_blank" rel="noreferrer">{am.viewRecording||'View recording'} ↗</a>}{activity.materials&&<p>{activity.materials}</p>}</section>}
+          {completed&&(recording||activity.materials)&&<section className="event-detail-description"><h3><Trans id="learningMaterials">Learning materials</Trans></h3>{recording&&<a href={recording} target="_blank" rel="noreferrer">{am.viewRecording||'View recording'} ↗</a>}{activity.materials&&<p>{activity.materials}</p>}</section>}
         </div>
       </div>
     </section>
@@ -378,7 +379,7 @@ export function PublicEventPage() {
 }
 
 function QAModal({ resource, onClose }) {
-  const { t } = useLanguage();
+  const { t, translateLabel } = useLanguage();
   const [currentPage, setCurrentPage] = useState(0);
   const dialogRef = useRef(null);
   const totalPages = resource.images.length;
@@ -419,7 +420,7 @@ function QAModal({ resource, onClose }) {
           className="modal-close"
           type="button"
           onClick={onClose}
-          aria-label="Close Q&A viewer"
+          aria-label={translateLabel("Close Q&A viewer", "closeQA")}
         >
           ×
         </button>
@@ -433,7 +434,7 @@ function QAModal({ resource, onClose }) {
             type="button"
             className="qa-nav qa-nav-prev"
             onClick={previousPage}
-            aria-label="Previous Q&A page"
+            aria-label={translateLabel("Previous Q&A page", "previousQA")}
           >
             ‹
           </button>
@@ -445,12 +446,12 @@ function QAModal({ resource, onClose }) {
             type="button"
             className="qa-nav qa-nav-next"
             onClick={nextPage}
-            aria-label="Next Q&A page"
+            aria-label={translateLabel("Next Q&A page", "nextQA")}
           >
             ›
           </button>
         </div>
-        <div className="qa-page-dots" aria-label="Q&A pages">
+        <div className="qa-page-dots" aria-label={translateLabel("Q&A pages", "qaPages")}>
           {resource.images.map((_, index) => (
             <button
               type="button"
@@ -468,7 +469,7 @@ function QAModal({ resource, onClose }) {
 }
 
 function ArchiveToolbar({ label, filters, onFiltersChange, totalCount, onReset }) {
-  const { t } = useLanguage();
+  const { t, translateLabel } = useLanguage();
   const le = t.learnEvents;
   const pm = le?.programModal || {};
   const isFiltered = Boolean(
@@ -509,7 +510,7 @@ function ArchiveToolbar({ label, filters, onFiltersChange, totalCount, onReset }
             type="button"
             className="archive-search-clear"
             onClick={() => onFiltersChange({ ...filters, query: "" })}
-            aria-label="Clear search text"
+            aria-label={translateLabel("Clear search text", "clearSearch")}
           >
             ×
           </button>
@@ -568,7 +569,7 @@ function ArchiveToolbar({ label, filters, onFiltersChange, totalCount, onReset }
 }
 
 function ArchivePagination({ label, page, pageCount, onPageChange }) {
-  const { t } = useLanguage();
+  const { t, translateLabel } = useLanguage();
   const le = t.learnEvents;
   if (pageCount <= 1) return null;
 
@@ -598,7 +599,7 @@ function ArchivePagination({ label, page, pageCount, onPageChange }) {
 }
 
 function ArchiveEmptyState({ label, onReset }) {
-  const { t } = useLanguage();
+  const { t, translateLabel } = useLanguage();
   const am = t.learnEvents?.activityModal || {};
   return (
     <div className="archive-empty-state">
@@ -663,7 +664,7 @@ function pageItems(items, filters, page) {
    ================================================================ */
 function OnlineEducation() {
   const { search } = useLocation();
-  const { t } = useLanguage();
+  const { t, translateLabel } = useLanguage();
   const activities = usePublicActivities();
   const cmsContent = useLearnEventsContent();
   const onlineCms = cmsContent.onlineEducation || {};
@@ -863,13 +864,13 @@ function OnlineEducation() {
                 </p>
               </div>
 
-              <div className="topics-view-switch" role="group" aria-label="Topic layout view switch">
+              <div className="topics-view-switch" role="group" aria-label={translateLabel("Topic layout view switch", "layoutSwitch")}>
                 <button
                   type="button"
                   className={`view-switch-btn ${topicView === "list" ? "is-active" : ""}`}
                   onClick={() => setTopicView("list")}
                   aria-pressed={topicView === "list"}
-                  title="List view"
+                  title={translateLabel("List view", "listView")}
                 >
                   <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                     <line x1="8" y1="6" x2="21" y2="6" />
@@ -886,7 +887,7 @@ function OnlineEducation() {
                   className={`view-switch-btn ${topicView === "grid" ? "is-active" : ""}`}
                   onClick={() => setTopicView("grid")}
                   aria-pressed={topicView === "grid"}
-                  title="Grid view"
+                  title={translateLabel("Grid view", "gridView")}
                 >
                   <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                     <rect x="3" y="3" width="7" height="7" rx="1.5" />
@@ -1035,11 +1036,11 @@ function OnlineEducation() {
                       >
                         <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true">
                           <path d="M8 5v14l11-7z" />
-                        </svg>
+                        </svg><Trans id="watchRecording">
                         Watch recording ↗
-                      </a>}
+                      </Trans></a>}
 
-                      {qaUrl ? <a className="resource-action-btn resource-btn-qa" href={qaUrl} target="_blank" rel="noreferrer">Review Q&amp;A ↗</a> : matchedQa ? <button
+                      {qaUrl ? <a className="resource-action-btn resource-btn-qa" href={qaUrl} target="_blank" rel="noreferrer"><Trans id="qaReview">Review Q&amp;A ↗</Trans></a> : matchedQa ? <button
                         type="button"
                         className="resource-action-btn resource-btn-qa"
                         onClick={() => setSelectedQa(matchedQa)}
@@ -1049,9 +1050,9 @@ function OnlineEducation() {
                           <rect width="18" height="18" x="3" y="3" rx="2" ry="2" />
                           <circle cx="9" cy="9" r="2" />
                           <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21" />
-                        </svg>
+                        </svg><Trans id="qaReviewSimple">
                         Review Q&amp;A →
-                      </button> : <span>Q&amp;A material not yet available</span>}
+                      </Trans></button> : <span><Trans id="qaUnavailable">Q&amp;A material not yet available</Trans></span>}
                     </div>
                   </article>
                 );
@@ -1083,7 +1084,7 @@ function OnlineEducation() {
    PROGRAM REGISTRATION / APPLICATION / WAITLIST MODAL
    ================================================================ */
 function PhysicalEducation() {
-  const { t } = useLanguage();
+  const { t, translateLabel } = useLanguage();
   const le = t.learnEvents;
   const cmsContent = useLearnEventsContent();
   const [activeTrackId, setActiveTrackId] = useState("dcs-family");
@@ -1120,7 +1121,7 @@ function PhysicalEducation() {
           <div
             className="dcs-tab-selector"
             role="tablist"
-            aria-label="Dementia Care Series Learning Tracks"
+            aria-label={translateLabel("Dementia Care Series Learning Tracks", "learningTracks")}
           >
             {programmes.map((p) => {
               const isActive = activeTrackId === p.id;
@@ -1239,15 +1240,15 @@ function PhysicalEducation() {
                     type="button"
                     className="stage-btn-primary"
                     onClick={() => document.getElementById('programme-intakes')?.scrollIntoView({behavior:'smooth',block:'start'})}
-                  >
-                    View available intakes <span aria-hidden="true">→</span>
+                  ><Trans id="availableIntakes">
+                    View available intakes </Trans><span aria-hidden="true">→</span>
                   </button>
 
                   {activeTrack.id === "dcs-family" && (
                     <Link
                       to="/learn-events/upcoming-calendar"
                       className="stage-btn-secondary"
-                      title="View DCS-Family in Upcoming Calendar"
+                      title={translateLabel("View DCS-Family in Upcoming Calendar", "dcsFamilyUpcoming")}
                     >
                       <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                         <rect width="18" height="18" x="3" y="4" rx="2" ry="2" />
@@ -1263,7 +1264,7 @@ function PhysicalEducation() {
                     <Link
                       to="/learn-events/certified-trainers"
                       className="stage-btn-secondary"
-                      title="Explore Certified Trainers Directory"
+                      title={translateLabel("Explore Certified Trainers Directory", "exploreTrainers")}
                     >
                       <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                         <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
@@ -1280,7 +1281,7 @@ function PhysicalEducation() {
                       type="button"
                       className="stage-btn-secondary"
                       onClick={() => alert("The detailed DCS-Care Worker curriculum framework is currently being finalized with clinical partners. Register on the waitlist to receive the full syllabus upon release.")}
-                      title="View curriculum syllabus overview"
+                      title={translateLabel("View curriculum syllabus overview", "curriculum")}
                     >
                       <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                         <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
@@ -1341,9 +1342,9 @@ function PhysicalEducation() {
                         <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                           <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" />
                           <circle cx="12" cy="10" r="3" />
-                        </svg>
+                        </svg><Trans id="serviceArea">
                         General service area
-                      </dt>
+                      </Trans></dt>
                       <dd>{activeTrack.location}</dd>
                     </div>
 
@@ -1354,11 +1355,11 @@ function PhysicalEducation() {
                           <line x1="16" x2="16" y1="2" y2="6" />
                           <line x1="8" x2="8" y1="2" y2="6" />
                           <line x1="3" x2="21" y1="10" y2="10" />
-                        </svg>
+                        </svg><Trans id="scheduledIntakes">
                         Scheduled intakes
-                      </dt>
+                      </Trans></dt>
                       <dd className="spec-schedule-value">
-                        <span>See upcoming intakes below for confirmed dates, venues and fees.</span>
+                        <span><Trans id="intakeNote">See upcoming intakes below for confirmed dates, venues and fees.</Trans></span>
                       </dd>
                     </div>
                   </dl>
@@ -1394,6 +1395,7 @@ function PhysicalEducation() {
    Reusable modal for zooming and inspecting posters, news, and photos
    ================================================================ */
 function ImageLightboxModal({ isOpen, onClose, image, title, subtitle, caption, date }) {
+  const {translateLabel} = useLanguage();
   const dialogRef = useRef(null);
   const [isZoomed, setIsZoomed] = useState(false);
 
@@ -1446,17 +1448,17 @@ function ImageLightboxModal({ isOpen, onClose, image, title, subtitle, caption, 
               target="_blank"
               rel="noreferrer"
               className="lightbox-action-btn"
-            >
+            ><Trans id="openOriginal">
               ↗ Open Original
-            </a>
+            </Trans></a>
             <button
               type="button"
               className="modal-close lightbox-close-btn"
               onClick={onClose}
-              aria-label="Close image viewer"
-            >
+              aria-label={translateLabel("Close image viewer", "closeImage")}
+            ><Trans>
               &times;
-            </button>
+            </Trans></button>
           </div>
         </div>
 
@@ -1487,7 +1489,7 @@ function ImageLightboxModal({ isOpen, onClose, image, title, subtitle, caption, 
    Name | Cert Ref No | Location | Language | Bio | Approved Activities
    ================================================================ */
 function FacilitatorProfileModal({ facilitator, activities = [], onClose }) {
-  const { t } = useLanguage();
+  const { t, translateLabel } = useLanguage();
   const le = t.learnEvents;
   const fm = le?.facilitatorModal || {};
   const am = le?.activityModal || {};
@@ -1539,10 +1541,10 @@ function FacilitatorProfileModal({ facilitator, activities = [], onClose }) {
           className="modal-close facilitator-modal-close"
           type="button"
           onClick={onClose}
-          aria-label="Close facilitator profile"
-        >
+          aria-label={translateLabel("Close facilitator profile", "closeFacilitator")}
+        ><Trans>
           &times;
-        </button>
+        </Trans></button>
 
         {/* Modal Top Header with verified badge */}
         <div className="facilitator-modal-hero">
@@ -1551,7 +1553,7 @@ function FacilitatorProfileModal({ facilitator, activities = [], onClose }) {
             style={{ backgroundColor: facilitator.badgeColor || "#0d716b" }}
           >
             <span>{facilitator.initials || facilitator.name.charAt(0)}</span>
-            <span className="facilitator-modal-verified-badge" title="ADFM Credentialed Facilitator">
+            <span className="facilitator-modal-verified-badge" title={translateLabel("ADFM Credentialed Facilitator", "adfmFacilitator")}>
               ✓
             </span>
           </div>
@@ -1565,7 +1567,7 @@ function FacilitatorProfileModal({ facilitator, activities = [], onClose }) {
 
             <h2 id="facilitator-modal-title">{facilitator.name}</h2>
             <p className="facilitator-modal-role">
-              <strong>{facilitator.role}</strong> &bull; {facilitator.institution}
+              <strong>{facilitator.role}</strong><Trans> &bull; </Trans>{facilitator.institution}
             </p>
 
             <div className="facilitator-modal-meta-grid">
@@ -1579,7 +1581,7 @@ function FacilitatorProfileModal({ facilitator, activities = [], onClose }) {
               </div>
               <div className="modal-meta-item">
                 <span className="meta-label">{fm.adfmAccreditation || "ADFM Accreditation"}</span>
-                <span className="meta-value">🛡️ DCS-TTT Framework</span>
+                <span className="meta-value"><Trans id="dcsFramework">🛡️ DCS-TTT Framework</Trans></span>
               </div>
             </div>
           </div>
@@ -1598,7 +1600,7 @@ function FacilitatorProfileModal({ facilitator, activities = [], onClose }) {
             <div className="activities-section-header">
               <div>
                 <h3>{fm.approvedActivities || "Approved Education Activities"} ({trainerActivities.length})</h3>
-                <p>Public webinars, community dialogue circles, and clinical training sessions led by this facilitator.</p>
+                <p><Trans id="facilitatedSessions">Public webinars, community dialogue circles, and clinical training sessions led by this facilitator.</Trans></p>
               </div>
 
               {/* Segmented Filter Pills */}
@@ -1607,22 +1609,22 @@ function FacilitatorProfileModal({ facilitator, activities = [], onClose }) {
                   type="button"
                   className={`modal-filter-pill ${activeTab === "all" ? "is-active" : ""}`}
                   onClick={() => setActiveTab("all")}
-                >
-                  All ({trainerActivities.length})
+                ><Trans id="allOpenParen">
+                  All (</Trans>{trainerActivities.length})
                 </button>
                 <button
                   type="button"
                   className={`modal-filter-pill ${activeTab === "upcoming" ? "is-active" : ""}`}
                   onClick={() => setActiveTab("upcoming")}
-                >
-                  Upcoming ({upcomingActs.length})
+                ><Trans id="upcomingOpenParen">
+                  Upcoming (</Trans>{upcomingActs.length})
                 </button>
                 <button
                   type="button"
                   className={`modal-filter-pill ${activeTab === "completed" ? "is-active" : ""}`}
                   onClick={() => setActiveTab("completed")}
-                >
-                  Past &amp; Archive ({pastActs.length})
+                ><Trans id="pastArchiveOpenParen">
+                  Past &amp; Archive (</Trans>{pastActs.length})
                 </button>
               </div>
             </div>
@@ -1656,7 +1658,7 @@ function FacilitatorProfileModal({ facilitator, activities = [], onClose }) {
                         >
                           {am.registerNow || "Register Now"} ↗
                         </a>
-                      ):<span className="archived-pill">Registration not open yet</span>) : (
+                      ):<span className="archived-pill"><Trans id="registrationNotOpen">Registration not open yet</Trans></span>) : (
                         <div className="modal-act-archived-info">
                           <span className="archived-pill">{le?.completed || "Completed"}</span>
                           {act.materials && <small>{act.materials}</small>}
@@ -1668,7 +1670,7 @@ function FacilitatorProfileModal({ facilitator, activities = [], onClose }) {
               </div>
             ) : (
               <div className="modal-activities-empty">
-                <p>No {activeTab} approved education activities recorded under this category.</p>
+                <p>No {activeTab}<Trans id="certifiedActivityNote"> approved education activities recorded under this category.</Trans></p>
               </div>
             )}
           </div>
@@ -1677,12 +1679,12 @@ function FacilitatorProfileModal({ facilitator, activities = [], onClose }) {
           <div className="facilitator-modal-boundary-box">
             <span className="boundary-icon">🛡️</span>
             <div>
-              <strong>Boundary &amp; Governance Notice:</strong>
-              <p>
+              <strong><Trans id="governanceNotice">Boundary &amp; Governance Notice:</Trans></strong>
+              <p><Trans id="governanceText">
                 Certified Trainer status reflects the defined project training and certification scope under
                 the Rotary HopeCare &amp; Alzheimer's Disease Foundation Malaysia (ADFM) DCS-TTT initiative.
                 It should not be presented or construed as a broader professional endorsement or guarantee.
-              </p>
+              </Trans></p>
             </div>
           </div>
         </div>
@@ -1711,7 +1713,7 @@ function FacilitatorProfileModal({ facilitator, activities = [], onClose }) {
    SECTION 3: EVENTS (Restored & Supercharged with Dialogue, Calendar, News)
    ================================================================ */
 function EventsSection() {
-  const { t } = useLanguage();
+  const { t, translateLabel } = useLanguage();
   const le = t.learnEvents;
   const ev = le?.eventsSection || {};
   const activities = usePublicActivities();
@@ -1867,7 +1869,7 @@ function EventsSection() {
             </div>
 
             {/* Clean Segmented Calendar Switcher */}
-            <div className="calendar-switcher-dock" aria-label="Select calendar edition">
+            <div className="calendar-switcher-dock" aria-label={translateLabel("Select calendar edition", "selectCalendar")}>
               <div className="switcher-pills" role="tablist">
                 {activeRoadmaps.map((rm, idx) => (
                   <button
@@ -1888,8 +1890,8 @@ function EventsSection() {
                   type="button"
                   className="switcher-arrow-btn"
                   onClick={handlePrevRoadmap}
-                  aria-label="Previous calendar edition"
-                  title="Previous calendar edition"
+                  aria-label={translateLabel("Previous calendar edition", "previousCalendar")}
+                  title={translateLabel("Previous calendar edition", "previousCalendar")}
                 >
                   <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                     <polyline points="15 18 9 12 15 6" />
@@ -1906,8 +1908,8 @@ function EventsSection() {
                   type="button"
                   className="switcher-arrow-btn"
                   onClick={handleNextRoadmap}
-                  aria-label="Next calendar edition"
-                  title="Next calendar edition"
+                  aria-label={translateLabel("Next calendar edition", "nextCalendar")}
+                  title={translateLabel("Next calendar edition", "nextCalendar")}
                 >
                   <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                     <polyline points="9 18 15 12 9 6" />
@@ -2014,8 +2016,8 @@ function EventsSection() {
                     })
                   }
                 >
-                  <span className="btn-icon">🔍</span> Inspect Full Calendar Poster ↗
-                </button>
+                  <span className="btn-icon">🔍</span><Trans id="fullCalendar"> Inspect Full Calendar Poster ↗
+                </Trans></button>
                 <a href="#event-finder" className="calendar-secondary-btn">
                   <span className="btn-icon">↓</span> {ev.browseSchedule || "Browse Event Schedule Below"}
                 </a>
@@ -2105,17 +2107,17 @@ function EventsSection() {
                 placeholder={le?.eventsSection?.searchPlaceholder || "Search events by title, venue, city, or speaker..."}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                aria-label="Search events"
+                aria-label={translateLabel("Search events", "searchEvents")}
               />
               {searchQuery && (
                 <button
                   type="button"
                   className="finder-clear-input"
                   onClick={() => setSearchQuery("")}
-                  aria-label="Clear search input"
-                >
+                  aria-label={translateLabel("Clear search input", "clearSearchInput")}
+                ><Trans>
                   &times;
-                </button>
+                </Trans></button>
               )}
             </div>
 
@@ -2205,8 +2207,8 @@ function EventsSection() {
               {le?.eventsSection?.eventsFound ? le.eventsSection.eventsFound.replace('{count}', filteredEvents.length).replace('{plural}', filteredEvents.length === 1 ? '' : 's') : `${filteredEvents.length} event${filteredEvents.length === 1 ? '' : 's'} found`}
             </span>
             {hasActiveFilters && (
-              <span className="active-filters-hint">
-                Filtering by {selectedCity !== "All cities" && `City: ${selectedCity} `}
+              <span className="active-filters-hint"><Trans id="filteringBy">
+                Filtering by </Trans>{selectedCity !== "All cities" && `City: ${selectedCity} `}
                 {selectedFormat !== "All formats" && `Format: ${selectedFormat} `}
                 {statusFilter !== "all" && `Status: ${statusFilter}`}
               </span>
@@ -2228,7 +2230,7 @@ function EventsSection() {
                       <div className="event-card-badges">
                         <span className="event-type-badge">{event.type}</span>
                         {closed ? (
-                          <span className="status-badge status-registration-closed">Registration Closed</span>
+                          <span className="status-badge status-registration-closed"><Trans id="registrationClosed">Registration Closed</Trans></span>
                         ) : (
                           <StatusBadge status={event.status} />
                         )}
@@ -2254,13 +2256,13 @@ function EventsSection() {
                         {event.capacity && (
                           <div className="event-meta-item">
                             <span className="meta-icon">👥</span>
-                            <span>Capacity: {event.capacity} seats</span>
+                            <span><Trans id="capacityColon">Capacity: </Trans>{event.capacity}<Trans id="seats"> seats</Trans></span>
                           </div>
                         )}
                         {(event.registrationDeadlineFormatted || event.registrationDeadline) && (
                           <div className="event-meta-item">
                             <span className="meta-icon">⏳</span>
-                            <span>Deadline: {event.registrationDeadlineFormatted || event.registrationDeadline}</span>
+                            <span><Trans id="deadlineColon">Deadline: </Trans>{event.registrationDeadlineFormatted || event.registrationDeadline}</span>
                           </div>
                         )}
                         <div className="event-meta-item">
@@ -2270,7 +2272,7 @@ function EventsSection() {
                         {(event.suitableFor || event.audience) && (
                           <div className="event-meta-item">
                             <span className="meta-icon">🎯</span>
-                            <span>Suitable for: {event.suitableFor || event.audience}</span>
+                            <span><Trans id="suitableForColon">Suitable for: </Trans>{event.suitableFor || event.audience}</span>
                           </div>
                         )}
                         <div className="event-meta-item">
@@ -2287,13 +2289,13 @@ function EventsSection() {
                     </div>
 
                     <div className="event-card-footer">
-                      {event.registration_settings&&<button type="button" className="event-register-btn" onClick={()=>setSelectedActivity(event)}>View registration details</button>}
+                      {event.registration_settings&&<button type="button" className="event-register-btn" onClick={()=>setSelectedActivity(event)}><Trans id="viewRegistration">View registration details</Trans></button>}
                       {!event.registration_settings&&(event.status === "cancelled" ? (
-                        <span className="event-completed-tag" style={{ background: "#fee2e2", color: "#991b1b", border: "1px solid #fecaca" }}>Cancelled</span>
+                        <span className="event-completed-tag" style={{ background: "#fee2e2", color: "#991b1b", border: "1px solid #fecaca" }}><Trans id="cancelled">Cancelled</Trans></span>
                       ) : event.status === "completed" ? (
                         <span className="event-completed-tag">{ev.sessionCompleted || "Session Completed"}</span>
                       ) : closed ? (
-                        <span className="event-completed-tag" style={{ background: "#fef3c7", color: "#92400e", border: "1px solid #fde68a" }}>Registration Closed</span>
+                        <span className="event-completed-tag" style={{ background: "#fef3c7", color: "#92400e", border: "1px solid #fde68a" }}><Trans id="registrationClosed">Registration Closed</Trans></span>
                       ) : publicLink(event.registrationLink) ? (
                         <a
                           href={publicLink(event.registrationLink)}
@@ -2303,7 +2305,7 @@ function EventsSection() {
                         >
                           {ev.registerGoogleForm || "Register via Google Form ↗"}
                         </a>
-                      ) : <span className="event-completed-tag">Registration not open yet</span>)}
+                      ) : <span className="event-completed-tag"><Trans id="registrationNotOpen">Registration not open yet</Trans></span>)}
                       <button
                         type="button"
                         className="event-details-btn"
@@ -2360,7 +2362,7 @@ function EventsSection() {
                   <div className="news-img-wrap">
                     <img src={artImg} alt={art.mainTitle || art.title || "Press Coverage"} />
                     <div className="news-img-hover-overlay">
-                      <span>🔍 Read Newspaper Clipping</span>
+                      <span><Trans id="newsClipping">🔍 Read Newspaper Clipping</Trans></span>
                     </div>
                   </div>
                   <div className="news-card-body">
@@ -2371,7 +2373,7 @@ function EventsSection() {
                     <h3>{art.mainTitle || art.title}</h3>
                     <p>{art.intro || art.description}</p>
                     <div className="news-action-bar">
-                      <span className="news-click-prompt">Click to open high-res newspaper clipping ↗</span>
+                      <span className="news-click-prompt"><Trans id="highResClipping">Click to open high-res newspaper clipping ↗</Trans></span>
                     </div>
                   </div>
                 </article>
@@ -2386,12 +2388,12 @@ function EventsSection() {
         <div className="section-container">
           <div className="collab-cta-box">
             <div className="collab-cta-text">
-              <span className="collab-label">Grassroots Collaboration</span>
-              <h2>Want to Host a Dementia Dialogue in Your Town?</h2>
-              <p>
+              <span className="collab-label"><Trans id="grassroot">Grassroots Collaboration</Trans></span>
+              <h2><Trans id="dialogueTown">Want to Host a Dementia Dialogue in Your Town?</Trans></h2>
+              <p><Trans id="dialoguePartnership">
                 We partner with community halls, religious institutions, corporate offices,
                 and health clinics across Sarawak to deliver free, culturally sensitive dementia education.
-              </p>
+              </Trans></p>
             </div>
             <div className="collab-cta-actions">
               <a
@@ -2399,12 +2401,12 @@ function EventsSection() {
                 target="_blank"
                 rel="noreferrer"
                 className="collab-btn-primary"
-              >
+              ><Trans id="proposeVenue">
                 Propose an Event / Venue ↗
-              </a>
-              <Link to="/learn-events/certified-trainers" className="collab-btn-secondary">
+              </Trans></a>
+              <Link to="/learn-events/certified-trainers" className="collab-btn-secondary"><Trans id="viewTrainers">
                 View Certified Trainers
-              </Link>
+              </Trans></Link>
             </div>
           </div>
         </div>
@@ -2441,7 +2443,7 @@ function EventsSection() {
    MEDICAL CAROUSEL — draggable, auto-flowing, prev/next
    ================================================================ */
 function MedicalCarousel({ trainers: carouselTrainers, onSelect, onViewAll }) {
-  const { t } = useLanguage();
+  const { t, translateLabel } = useLanguage();
   const trackRef = useRef(null);
   const isDragging = useRef(false);
   const startX = useRef(0);
@@ -2483,12 +2485,12 @@ function MedicalCarousel({ trainers: carouselTrainers, onSelect, onViewAll }) {
             <span className="ct-section-eyebrow">{t.learnEvents.trainerGovernance.hcp}</span>
             <h3 className="ct-section-title">{t.learnEvents.trainerGovernance.hcp}</h3>
             <p className="ct-section-sub">
-              {carouselTrainers.length} certified {carouselTrainers.length === 1 ? "trainer" : "trainers · Drag or use the arrows to browse"}
+              {carouselTrainers.length}<Trans id="certified"> certified </Trans>{carouselTrainers.length === 1 ? "trainer" : "trainers · Drag or use the arrows to browse"}
             </p>
           </div>
           {carouselTrainers.length > 1 && <div className="ct-carousel-nav-btns">
-            <button type="button" className="ct-nav-btn" onClick={() => scrollBy(-1)} aria-label="Previous trainer">←</button>
-            <button type="button" className="ct-nav-btn" onClick={() => scrollBy(1)} aria-label="Next trainer">→</button>
+            <button type="button" className="ct-nav-btn" onClick={() => scrollBy(-1)} aria-label={translateLabel("Previous trainer", "previousTrainer")}>←</button>
+            <button type="button" className="ct-nav-btn" onClick={() => scrollBy(1)} aria-label={translateLabel("Next trainer", "nextTrainer")}>→</button>
           </div>}
         </div>
 
@@ -2530,9 +2532,9 @@ function MedicalCarousel({ trainers: carouselTrainers, onSelect, onViewAll }) {
                     onClick={() => !hasDragged.current && onSelect(trainer)}
                     onPointerDown={(e) => e.stopPropagation()}
                     aria-label={`View profile of ${trainer.name}`}
-                  >
+                  ><Trans id="viewProfileArrow">
                     View profile →
-                  </button>
+                  </Trans></button>
                 </div>
               </div>
             ))}
@@ -2540,7 +2542,7 @@ function MedicalCarousel({ trainers: carouselTrainers, onSelect, onViewAll }) {
         </div>
 
         <div className="ct-carousel-bottom">
-          <button type="button" className="ct-view-all-btn" onClick={onViewAll}>View full directory →</button>
+          <button type="button" className="ct-view-all-btn" onClick={onViewAll}><Trans id="viewDirectoryArrow">View full directory →</Trans></button>
         </div>
       </div>
     </section>
@@ -2555,7 +2557,7 @@ function TrainerPermissions({trainer}){
  return <div className="trainer-permissions"><dl><dt>{copy.assessment}</dt><dd>{ASSESSMENT_LABEL[trainer.assessment_status]||'Not assessed yet'}</dd><dt>{copy.certificate}</dt><dd>{trainer.certificate_ref||'—'}</dd><dt>{copy.teaching}</dt><dd>{trainer.teaching_allowed?copy.approved:copy.notApproved}</dd></dl>{trainer.teaching_allowed&&<details><summary>{copy.scope}</summary><ul>{(trainer.teaching_permissions||[]).map(p=><li key={p.scope}>{p.scope}{p.modules.length?': '+p.modules.join(', '):''}</li>)}</ul></details>}{trainer.contact_email&&<p><a href={'mailto:'+trainer.contact_email}>{trainer.contact_email}</a></p>}{trainer.contact_phone&&<p>{trainer.contact_phone}</p>}</div>;
 }
 function CertifiedTrainers() {
-  const { t: i18nData } = useLanguage();
+  const { t: i18nData, translateLabel } = useLanguage();
   const le = i18nData.learnEvents;
   const cs = le?.certifiedTrainersSection || {};
   const activities = usePublicActivities();
@@ -2692,7 +2694,7 @@ function CertifiedTrainers() {
                   <span className="ct-advisory-inst">{t.institution.split(",")[0]}</span>
                 </div>
                 <div className="ct-advisory-footer">
-                  <span className="ct-advisory-cta">View profile →</span>
+                  <span className="ct-advisory-cta"><Trans id="viewProfileArrow">View profile →</Trans></span>
                 </div>
               </button>
             ))}
@@ -2717,27 +2719,27 @@ function CertifiedTrainers() {
 
           <div className="directory-header-row">
             <div>
-              <span className="section-label">Verified Profiles</span>
+              <span className="section-label"><Trans id="verifiedProfiles">Verified Profiles</Trans></span>
               <h2>{le?.directoryTitle || "Trainer Directory & Approved Activities"}</h2>
             </div>
           </div>
 
           <div className="directory-controls-bar">
-            <div className="directory-track-tabs" role="tablist" aria-label="Facilitator Category">
+            <div className="directory-track-tabs" role="tablist" aria-label={translateLabel("Facilitator Category", "facilitatorCategory")}>
               <button type="button" className={`track-tab-btn ${activeCategory === "all" ? "is-active" : ""}`} onClick={() => setActiveCategory("all")} role="tab" aria-selected={activeCategory === "all"}>{le?.all || "All"} ({trainers.length})</button>
               <button type="button" className={`track-tab-btn ${activeCategory === "hcp" ? "is-active" : ""}`} onClick={() => setActiveCategory("hcp")} role="tab" aria-selected={activeCategory === "hcp"}>{le.trainerGovernance.hcp} ({clinicalFacilitators.length})</button>
               <button type="button" className={`track-tab-btn ${activeCategory === "non-hcp" ? "is-active" : ""}`} onClick={() => setActiveCategory("non-hcp")} role="tab" aria-selected={activeCategory === "non-hcp"}>{le.trainerGovernance.nonHcp} ({advisoryFacilitators.length})</button>
             </div>
             <div className="directory-filters-cluster">
               <div className="directory-search-input-wrap">
-                <input type="text" placeholder={le?.searchPlaceholder || "Search name, clinic, or role..."} value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} aria-label="Search trainers" />
-                {searchQuery && <button type="button" className="search-clear-btn" onClick={() => setSearchQuery("")} aria-label="Clear">&times;</button>}
+                <input type="text" placeholder={le?.searchPlaceholder || "Search name, clinic, or role..."} value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} aria-label={translateLabel("Search trainers", "searchTrainers")} />
+                {searchQuery && <button type="button" className="search-clear-btn" onClick={() => setSearchQuery("")} aria-label={translateLabel("Clear")}><Trans>&times;</Trans></button>}
               </div>
-              <select value={trainerCity} onChange={(e) => setTrainerCity(e.target.value)} aria-label="Filter by city">
+              <select value={trainerCity} onChange={(e) => setTrainerCity(e.target.value)} aria-label={translateLabel("Filter by city", "otherCityFilter")}>
                 <option value="All cities">{le?.allCities || "All cities"}</option>
                 {cities.map((c) => <option key={c} value={c}>{c}</option>)}
               </select>
-              <select value={trainerLanguage} onChange={(e) => setTrainerLanguage(e.target.value)} aria-label="Filter by language">
+              <select value={trainerLanguage} onChange={(e) => setTrainerLanguage(e.target.value)} aria-label={translateLabel("Filter by language")}>
                 <option value="All languages">{le?.allLanguages || "All languages"}</option>
                 {languages.map((l) => <option key={l} value={l}>{l}</option>)}
               </select>
@@ -2757,12 +2759,12 @@ function CertifiedTrainers() {
                     <div className="trainer-card-topbar">
                       <div className="trainer-avatar-wrap" style={{ backgroundColor: t.badgeColor || "#0d716b" }}>
                         {t.photo ? <img src={t.photo} alt={t.name} style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "50%" }} /> : <span className="trainer-avatar-letter">{t.initials || t.name.charAt(0)}</span>}
-                        <span className="trainer-verified-check" title="RCBC Verified">✓</span>
+                        <span className="trainer-verified-check" title={translateLabel("RCBC Verified", "verifiedRCBC")}>✓</span>
                       </div>
                       <div className="trainer-primary-info">
                         <span className={`trainer-category-chip ${isAdvisory ? "chip-advisory" : "chip-clinical"}`}>{isAdvisory?le.trainerGovernance.nonHcp:le.trainerGovernance.hcp}</span>
                         <h3>{t.name}</h3>
-                        <p className="trainer-role-title"><strong>{t.role}</strong> &bull; {t.institution}</p>
+                        <p className="trainer-role-title"><strong>{t.role}</strong><Trans> &bull; </Trans>{t.institution}</p>
                       </div>
                     </div>
                     <div className="trainer-meta-strip">
@@ -2777,7 +2779,7 @@ function CertifiedTrainers() {
                     </div>
                     {isOpen && (
                       <div className="trainer-drawer-content">
-                        <h4>Sessions by {t.name}:</h4>
+                        <h4><Trans id="sessionsBy">Sessions by </Trans>{t.name}:</h4>
                         {trainerActivities.length > 0 ? (
                           <div className="drawer-activities-list">
                             {trainerActivities.map((act) => (
@@ -2791,7 +2793,7 @@ function CertifiedTrainers() {
                               </div>
                             ))}
                           </div>
-                        ) : <p className="drawer-empty-text">No active sessions assigned.</p>}
+                        ) : <p className="drawer-empty-text"><Trans id="noSessions">No active sessions assigned.</Trans></p>}
                       </div>
                     )}
                     <div className="trainer-card-actions">
@@ -2828,11 +2830,11 @@ function CertifiedTrainers() {
             </div>
             <div className="framework-posters-row">
               <div className="framework-card" role="button" tabIndex={0} onClick={() => setTrainerLightbox({ image: adfmPoster, title: "ADFM Certified Trainers Framework", subtitle: "Official Dementia Training Syllabus", caption: "Official syllabus overview and certification standards." })} onKeyDown={(e) => e.key === "Enter" && setTrainerLightbox({ image: adfmPoster, title: "ADFM Certified Trainers Framework", subtitle: "Official Dementia Training Syllabus", caption: "Official syllabus." })}>
-                <div className="framework-thumb-wrap"><img src={adfmPoster} alt="ADFM Certified Trainers Poster" /><div className="framework-hover-hint"><span>🔍 View Poster</span></div></div>
+                <div className="framework-thumb-wrap"><img src={adfmPoster} alt={translateLabel("ADFM Certified Trainers Poster", "adfmPoster")} /><div className="framework-hover-hint"><span><Trans id="viewPoster">🔍 View Poster</Trans></span></div></div>
                 <div className="framework-card-info"><h4>{cs.adfmPosterTitle || "ADFM Certified Trainers Poster"}</h4><small>{cs.clickHighRes || "Click to view high-res guide"}</small></div>
               </div>
               <div className="framework-card" role="button" tabIndex={0} onClick={() => setTrainerLightbox({ image: facilitatorInfo, title: "Facilitator Information & Delivery Scope", subtitle: "ADFM Accredited Facilitator Guidelines", caption: "Facilitator competency standards and approved delivery scope." })} onKeyDown={(e) => e.key === "Enter" && setTrainerLightbox({ image: facilitatorInfo, title: "Facilitator Information", subtitle: "ADFM Guidelines", caption: "Facilitator standards." })}>
-                <div className="framework-thumb-wrap"><img src={facilitatorInfo} alt="Facilitator Information Guide" /><div className="framework-hover-hint"><span>🔍 View Info</span></div></div>
+                <div className="framework-thumb-wrap"><img src={facilitatorInfo} alt={translateLabel("Facilitator Information Guide", "facilitatorGuide")} /><div className="framework-hover-hint"><span><Trans id="viewInfo">🔍 View Info</Trans></span></div></div>
                 <div className="framework-card-info"><h4>{cs.facilitatorInfoTitle || "Facilitator Information Guide"}</h4><small>{cs.clickStandards || "Click to view standards & code"}</small></div>
               </div>
             </div>
@@ -2974,7 +2976,7 @@ const UC_LEGEND = [
 
 function UpcomingCalendar() {
   const activities = usePublicActivities();
-  const { t } = useLanguage();
+  const { t, translateLabel } = useLanguage();
   const le = t.learnEvents;
   // ---- State ----
   const today = new Date();
@@ -3272,7 +3274,7 @@ function UpcomingCalendar() {
                               {dayEvents[0].title}
                             </span>
                             {dayEvents.length > 1 && (
-                              <span className="uc-cell-extra-badge">+{dayEvents.length - 1} more</span>
+                              <span className="uc-cell-extra-badge">+{dayEvents.length - 1}<Trans id="more"> more</Trans></span>
                             )}
                           </div>
                         </div>
@@ -3300,13 +3302,13 @@ function UpcomingCalendar() {
                 ref={detailRef}
                 tabIndex={-1}
                 role="region"
-                aria-label="Event details"
+                aria-label={translateLabel("Event details", "eventDetails")}
               >
                 <button
                   type="button"
                   className="uc-detail-close"
                   onClick={() => setSelectedEvent(null)}
-                  aria-label="Close event details"
+                  aria-label={translateLabel("Close event details", "eventDetailsClose")}
                 >
                   ×
                 </button>
@@ -3356,9 +3358,9 @@ function UpcomingCalendar() {
                       <dd>
                         {selectedEvent.registrationDeadlineFormatted || selectedEvent.registrationDeadline}
                         {isEventClosed(selectedEvent) && (
-                          <span style={{ color: "#dc2626", fontWeight: 700, marginLeft: "0.4rem" }}>
+                          <span style={{ color: "#dc2626", fontWeight: 700, marginLeft: "0.4rem" }}><Trans id="closedParen">
                             (Closed)
-                          </span>
+                          </Trans></span>
                         )}
                       </dd>
                     </div>
@@ -3414,9 +3416,9 @@ function UpcomingCalendar() {
                   ) : selectedEvent.status === "completed" ? (
                     <span className="uc-action-past">{le?.upcomingCalendarSection?.completed || "This session has been completed."}</span>
                   ) : isEventClosed(selectedEvent) ? (
-                    <button type="button" className="uc-register-btn uc-register-btn-disabled" disabled style={{ background: "#fef3c7", color: "#92400e", border: "1px solid #fde68a", cursor: "not-allowed" }}>
+                    <button type="button" className="uc-register-btn uc-register-btn-disabled" disabled style={{ background: "#fef3c7", color: "#92400e", border: "1px solid #fde68a", cursor: "not-allowed" }}><Trans id="registrationClosed">
                       Registration Closed
-                    </button>
+                    </Trans></button>
                   ) : selectedEvent.registrationLink != null ? (
                     <a
                       href={selectedEvent.registrationLink || "#"}
@@ -3456,7 +3458,7 @@ function UpcomingCalendar() {
    ================================================================ */
 function LearnEvents({ module }) {
   const location = useLocation();
-  const { t } = useLanguage();
+  const { t, translateLabel } = useLanguage();
   const le = t.learnEvents;
   const page = le?.pageInfo?.[module] || pageInfo[module] || pageInfo["online-education"];
   const rawPage = pageInfo[module] || pageInfo["online-education"];
@@ -3483,7 +3485,7 @@ function LearnEvents({ module }) {
       </section>
 
       {/* ---- Section content ---- */}
-      {module === "online-education" && <><PublishedRecords kind="learning_resources" title="Approved learning resources" /><OnlineEducation /></>}
+      {module === "online-education" && <><PublishedRecords kind="learning_resources" title={translateLabel("Approved learning resources", "approvedResources")} /><OnlineEducation /></>}
       {module === "physical-education" && <PhysicalEducation />}
       {module === "events" && <EventsSection />}
       {module === "certified-trainers" && <CertifiedTrainers />}

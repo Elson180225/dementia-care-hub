@@ -1,3 +1,4 @@
+import Trans from "../i18n/Trans";
 import { useEffect, useMemo, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useLanguage } from "../i18n/LanguageContext";
@@ -136,10 +137,10 @@ function SectionHeading({ eyebrow, title, description }) {
 // Show RCBC's approved programme boundaries on both the main Caregiver Support
 // page and the dedicated training page, so visitors cannot miss the notice.
 function RcbcProgrammeNotice({ showTrainingLink = false }) {
-  const {t}=useLanguage();
+  const {t,translateLabel}=useLanguage();
   const copy=t.caregiverSupport;
   return (
-    <aside className="caregiver-rcbc-notice" aria-label="RCBC caregiver programme and platform information">
+    <aside className="caregiver-rcbc-notice" aria-label={translateLabel('RCBC caregiver programme and platform information', "caregiverInfo")}>
       <strong>{copy.programmeNoticeTitle}</strong>
       <p>{copy.programmeFamilyNotice}</p>
       <p>{copy.programmeWorkerNotice}</p>
@@ -217,7 +218,7 @@ function CaregiverSupport() {
     return () => controller.abort();
   }, [reloadGroups, page]);
 
-  const { t,translateContent } = useLanguage();
+  const { t,translateContent, translateLabel } = useLanguage();
   const supportGroups=translateContent(rawSupportGroups,'records/organisations');
   const cs = t.caregiverSupport;
   const m = t.header.menu;
@@ -295,15 +296,15 @@ function CaregiverSupport() {
               <Link className="caregiver-hero-text-link" to="/caregiver-support/training">
                 {m.caregiverTraining} <span aria-hidden="true">↗</span>
               </Link>
-              <a className="caregiver-hero-text-link" href="#rcbc-programme-notice">
-                RCBC programme information <span aria-hidden="true">↓</span>
+              <a className="caregiver-hero-text-link" href="#rcbc-programme-notice"><Trans id="caregiverProgramme">
+                RCBC programme information </Trans><span aria-hidden="true">↓</span>
               </a>
             </div>
           </div>
           <div className="caregiver-hero-image-wrap">
             <img
               src={caregiverPhoto}
-              alt="An older adult and caregiver preparing food together in a kitchen"
+              alt={translateLabel("An older adult and caregiver preparing food together in a kitchen", "aboutCaregiverAlt")}
               className="caregiver-hero-image"
             />
             <div className="caregiver-hero-image-caption">
@@ -326,7 +327,7 @@ function CaregiverSupport() {
       {page === "guidance" && (
         <section className="caregiver-programme-intro" id="rcbc-programme-notice" aria-labelledby="rcbc-programme-heading">
           <div className="caregiver-container">
-            <h2 id="rcbc-programme-heading">Caregiver education and future DCS–Worker training</h2>
+            <h2 id="rcbc-programme-heading"><Trans id="caregiverEducation">Caregiver education and future DCS–Worker training</Trans></h2>
             <RcbcProgrammeNotice showTrainingLink />
           </div>
         </section>
@@ -347,7 +348,7 @@ function CaregiverSupport() {
             <div
               className="caregiver-guidance-menu"
               role="group"
-              aria-label="Caregiving guidance topics"
+              aria-label={translateLabel('Caregiving guidance topics', "caregiverGuidance")}
             >
               {currentGuidanceTopics.map((item) => (
                 <button
@@ -477,12 +478,12 @@ function CaregiverSupport() {
           </div>
           <div className="caregiver-training-path">
             <strong>{cs.learningPathway || "Learning pathway"}</strong>
-            <span>DCS–Family</span>
+            <span><Trans>DCS–Family</Trans></span>
             <span className="caregiver-path-arrow" aria-hidden="true">
               →
             </span>
-            <span>
-              DCS–Worker <small>{cs.workerApprovalLabel}</small>
+            <span><Trans>
+              DCS–Worker </Trans><small>{cs.workerApprovalLabel}</small>
             </span>
           </div>
         </div>
@@ -597,20 +598,20 @@ function CaregiverSupport() {
             </div>
             {groupsLoading ? (
               <div className="caregiver-empty-state" role="status">
-                <h4>Loading support groups…</h4>
-                <p>Checking the latest published listings.</p>
+                <h4><Trans id="groupsLoading">Loading support groups…</Trans></h4>
+                <p><Trans id="groupsChecking">Checking the latest published listings.</Trans></p>
               </div>
             ) : groupsError ? (
               <div className="caregiver-empty-state" role="alert">
-                <h4>Unable to load support groups</h4>
+                <h4><Trans id="groupsError">Unable to load support groups</Trans></h4>
                 <p>{groupsError}</p>
                 <button
                   type="button"
                   className="caregiver-text-action"
                   onClick={() => setReloadGroups((n) => n + 1)}
-                >
+                ><Trans id="retryArrow">
                   Try again →
-                </button>
+                </Trans></button>
               </div>
             ) : filteredGroups.length > 0 ? (
               <div className="caregiver-results" aria-live="polite">
@@ -622,17 +623,17 @@ function CaregiverSupport() {
                     <h4>{group.name}</h4>
                     {group.city && (
                       <p>
-                        <strong>City:</strong> {group.city}
+                        <strong><Trans id="cityColon">City:</Trans></strong> {group.city}
                       </p>
                     )}
                     <p>
-                      <strong>Languages:</strong>{" "}
+                      <strong><Trans id="languagesColon">Languages:</Trans></strong>{" "}
                       {Array.isArray(group.languages) && group.languages.length
                         ? group.languages.join(", ")
                         : "Not specified"}
                     </p>
                     <p>
-                      <strong>Accepting volunteers:</strong>{" "}
+                      <strong><Trans id="acceptingVolunteers">Accepting volunteers:</Trans></strong>{" "}
                       {group.accepting_volunteers ? "Yes" : "No"}
                     </p>
                     {group.email && (
@@ -708,7 +709,7 @@ function CaregiverSupport() {
             <div
               className="caregiver-volunteer-choices"
               role="group"
-              aria-label="Types of volunteer organisations"
+              aria-label={translateLabel('Types of volunteer organisations', "volunteerTypes")}
             >
               {volunteerTypes.map((item, index) => (
                 <button

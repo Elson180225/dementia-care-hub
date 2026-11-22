@@ -1,3 +1,4 @@
+import Trans from "../i18n/Trans";
 import {useEffect,useState} from 'react';
 import {Link} from 'react-router-dom';
 import EventPriceLabel from './EventPriceLabel';
@@ -17,7 +18,7 @@ export default function ProgrammeIntakes({programme,onSelect}){
  {programme.id==='dcs-family'&&<p className="tp-note">{copy.familyNotice}</p>}
  {programme.id==='dcs-ttt'&&<p className="tp-note">{copy.tttNotice}</p>}
  <h3>{isPlannedProgramme(programme)?copy.planned:copy.upcoming} — {programme.code||programme.title}</h3>
- {isPlannedProgramme(programme)?<p>{copy.plannedNotice} <Link to="/about/contact">{copy.contact}</Link> {copy.enquiries}</p>:error?<p role="alert">{error} Please <Link to="/about/contact">{copy.contact}</Link>.</p>:!events?<p role="status">{copy.loading}</p>:upcoming.length?cards(upcoming):<p>{copy.none} <Link to="/about/contact">{copy.contact}</Link> {copy.future}</p>}
+ {isPlannedProgramme(programme)?<p>{copy.plannedNotice} <Link to="/about/contact">{copy.contact}</Link> {copy.enquiries}</p>:error?<p role="alert">{error}<Trans id="please"> Please </Trans><Link to="/about/contact">{copy.contact}</Link>.</p>:!events?<p role="status">{copy.loading}</p>:upcoming.length?cards(upcoming):<p>{copy.none} <Link to="/about/contact">{copy.contact}</Link> {copy.future}</p>}
  {!!past.length&&<details><summary>{copy.past} ({past.length})</summary><p>{copy.pastNotice}</p>{cards(past,true)}</details>}
  </section>;
 }

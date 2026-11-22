@@ -357,7 +357,7 @@ function HelpMenuIcon({ path }) {
 }
 
 function Header() {
-  const { language, setLanguage, t, languages, currentLanguageConfig } =
+  const { language, setLanguage, t, languages, currentLanguageConfig, translateLabel } =
     useLanguage();
 
   const [openMenu, setOpenMenu] = useState(null);
@@ -432,7 +432,7 @@ function Header() {
             <span>{t.header.topBar}</span>
 
             <div className="top-actions">
-              <nav className="utility-nav" aria-label="Updates and trainer access">
+              <nav className="utility-nav" aria-label={translateLabel('Updates and trainer access', "updatesTrainerAccess")}>
                 <Link to="/get-updated" onClick={closeMobileMenu}>{t.footer.getUpdated}</Link>
                 <span aria-hidden="true">|</span>
                 <Link to="/trainer-portal" onClick={closeMobileMenu}>{t.footer.trainerPortal}</Link>
@@ -469,7 +469,7 @@ function Header() {
                   type="button"
                   onClick={() => setLanguageOpen(!languageOpen)}
                   aria-expanded={languageOpen}
-                  aria-label="Select language"
+                  aria-label={translateLabel('Select language', "selectLanguage")}
                 >
                   <span className="language-label">{currentLanguageConfig.nativeLabel}</span>
                   <span className="language-chevron" aria-hidden="true">▼</span>
@@ -518,7 +518,7 @@ function Header() {
             {/* =================================================
                 DESKTOP NAVIGATION
             ================================================= */}
-            <nav className="desktop-nav" aria-label="Main navigation">
+            <nav className="desktop-nav" aria-label={translateLabel('Main navigation', "mainNavigation")}>
               <Link
                 to="/"
                 className="nav-link"
@@ -623,7 +623,7 @@ function Header() {
               MOBILE NAVIGATION
           ================================================= */}
           {mobileOpen && (
-            <nav id="mobile-navigation" className="mobile-nav" aria-label="Mobile navigation">
+            <nav id="mobile-navigation" className="mobile-nav" aria-label={translateLabel('Mobile navigation', "mobileNavigation")}>
               <Link to="/" onClick={closeMobileMenu}>
                 {t.header.home}
               </Link>

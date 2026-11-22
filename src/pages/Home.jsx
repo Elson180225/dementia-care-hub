@@ -71,7 +71,7 @@ function Home() {
 
   return (
     <main className="home-page">
-      <PublishedRecords kind="content_pages" slug="home" title="Project updates" />
+      <PublishedRecords kind="content_pages" slug="home" title={t.inlineCopy.projectUpdates} />
 
       {/* HERO: one message, one main button */}
       <section className="hero-section">

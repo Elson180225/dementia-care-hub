@@ -3,7 +3,7 @@ import { useLanguage } from "../../i18n/LanguageContext";
 import "./Footer.css";
 
 function Footer() {
-  const { language, setLanguage, t, languages, currentLanguageConfig } =
+  const { language, setLanguage, t, languages, currentLanguageConfig, translateLabel } =
     useLanguage();
   const f = t.footer;
   const m = t.header.menu;
@@ -76,7 +76,7 @@ function Footer() {
             <button
               type="button"
               onClick={cycleLanguage}
-              title="Click to switch language"
+              title={translateLabel("Click to switch language", "clickSwitchLanguage")}
             >
               {currentLanguageConfig.nativeLabel}
             </button>

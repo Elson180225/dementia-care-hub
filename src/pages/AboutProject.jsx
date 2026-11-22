@@ -38,7 +38,7 @@ function ContributionList({ items }) {
 }
 
 export default function AboutProject() {
-  const { t,translateContent } = useLanguage();
+  const { t,translateContent, translateLabel } = useLanguage();
   const [rawRecords, setRecords] = useState([]);
   const records=translateContent(rawRecords.filter(r=>r.language==='English'),'records/content_pages');
   useEffect(() => {
@@ -63,7 +63,7 @@ export default function AboutProject() {
       </header>
 
       <div className="about-container about-layout">
-        <nav className="about-toc" aria-label="On this page">
+        <nav className="about-toc" aria-label={translateLabel("On this page", "onThisPage")}>
           <p className="about-toc-title">{ap.onPage}</p>
           <ol>
             {navigation.map(item => <li key={item.id}><a href={`#${item.id}`}>{item.label}</a></li>)}

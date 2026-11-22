@@ -1,7 +1,12 @@
 import { createContext, useContext, useCallback, useEffect, useMemo, useState } from "react";
 import { translations } from "./translations";
 
-import {translateTree} from '../../shared/translation-review';
+import { translateTree } from '../../shared/translation-review.js';
+import { bundledPreviewOverrides } from './bundledPreview.js';
+import {createLabelLookup, translateFixedLabel, translateCataloguedLabel} from './labelLookup.js';
+// Opt-in preview for local development only; RCBC approval is still required on the public site.
+const BUNDLED_PREVIEW = import.meta.env.DEV && import.meta.env.VITE_PREVIEW_BUNDLED_TRANSLATIONS === 'true';
+
 const LanguageContext = createContext(null);
 
 export const SUPPORTED_LANGUAGES = [
@@ -49,7 +54,24 @@ export function LanguageProvider({ children }) {
   },[language]);
   const approved=useMemo(()=>language==='en'?{}:bundles[language]||{},[language,bundles]);
   const translateContent=useCallback((value,prefix)=>translateTree(value,prefix,approved),[approved]);
-  const t=useMemo(()=>translateTree(translations.en,'ui',approved),[approved]);
+  const t = useMemo(() => {
+    const overrides = BUNDLED_PREVIEW && language !== 'en'
+      ? bundledPreviewOverrides(translations.en, translations[language], approved)
+      : approved;
+    return translateTree(translations.en, 'ui', overrides);
+  }, [language, approved]);
+
+  const labelLookup = useMemo(
+    () => createLabelLookup(translations.en, t),
+    [t]
+  );
+  const translateLabel = useCallback(
+    (label, inlineKey) => {
+      if (inlineKey) return translateCataloguedLabel(label, inlineKey, translations.en, t);
+      return translateFixedLabel(label, labelLookup);
+    },
+    [labelLookup, t]
+  );
 
   return (
     <LanguageContext.Provider
@@ -58,6 +80,8 @@ export function LanguageProvider({ children }) {
         setLanguage,
         t,
         translateContent,
+        translateLabel,
+        bundledPreview: BUNDLED_PREVIEW && language !== "en",
         languages: SUPPORTED_LANGUAGES,
         currentLanguageConfig:
           SUPPORTED_LANGUAGES.find((l) => l.code === language) ||

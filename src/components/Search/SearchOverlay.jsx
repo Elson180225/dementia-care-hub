@@ -8,7 +8,7 @@ import { lockDialogScroll } from "../dialogScroll";
 
 
 function SearchOverlay({ isOpen, onClose }) {
-  const { t, translateContent } = useLanguage();
+  const { t, translateContent, translateLabel } = useLanguage();
   const s = t.search;
   const [query, setQuery] = useState("");
   const inputRef = useRef(null);
@@ -175,12 +175,12 @@ function SearchOverlay({ isOpen, onClose }) {
                   >
                     <div>
                       <span className="search-result-category">
-                        {item.category}
+                        {translateLabel(item.category)}
                       </span>
 
-                      <h3>{item.title}</h3>
+                      <h3>{translateLabel(item.title)}</h3>
 
-                      <p>{item.description}</p>
+                      <p>{translateLabel(item.description)}</p>
                     </div>
 
                     <span className="search-result-arrow">

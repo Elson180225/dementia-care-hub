@@ -1,3 +1,4 @@
+import Trans from "../../i18n/Trans";
 import { LastReviewed } from '../../components/PublicFeatures';
 import { useEffect, useMemo, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
@@ -124,7 +125,7 @@ function normaliseCategory(value = "") {
 }
 
 function ResourceFinder() {
-  const { t } = useLanguage();
+  const { t, translateLabel } = useLanguage();
   const { search } = useLocation();
   const linkedResource = new URLSearchParams(search).get("resource");
   const rf = t.resourceFinderPage || {};
@@ -413,9 +414,9 @@ function ResourceFinder() {
         directoryError) && (
         <div className="rf-directory-status">
           {directoryLoading && (
-            <p role="status">
+            <p role="status"><Trans id="publishedLoading">
               Loading published resources…
-            </p>
+            </Trans></p>
           )}
 
           {directoryError && (
@@ -621,13 +622,13 @@ function ResourceFinder() {
                         showNeedGuide
                       }
                     >
-                      <span>
+                      <span><Trans id="unsureStart">
                         Not sure where to start?
-                      </span>
+                      </Trans></span>
 
-                      <strong>
+                      <strong><Trans id="helpChoose">
                         Help me choose
-                      </strong>
+                      </Trans></strong>
 
                       <span
                         className="rf-need-guide-arrow"
@@ -641,9 +642,9 @@ function ResourceFinder() {
 
                     {showNeedGuide && (
                       <div className="rf-need-guide-content">
-                        <p className="rf-need-guide-intro">
+                        <p className="rf-need-guide-intro"><Trans id="chooseClosest">
                           Choose what sounds closest to your situation.
-                        </p>
+                        </Trans></p>
 
                         <div className="rf-need-guide-options">
                           <button
@@ -654,13 +655,13 @@ function ResourceFinder() {
                               )
                             }
                           >
-                            <span>
+                            <span><Trans id="noticedChanges">
                               I&apos;ve noticed memory or behaviour changes
-                            </span>
+                            </Trans></span>
 
-                            <strong>
+                            <strong><Trans id="assessArrow">
                               Assessment & Healthcare →
-                            </strong>
+                            </Trans></strong>
                           </button>
 
                           <button
@@ -671,13 +672,13 @@ function ResourceFinder() {
                               )
                             }
                           >
-                            <span>
+                            <span><Trans id="dailyHelp">
                               I need help caring for someone day to day
-                            </span>
+                            </Trans></span>
 
-                            <strong>
+                            <strong><Trans id="supportArrow">
                               Support Services →
-                            </strong>
+                            </Trans></strong>
                           </button>
 
                           <button
@@ -688,13 +689,13 @@ function ResourceFinder() {
                               )
                             }
                           >
-                            <span>
+                            <span><Trans id="costsHelp">
                               I&apos;m worried about costs or government assistance
-                            </span>
+                            </Trans></span>
 
-                            <strong>
+                            <strong><Trans id="financialArrow">
                               Government & Financial →
-                            </strong>
+                            </Trans></strong>
                           </button>
 
                           <button
@@ -705,13 +706,13 @@ function ResourceFinder() {
                               )
                             }
                           >
-                            <span>
+                            <span><Trans id="equipmentHelp">
                               I need something to make daily life safer or easier
-                            </span>
+                            </Trans></span>
 
-                            <strong>
+                            <strong><Trans id="equipmentArrow">
                               Equipment & Practical Aids →
-                            </strong>
+                            </Trans></strong>
                           </button>
                         </div>
                       </div>
@@ -771,7 +772,7 @@ function ResourceFinder() {
                           </span>
 
                           <strong>
-                            {type}
+                            {translateLabel(type)}
                           </strong>
 
                           <span>
@@ -1102,7 +1103,7 @@ function ResourceFinder() {
                       {expandedResource === resource.id && (
                         <div className="rf-result-details">
                           <div>
-                            <span>Location</span>
+                            <span><Trans id="locationLabel">Location</Trans></span>
                             <strong>
                               {[resource.address, resource.location, resource.state]
                                 .filter(Boolean)
@@ -1111,46 +1112,46 @@ function ResourceFinder() {
                           </div>
 
                           <div>
-                            <span>Phone</span>
+                            <span><Trans id="phoneLabel">Phone</Trans></span>
                             <strong>{resource.phone || "Not provided"}</strong>
                           </div>
 
                           <div>
-                            <span>Email</span>
+                            <span><Trans id="emailLabel">Email</Trans></span>
                             <strong>{resource.email || "Not provided"}</strong>
                           </div>
 
                           <div>
-                            <span>Eligibility</span>
+                            <span><Trans id="eligibility">Eligibility</Trans></span>
                             <strong>{resource.eligibility || "Not provided"}</strong>
                           </div>
 
                           <div>
-                            <span>Fees</span>
+                            <span><Trans id="fees">Fees</Trans></span>
                             <strong>{resource.fees || "Not provided"}</strong>
                           </div>
 
                           <div>
-                            <span>Source</span>
+                            <span><Trans id="sourceLabel">Source</Trans></span>
                             <strong>{resource.sourceLabel || "Not provided"}</strong>
                           </div>
 
                           <div>
-                            <span>Review status</span>
+                            <span><Trans id="reviewStatus">Review status</Trans></span>
                             <strong>{resource.reviewStatus || "Not provided"}</strong>
                           </div>
 
                           <LastReviewed value={resource.lastReviewed} />
                           {resource.website && (
                             <div className="rf-result-details-wide">
-                              <span>Website</span>
+                              <span><Trans id="website">Website</Trans></span>
                               <a
                                 href={resource.website}
                                 target="_blank"
                                 rel="noreferrer"
-                              >
+                              ><Trans id="visitWebsite">
                                 Visit published website ↗
-                              </a>
+                              </Trans></a>
                             </div>
                           )}
                         </div>
@@ -1209,11 +1210,11 @@ function ResourceFinder() {
                     </span>
                   ))
                 ) : (
-                  <>
+                  <><Trans id="directoryIn">
                     Directory in.
-                    <br />
+                    </Trans><br /><Trans id="answersOut">
                     Relevant answers out.
-                  </>
+                  </Trans></>
                 )}
               </h2>
 

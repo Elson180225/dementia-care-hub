@@ -1,4 +1,6 @@
 import {publicCopy,addMissingCopy} from '../../shared/public-copy.js';
+import {inlineCopy} from './inlineCopy.js';
+import {addSupplementalCopy} from './supplementalCopy.js';
 export const translations = {
   "en": {
     "header": {
@@ -4982,4 +4984,59 @@ for (const [language, copy] of Object.entries(pageRefresh)) {
 Object.assign(translations.en.contact, { pendingDetails: 'Official contact details will be published once confirmed. Please use the enquiry form for now.' });
 Object.assign(translations.ms.contact, { pendingDetails: 'Maklumat hubungan rasmi akan dipaparkan selepas disahkan. Sila gunakan borang pertanyaan buat masa ini.' });
 Object.assign(translations.zh.contact, { pendingDetails: '官方联系方式将在确认后公布。目前请使用咨询表格。' });
+// Translation-ready wording used by Find Help & Support.
+// These are catalogue suggestions, not publicly approved translations.
+const findHelpCopy = {
+ en: {
+  shortA: ['Concerned about changes?', 'For yourself or someone you support.'],
+  shortB: ['Already diagnosed?', 'Find care, services and support for yourself or someone else.'],
+  peerSupport: 'Peer / community support → Support Groups',
+  planningLink: 'Planning Ahead → Advance Planning',
+  planningEyebrow: 'Planning Ahead',
+  planningTitle: 'Advance Planning',
+  planningText: 'Planning ahead can help individuals and families think about future care, preferences and important decisions early. Detailed guidance will be added after professional review.',
+ },
+ ms: {
+  shortA: ['Bimbang tentang perubahan?', 'Untuk diri sendiri atau seseorang yang anda sokong.'],
+  shortB: ['Sudah didiagnosis?', 'Cari penjagaan, perkhidmatan dan sokongan untuk diri sendiri atau orang lain.'],
+  peerSupport: 'Sokongan rakan sebaya / komuniti → Kumpulan Sokongan',
+  planningLink: 'Merancang Masa Hadapan → Perancangan Awal',
+  planningEyebrow: 'Merancang Masa Hadapan',
+  planningTitle: 'Perancangan Awal',
+  planningText: 'Merancang lebih awal dapat membantu individu dan keluarga mempertimbangkan penjagaan masa depan, pilihan peribadi dan keputusan penting. Panduan terperinci akan ditambah selepas semakan profesional.',
+ },
+ zh: {
+  shortA: ['担心近期的变化吗？', '无论是您自己还是您所照顾的人。'],
+  shortB: ['已经确诊了吗？', '为自己或他人寻找照护、服务和支持。'],
+  peerSupport: '同伴／社区支持 → 支持小组',
+  planningLink: '提前规划 → 预先规划',
+  planningEyebrow: '提前规划',
+  planningTitle: '预先规划',
+  planningText: '提前规划可以帮助个人和家庭尽早思考未来的照护安排、个人意愿和重要决定。详细指南将在专业审核后补充。',
+ },
+};
+for (const [language, copy] of Object.entries(findHelpCopy)) {
+ const section = translations[language].findHelp;
+ Object.assign(section.card1, {shortTitle: copy.shortA[0], shortText: copy.shortA[1]});
+ Object.assign(section.card2, {
+  shortTitle: copy.shortB[0], shortText: copy.shortB[1],
+  peerSupport: copy.peerSupport, planningLink: copy.planningLink,
+ });
+ Object.assign(section, {
+  planningEyebrow: copy.planningEyebrow,
+  planningTitle: copy.planningTitle,
+  planningText: copy.planningText,
+ });
+}
+
 addMissingCopy(translations.en,publicCopy);
+
+// Register JSX labels under stable translation-review keys instead of leaving
+// their text hardcoded in components. Published wording still needs approval.
+for (const [key, [en, ms, zh]] of Object.entries(inlineCopy)) {
+  for (const [lang, value] of [['en', en], ['ms', ms], ['zh', zh]]) {
+    if (!translations[lang].inlineCopy) translations[lang].inlineCopy = {};
+    translations[lang].inlineCopy[key] = value;
+  }
+}
+addSupplementalCopy(translations);

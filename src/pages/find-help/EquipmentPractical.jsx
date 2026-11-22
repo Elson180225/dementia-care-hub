@@ -1,3 +1,4 @@
+import Trans from "../../i18n/Trans";
 // src/pages/find-help/EquipmentPractical.jsx
 
 import { useEffect, useMemo, useState } from "react";
@@ -63,8 +64,13 @@ function EquipmentNeedIcon({ type }) {
 }
 
 function EquipmentPractical() {
-  const { t } = useLanguage();
+  const { t, translateLabel } = useLanguage();
   const ep = t.equipmentPracticalPage || {};
+  // Only change visible card headings; IDs/categories remain canonical filter keys.
+  const currentHeroCards = heroCards.map((card) => ({
+    ...card,
+    title: ep.heroCards?.find((item) => item.id === card.id)?.title || card.title,
+  }));
 
   const [selectedCategory, setSelectedCategory] =
     useState("All");
@@ -304,7 +310,7 @@ function EquipmentPractical() {
           }
         >
           <div className="equipment-hero-cards">
-            {heroCards.map(
+            {currentHeroCards.map(
               (card, index) => (
                 <button
                   key={card.id}
@@ -339,7 +345,7 @@ function EquipmentPractical() {
           </div>
 
           <div className="equipment-hero-card-controls">
-            {heroCards.map(
+            {currentHeroCards.map(
               (card, index) => (
                 <button
                   key={card.id}
@@ -514,16 +520,16 @@ function EquipmentPractical() {
       >
         <div className="equipment-container">
           <div className="equipment-database-note">
-            <strong>Database-managed directory</strong>
-            <span>
+            <strong><Trans id="directoryTitle">Database-managed directory</Trans></strong>
+            <span><Trans id="equipmentDirectoryNote">
               Only published equipment records from the RCBC admin database are shown here.
-            </span>
+            </Trans></span>
           </div>
 
           {directoryLoading && (
-            <p className="equipment-database-status" role="status">
+            <p className="equipment-database-status" role="status"><Trans id="publishedLoading">
               Loading published resources…
-            </p>
+            </Trans></p>
           )}
 
           {directoryError && (
@@ -572,7 +578,7 @@ function EquipmentPractical() {
 
                       {category === "All"
                         ? (ep.allResources || "All resources")
-                        : category}
+                        : translateLabel(category)}
                     </button>
                   )
                 )}
@@ -597,7 +603,7 @@ function EquipmentPractical() {
                   <span>
                     {selectedCategory === "All"
                       ? (ep.allResources || "All resources")
-                      : selectedCategory}
+                      : translateLabel(selectedCategory)}
                   </span>
 
                   <h2>
@@ -695,26 +701,26 @@ function EquipmentPractical() {
                         {isOpen && (
                           <div className="equipment-resource-details">
                             <div className="equipment-examples">
-                              <span>Published record details</span>
+                              <span><Trans id="publishedDetails">Published record details</Trans></span>
 
                               <ul>
                                 <li>
-                                  <strong>Location:</strong>{" "}
+                                  <strong><Trans id="locationColon">Location:</Trans></strong>{" "}
                                   {resource.location}
                                 </li>
                                 <li>
-                                  <strong>Source:</strong>{" "}
+                                  <strong><Trans id="sourceColon">Source:</Trans></strong>{" "}
                                   {resource.source}
                                 </li>
                                 <li>
-                                  <strong>Status:</strong>{" "}
-                                  {resource.status}
+                                  <strong><Trans id="statusColon">Status:</Trans></strong>{" "}
+                                  {translateLabel(resource.status)}
                                 </li>
                               </ul>
                             </div>
 
                             <div className="equipment-source-panel">
-                              <span>Contact information</span>
+                              <span><Trans id="contactInfo">Contact information</Trans></span>
 
                               <p>
                                 {resource.phone
@@ -733,9 +739,9 @@ function EquipmentPractical() {
                                   href={resource.website}
                                   target="_blank"
                                   rel="noreferrer"
-                                >
+                                ><Trans id="visitWebsite">
                                   Visit published website ↗
-                                </a>
+                                </Trans></a>
                               )}
                             </div>
 

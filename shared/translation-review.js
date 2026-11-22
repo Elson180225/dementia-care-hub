@@ -1,7 +1,9 @@
+import { inlineCopyMeta } from './inline-copy-metadata.js';
 export const reviewLanguages=['ms','zh'];
 const excluded=new Set(['id','slug','code','trackNumber','language','languages','mode','status','availability','registrationMethod','registrationType','type','date','time','dateISO','year','month','day','city','phone','email','postcode','state','category','resource_type','certificate_ref','webinarQuery']);
 function isDisplayLabel(prefix,key){
  const uiLabel=prefix.startsWith('ui/')&&prefix.split('/').length===3
+  || /^ui\/welcomeGuide\/questions\/(language|city)$/.test(prefix)
   || /^ui\/learnEvents\/(activityModal|programModal|stageSpecs)\//.test(prefix);
  const descriptiveProgramme=prefix.startsWith('cms/physicalEducation/programmes/')
   && ['mode','language','status'].includes(key);
@@ -10,7 +12,11 @@ function isDisplayLabel(prefix,key){
 export function sourceLeaves(value,prefix='ui',result={}){
  if(typeof value==='string'){
   const key=prefix.split('/').at(-1);
-  if(value.trim()&&(!excluded.has(key)||isDisplayLabel(prefix,key))&&!/(url|image|poster|path|href|src|At|_at|Id|_id)$/i.test(key)&&!/^https?:|^\/|^#|^mailto:|^tel:|^data:|^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value))result[prefix]=value;
+  // Explicitly catalogued UI labels (e.g. "Event poster") are readable text,
+  // even when their stable name ends with "poster" or "image". Other source
+  // fields still obey the existing URL, media and identifier exclusions.
+  const fixedLabel = prefix.startsWith('ui/inlineCopy/') && Boolean(inlineCopyMeta(decodeURIComponent(key)));
+  if(value.trim()&&(fixedLabel||(!excluded.has(key)||isDisplayLabel(prefix,key))&&!/(url|image|poster|path|href|src)$/i.test(key)&&!/(At|_at|Id|_id)$/.test(key))&&!/^https?:|^\/|^#|^mailto:|^tel:|^data:|^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value))result[prefix]=value;
  }else if(Array.isArray(value)){
   value.forEach((v,i)=>sourceLeaves(v,prefix+'/'+encodeURIComponent(v?.id??i),result));
  }else if(value&&typeof value==='object'){
@@ -30,6 +36,7 @@ export function reviewStatus(row,source){
  return row.status;
 }
 export function defaultReviewType(key){
+ if(key.startsWith('ui/inlineCopy/')) return inlineCopyMeta(decodeURIComponent(key.slice('ui/inlineCopy/'.length)))?.reviewType || 'standard';
  return /^ui\/(header|footer|common)\//.test(key)?'standard':'medical';
 }
 export function reviewTransition(row,source,action,actor){

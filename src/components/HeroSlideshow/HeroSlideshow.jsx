@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
+import { useLanguage } from "../../i18n/LanguageContext";
 
 import alzheimersHero from "../../assets/alzheimers-hero.jpg";
 import seniorCitizens from "../../assets/Senior-citizens-chatting.png";
@@ -45,6 +46,7 @@ const slides = [
 const SLIDE_DURATION = 5000;
 
 function HeroSlideshow() {
+  const { translateLabel } = useLanguage();
   const [activeIndex, setActiveIndex] = useState(0);
 
   const goToSlide = useCallback((index) => {
@@ -84,7 +86,7 @@ function HeroSlideshow() {
       className="hero-slideshow"
       onKeyDown={handleKeyDown}
       role="region"
-      aria-label="Hero image slideshow"
+      aria-label={translateLabel("Hero image slideshow", "slideshowLabel")}
       aria-roledescription="carousel"
       tabIndex={0}
     >
@@ -98,12 +100,12 @@ function HeroSlideshow() {
             }`}
             aria-hidden={index !== activeIndex}
             role="group"
-            aria-label={`${index + 1} of ${slides.length}: ${slide.label}`}
+            aria-label={`${index + 1} ${translateLabel("of") || "of"} ${slides.length}: ${translateLabel(slide.label)}`}
             aria-roledescription="slide"
           >
-            <img src={slide.src} alt={slide.alt} />
+            <img src={slide.src} alt={translateLabel(slide.alt)} />
             <div className="hero-slide-overlay" />
-            <span className="hero-slide-label">{slide.label}</span>
+            <span className="hero-slide-label">{translateLabel(slide.label)}</span>
           </div>
         ))}
       </div>
@@ -113,7 +115,7 @@ function HeroSlideshow() {
         type="button"
         className="hero-slideshow-arrow hero-slideshow-arrow-prev"
         onClick={goPrev}
-        aria-label="Previous slide"
+        aria-label={translateLabel("Previous slide", "previousSlide")}
       >
         &#8249;
       </button>
@@ -122,7 +124,7 @@ function HeroSlideshow() {
         type="button"
         className="hero-slideshow-arrow hero-slideshow-arrow-next"
         onClick={goNext}
-        aria-label="Next slide"
+        aria-label={translateLabel("Next slide", "nextSlide")}
       >
         &#8250;
       </button>
@@ -137,7 +139,7 @@ function HeroSlideshow() {
               index === activeIndex ? "hero-slideshow-dot-active" : ""
             }`}
             onClick={() => goToSlide(index)}
-            aria-label={`Go to slide ${index + 1}: ${slide.label}`}
+            aria-label={`${translateLabel("Go to slide", "goToSlide")} ${index + 1}: ${translateLabel(slide.label)}`}
             aria-selected={index === activeIndex}
             role="tab"
           />

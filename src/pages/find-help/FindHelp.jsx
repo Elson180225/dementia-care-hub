@@ -76,28 +76,15 @@ function getAreaIcon(path) {
 }
 
 function FindHelp() {
-  const { t, language } = useLanguage();
+  const { t } = useLanguage();
   const fh = t.findHelp;
 
-  // RCBC requires Journeys A and B to support people seeking
-  // help for themselves or for someone else.
-  const isEnglish = !language || language === "en";
-
-  const journeyATitle = isEnglish
-    ? "Concerned about changes?"
-    : (fh.card1?.title || "I am concerned about changes");
-
-  const journeyAText = isEnglish
-    ? "For yourself or someone you support."
-    : (fh.card1?.text || "You may have noticed changes in memory, thinking, behaviour or daily life and want to understand what to do next.");
-
-  const journeyBTitle = isEnglish
-    ? "Already diagnosed?"
-    : (fh.card2?.title || "I / my family member has been diagnosed");
-
-  const journeyBText = isEnglish
-    ? "Find care, services and support for yourself or someone else."
-    : (fh.card2?.text || "Explore the areas that may need attention after diagnosis and move directly to the most relevant support section.");
+  // These short card headings are part of the translation catalogue,
+  // rather than English-only text selected by the language switch.
+  const journeyATitle = fh.card1?.shortTitle || fh.card1?.title;
+  const journeyAText = fh.card1?.shortText || fh.card1?.text;
+  const journeyBTitle = fh.card2?.shortTitle || fh.card2?.title;
+  const journeyBText = fh.card2?.shortText || fh.card2?.text;
 
   return (
     <main className="find-help-page">
@@ -216,11 +203,11 @@ function FindHelp() {
                 </Link>
 
                 <Link to="/caregiver-support/support-groups">
-                  Peer / community support → Support Groups
+                  {fh.card2?.peerSupport}
                 </Link>
 
                 <a href="#advance-planning">
-                  Planning Ahead → Advance Planning
+                  {fh.card2?.planningLink}
                 </a>
 
                 <Link to="/learn-events">
@@ -273,17 +260,12 @@ function FindHelp() {
       >
         <div className="find-help-container">
           <div className="find-help-planning-card">
-            <span>Planning Ahead</span>
+            <span>{fh.planningEyebrow}</span>
 
             <div>
-              <h2>Advance Planning</h2>
+              <h2>{fh.planningTitle}</h2>
 
-              <p>
-                Planning ahead can help individuals and families
-                think about future care, preferences and important
-                decisions early. Detailed guidance will be added
-                after professional review.
-              </p>
+              <p>{fh.planningText}</p>
             </div>
           </div>
         </div>

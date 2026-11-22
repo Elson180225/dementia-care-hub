@@ -1,3 +1,4 @@
+import Trans from "../../i18n/Trans";
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 
@@ -124,7 +125,7 @@ function AssessmentVisualIcon({ type }) {
 }
 
 function AssessmentHealthcare() {
-  const { t } = useLanguage();
+  const { t, translateLabel } = useLanguage();
   const ah = t.assessmentHealthcare || {};
   const currentPrepItems = ah.items || preparationItems;
 
@@ -584,23 +585,23 @@ function AssessmentHealthcare() {
                   event.target.value
                 )
               }
-              aria-label="Filter healthcare providers by city"
+              aria-label={translateLabel("Filter healthcare providers by city", "providerCityFilter")}
             >
               <option value="All">
                 {ah.allLocations || "All locations"}
               </option>
 
-              <option value="Kuching">
+              <option value="Kuching"><Trans>
                 Kuching
-              </option>
+              </Trans></option>
 
-              <option value="Sibu">
+              <option value="Sibu"><Trans>
                 Sibu
-              </option>
+              </Trans></option>
 
-              <option value="Miri">
+              <option value="Miri"><Trans>
                 Miri
-              </option>
+              </Trans></option>
             </select>
 
             <select
@@ -610,7 +611,7 @@ function AssessmentHealthcare() {
                   event.target.value
                 )
               }
-              aria-label="Filter healthcare providers by pathway"
+              aria-label={translateLabel("Filter healthcare providers by pathway", "providerPathFilter")}
             >
               <option value="All">
                 {ah.govtAndPrivate || "Government & Private"}
@@ -653,7 +654,7 @@ function AssessmentHealthcare() {
 
                   <div className="assessment-provider-top">
                     <span>
-                      {provider.type}
+                      {translateLabel(provider.type)}
                     </span>
 
                     <span>
@@ -666,7 +667,7 @@ function AssessmentHealthcare() {
                   </h3>
 
                   <p className="assessment-provider-description">
-                    {provider.description}
+                    {translateLabel(provider.description)}
                   </p>
 
                   <div className="assessment-provider-info">
@@ -701,7 +702,7 @@ function AssessmentHealthcare() {
                       </span>
 
                       <strong>
-                        {provider.specialistField}
+                        {translateLabel(provider.specialistField)}
                       </strong>
                     </div>
 
@@ -733,7 +734,7 @@ function AssessmentHealthcare() {
                       {provider.services.map(
                         (service) => (
                           <small key={service}>
-                            {service}
+                            {translateLabel(service)}
                           </small>
                         )
                       )}
