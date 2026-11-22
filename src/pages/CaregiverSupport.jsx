@@ -168,7 +168,11 @@ function CaregiverSupport() {
     }[hash];
     if (legacyPath) navigate(legacyPath, { replace: true });
   }, [hash, navigate]);
-  const [activeTopic, setActiveTopic] = useState(guidanceTopics[0].id);
+  const [activeTopic, setActiveTopic] = useState(() => guidanceTopics.find(topic => topic.id === new URLSearchParams(search).get("topic"))?.id || guidanceTopics[0].id);
+  useEffect(() => {
+    const topic = new URLSearchParams(search).get('topic');
+    if (guidanceTopics.some(item => item.id === topic)) setActiveTopic(topic);
+  }, [search]);
   const [city, setCity] = useState("");
   const [language, setLanguage] = useState("");
   const [volunteerOnly, setVolunteerOnly] = useState(

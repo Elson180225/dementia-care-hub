@@ -83,40 +83,36 @@ export const translations = {
       "phase": "Phase 2",
       "phaseTheme": "Go Digital",
       "projectTheme": "Understanding the Missing Pieces",
-      "description": "Find clear information, practical support and learning resources for people living with dementia, families, caregivers and the wider community.",
-      "findPath": "Find Your Path",
-      "understandDementia": "Understanding Dementia",
-      "notSure": "Not sure where to begin?",
-      "tellUs": "Tell us what brings you here →",
-      "pathwaysSectionNum": "02",
-      "pathwaysSectionLabel": "What Brings You Here?",
-      "pathwaysHeading": "Tell us what you need.",
-      "pathwaysSubheading": "Choose the pathway that best describes why you are visiting Dementia Care Connect.",
+      "description": "Clear information, practical help and learning for people with dementia, their families and carers.",
+      "browseTopics": "Browse topics ↓",
+      "facts": {
+        "free": "Free to use",
+        "languages": "English, Bahasa Malaysia and 中文",
+        "information": "Information only, not medical advice"
+      },
+      "pathwaysSectionLabel": "What brings you here?",
+      "pathwaysHeading": "How can we help?",
+      "pathwaysSubheading": "Pick the one that fits you best today.",
       "pathway1": {
-        "number": "01",
         "title": "I want to understand",
-        "desc": "Dementia, Alzheimer's, signs, when to be concerned, and Healthy & Active Living to support brain health, wellbeing and dementia risk reduction.",
+        "desc": "What dementia is, early signs and healthy living.",
         "link": "Understanding Dementia"
       },
       "pathway2": {
-        "number": "02",
         "title": "I need help & support",
-        "desc": "Next steps if concerned about changes or after a diagnosis; assessment and healthcare pathways; support services; government and financial resources; practical resources; and planning ahead.",
+        "desc": "Next steps, assessments, services and financial help.",
         "link": "Find Help & Support"
       },
       "pathway3": {
-        "number": "03",
         "title": "I am caring for someone",
-        "desc": "Caregiver guidance, caregiver training, support groups and relevant caregiver support resources.",
+        "desc": "Guidance, training and support groups for carers.",
         "link": "Caregiver Support"
       },
       "pathway4": {
-        "number": "04",
-        "title": "I want to learn or participate",
-        "desc": "Training, webinars, events, learning resources and ways to participate.",
+        "title": "I want to learn or take part",
+        "desc": "Webinars, workshops and events you can join.",
         "link": "Education & Events"
-      },
-      "pathwaysNote": "Not sure which pathway is right for you? Start with the option that best matches what you need today."
+      }
     },
     "understandDementia": {
       "eyebrow": "Understanding Dementia",
