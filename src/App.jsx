@@ -15,7 +15,8 @@ import Home from "./pages/Home";
 import Translations from "./admin/pages/Translations";
 import TranslationNotice from "./i18n/TranslationNotice";
 import WelcomeGuide from "./components/WelcomeGuide/WelcomeGuide";
-import LearnEvents from "./pages/LearnEvents";
+import LearnEvents, { PublicEventPage } from "./pages/LearnEvents";
+import PublicPageActions from "./components/PublicFeatures";
 import NotFound from "./pages/NotFound";
 import Contact from "./pages/Contact";
 import UnderstandDementia from "./pages/UnderstandDementia";
@@ -154,6 +155,7 @@ function App() {
               LEARN & EVENTS
           ========================== */}
 
+          <Route path="/learn-events/event/:eventId" element={<PublicEventPage />} />
           <Route
             path="/learn-events"
             element={
@@ -279,6 +281,7 @@ function App() {
         </Routes>
       </TrainerProvider>
       <PublicOnly>
+      <PublicPageActions />
       <Footer />
       </PublicOnly>
       <ScrollToTop />
