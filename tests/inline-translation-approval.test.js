@@ -11,8 +11,8 @@ const original = translations.en;
 const catalogue = sourceLeaves(original);
 const pageIds = new Set(translationPages.map(page => page.id));
 
-test('all 262 fixed labels are individually reviewable and assigned to a real admin page', () => {
-  assert.equal(Object.keys(inlineCopy).length, 262);
+test('all 264 fixed labels are individually reviewable and assigned to a real admin page', () => {
+  assert.equal(Object.keys(inlineCopy).length, 264);
   assert.deepEqual(new Set(Object.keys(inlineCopy)), new Set(Object.keys(inlineCopyMetadata)));
   for (const [key, [en, ms, zh]] of Object.entries(inlineCopy)) {
     const sourceKey = `ui/inlineCopy/${key}`;

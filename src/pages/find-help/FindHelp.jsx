@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { useLanguage } from "../../i18n/LanguageContext";
 
 import "./FindHelp.css";
+import ReadMore from "../../components/ReadMore/ReadMore";
 
 
 function FindHelpVisualIcon({ type }) {
@@ -100,9 +101,7 @@ function FindHelp() {
             {fh.title}
           </h1>
 
-          <p>
-            {fh.subtitle}
-          </p>
+          <ReadMore text={fh.subtitle} />
         </div>
       </section>
 
@@ -265,7 +264,7 @@ function FindHelp() {
             <div>
               <h2>{fh.planningTitle}</h2>
 
-              <p>{fh.planningText}</p>
+              <ReadMore text={fh.planningText} />
             </div>
           </div>
         </div>
@@ -322,7 +321,7 @@ function FindHelp() {
                 </div>
                 <span>{area.num}</span>
                 <h3>{area.title}</h3>
-                <p>{area.text}</p>
+                <ReadMore text={area.text} />
               </Link>
             ))}
           </div>

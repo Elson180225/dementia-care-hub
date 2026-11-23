@@ -61,6 +61,7 @@ import {
   languages,
 } from "../data/learn-events-data";
 import "./LearnEvents.css";
+import ReadMore from "../components/ReadMore/ReadMore";
 
 function formatActivityDate(val) { return val ? eventDate(val) : ''; }
 function formatActivityTime(val) { return val ? eventTime(val) : ''; }
@@ -923,7 +924,7 @@ function OnlineEducation() {
                         <span className="meta-bullet">•</span>
                         <span className="topic-lang-pill">{t.language}</span>
                       </div>
-                      <p className="topic-desc">{t.description}</p>
+                      <ReadMore className="topic-desc" text={t.description} />
                       <button
                         type="button"
                         className="topic-action-link"
@@ -960,7 +961,7 @@ function OnlineEducation() {
                         <span className="meta-bullet">•</span>
                         <span>{t.language}</span>
                       </div>
-                      <p>{t.description}</p>
+                      <ReadMore text={t.description} />
                       <span className="topic-action-link">{le?.viewEventDetails || "View Event Details"} →</span>
                     </div>
                   </article>

@@ -4,6 +4,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useLanguage } from "../i18n/LanguageContext";
 import caregiverPhoto from "../assets/caregiver-support.jpg";
 import "./CaregiverSupport.css";
+import ReadMore from "../components/ReadMore/ReadMore";
 
 const guidanceTopics = [
   {
@@ -129,7 +130,7 @@ function SectionHeading({ eyebrow, title, description }) {
     <div className="caregiver-section-heading">
       <p className="caregiver-eyebrow">{eyebrow}</p>
       <h2>{title}</h2>
-      <p>{description}</p>
+      <ReadMore text={description} />
     </div>
   );
 }
@@ -319,7 +320,7 @@ function CaregiverSupport() {
           <div className="caregiver-container">
             <p className="caregiver-eyebrow">{cs.eyebrow}</p>
             <h1>{pageLabels[page]?.title}</h1>
-            <p>{pageLabels[page]?.intro}</p>
+            <ReadMore text={pageLabels[page]?.intro} />
           </div>
         </section>
       )}
@@ -737,7 +738,7 @@ function CaregiverSupport() {
                 {cs.volunteerHeader || "VOLUNTEER WITH AN ORGANISATION"}
               </span>
               <h3>{(cs.volunteerTypes && cs.volunteerTypes[selectedVolunteer]?.title) || volunteerTypes[selectedVolunteer].title}</h3>
-              <p>{(cs.volunteerTypes && cs.volunteerTypes[selectedVolunteer]?.description) || volunteerTypes[selectedVolunteer].description}</p>
+              <ReadMore text={(cs.volunteerTypes && cs.volunteerTypes[selectedVolunteer]?.description) || volunteerTypes[selectedVolunteer].description} />
               <ol className="caregiver-volunteer-steps">
                 {(cs.volunteerSteps || [
                   "Find a relevant organisation or opportunity.",

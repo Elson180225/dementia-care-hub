@@ -6,6 +6,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useLanguage } from "../../i18n/LanguageContext";
 
 import "./EquipmentPractical.css";
+import ReadMore from "../../components/ReadMore/ReadMore";
 
 const categoryIcons = {
   "Daily Living Aids": "✦",
@@ -279,9 +280,7 @@ function EquipmentPractical() {
               {ep.title || "Equipment & Practical Resources"}
             </h1>
 
-            <p>
-              {ep.subtitle || "Explore everyday aids, reminder tools, mobility equipment and assistive technology that may support daily life."}
-            </p>
+            <ReadMore text={ep.subtitle || "Explore everyday aids, reminder tools, mobility equipment and assistive technology that may support daily life."} />
 
             <a
               href="#equipment-explore"

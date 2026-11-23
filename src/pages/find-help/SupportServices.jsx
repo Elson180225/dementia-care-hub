@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useLanguage } from "../../i18n/LanguageContext";
 
 import "./SupportServices.css";
+import ReadMore from "../../components/ReadMore/ReadMore";
 
 const categories = [
   "All",
@@ -267,9 +268,7 @@ function SupportServices() {
             {ss.title || "Support Services Directory"}
           </h1>
 
-          <p>
-            {ss.subtitle || "Browse available external support services and providers by service type and location."}
-          </p>
+          <ReadMore text={ss.subtitle || "Browse available external support services and providers by service type and location."} />
         </div>
       </section>
 
@@ -662,56 +661,6 @@ function SupportServices() {
                   </button>
                 )
               )}
-          </div>
-        </div>
-      </section>
-
-      {/* =====================================================
-          ADMIN-READY EXPLANATION
-      ====================================================== */}
-
-      <section className="support-admin-ready">
-        <div className="support-services-container">
-          <div className="support-admin-ready-box">
-            <div>
-              <span>
-                {ss.adminEyebrow || "Admin-ready structure"}
-              </span>
-
-              <h2>
-                {ss.adminTitle || "Directory content can be managed centrally."}
-              </h2>
-
-              <p>
-                {ss.adminDesc || "Service information is separated from the page interface. When the Admin module and backend are added, administrators will be able to add, edit, verify, publish and archive directory records without changing the public page code."}
-              </p>
-            </div>
-
-            <div className="support-admin-fields">
-              <span>
-                {ss.adminFieldProvider || "Provider"}
-              </span>
-
-              <span>
-                {ss.adminFieldCategory || "Category"}
-              </span>
-
-              <span>
-                {ss.adminFieldLocation || "Location"}
-              </span>
-
-              <span>
-                {ss.adminFieldContact || "Contact"}
-              </span>
-
-              <span>
-                {ss.adminFieldVerification || "Verification"}
-              </span>
-
-              <span>
-                {ss.adminFieldStatus || "Publication status"}
-              </span>
-            </div>
           </div>
         </div>
       </section>
