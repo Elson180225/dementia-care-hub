@@ -63,3 +63,7 @@
 .account-form-card .tp-password-row input:focus-visible { outline: none; }
 .account-form-card .account-links a:focus-visible,
 .account-form-card .tp-password-eye:focus-visible { outline: 3px solid #a66b00; outline-offset: 2px; }
+
+/* Sign-in, forgot and reset pages show only the form, centred. */
+.account-shell{grid-template-columns:minmax(0,1fr);max-width:520px;min-height:0;margin:40px auto}
+@media(max-width:640px){.account-shell{margin:16px auto}}

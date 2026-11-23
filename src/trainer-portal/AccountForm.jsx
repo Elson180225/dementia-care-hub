@@ -4,7 +4,6 @@ import FormFeedback from "../components/FormFeedback";
 import { useId, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { api, useTrainer } from './TrainerContext';
-import hopeCareLogo from '../assets/rcbc-alzheimers-care-logo.png';
 import './AccountForm.css';
 export default function AccountForm({role='trainer',signup=false,application=false,forgot=false,reset=false}) {
   const [params]=useSearchParams();const navigate=useNavigate();const {refresh,error:sessionError,clearError}=useTrainer();
@@ -62,7 +61,6 @@ export default function AccountForm({role='trainer',signup=false,application=fal
     }catch(e){setMessageTone('error');setMessage(e.message);}finally{setBusy(false);}
   }
   return <div className={(signIn||forgot||reset)?`account-shell account-shell-${role}`:'account-secondary'}>
-  {(signIn||forgot||reset)&&<aside className="account-story" aria-label="RCBC Alzheimer's Care"><Link className="account-brand" to="/" aria-label="RCBC Hope Care home"><img src={hopeCareLogo} alt="Rotary Club of Bintulu Central Hope Care Alzheimer's Care — understanding the missing pieces"/></Link><div className="account-story-copy"><span className="account-eyebrow">ROTARY CLUB OF BINTULU CENTRAL</span><h2>{role==='admin'?'Behind every connection, a caring community.':'Share knowledge. Support a caring community.'}</h2><p>{role==='admin'?'Help keep dementia education, community resources and training activities connected.':'Your experience helps families and caregivers find understanding, confidence and support.'}</p><span className="account-story-caption">Learning together. Caring together.</span></div></aside>}
   <section className="tp-card account-form-card">
   {(signIn||forgot||reset)&&<div className="account-form-intro"><Link to={forgot||reset?base:"/"} className="account-home-link">{forgot||reset?'← Back to sign in':'← Back to website'}</Link><span className="account-access-label">{role==='admin'?'ADMINISTRATOR ACCESS':'CERTIFIED TRAINER ACCESS'}</span></div>}
   <h1>{forgot?'Forgot your password?':reset?'Choose a new password':signIn?'Welcome back':role==='admin'?'RCBC Administrative Dashboard':'Certified Trainer Portal'}{!signIn&&!forgot&&!reset&&`: ${application?'Check application':'Register'}`}</h1>
