@@ -1,115 +1,229 @@
-import { createHash } from 'node:crypto';
 import { pool } from './db.js';
 import { subscriberPool } from './subscriber-db.js';
 import { createBrevo } from './brevo.js';
-import { unsubscribeToken } from './subscriber-tokens.js';
+import { registrationTarget, reminderMessage } from './event-reminder-email.js';
 
-export const reminderTypes=['Seminar','RCBC Webinar','CT Webinar'];
-export function reminderSettings(env=process.env) {
- const hours=Number(env.REMINDER_LEAD_HOURS || 24);
- const limit=Number(env.REMINDER_BATCH_SIZE || 100);
- if(!Number.isFinite(hours)||hours<=0||hours>168||!Number.isInteger(limit)||limit<1||limit>1000) throw new Error('Invalid reminder lead hours or batch size');
- return {hours,limit};
+export { reminderMessage, reminderIdempotencyKey } from './event-reminder-email.js';
+
+const hour = 3600000;
+const earlyDeadlineHours = 336;
+export const lastCallHours = 168;
+export const finalHours = 72;
+const lastCallSpacing = 48 * hour;
+const stages = ['final', 'last-call', 'invite'];
+
+export function reminderSettings(env = process.env) {
+ const hours = Number(env.REMINDER_INVITE_LEAD_HOURS || 504);
+ const limit = Number(env.REMINDER_BATCH_SIZE || 100);
+ if (!Number.isFinite(hours) || hours <= 0 || hours > 504 || !Number.isInteger(limit) || limit < 1 || limit > 1000) {
+  throw new Error('Invalid event invite lead hours or reminder batch size');
+ }
+ return { hours, limit, lastCall: env.REMINDER_LAST_CALL_ENABLED === 'true' };
 }
-export function matchesAudience(activity,subscriber) {
+
+export function matchesAudience(activity, subscriber) {
  return !!subscriber.consent_at && !subscriber.unsubscribed_at
-  && (activity.language==='All' || activity.language===subscriber.language)
-  && (activity.mode==='Online' || !activity.city?.trim() || activity.city.trim().toLowerCase()===subscriber.city?.trim().toLowerCase());
+  && (activity.language === 'All' || activity.language === subscriber.language)
+  && (activity.mode === 'Online' || !activity.city?.trim() || activity.city.trim().toLowerCase() === subscriber.city?.trim().toLowerCase());
 }
-const escape=s=>String(s ?? '').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-export function reminderIdempotencyKey(activity,subscriber) {
- const hash=createHash('sha256').update(activity.id+'|'+new Date(activity.starts_at).toISOString()+'|'+subscriber.id).digest('hex');
- // Brevo accepts a UUID-sized key, not a full 64-character SHA-256 hex string.
- return [hash.slice(0,8),hash.slice(8,12),'5'+hash.slice(13,16),'8'+hash.slice(17,20),hash.slice(20,32)].join('-');
-}
-export function reminderMessage(activity,subscriber,env=process.env) {
- const base=new URL(env.APP_BASE_URL);
- if(!['https:','http:'].includes(base.protocol))throw new Error('APP_BASE_URL must use HTTP or HTTPS');
- const unsubscribe=new URL('/get-updated',base);
- unsubscribe.searchParams.set('unsubscribe',unsubscribeToken(subscriber.id,env.SUBSCRIBER_TOKEN_SECRET));
- let details=new URL('/learn-events/upcoming-calendar',base).href;
- try {const url=new URL(activity.registration_link);if(['https:','http:'].includes(url.protocol))details=url.href;} catch { /* Use public calendar. */ }
- const time=new Date(activity.starts_at).toLocaleString('en-MY',{timeZone:'Asia/Kuala_Lumpur',dateStyle:'full',timeStyle:'short'})+' (Malaysia time, UTC+8)';
- const lines=[`Hello ${subscriber.name},`,`Reminder: ${activity.title}`,time,`${activity.mode}: ${activity.venue || activity.city || 'See activity details'}`,activity.description || '',`Details / registration: ${details}`,'You receive this project activity reminder because you opted in to RCBC email updates. This is not confirmation of event registration.',`Unsubscribe: ${unsubscribe.href}`];
- return {sender:{name:env.BREVO_SENDER_NAME || 'RCBC Dementia Care',email:env.BREVO_SENDER_EMAIL},to:[{email:subscriber.email,name:subscriber.name}],subject:`Upcoming activity: ${activity.title}`,
-  textContent:lines.join('\n\n'),htmlContent:lines.map(line=>`<p>${escape(line)}</p>`).join('')+`<p><a href="${escape(details)}">Activity details</a> | <a href="${escape(unsubscribe.href)}">Unsubscribe from project updates</a></p>`,
-  tags:['project-activity-reminder'],headers:{idempotencyKey:reminderIdempotencyKey(activity,subscriber)}};
-}
-export function validateReminderConfig(env=process.env) {
+
+export function validateReminderConfig(env = process.env) {
  reminderSettings(env);
- if(!env.BREVO_API_KEY || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(env.BREVO_SENDER_EMAIL || '')) throw new Error('Set BREVO_API_KEY and verified BREVO_SENDER_EMAIL before enabling reminders');
- reminderMessage({id:'config-check',title:'Check',starts_at:new Date(),mode:'Online'},{id:'00000000-0000-0000-0000-000000000000',email:'check@example.invalid',name:'Check'},env);
+ if (!env.BREVO_API_KEY || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(env.BREVO_SENDER_EMAIL || '')) {
+  throw new Error('Set BREVO_API_KEY and verified BREVO_SENDER_EMAIL before enabling reminders');
+ }
+ reminderMessage({ id: 'config-check', title: 'Check', starts_at: new Date(), mode: 'Online' },
+  { id: '00000000-0000-0000-0000-000000000000', email: 'check@example.invalid', name: 'Check' }, env);
 }
-const dueSql="SELECT * FROM activities WHERE status='published' AND cancelled_at IS NULL AND type=ANY($1::text[]) AND starts_at>$2 AND starts_at<=$2::timestamptz+($3::double precision * interval '1 hour') ORDER BY starts_at,id";
-export async function runReminders({website=pool,subscribers=subscriberPool,request=createBrevo(),env=process.env,now=new Date(),dryRun=false}={}) {
- const {hours,limit}=reminderSettings(env);
- if(!dryRun)validateReminderConfig(env);
- const db=await subscribers.connect();let locked=false;
- const result={activities:0,eligible:0,sent:0,suppressed:0,failed:0,uncertain:0,claimed:0,dryRun};
+
+const eventSql = `
+ SELECT a.*, statement_timestamp() AS checked_at,
+  s.enabled AS registration_enabled, s.website_enabled, s.google_url, s.general_instructions,
+  (SELECT programme FROM jsonb_array_elements(cms.data #> '{physicalEducation,programmes}') AS programme
+   WHERE programme->>'id' = a.programme_id LIMIT 1) AS programme,
+  (SELECT count(*) FROM event_participants p WHERE p.activity_id = a.id
+   AND p.status = 'registered' AND p.registration_state = 'confirmed') AS confirmed
+ FROM activities a
+ LEFT JOIN event_registration_settings s ON s.activity_id = a.id
+ LEFT JOIN learn_events_content cms ON a.programme_id IS NOT NULL AND cms.id = 'main'
+ WHERE a.status = 'published' AND a.published_at IS NOT NULL AND a.cancelled_at IS NULL`;
+
+function due(event, stage, now, settings) {
+ const untilStart = new Date(event.starts_at) - now;
+ if (untilStart <= 0) return false;
+ if (stage === 'final') return untilStart <= finalHours * hour && Number(event.confirmed) > 0;
+ if (!registrationTarget(event) || (event.capacity && Number(event.confirmed) >= event.capacity)) return false;
+ const untilClose = event.registration_deadline
+  ? Math.min(untilStart, new Date(event.registration_deadline) - now) : untilStart;
+ if (untilClose <= 0) return false;
+ if (stage === 'last-call') return settings.lastCall && untilClose <= lastCallHours * hour;
+ const registrationLead = Math.min(settings.hours, earlyDeadlineHours);
+ return untilStart <= settings.hours * hour || untilClose <= registrationLead * hour;
+}
+
+const participantSql = `SELECT id,name,email,registration_state FROM event_participants
+ WHERE activity_id = $1 AND status = 'registered'`;
+
+async function candidates(website, db, activity, stage, now) {
+ const { rows: participants } = await website.query(participantSql + ' ORDER BY id', [activity.id]);
+ if (stage === 'final') return participants.filter(p => p.registration_state === 'confirmed');
+
+ const registered = new Set(participants.map(p => p.email.trim().toLowerCase()));
+ const { rows: subscribers } = await db.query(
+  'SELECT id,name,email,city,language,consent_at,unsubscribed_at FROM subscribers WHERE consent_at IS NOT NULL AND unsubscribed_at IS NULL ORDER BY id',
+ );
+ const audience = subscribers.filter(s => matchesAudience(activity, s) && !registered.has(s.email.trim().toLowerCase()));
+ if (stage !== 'last-call') return audience;
+
+ const { rows: invites } = await db.query(`SELECT subscriber_id FROM reminder_deliveries
+  WHERE activity_id=$1 AND starts_at=$2 AND stage='invite' AND status='sent' AND sent_at <= $3`,
+  [activity.id, activity.starts_at, new Date(now - lastCallSpacing)]);
+ const invited = new Set(invites.map(row => row.subscriber_id));
+ return audience.filter(s => invited.has(s.id));
+}
+
+async function refresh(website, db, original, recipient, stage, settings) {
+ const { rows: [activity] } = await website.query(eventSql + ' AND a.id=$1 AND a.starts_at=$2',
+  [original.id, original.starts_at]);
+ if (!activity || !due(activity, stage, activity.checked_at, settings)) return null;
+
+ if (stage === 'final') {
+  const { rows: [participant] } = await website.query(participantSql + " AND id=$2 AND registration_state='confirmed'",
+   [activity.id, recipient.id]);
+  return participant ? { activity, recipient: participant } : null;
+ }
+
+ const { rows: [subscriber] } = await db.query('SELECT * FROM subscribers WHERE id=$1', [recipient.id]);
+ if (!subscriber || !matchesAudience(activity, subscriber)) return null;
+ const registered = await website.query(participantSql + ' AND lower(trim(email))=$2 LIMIT 1',
+  [activity.id, subscriber.email.trim().toLowerCase()]);
+ return registered.rowCount ? null : { activity, recipient: subscriber };
+}
+
+async function claimDelivery(db, activity, recipient, stage) {
+ const final = stage === 'final';
+ const table = final ? 'event_attendance_reminders' : 'reminder_deliveries';
+ const fields = final ? ['activity_id', 'starts_at', 'participant_id'] : ['activity_id', 'starts_at', 'subscriber_id', 'stage'];
+ const key = [activity.id, activity.starts_at, recipient.id];
+ if (!final) key.push(stage);
+ const columns = fields.join(',');
+ const placeholders = fields.map((_, index) => '$' + (index + 1)).join(',');
+ const { rows: [claim] } = await db.query(`INSERT INTO ${table}(${columns},status) VALUES(${placeholders},'sending')
+  ON CONFLICT(${columns}) DO UPDATE SET status='sending',attempts=${table}.attempts+1,attempted_at=now(),next_attempt_at=NULL,error=NULL
+  WHERE ${table}.attempts<5 AND (${table}.status='cancelled' OR (${table}.status='retry' AND ${table}.next_attempt_at<=now()))
+  RETURNING attempts`, key);
+ if (!claim) return null;
+
+ const match = fields.map((field, index) => `${field}=$${index + 4}`).join(' AND ');
+ const finish = (status, error = null, messageId = null) => db.query(`UPDATE ${table}
+  SET status=$1,error=$2,provider_message_id=$3,sent_at=CASE WHEN $1='sent' THEN now() ELSE sent_at END,
+  next_attempt_at=CASE WHEN $1='retry' THEN now()+interval '5 minutes' ELSE NULL END WHERE ${match}`,
+  [status, error, messageId, ...key]);
+ return { attempts: claim.attempts, finish };
+}
+
+async function deliver({ website, db, activity, recipient, stage, settings, request, env, result }) {
+ const final = stage === 'final';
+ const claim = await claimDelivery(final ? website : db, activity, recipient, stage);
+ if (!claim) return false;
+ const { finish, attempts } = claim;
+ result.claimed++;
+ let sending = false;
  try {
-  locked=(await db.query('SELECT pg_try_advisory_lock(718423) AS locked')).rows[0].locked;
-  if(!locked)return {...result,busy:true};
-  const activities=(await website.query(dueSql,[reminderTypes,now,hours])).rows;
-  result.activities=activities.length;
-  for(const activity of activities) {
-   const audience=(await db.query('SELECT id,name,email,city,state,language,consent_at,unsubscribed_at FROM subscribers WHERE consent_at IS NOT NULL AND unsubscribed_at IS NULL ORDER BY id')).rows;
-   for(const subscriber of audience) {
-    if(!matchesAudience(activity,subscriber))continue;
-    result.eligible++;
-    if(dryRun)continue;
-    if(result.claimed>=limit)return result;
-    // A durable claim is committed before any external send. Ambiguous sends are
-    // never automatically retried, including after process death or DB failure.
-    const key=[activity.id,activity.starts_at,subscriber.id];
-    const claim=await db.query(`INSERT INTO reminder_deliveries(activity_id,starts_at,subscriber_id,status) VALUES($1,$2,$3,'sending')
-     ON CONFLICT(activity_id,starts_at,subscriber_id) DO UPDATE SET status='sending',attempts=reminder_deliveries.attempts+1,attempted_at=now(),next_attempt_at=NULL,error=NULL
-     WHERE reminder_deliveries.status='retry' AND reminder_deliveries.next_attempt_at<=now() AND reminder_deliveries.attempts<5 RETURNING attempts`,key);
-    if(!claim.rowCount)continue;
-    result.claimed++;
-    let sending=false;
-    const finish=(status,error=null,messageId=null)=>db.query(`UPDATE reminder_deliveries SET status=$4,error=$5,provider_message_id=$6,
-     sent_at=CASE WHEN $4='sent' THEN now() ELSE sent_at END,next_attempt_at=CASE WHEN $4='retry' THEN now()+interval '5 minutes' ELSE NULL END
-     WHERE activity_id=$1 AND starts_at=$2 AND subscriber_id=$3`,[...key,status,error,messageId]);
-    try {
-     const freshActivity=(await website.query(dueSql.replace(' ORDER BY starts_at,id',' AND id=$4 AND starts_at=$5'),[reminderTypes,new Date(),hours,activity.id,activity.starts_at])).rows[0];
-     const fresh=(await db.query('SELECT * FROM subscribers WHERE id=$1',[subscriber.id])).rows[0];
-     if(!freshActivity || !fresh || !matchesAudience(freshActivity,fresh)){await finish('cancelled');continue;}
-     const contact=await request('/contacts/'+encodeURIComponent(fresh.email),{missing:true});
-     if(contact?.emailBlacklisted){await finish('suppressed');result.suppressed++;continue;}
-     // Provider checks may take time: reread event and consent before dispatch.
-     const finalActivity=(await website.query(dueSql.replace(' ORDER BY starts_at,id',' AND id=$4 AND starts_at=$5'),[reminderTypes,new Date(),hours,activity.id,activity.starts_at])).rows[0];
-     const finalSubscriber=(await db.query('SELECT * FROM subscribers WHERE id=$1',[fresh.id])).rows[0];
-     if(!finalActivity || !finalSubscriber || finalSubscriber.email!==fresh.email || !matchesAudience(finalActivity,finalSubscriber)){await finish('cancelled');continue;}
-     const message=reminderMessage(finalActivity,finalSubscriber,env);
-     sending=true;
-     const receipt=await request('/smtp/email',{method:'POST',data:message});
-     if(!receipt?.messageId) {await finish('uncertain','Provider receipt missing; inspect Brevo logs before any manual retry.');result.uncertain++;continue;}
-     await finish('sent',null,receipt.messageId);result.sent++;
-    } catch(error) {
-     const uncertain=sending && (error.uncertain || !error.providerStatus);
-     const retry=!uncertain && (error.retryable || !sending) && claim.rows[0].attempts<5;
-     const status=uncertain?'uncertain':retry?'retry':'failed';
-     await finish(status,uncertain?'Send outcome unknown; inspect Brevo logs.':error.providerStatus?'Brevo request failed ('+error.providerStatus+').':'Reminder preparation failed.');
-     result[uncertain?'uncertain':'failed']++;
-     if(error.providerStatus===401 || error.providerStatus===429) return result;
+  let current = await refresh(website, db, activity, recipient, stage, settings);
+  if (!current) { await finish('cancelled'); return false; }
+  if (!final) {
+   const email = current.recipient.email;
+   const contact = await request('/contacts/' + encodeURIComponent(email), { missing: true });
+   if (contact?.emailBlacklisted) { await finish('suppressed'); result.suppressed++; return false; }
+   current = await refresh(website, db, activity, recipient, stage, settings);
+   if (!current || current.recipient.email !== email) { await finish('cancelled'); return false; }
+  }
+
+  const message = reminderMessage(current.activity, current.recipient, env, stage);
+  sending = true;
+  const receipt = await request('/smtp/email', { method: 'POST', data: message });
+  if (!receipt?.messageId) {
+   await finish('uncertain', 'Provider receipt missing; inspect Brevo logs before any manual retry.');
+   result.uncertain++;
+   return false;
+  }
+  await finish('sent', null, receipt.messageId);
+  result.sent++;
+  return false;
+ } catch (error) {
+  const uncertain = sending && (error.uncertain || !error.providerStatus);
+  const retry = !uncertain && (error.retryable || !sending) && attempts < 5;
+  const status = uncertain ? 'uncertain' : retry ? 'retry' : 'failed';
+  await finish(status, uncertain ? 'Send outcome unknown; inspect Brevo logs.'
+   : error.providerStatus ? `Brevo request failed (${error.providerStatus}).` : 'Reminder preparation failed.');
+  result[uncertain ? 'uncertain' : 'failed']++;
+  return error.providerStatus === 401 || error.providerStatus === 429;
+ }
+}
+
+export async function runReminders({
+ website = pool, subscribers = subscriberPool, env = process.env, request = createBrevo({ env }),
+ now = new Date(), dryRun = false,
+} = {}) {
+ const settings = reminderSettings(env);
+ if (!dryRun) validateReminderConfig(env);
+ const db = await subscribers.connect();
+ let locked = false;
+ const result = { activities: 0, eligible: 0, sent: 0, suppressed: 0, failed: 0, uncertain: 0, claimed: 0, dryRun,
+  eligibleByStage: { invite: 0, 'last-call': 0, final: 0 } };
+ try {
+  locked = (await db.query('SELECT pg_try_advisory_lock(718423) AS locked')).rows[0].locked;
+  if (!locked) return { ...result, busy: true };
+  const horizon = Math.max(settings.hours, finalHours, settings.lastCall ? lastCallHours : 0);
+  const { rows: events } = await website.query(eventSql + `
+   AND a.starts_at > $1
+   AND least(a.starts_at, a.registration_deadline) <= $1::timestamptz + ($2::double precision * interval '1 hour')
+   ORDER BY a.starts_at,a.id`, [now, horizon]);
+  const dueEvents = events.map(activity => ({ activity, stages: stages.filter(stage => due(activity, stage, now, settings)) }));
+  result.activities = dueEvents.filter(event => event.stages.length).length;
+  for (const stage of stages) {
+   for (const event of dueEvents) {
+    if (!event.stages.includes(stage)) continue;
+    const { activity } = event;
+    const recipients = await candidates(website, db, activity, stage, now);
+    result.eligible += recipients.length;
+    result.eligibleByStage[stage] += recipients.length;
+    if (dryRun) continue;
+    for (const recipient of recipients) {
+     if (result.claimed >= settings.limit) return result;
+     if (await deliver({ website, db, activity, recipient, stage, settings, request, env, result })) return result;
     }
    }
   }
   return result;
- } finally {if(locked)await db.query('SELECT pg_advisory_unlock(718423)');db.release();}
+ } finally {
+  try {
+   if (locked) await db.query('SELECT pg_advisory_unlock(718423)');
+  } finally {
+   db.release();
+  }
+ }
 }
 
-export function startReminderWorker({env=process.env,run=runReminders,logger=console}={}) {
- if(env.REMINDERS_ENABLED!=='true')return ()=>{};
+export function startReminderWorker({ env = process.env, run = () => runReminders({ env }), logger = console } = {}) {
+ if (env.REMINDERS_ENABLED !== 'true') return () => {};
  validateReminderConfig(env);
- let running=false,stopped=false;
- const tick=async()=>{
-  if(running || stopped)return;
-  running=true;
-  try {const result=await run();if(result.claimed || result.activities)logger.log('Reminder scan:',JSON.stringify(result));}
-  catch {logger.error('Reminder scan failed. Check database migrations, connectivity and Brevo configuration.');}
-  finally {running=false;}
+ let running = false, stopped = false;
+ const tick = async () => {
+  if (running || stopped) return;
+  running = true;
+  try {
+   const result = await run();
+   if (result.claimed || result.activities) logger.log('Reminder scan:', JSON.stringify(result));
+  } catch {
+   logger.error('Reminder scan failed. Check database migrations, connectivity and Brevo configuration.');
+  } finally {
+   running = false;
+  }
  };
- const timer=setInterval(tick,60000);timer.unref();void tick();
- return ()=>{stopped=true;clearInterval(timer);};
+ const timer = setInterval(tick, 60000);
+ timer.unref();
+ void tick();
+ return () => { stopped = true; clearInterval(timer); };
 }

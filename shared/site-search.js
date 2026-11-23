@@ -8,7 +8,7 @@ const synonyms = {
   carers: 'caregiver', carer: 'caregiver', caregivers: 'caregiver',
   alzheimers: 'alzheimer', doctors: 'doctor', hospitals: 'hospital',
   bantuan: 'financial', kewangan: 'financial', penjaga: 'caregiver',
-  demensia: 'dementia', 失智症: 'dementia', 照顾者: 'caregiver',
+  demensia: 'dementia', nyanyuk: 'dementia', 失智症: 'dementia', 老人痴呆: 'dementia', 照顾者: 'caregiver',
 };
 const tokens = value => normalizeSearch(value).split(' ').filter(Boolean).map(word => synonyms[word] || word);
 

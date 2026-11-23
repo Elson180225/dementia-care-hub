@@ -16,7 +16,8 @@ BREVO_SENDER_EMAIL="verified-sender@your-domain.example"
 BREVO_SENDER_NAME="RCBC Dementia Care"
 SUBSCRIBER_TOKEN_SECRET="GENERATE_A_RANDOM_SECRET_AT_LEAST_32_CHARACTERS_LONG"
 REMINDERS_ENABLED=false
-REMINDER_LEAD_HOURS=24
+REMINDER_INVITE_LEAD_HOURS=504
+REMINDER_LAST_CALL_ENABLED=false
 REMINDER_BATCH_SIZE=100
 ```
 
@@ -73,14 +74,21 @@ For manual campaigns, sync before every send. Local website opt-outs are blocked
 
 With `REMINDERS_ENABLED=true`, the running API scans immediately after startup and every 60 seconds:
 
-- Only `published`, uncancelled activities of type `Seminar`, `RCBC Webinar`, or `CT Webinar` qualify. Draft/submitted/approved-only events do not send before publication. Workshops and other activity types are outside this reminder rule.
-- An activity becomes due when its start is within the next 24 hours by default. If published late or the server restarts inside that window, it sends on the next scan. No reminder is sent after the activity starts.
-- Recipients must have recorded consent and no local opt-out. Activity language must match the subscriber language (an `All` activity matches all). Online events reach matching-language subscribers in any city; physical events with a city match subscriber city ignoring case. Blank physical city means no locality restriction. The free-text event audience field is descriptive, not a machine-readable targeting rule.
-- Before sending, the worker checks Brevo's contact blocklist and rechecks the current event, start time and subscriber consent. Provider lookup failures stop that recipient from sending. A missing Brevo contact may still receive a locally consented reminder; reminders do not require a prior manual list sync. Brevo's transactional sending suppression also applies.
-- Templates are generated in code and include title, description, Malaysian start time, venue, approved registration link (or the public calendar), and a signed website unsubscribe link. HTML is escaped. No Brevo template ID is required. The wrapper text is English; the event title/description retain their authored language.
-- Reminders are outreach to opted-in subscribers, not event registration confirmations. Website unsubscribe prevents both future reminders and manual campaign sync; native Brevo campaign opt-outs are respected on lookup but are not automatically mirrored into the local database.
+| Email | Timing | Recipients |
+| --- | --- | --- |
+| Initial invite | 21 days before the event by default, or up to 14 days before an early registration cutoff if that comes first | Matching Get Updated subscribers without an active registration recorded for that event |
+| Optional last call | Within seven days of registration closing, or seven days before the event if there is no earlier deadline. The invite must have been accepted by Brevo at least 48 hours earlier. | Matching subscribers who received the invite and still have no active registration recorded |
+| Final event reminder | Within 72 hours of the event starting, including after registration closes | Confirmed participants with an active registration |
 
-Messages are sent individually using Brevo's email API. The database key `(activity_id, starts_at, subscriber_id)` prevents repeat sends for the same event occurrence. A rescheduled start creates a new occurrence and may generate another reminder. New subscribers inside the due window can receive the current occurrence on the next scan.
+Only published, uncancelled events qualify. Invitations and last calls require open registration and skip events whose recorded confirmed registrations have reached capacity. Events can use website registration or a valid external form. A late publication or a late confirmation can qualify for its email on the next scan while the relevant window remains open.
+
+Subscriber invitations and last calls require consent, matching language, and matching city for in-person events that have a city. They use Brevo’s contact blocklist and include a site unsubscribe link. Final reminders use the participant list and do not require a Get Updated subscription. For Google Forms events, import registrations and confirm participants in the portal so the system can identify them for the final reminder and skip them when sending registration emails. Brevo’s transactional suppression still applies.
+
+In the event editor, use **Venue** for the exact address and **Registration instructions** for parking, drop-off, caregiver stay requirements, and any respite arrangements. The emails include the available information, start and end times in Malaysia time, and calendar links. Subscriber emails also put the registration deadline near the top when it is set. Recipients can open Google Calendar directly or download a calendar file for Apple Calendar or Outlook.
+
+Each subscriber can receive one email per stage and event occurrence. Existing subscriber delivery records are treated as invites, preserving duplicate protection on upgrade. Final reminders are tracked per confirmed participant and event occurrence. A changed start time creates a new occurrence. Check subscriber sends in **Get Updated → Check event reminder emails** and final sends in **Participants → Reminder history**.
+
+On Render, run both `npm run db:migrate` and `npm run db:migrate:subscribers` before starting the updated server. After testing, set `REMINDERS_ENABLED=true`. The 21-day default uses `REMINDER_INVITE_LEAD_HOURS=504`, which replaces the old `REMINDER_LEAD_HOURS` setting. Set `REMINDER_LAST_CALL_ENABLED=true` only if you want the optional last call. Once configured, the [daily GitHub workflow](ADMIN_REVIEW_REMINDER_DEPLOYMENT.md) can wake a sleeping Free web service for a startup scan even when admin review email delivery is disabled.
 
 An advisory lock prevents concurrent workers from sending the same queue. Durable `sending` claims are recorded before dispatch. A successful provider receipt is recorded as `sent` with its message ID; this means provider acceptance, not confirmed inbox delivery. Check Brevo's transactional delivery logs for delivery/bounces. Brevo receives a stable idempotency key as an additional safeguard; the durable database ledger remains the long-term source of deduplication.
 
@@ -96,7 +104,7 @@ npm run build
 npm run lint
 ```
 
-Preview reads due events and matching subscriber counts without writing delivery claims or calling Brevo. `eligible` counts audience matches, including people already reminded; it is not an exact pending-send count. An all-zero preview means no qualifying published event is inside the configured reminder window.
+Preview reports eligible subscriber and participant counts under `eligibleByStage` without writing delivery claims or calling Brevo. Counts can include people already reminded.
 
 Database integration tests use `TEST_DATABASE_URL` to create and remove isolated schemas, with a simulated email provider. They exercise concurrency, opt-out filtering, duplicate prevention, ambiguous sends and cancellation without sending real messages. Never point `TEST_DATABASE_URL` at a database where the test role cannot safely create isolated schemas.
 
@@ -104,28 +112,28 @@ Database integration tests use `TEST_DATABASE_URL` to create and remove isolated
 
 1. Keep `REMINDERS_ENABLED=false` while preparing the test. Restart the API if changing `.env`.
 2. Use only subscribers you intend to contact. In the admin subscriber editor, verify your own consented test email and language/locality. The reminder worker reads Supabase subscribers directly, not just the configured Brevo list.
-3. Create a test seminar (or webinar) for about 25 hours from now, choose a matching language and city, approve and publish it. `reminders:preview` should report no due activity for it yet.
-4. For a quick delivery test, reschedule that test event to about 23 hours from now. It is now inside the default window; preview should show it as due. Alternatively, leave it at 25 hours and wait until 24 hours before its start.
+3. Create a workshop or seminar for about 24 days from now with open registration and a deadline 17 days from now. Choose a matching language and city, then approve and publish it. The event should be outside the invite window.
+4. Move the event inside 21 days of its start or move its registration deadline within 14 days. The preview should count the invitation. To test a final reminder, create a separate event that starts within 72 hours and confirm only your own test registration.
 5. Set `REMINDERS_ENABLED=true`, then restart the API. Startup scans immediately; subsequent scans run every minute. You can also run `npm run reminders:run` for a one-time live scan. Both paths use the same lock/ledger.
 6. Open Content and records > Check automatic reminders. Confirm a `sent` entry, then check Brevo's transactional logs and your inbox/spam folder. If tracking remains `retry`/`failed`, inspect sender approval, key/IP restrictions, available quota and provider logs.
-7. Run a second scan. The same occurrence should not send again.
+7. Run a second scan and confirm each stage sends only once for the same occurrence. In the email, open the event link and test the calendar links.
 8. Using a second intended test event, verify draft/approved-only/cancelled events are excluded. Use your received unsubscribe link, confirm the action on the website, and verify no reminder is sent for another occurrence.
 
-For a persistent installation keep `REMINDERS_ENABLED=true` and run the API as a service. It must remain running with access to both databases. A laptop that sleeps or a stopped process cannot deliver on time. A static frontend host alone cannot run this worker. Deploy frontend and API under the same HTTPS origin, reverse-proxy `/api`, and configure the correct public `APP_BASE_URL` so recipients can open their links. The current API binds to loopback for a same-host proxy. Check current Brevo allowances; batches are limited by `REMINDER_BATCH_SIZE`, not a guaranteed daily quota. The worker stops a scan on rate limiting.
+The API needs access to both databases while it scans. Use the public HTTPS origin for `APP_BASE_URL` so recipients can open the event, calendar and unsubscribe links. `REMINDER_BATCH_SIZE` caps each scan, while Brevo applies its account sending allowance.
 
 ## Inspect and recover tracking
 
 Run this in Supabase SQL Editor (or the subscriber database):
 
 ```sql
-SELECT activity_id, starts_at, status, attempts, attempted_at, sent_at,
+SELECT activity_id, starts_at, stage, status, attempts, attempted_at, sent_at,
        provider_message_id, error
 FROM reminder_deliveries
 ORDER BY attempted_at DESC
 LIMIT 50;
 ```
 
-Keep the ledger across restarts and deployments. Deleting it removes duplicate protection. Investigate `sending`/`uncertain` in Brevo logs before considering any manual resend. For a definite `failed` rejection, fix the cause and explicitly requeue only the selected activity/subscriber row:
+Final delivery history is stored in `event_attendance_reminders` in the website database. Keep both ledgers across restarts and deployments. Investigate `sending` or `uncertain` in Brevo logs before considering a manual resend. For a definite subscriber delivery failure, fix the cause and requeue only the selected activity, subscriber and stage:
 
 ```sql
 UPDATE reminder_deliveries
@@ -133,6 +141,7 @@ SET status = 'retry', attempts = 0, next_attempt_at = now()
 WHERE activity_id = 'ACTIVITY_UUID'
   AND subscriber_id = 'SUBSCRIBER_UUID'
   AND starts_at = 'EXACT_OCCURRENCE_TIMESTAMP'
+  AND stage = 'invite'
   AND status = 'failed';
 ```
 
@@ -145,7 +154,7 @@ Do not apply this to `sent`, `sending` or `uncertain`. The event must still be p
 | Port 3001 already in use | Stop the existing project API before restarting; do not launch a second copy on the same port. |
 | `subscribers` already exists | Run the current standalone migration, which handles compatible schemas; do not drop real subscriber data. |
 | `reminder_deliveries` missing | Run `npm run db:migrate:subscribers` against the connection used by the API. |
-| No reminder | Check enabled setting, published status, supported type, start within window, consent, language/city and existing ledger. |
+| No reminder | Check the enabled setting, published status, stage window and delivery history. Check registration availability and subscriber preferences for invites, or participant confirmation for final reminders. |
 | Empty Brevo list | Signup does not automatically sync; use the admin sync panel. Reminder sending is a separate workflow. |
 | Unknown server IP | Review Brevo's authorised IP settings for the actual backend IP. |
 | Sender rejected | Use an active verified Brevo sender, then run `npm run brevo:check`. |
