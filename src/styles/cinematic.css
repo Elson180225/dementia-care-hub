@@ -1,0 +1,175 @@
+/* ============================================================
+   CINEMATIC STYLE (Sprint 3)
+   A dark, glowing banner at the top of every public page, inspired
+   by modern technology company sites. Reading sections below the
+   banner stay light, with large high-contrast text for older visitors.
+============================================================ */
+
+:root {
+  --cine-ink: #140a20;
+  --cine-deep: #241038;
+  --cine-glow-gold: rgba(247, 168, 27, 0.22);
+  --cine-glow-purple: rgba(122, 82, 173, 0.55);
+  --cine-line: rgba(255, 255, 255, 0.04);
+  --cine-heading-font: "Segoe UI", system-ui, -apple-system, Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+/* 1. Page banners: deep purple to near black, soft glows and a faint grid */
+main :is(
+  .understand-hero,
+  .find-help-hero,
+  .assessment-hero,
+  .support-services-hero,
+  .government-hero,
+  .caregiver-hero,
+  .caregiver-subpage-hero,
+  .module-hero,
+  .about-hero,
+  .equipment-hero,
+  .contact-hero
+) {
+  background:
+    radial-gradient(55% 80% at 88% 8%, var(--cine-glow-gold), transparent 62%),
+    radial-gradient(50% 75% at 6% 100%, var(--cine-glow-purple), transparent 66%),
+    linear-gradient(var(--cine-line) 1px, transparent 1px) 0 0 / 56px 56px,
+    linear-gradient(90deg, var(--cine-line) 1px, transparent 1px) 0 0 / 56px 56px,
+    linear-gradient(135deg, var(--cine-deep) 0%, var(--cine-ink) 100%);
+  background-color: var(--cine-ink);
+}
+
+/* 2. Banner headings: clean sans-serif with a white-to-lilac fade */
+main :is(
+  .understand-hero,
+  .find-help-hero,
+  .assessment-hero,
+  .support-services-hero,
+  .government-hero,
+  .caregiver-hero,
+  .caregiver-subpage-hero,
+  .module-hero,
+  .about-hero,
+  .equipment-hero,
+  .contact-hero,
+  .hero-section
+) h1 {
+  font-family: var(--cine-heading-font);
+  font-weight: 800;
+  letter-spacing: -0.015em;
+  color: #ffffff;
+  background: linear-gradient(180deg, #ffffff 35%, var(--color-purple-200) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* 3. Small labels above banner headings: wide letter spacing */
+main :is(
+  .understand-hero .understand-eyebrow,
+  .find-help-kicker,
+  .assessment-kicker,
+  .support-services-kicker,
+  .government-kicker,
+  .caregiver-hero .caregiver-eyebrow,
+  .caregiver-subpage-hero .caregiver-eyebrow,
+  .contact-kicker,
+  .equipment-eyebrow,
+  .hero-eyebrow
+) {
+  letter-spacing: 0.24em;
+}
+
+/* 4. Banner buttons glow softly on hover */
+main :is(
+  .understand-hero,
+  .find-help-hero,
+  .assessment-hero,
+  .support-services-hero,
+  .government-hero,
+  .caregiver-hero,
+  .caregiver-subpage-hero,
+  .module-hero,
+  .about-hero,
+  .equipment-hero,
+  .contact-hero,
+  .hero-section
+) :is(a, button)[class*="button"],
+main :is(.hero-section, .module-hero) :is(a, button)[class*="btn"] {
+  transition: box-shadow 0.25s ease, transform 0.25s ease;
+}
+
+main :is(
+  .understand-hero,
+  .find-help-hero,
+  .assessment-hero,
+  .support-services-hero,
+  .government-hero,
+  .caregiver-hero,
+  .caregiver-subpage-hero,
+  .module-hero,
+  .about-hero,
+  .equipment-hero,
+  .contact-hero,
+  .hero-section
+) :is(a, button)[class*="button"]:hover,
+main :is(.hero-section, .module-hero) :is(a, button)[class*="btn"]:hover {
+  box-shadow: 0 0 0 1px rgba(255, 212, 111, 0.5), 0 10px 34px rgba(247, 168, 27, 0.35);
+  transform: translateY(-2px);
+}
+
+/* 5. Section headings on the home page: wide, calm capitals */
+.home-page .home-heading h2 {
+  font-family: var(--cine-heading-font);
+  font-weight: 300;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  main :is(a, button)[class*="button"]:hover,
+  main :is(a, button)[class*="btn"]:hover {
+    transform: none;
+  }
+}
+
+@media print {
+  main :is(
+    .understand-hero,
+    .find-help-hero,
+    .assessment-hero,
+    .support-services-hero,
+    .government-hero,
+    .caregiver-hero,
+    .caregiver-subpage-hero,
+    .module-hero,
+    .about-hero,
+    .equipment-hero,
+    .contact-hero
+  ) {
+    background: none;
+    color: #000000;
+  }
+
+  main h1 {
+    -webkit-text-fill-color: currentColor;
+    background: none;
+  }
+}
+
+/* The equipment banner is split in two; let one glow run behind both halves. */
+main section.equipment-hero > :is(.equipment-hero-left, .equipment-hero-right) {
+  background: transparent;
+}
+
+main section.equipment-hero .equipment-hero-card-controls > span {
+  color: var(--color-purple-200);
+}
+
+/* Footer: the same deep background and glow as the page banners */
+.site-footer {
+  background:
+    radial-gradient(45% 70% at 92% 0%, var(--cine-glow-gold), transparent 60%),
+    radial-gradient(40% 80% at 0% 100%, var(--cine-glow-purple), transparent 65%),
+    linear-gradient(135deg, var(--cine-deep) 0%, var(--cine-ink) 100%);
+  background-color: var(--cine-ink);
+  border-top: 1px solid rgba(255, 212, 111, 0.18);
+}
