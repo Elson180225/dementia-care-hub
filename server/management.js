@@ -15,7 +15,7 @@ import {
     subscriberCsv,
     syncBrevo,
 } from "./subscriber-export.js";
-import { reminderSettings } from "./reminders.js";
+import { finalHours, lastCallHours, reminderSettings } from "./reminders.js";
 
 function validUrl(value) {
     if (!value) return;
@@ -64,11 +64,14 @@ export async function managementHandler(req, res, url, send) {
     ) {
         const deliveries =
             (await subscriberPool.query(
-                "SELECT activity_id,starts_at,status,attempts,attempted_at,sent_at,provider_message_id,error FROM reminder_deliveries ORDER BY attempted_at DESC LIMIT 50",
+                "SELECT activity_id,starts_at,stage,status,attempts,attempted_at,sent_at,provider_message_id,error FROM reminder_deliveries ORDER BY attempted_at DESC LIMIT 50",
             )).rows;
+        const settings = reminderSettings();
         return send(res, 200, {
             enabled: process.env.REMINDERS_ENABLED === "true",
-            leadHours: reminderSettings().hours,
+            leadHours: settings.hours,
+            lastCallHours: settings.lastCall ? lastCallHours : null,
+            finalHours,
             deliveries,
         });
     }

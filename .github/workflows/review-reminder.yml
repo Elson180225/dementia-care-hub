@@ -1,0 +1,58 @@
+name: Daily content review reminder
+
+on:
+  schedule:
+    - cron: '7 1 * * *' # 9:07 a.m. Malaysia time
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: Preview in Render logs or send the live email
+        type: choice
+        default: preview
+        options:
+          - preview
+          - live
+
+permissions: {}
+
+jobs:
+  review-reminder:
+    if: github.ref_name == github.event.repository.default_branch && (github.event_name == 'workflow_dispatch' || vars.REVIEW_REMINDER_URL != '')
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - name: Trigger the Render reminder
+        env:
+          BASE_URL: ${{ vars.REVIEW_REMINDER_URL }}
+          REVIEW_REMINDER_SECRET: ${{ secrets.REVIEW_REMINDER_SECRET }}
+          MODE: ${{ inputs.mode || 'live' }}
+        shell: bash
+        run: |
+          if [[ "$BASE_URL" != https://* || ${#REVIEW_REMINDER_SECRET} -lt 32 ]]; then
+            echo 'Set REVIEW_REMINDER_URL to the live HTTPS site and configure REVIEW_REMINDER_SECRET.' >&2
+            exit 1
+          fi
+
+          response=$(mktemp)
+          for attempt in 1 2 3; do
+            code=$(curl --silent --show-error --proto '=https' --connect-timeout 15 --max-time 90 \
+              --request POST --header "Authorization: Bearer $REVIEW_REMINDER_SECRET" \
+              --output "$response" --write-out '%{http_code}' \
+              "${BASE_URL%/}/api/admin/review-reminder?mode=$MODE") || code=000
+            case "$code" in
+              200)
+                if jq -e -c 'select(.status | IN("previewed", "disabled", "nothing-due", "already-sent", "sent"))' "$response"; then
+                  exit 0
+                fi
+                ;;
+              000|429|500|502|503|504) ;;
+              *)
+                echo "Reminder request returned HTTP $code. Check Render logs." >&2
+                exit 1
+                ;;
+            esac
+            echo "Attempt $attempt did not return a reminder result (HTTP $code)." >&2
+            if [[ "$attempt" != 3 ]]; then sleep 15; fi
+          done
+          echo 'Reminder could not complete. Check Render logs.' >&2
+          exit 1

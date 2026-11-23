@@ -9,6 +9,7 @@ import { validateFileLinks } from './uploads.js';
 import {validateEventPricing} from '../shared/event-registration.js';
 import {getLearnEventsData} from './learn-events-content.js';
 import {isPlannedProgramme} from '../shared/programme-intakes.js';
+import { maintenanceCounts } from './content-review.js';
 function validateLinks(single, list = []) {
  if(!Array.isArray(list) || list.some(x=>typeof x!=='string')) fail('Document and photo links must be a list of URLs');
  for(const url of [single,...list].filter(Boolean)) {
@@ -35,10 +36,7 @@ export async function snapshot(user) {
  users:admin?(await pool.query('SELECT u.id,u.name,u.email,u.role,u.enabled,p.certified_status,p.certificate_ref,p.listing_status,p.listing_consent_at,p.assessment_result, p.assessment_status, p.healthcare_professional,p.independent_teaching_scope,p.certificate_file_id,p.teaching_allowed,p.teaching_permissions,p.portal_access_enabled,EXISTS(SELECT 1 FROM approved_trainer_accounts x WHERE x.id=u.id) AS portal_access_active FROM users u LEFT JOIN trainer_profiles p ON p.id=u.id ORDER BY u.created_at DESC')).rows:[],
  contributions:(await pool.query('SELECT * FROM annual_trainer_contributions WHERE $1 OR trainer_id=$2 ORDER BY year DESC',[admin,user.id])).rows,
  projectReach:admin?(await pool.query('SELECT * FROM annual_project_reach ORDER BY year DESC')).rows:[],
- maintenance:admin?(await pool.query(`SELECT 'Directory' AS kind,count(*)::int AS count FROM organisations WHERE review_status='needs review' OR (review_status<>'archived' AND next_review_at<=now())
- UNION ALL SELECT 'Learning resources',count(*)::int FROM learning_resources WHERE review_status='needs review' OR (review_status<>'archived' AND next_review_at<=now())
- UNION ALL SELECT 'Content and FAQs',count(*)::int FROM (SELECT review_status,next_review_at FROM content_pages UNION ALL SELECT review_status,next_review_at FROM faqs) c WHERE review_status='needs review' OR (review_status<>'archived' AND next_review_at<=now())
- UNION ALL SELECT 'Enquiries',count(*)::int FROM enquiries WHERE status<>'closed'`)).rows:[],
+ maintenance:admin?await maintenanceCounts(pool):[],
  history:(await pool.query(`SELECT l.id,l.changed_at AS at,l.entity,coalesce(l.after_data->>'title',l.after_data->>'name',l.after_data->>'question',
  (SELECT a.title FROM activities a WHERE a.id::text=l.record_id),
  (SELECT person.name FROM users person WHERE person.id::text=l.record_id),

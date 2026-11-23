@@ -15,6 +15,7 @@
     "db:migrate:subscribers": "node --env-file-if-exists=.env scripts/migrate-subscribers.js",
     "reminders:preview": "node --env-file-if-exists=.env scripts/reminders.js --dry-run",
     "reminders:run": "node --env-file-if-exists=.env scripts/reminders.js",
+    "review-reminders:preview": "node --env-file-if-exists=.env scripts/review-reminder-preview.js",
     "brevo:check": "node --env-file-if-exists=.env scripts/check-brevo.js",
     "brevo:setup": "node --env-file-if-exists=.env scripts/check-brevo.js --setup",
     "admin:invite": "node --env-file-if-exists=.env scripts/invite-admin.js",

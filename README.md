@@ -29,6 +29,8 @@ npm run db:migrate:subscribers
 
 See [Get Updated and email setup](docs/GET_UPDATED_EMAIL_SETUP.md) for Supabase connections, Brevo configuration and reminder testing.
 
+See [Daily admin review reminder deployment](docs/ADMIN_REVIEW_REMINDER_DEPLOYMENT.md) for the Render settings, GitHub Actions schedule and preview steps.
+
 See [Client feedback implementation and testing](docs/client-feedback-implementation-and-testing.md) for trainer consent, contact follow-up, subscription, Resource Finder and About page acceptance tests.
 
 ## Run the website

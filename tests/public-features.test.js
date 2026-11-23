@@ -17,6 +17,12 @@ test('title matches rank first and repeated paths are deduplicated', () => {
   assert.deepEqual(rankSearch(items, 'memory').map(row => row.path), ['/b', '/a']);
 });
 
+test('Malay and Chinese dementia synonyms match dementia content', () => {
+  const items = [{ title: 'Understanding Dementia', path: '/dementia' }];
+  assert.deepEqual(rankSearch(items, 'nyanyuk'), items);
+  assert.deepEqual(rankSearch(items, '老人痴呆'), items);
+});
+
 test('public event search includes location and uses an encoded event URL', () => {
   const items = publicSearchItems([{ id: 'event/1', title: 'Family Workshop', city: 'Kuching' }], [{ id: 'example', is_example: true }]);
   assert.equal(items.length, 1);

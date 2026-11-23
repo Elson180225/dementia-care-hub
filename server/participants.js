@@ -24,7 +24,13 @@ export async function participantsHandler(req, res, url, send) {
     activity,
     participants,capacitySummary:capacitySummary(activity,participants),
     imports:(await pool.query('SELECT * FROM participant_imports WHERE activity_id=$1 ORDER BY imported_at DESC LIMIT 20',[id])).rows,
-    deliveries:(await pool.query('SELECT r.*,p.email FROM participant_reminders r JOIN event_participants p ON p.id=r.participant_id WHERE p.activity_id=$1 ORDER BY r.created_at DESC LIMIT 100',[id])).rows,
+    deliveries:(await pool.query(`
+      SELECT r.id,r.participant_id,r.subject,r.message,r.created_by,r.status,r.created_at,r.provider_id,r.error,p.email
+      FROM participant_reminders r JOIN event_participants p ON p.id=r.participant_id WHERE p.activity_id=$1
+      UNION ALL
+      SELECT r.id,r.participant_id,$2,NULL,NULL,r.status,r.attempted_at,r.provider_message_id,r.error,p.email
+      FROM event_attendance_reminders r JOIN event_participants p ON p.id=r.participant_id WHERE r.activity_id=$1
+      ORDER BY created_at DESC LIMIT 100`,[id,'Final event reminder: '+activity.title])).rows,
   });}
   const data = await body(req);
   if (data.action === 'import') {
