@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useLanguage } from "../../i18n/LanguageContext";
 
 import "./GovernmentFinancial.css";
+import ReadMore from "../../components/ReadMore/ReadMore";
 
 const categories = [
   "All",
@@ -159,9 +160,7 @@ function GovernmentFinancial() {
             {gf.title || "Government & Financial Resources"}
           </h1>
 
-          <p>
-            {gf.subtitle || "Find information about official government programmes, financial support and other external resources that may be relevant to you or your family."}
-          </p>
+          <ReadMore text={gf.subtitle || "Find information about official government programmes, financial support and other external resources that may be relevant to you or your family."} />
         </div>
       </section>
 
@@ -518,64 +517,6 @@ function GovernmentFinancial() {
               <p>
                 {gf.step3Desc || "Use the official contact details or website for final information, applications and decisions."}
               </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* =====================================================
-          ADMIN READY
-      ====================================================== */}
-
-      <section className="government-admin">
-        <div className="government-container">
-          <div className="government-admin-box">
-            <div>
-              <span>
-                {gf.adminEyebrow || "Admin-ready structure"}
-              </span>
-
-              <h2>
-                {gf.adminTitle || "Resources can be managed without changing the page."}
-              </h2>
-
-              <p>
-                {gf.adminDesc || "When the Admin module and backend are added, administrators can create, edit, verify, publish, archive and review government or financial resource records centrally."}
-              </p>
-            </div>
-
-            <div className="government-admin-fields">
-              <span>
-                {gf.adminName || "Programme name"}
-              </span>
-
-              <span>
-                {gf.adminAgency || "Agency"}
-              </span>
-
-              <span>
-                {gf.adminCategory || "Category"}
-              </span>
-
-              <span>
-                {gf.adminEligibility || "Eligibility"}
-              </span>
-
-              <span>
-                {gf.adminAccess || "Access information"}
-              </span>
-
-              <span>
-                {gf.adminContact || "Official contact"}
-              </span>
-
-              <span>
-                {gf.adminVerification || "Verification"}
-              </span>
-
-              <span>
-                {gf.adminStatus || "Publication status"}
-              </span>
             </div>
           </div>
         </div>

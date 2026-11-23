@@ -268,4 +268,6 @@ export const inlineCopy = {
   sourceLabel: ["Source", "Sumber", "来源"],
   sourceColon: ["Source:", "Sumber:", "来源："],
   districtAgedCaption: ["Share of district population aged 60 years and above.", "Peratusan penduduk daerah yang berumur 60 tahun ke atas.", "各地区60岁及以上人口所占比例。"],
+  readMore: ["Read more", "Baca lagi", "阅读更多"],
+  showLess: ["Show less", "Tunjuk kurang", "收起"],
 };

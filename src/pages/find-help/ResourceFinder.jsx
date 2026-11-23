@@ -6,6 +6,7 @@ import { Link, useLocation } from "react-router-dom";
 import { useLanguage } from "../../i18n/LanguageContext";
 
 import "./ResourceFinder.css";
+import ReadMore from "../../components/ReadMore/ReadMore";
 
 const needs = [
   {
@@ -555,9 +556,7 @@ function ResourceFinder() {
                     {rf.step1Title || "What do you need help with?"}
                   </h2>
 
-                  <p className="rf-question-description">
-                    {rf.subtitle || "Choose the option that most closely describes what you are looking for."}
-                  </p>
+                  <ReadMore className="rf-question-description" text={rf.subtitle || "Choose the option that most closely describes what you are looking for."} />
 
                   <div className="rf-needs-grid">
                     {currentNeeds.map((item, idx) => {

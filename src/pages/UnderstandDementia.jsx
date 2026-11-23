@@ -1,6 +1,7 @@
 import Trans from "../i18n/Trans";
 import {understandingDementiaContent} from "../../shared/public-copy";
 import PublishedRecords from "../components/PublishedRecords";
+import ReadMore from "../components/ReadMore/ReadMore";
 import { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useLanguage } from "../i18n/LanguageContext";
@@ -35,7 +36,7 @@ function UnderstandDementia() {
     return () => window.cancelAnimationFrame(frame);
   }, [hash]);
 
-  const { t: translationsData, language } = useLanguage();
+  const { t: translationsData, language, translateLabel } = useLanguage();
   const rawT = translationsData.understandDementia || {};
   const t = {
     ...understandingDementiaContent,
@@ -119,13 +120,36 @@ function UnderstandDementia() {
         </div>
       </section>
 
+      {/* Quick links to each step, so visitors can skip to what they need. */}
+      <nav className="page-jump-nav" aria-label={translateLabel("On this page", "onThisPage")}>
+        <div className="understand-container">
+          <ol>
+            {[
+              ["overview", t.whatIs],
+              ["normal-ageing", reviewCopy.normalTitle],
+              ["changes-to-watch", reviewCopy.changesTitle],
+              ["early-signs", reviewCopy.earlyTitle],
+              ["self-check", reviewCopy.selfCheckTitle],
+              ["medical-advice", reviewCopy.professionalTitle],
+              ["further-care", reviewCopy.furtherTitle],
+              ["healthy-living", t.healthyTitle],
+              ["understand-faq", t.faqTitle],
+            ].map(([id, label]) => (
+              <li key={id}>
+                <a href={`#${id}`}>{label}</a>
+              </li>
+            ))}
+          </ol>
+        </div>
+      </nav>
+
       {/* Introduce what dementia means before RCBC's six-stage journey. */}
       <section className="understand-section" id="overview">
         <div className="understand-container">
           <div className="understand-section-heading">
             <p className="understand-eyebrow">{t.basics}</p>
             <h2>{t.whatIs}</h2>
-            <p>{t.overviewIntro}</p>
+            <ReadMore text={t.overviewIntro} />
           </div>
           <div className="understand-info-grid">
             {t.overviewCards.map((card, index) => (
@@ -150,7 +174,7 @@ function UnderstandDementia() {
             aria-label="More about the selected topic"
           >
             <h3>{t.overviewCards[selectedOverview].title}</h3>
-            <p>{t.overviewDetails[selectedOverview]}</p>
+            <ReadMore key={selectedOverview} text={t.overviewDetails[selectedOverview]} />
           </div>
           <div className="understand-common-types" id="common-types">
             <h3>{t.commonTypesTitle}</h3>
@@ -181,7 +205,7 @@ function UnderstandDementia() {
           <div className="understand-section-heading">
             <p className="understand-eyebrow">01 / {reviewCopy.normalTitle}</p>
             <h2>{reviewCopy.normalTitle}</h2>
-            <p>{reviewCopy.normalIntro}</p>
+            <ReadMore text={reviewCopy.normalIntro} />
           </div>
           <ul className="understand-brief-list">
             {t.comparison.slice(0, 2).map(([everyday]) => <li key={everyday}>{everyday}</li>)}
@@ -196,7 +220,7 @@ function UnderstandDementia() {
           <div className="understand-section-heading">
             <p className="understand-eyebrow">02 / {reviewCopy.changesTitle}</p>
             <h2>{reviewCopy.changesTitle}</h2>
-            <p>{t.signsIntro}</p>
+            <ReadMore text={t.signsIntro} />
           </div>
           <div className="understand-comparison" role="table" aria-label={t.comparisonLabel}>
             <div className="understand-comparison-head" role="row">
@@ -219,7 +243,7 @@ function UnderstandDementia() {
           <div className="understand-section-heading">
             <p className="understand-eyebrow">03 / {t.signsEyebrow}</p>
             <h2>{reviewCopy.earlyTitle}</h2>
-            <p>{reviewCopy.earlyIntro}</p>
+            <ReadMore text={reviewCopy.earlyIntro} />
           </div>
           <ul className="understand-brief-list">
             {reviewCopy.earlyExamples.map((example) => <li key={example}>{example}</li>)}
@@ -234,7 +258,7 @@ function UnderstandDementia() {
           <div className="understand-section-heading">
             <p className="understand-eyebrow">04 / {t.selfAssessmentEyebrow}</p>
             <h2>{reviewCopy.selfCheckTitle}</h2>
-            <p>{reviewCopy.selfCheckIntro}</p>
+            <ReadMore text={reviewCopy.selfCheckIntro} />
           </div>
           <div className="understand-assessment-card" id="why-changes-matter">
             <div className="understand-assessment-intro">
@@ -341,7 +365,7 @@ function UnderstandDementia() {
           <div className="understand-section-heading">
             <p className="understand-eyebrow">05 / {reviewCopy.professionalTitle}</p>
             <h2>{reviewCopy.professionalTitle}</h2>
-            <p>{reviewCopy.professionalIntro}</p>
+            <ReadMore text={reviewCopy.professionalIntro} />
           </div>
           <div className="understand-callout">
             <div>
@@ -359,7 +383,7 @@ function UnderstandDementia() {
           <div className="understand-section-heading">
             <p className="understand-eyebrow">06 / {reviewCopy.furtherTitle}</p>
             <h2>{reviewCopy.furtherTitle}</h2>
-            <p>{reviewCopy.furtherIntro}</p>
+            <ReadMore text={reviewCopy.furtherIntro} />
           </div>
           <div className="understand-next-steps">
             <Link to="/caregiver-support">{reviewCopy.caregiverLink} →</Link>
@@ -373,14 +397,14 @@ function UnderstandDementia() {
           <div className="understand-section-heading">
             <p className="understand-eyebrow">{t.livingEyebrow}</p>
             <h2>{t.healthyTitle}</h2>
-            <p>{t.healthyIntro}</p>
+            <ReadMore text={t.healthyIntro} />
           </div>
           <div className="understand-living-grid">
             {LIVING_SECTIONS.map((card, index) => (
               <article key={card.slug}>
                 <span aria-hidden="true">{["♡", "↗", "◎", "✧"][index]}</span>
                 <h3>{card.title}</h3>
-                <p className="understand-living-description">{publishedLivingCopy[card.slug] || card.description}</p>
+                <ReadMore className="understand-living-description" text={publishedLivingCopy[card.slug] || card.description} />
                 <Link
                   className="understand-living-webinar"
                   to={`/learn-events/online-education?q=${encodeURIComponent(card.webinarQuery)}`}
@@ -399,7 +423,7 @@ function UnderstandDementia() {
             </div>
             <Link to="/learn-events/online-education">{reviewCopy.webinarLink} →</Link>
           </div>
-          <p className="understand-note">{reviewCopy.healthNote}</p>
+          <ReadMore className="understand-note" text={reviewCopy.healthNote} />
         </div>
       </section>
 
@@ -411,7 +435,7 @@ function UnderstandDementia() {
           <div className="understand-section-heading">
             <p className="understand-eyebrow">{t.faqEyebrow}</p>
             <h2>{t.faqTitle}</h2>
-            <p>{t.faqIntro}</p>
+            <ReadMore text={t.faqIntro} />
           </div>
           <div className="understand-faq-list">
             {t.faqs.map((faq) => (

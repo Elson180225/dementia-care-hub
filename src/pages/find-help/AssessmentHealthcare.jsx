@@ -6,6 +6,7 @@ import healthcareProviders from "../../data/healthcareProviders";
 import { useLanguage } from "../../i18n/LanguageContext";
 
 import "./AssessmentHealthcare.css";
+import ReadMore from "../../components/ReadMore/ReadMore";
 
 const preparationItems = [
   {
@@ -187,9 +188,7 @@ function AssessmentHealthcare() {
             {ah.title || "Assessment & Healthcare"}
           </h1>
 
-          <p>
-            {ah.subtitle || "If you are concerned about changes in memory, thinking or behaviour, this page can help you prepare and understand where to go next."}
-          </p>
+          <ReadMore text={ah.subtitle || "If you are concerned about changes in memory, thinking or behaviour, this page can help you prepare and understand where to go next."} />
 
           <div className="assessment-hero-actions">
             <a

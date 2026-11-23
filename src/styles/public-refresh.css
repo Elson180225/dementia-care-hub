@@ -1,0 +1,146 @@
+/* ============================================================
+   SPRINT 3 PUBLIC PAGES REFRESH
+   One shared layer that gives every public page the same modern
+   look as the refreshed home page. Loaded after the page styles.
+============================================================ */
+
+/* 1. Section labels become soft pills.
+   The tint follows each label's own text colour, so the same rule
+   works on white sections and on the purple page heroes. */
+main :is(
+  .understand-eyebrow,
+  .caregiver-eyebrow,
+  .find-help-kicker,
+  .support-services-kicker,
+  .government-kicker,
+  .equipment-eyebrow,
+  .rf-eyebrow,
+  .assessment-kicker,
+  .assessment-section-label,
+  .section-label,
+  .ct-eyebrow,
+  .ct-section-eyebrow,
+  .contact-kicker
+) {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  max-width: 100%;
+  padding: 6px 14px;
+  border: 1px solid color-mix(in srgb, currentColor 24%, transparent);
+  border-radius: 999px;
+  background: color-mix(in srgb, currentColor 10%, transparent);
+  line-height: 1.3;
+}
+
+/* 2. "On this page" quick links under a page hero */
+.page-jump-nav {
+  position: relative;
+  z-index: 2;
+  margin-top: -28px;
+}
+
+.page-jump-nav ol {
+  display: flex;
+  gap: 10px;
+  margin: 0;
+  padding: 12px;
+  overflow-x: auto;
+  list-style: none;
+  border: 1px solid var(--color-purple-200);
+  border-radius: 20px;
+  background: #ffffff;
+  box-shadow: 0 18px 40px rgba(53, 21, 82, 0.12);
+  scrollbar-width: thin;
+}
+
+.page-jump-nav li {
+  flex: 0 0 auto;
+}
+
+.page-jump-nav a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 8px 16px;
+  border-radius: 999px;
+  background: var(--color-purple-50);
+  color: var(--color-purple-700);
+  font-weight: 700;
+  font-size: 0.95rem;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease;
+}
+
+.page-jump-nav a:hover {
+  background: var(--color-purple-600);
+  color: #ffffff;
+  transform: translateY(-2px);
+}
+
+.page-jump-nav a:focus-visible {
+  outline: 3px solid var(--color-gold-500);
+  outline-offset: 2px;
+}
+
+/* 3. Shorter pages: less empty space between sections */
+main .understand-section {
+  padding: 60px 0;
+}
+
+/* 4. Content fades up gently as it scrolls into view.
+   Only in browsers that support scroll-driven animation; others
+   show everything straight away. */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    main :is(
+      .understand-section-heading,
+      .understand-info-grid,
+      .understand-types-grid,
+      .understand-living-grid,
+      .understand-comparison,
+      .caregiver-section > *,
+      .find-help-card-grid,
+      .support-services-container > *,
+      .government-container > *
+    ) {
+      animation: public-reveal linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 40%;
+    }
+  }
+}
+
+@keyframes public-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (max-width: 700px) {
+  .page-jump-nav {
+    margin-top: -20px;
+  }
+
+  .page-jump-nav ol {
+    padding: 8px;
+    border-radius: 16px;
+  }
+
+  main .understand-section {
+    padding: 44px 0;
+  }
+}
+
+@media print {
+  .page-jump-nav {
+    display: none;
+  }
+}

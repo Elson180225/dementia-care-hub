@@ -75,7 +75,7 @@ const keysByPage = {
     'searchEquipmentDesc', 'searchServicesTitle', 'searchServicesDesc', 'searchCaringTitle', 'searchCaringDesc',
     'searchWellbeingTitle', 'searchWellbeingDesc', 'searchEducationTitle', 'searchEducationDesc', 'searchTrainingTitle',
     'searchTrainingDesc', 'searchWebinars', 'searchWebinarDesc', 'searchCTEvents', 'searchCTEventsDesc',
-    'searchAboutDesc', 'searchContactDesc', 'onThisPage',
+    'searchAboutDesc', 'searchContactDesc', 'onThisPage', 'readMore', 'showLess',
   ],
 };
 
