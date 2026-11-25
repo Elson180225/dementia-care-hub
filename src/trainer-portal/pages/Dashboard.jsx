@@ -20,6 +20,7 @@ export default function Dashboard() {
         <div className="tp-stat"><span>Profile status</span><StatusChip status={profile.status} labels={STATUS_LABEL} /></div>
         <div className="tp-stat"><span>Waiting for RCBC review</span><strong>{pendingCount(profile, activities)}</strong></div>
         <div className="tp-stat"><span>Workshops run in {year}</span><strong>{summary.conducted}</strong></div>
+        <div className="tp-stat"><span>Verified training hours</span><strong>{summary.hours}</strong></div>
         <div className="tp-stat"><span>People reached</span><strong>{summary.participants}</strong></div>
       </div>
 

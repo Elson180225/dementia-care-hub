@@ -39,6 +39,7 @@ import TrainerDashboard from "./trainer-portal/pages/Dashboard";
 import MyProfile from "./trainer-portal/pages/MyProfile";
 import TrainerActivities from "./trainer-portal/pages/Activities";
 import Conducted from "./trainer-portal/pages/Conducted";
+import Hours from "./trainer-portal/pages/Hours";
 
 /* Admin Dashboard */
 import AdminLayout from "./admin/AdminLayout";
@@ -249,8 +250,8 @@ function App() {
             <Route path="profile" element={<MyProfile />} />
             <Route path="activities" element={<TrainerActivities />} />
             <Route path="conducted" element={<Conducted />} />
-            {/* "My hours" was removed in Sprint 3; send old links to the dashboard. */}
-            <Route path="hours" element={<Navigate to="/trainer-portal" replace />} />
+            <Route path="training-records" element={<Hours />} />
+            <Route path="hours" element={<Navigate to="/trainer-portal/training-records" replace />} />
           </Route>
 
 {/* =========================
