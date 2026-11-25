@@ -11,6 +11,7 @@ const groups = [
     { to: "/trainer-portal", label: "Dashboard", end: true, icon: "overview" },
     { to: "/trainer-portal/activities", label: "My workshops", icon: "workshops" },
     { to: "/trainer-portal/conducted", label: "Completed workshops", icon: "completed" },
+    { to: "/trainer-portal/hours", label: "My hours", icon: "hours" },
     { to: "/trainer-portal/profile", label: "My profile", icon: "profile" },
   ] },
 ];
