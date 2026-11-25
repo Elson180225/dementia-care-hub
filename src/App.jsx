@@ -250,7 +250,8 @@ function App() {
             <Route path="profile" element={<MyProfile />} />
             <Route path="activities" element={<TrainerActivities />} />
             <Route path="conducted" element={<Conducted />} />
-            <Route path="hours" element={<Hours />} />
+            <Route path="training-records" element={<Hours />} />
+            <Route path="hours" element={<Navigate to="/trainer-portal/training-records" replace />} />
           </Route>
 
 {/* =========================

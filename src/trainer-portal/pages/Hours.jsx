@@ -14,12 +14,12 @@ export default function Hours() {
 
   return (
     <>
-      <h1>My hours</h1>
-      <p>Your hours are added up automatically once RCBC has checked your completed workshops. You don't need to enter them again.</p>
+      <h1>My Training Records</h1>
+      <p>Your verified training hours are added up automatically once RCBC has checked your completed activities. Only your own teaching hours count, and you don&apos;t need to enter them again.</p>
       <label className="tp-field">Reporting year<select value={year} onChange={e=>setYear(Number(e.target.value))}>{[...new Set([new Date().getFullYear(),...state.activities.map(a=>new Date(a.date).getFullYear())])].sort((a,b)=>b-a).map(y=><option key={y}>{y}</option>)}</select></label>
       <div className="tp-stats">
         <div className="tp-stat"><span>Conducted in {year}</span><strong>{summary.conducted}</strong></div>
-        <div className="tp-stat"><span>Verified hours</span><strong>{summary.hours}</strong></div>
+        <div className="tp-stat"><span>Verified training hours</span><strong>{summary.hours}</strong></div>
         <div className="tp-stat"><span>Participants reached</span><strong>{summary.participants}</strong></div>
       </div>
       <div className="tp-table-wrap">
