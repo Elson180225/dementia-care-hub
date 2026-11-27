@@ -69,7 +69,7 @@ test('search opens a published event with shareable metadata', async ({ page, ba
   expect(href.origin).toBe('https://wa.me');
   expect(href.searchParams.get('text')).toBe(`${event.title}\n${baseURL}${eventPath}`);
   await page.reload();
-  await expect(page).toHaveTitle(`${event.title} | Rotary Hope Care`);
+  await expect(page).toHaveTitle(`${event.title} | RCBC Hope Care`);
   const schema = JSON.parse(await page.locator('script[type="application/ld+json"]').textContent());
   expect(schema).toMatchObject({
     '@type': 'Event', name: event.title, url: `${baseURL}${eventPath}`,
@@ -103,7 +103,7 @@ test('public page share includes the clean URL and excludes subscription links',
   await page.goto('/understand-dementia?tracking=example#early-signs');
   const share = page.getByRole('link', { name: 'Share on WhatsApp' });
   const href = new URL(await share.getAttribute('href'));
-  expect(href.searchParams.get('text')).toBe(`Rotary Hope Care\n${baseURL}/understand-dementia#early-signs`);
+  expect(href.searchParams.get('text')).toBe(`Dementia Care Connect\n${baseURL}/understand-dementia#early-signs`);
   await page.goto('/get-updated?unsubscribe=example');
   await expect(share).toHaveCount(0);
 });

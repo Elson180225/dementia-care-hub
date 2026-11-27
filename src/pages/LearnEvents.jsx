@@ -103,7 +103,7 @@ function usePublicActivities() {
               .filter(Boolean)
               .join(', ');
             const primaryTrainerId = a.trainerId || (trainerList[0]?.trainerId ?? null);
-            const primarySpeaker = a.speaker || speakerNames || "Rotary HopeCare Facilitators";
+            const primarySpeaker = a.speaker || speakerNames || "RCBC Hope Care Facilitators";
             const audienceVal = a.suitableFor || a.audience || "General public, caregivers and families";
             const cityVal = a.city || (a.mode === "Online" ? "Online" : "Sarawak");
             const venueVal = a.venue || a.location || (a.mode === "Online" ? "Online" : "");
@@ -381,7 +381,7 @@ export function PublicEventPage() {
   useEffect(() => {
     if (!eventTitle) return;
     const previousTitle = document.title;
-    document.title = eventTitle + " | Rotary Hope Care";
+    document.title = eventTitle + " | RCBC Hope Care";
     return () => { document.title = previousTitle; };
   }, [eventTitle]);
   const schema = activity ? eventSchema(activity, window.location.origin) : null;
@@ -1707,7 +1707,7 @@ function FacilitatorProfileModal({ facilitator, activities = [], onClose }) {
               <strong><Trans id="governanceNotice">Boundary &amp; Governance Notice:</Trans></strong>
               <p><Trans id="governanceText">
                 Certified Trainer status reflects the defined project training and certification scope under
-                the Rotary HopeCare &amp; Alzheimer's Disease Foundation Malaysia (ADFM) DCS-TTT initiative.
+                the RCBC Hope Care &amp; Alzheimer's Disease Foundation Malaysia (ADFM) DCS-TTT initiative.
                 It should not be presented or construed as a broader professional endorsement or guarantee.
               </Trans></p>
             </div>
@@ -2363,7 +2363,7 @@ function EventsSection() {
             <span className="section-label">{ev.mediaHeadlines || le?.pressHighlights || "Press & Media Highlights"}</span>
             <h2>{ev.mediaHeadlines || "Sarawak Dementia Care in the Headlines"}</h2>
             <p>
-              {ev.mediaDesc || "Major regional news articles and press features reporting on the Rotary HopeCare initiative, public dialogues, and train-the-trainer education."}
+              {ev.mediaDesc || "Major regional news articles and press features reporting on the RCBC Hope Care initiative, public dialogues, and train-the-trainer education."}
             </p>
           </div>
 

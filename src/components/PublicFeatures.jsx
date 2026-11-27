@@ -3,7 +3,7 @@ import { useLanguage } from '../i18n/LanguageContext';
 import { reviewedDate, whatsappShareUrl } from '../../shared/public-features';
 import './PublicFeatures.css';
 
-export function WhatsAppShare({ title = 'Rotary Hope Care', path }) {
+export function WhatsAppShare({ title = 'Dementia Care Connect', path }) {
   const location = useLocation();
   const { language } = useLanguage();
   const labels = { en: 'Share on WhatsApp', ms: 'Kongsi di WhatsApp', zh: '分享到 WhatsApp' };

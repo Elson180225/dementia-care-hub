@@ -103,19 +103,20 @@ function Home() {
 
             <p className="hero-description">{h.description}</p>
 
+            {/* RCBC Home Draft 02: Find Your Path goes straight to the pathway cards. */}
             <div className="hero-actions">
-              <button
-                type="button"
-                className="hero-btn hero-btn-primary"
-                onClick={openWelcomeGuide}
-              >
-                {t.welcomeGuide.reopen} →
-              </button>
-
-              <a href="#visitor-pathways" className="hero-btn hero-btn-secondary">
-                {h.browseTopics}
+              <a href="#visitor-pathways" className="hero-btn hero-btn-primary">
+                {h.findYourPath} <span aria-hidden="true">↓</span>
               </a>
+
+              <Link to="/understand-dementia" className="hero-btn hero-btn-secondary">
+                {h.understandButton} <span aria-hidden="true">→</span>
+              </Link>
             </div>
+
+            <button type="button" className="hero-guide-link" onClick={openWelcomeGuide}>
+              {h.notSureGuide}
+            </button>
 
             <ul className="hero-facts">
               <li>{h.facts.free}</li>

@@ -19,15 +19,15 @@ export default function Dashboard() {
       <div className="tp-stats">
         <div className="tp-stat"><span>Profile status</span><StatusChip status={profile.status} labels={STATUS_LABEL} /></div>
         <div className="tp-stat"><span>Waiting for RCBC review</span><strong>{pendingCount(profile, activities)}</strong></div>
-        <div className="tp-stat"><span>Workshops run in {year}</span><strong>{summary.conducted}</strong></div>
+        <div className="tp-stat"><span>Completed activities in {year}</span><strong>{summary.conducted}</strong></div>
         <div className="tp-stat"><span>Verified training hours</span><strong>{summary.hours}</strong></div>
         <div className="tp-stat"><span>Participant attendances</span><strong>{summary.participants}</strong></div>
       </div>
 
       <section className="tp-card">
-        <h2>Your upcoming workshops</h2>
+        <h2>Upcoming training activities</h2>
         {upcoming.length === 0 ? (
-          <p>You have no upcoming workshops yet. <Link to="/trainer-portal/activities">Add a workshop or seminar</Link>.</p>
+          <p>You have no upcoming training activities yet. <Link to="/trainer-portal/activities">Add a training activity</Link>.</p>
         ) : (
           <ul className="tp-list">
             {upcoming.map((a) => (
@@ -36,6 +36,11 @@ export default function Dashboard() {
           </ul>
         )}
       </section>
+
+      <p className="tp-note">
+        Your teaching scope depends on your verified classification.{" "}
+        <Link to="/trainer-portal/eligibility">Check your eligibility &amp; teaching conditions</Link>
+      </p>
     </>
   );
 }

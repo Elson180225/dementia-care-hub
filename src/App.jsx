@@ -19,6 +19,7 @@ import LearnEvents, { PublicEventPage } from "./pages/LearnEvents";
 import PublicPageActions from "./components/PublicFeatures";
 import NotFound from "./pages/NotFound";
 import Contact from "./pages/Contact";
+import PolicyPage from "./pages/PolicyPage";
 import UnderstandDementia from "./pages/UnderstandDementia";
 import CaregiverSupport from "./pages/CaregiverSupport";
 import AboutProject from "./pages/AboutProject";
@@ -40,6 +41,7 @@ import MyProfile from "./trainer-portal/pages/MyProfile";
 import TrainerActivities from "./trainer-portal/pages/Activities";
 import Conducted from "./trainer-portal/pages/Conducted";
 import Hours from "./trainer-portal/pages/Hours";
+import Eligibility from "./trainer-portal/pages/Eligibility";
 
 /* Admin Dashboard */
 import AdminLayout from "./admin/AdminLayout";
@@ -77,6 +79,7 @@ function App() {
           <Route path="/caregiver-support/verify-certificate" element={<Navigate to="/learn-events/dcs-participants" replace />} />
           <Route path="/learn-events/dcs-participants" element={<DcsParticipantSearch />} />
           <Route path="/trainer-portal/application" element={<main className="tp-page"><div className="tp-container"><AccountForm application /></div></main>} />
+          <Route path="/trainer-portal/eligibility" element={<main className="tp-page"><div className="tp-container"><Eligibility /></div></main>} />
           <Route path="/trainer-portal/signup" element={<main className="tp-page"><div className="tp-container"><AccountForm signup /></div></main>} />
           <Route path="/admin/signup" element={<main className="tp-page"><div className="tp-container"><AccountForm role="admin" signup /></div></main>} />
           <Route path="/trainer-portal/forgot-password" element={<main className="tp-page"><div className="tp-container"><AccountForm forgot /></div></main>} />
@@ -85,6 +88,8 @@ function App() {
           <Route path="/admin/reset-password" element={<main className="tp-page"><div className="tp-container"><AccountForm role="admin" reset /></div></main>} />
           <Route path="/about/contact" element={<Contact />} />
           <Route path="/contact" element={<Navigate to="/about/contact" replace />} />
+          <Route path="/privacy-policy" element={<PolicyPage kind="privacy" />} />
+          <Route path="/terms-of-use" element={<PolicyPage kind="terms" />} />
           {/* =========================
               HOME
           ========================== */}

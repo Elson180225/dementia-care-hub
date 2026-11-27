@@ -30,7 +30,7 @@ export function eventCalendar(activity, base, now = new Date()) {
  const end = eventEnd(activity);
  const url = new URL(eventPath(activity.id), base);
  return [
-  'BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Dementia Care Hub//Calendar//EN',
+  'BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Dementia Care Connect//Calendar//EN',
   'BEGIN:VEVENT',
   `UID:${activity.id}@${url.hostname}`, `DTSTAMP:${timestamp(now)}`, `DTSTART:${timestamp(activity.starts_at)}`,
   ...(end ? [`DTEND:${timestamp(end)}`] : []),
