@@ -12,7 +12,7 @@ Section identifiers: `about-overview`, `about-mission`, `about-journey`, `about-
 
 Set ENQUIRY_ADMIN_EMAIL to the designated RCBC recipient, and configure BREVO_API_KEY, BREVO_SENDER_EMAIL (verified sender), BREVO_SENDER_NAME and APP_BASE_URL. No recipient is guessed. The API scans queued enquiries every minute. A successful form submission means the enquiry was saved; it does not promise email delivery. The admin inbox remains the source of truth when email is unavailable.
 
-In Content & records > Enquiries, review notification status and choose Record follow-up. Reply using the visitor email link, record the action/outcome, and select In progress or Closed. A note is required for these states. Timestamps and the follow-up history preserve the recorded actions. This records follow-up; it does not send a visitor reply automatically.
+In Enquiries & Subscribers > Enquiries, review notification status and choose Record follow-up. Reply using the visitor email link, record the action/outcome, and select In Progress or Responded. A note is required for these states. Timestamps and the follow-up history preserve the recorded actions. This records follow-up; it does not send a visitor reply automatically.
 
 Confirmed failed notifications can be queued again with Retry notification. Uncertain sends and interrupted sends require inspection of Brevo logs before any manual database recovery to avoid duplicate messages. A sent notification means Brevo accepted it, not confirmed inbox delivery.
 

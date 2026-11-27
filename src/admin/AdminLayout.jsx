@@ -34,6 +34,8 @@ export default function AdminLayout() {
     { label: "Website", links: [
       { to: "/admin/translations", label: "Language & translations", icon: "content" },
       { to: "/admin/records", label: "Content & records", icon: "content" },
+      { to: "/admin/directory", label: "Directory Management", icon: "content" },
+      { to: "/admin/enquiries-subscribers", label: "Enquiries & Subscribers", icon: "content" },
     ] },
   ];
 

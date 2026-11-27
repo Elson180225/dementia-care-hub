@@ -831,7 +831,7 @@ function AssessmentHealthcare() {
               </strong>
             </Link>
 
-            <Link to="/find-help/resource-finder">
+            <Link to="/find-help/resource-finder?category=healthcare">
               <span>04</span>
 
               <h3>

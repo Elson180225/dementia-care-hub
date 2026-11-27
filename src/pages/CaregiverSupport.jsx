@@ -1,9 +1,10 @@
 import Trans from "../i18n/Trans";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useLanguage } from "../i18n/LanguageContext";
 import caregiverPhoto from "../assets/caregiver-support.jpg";
 import "./CaregiverSupport.css";
+import DirectoryListings from "../components/DirectoryListings";
 import ReadMore from "../components/ReadMore/ReadMore";
 
 const guidanceTopics = [
@@ -100,7 +101,6 @@ const guidanceTopics = [
 ];
 
 // Directory entries use the backend's snake_case field names (including languages[]).
-const supportGroupsUrl = "/api/public/organisations?category=support-group";
 
 const volunteerTypes = [
   {
@@ -174,103 +174,20 @@ function CaregiverSupport() {
     const topic = new URLSearchParams(search).get('topic');
     if (guidanceTopics.some(item => item.id === topic)) setActiveTopic(topic);
   }, [search]);
-  const [city, setCity] = useState("");
-  const [language, setLanguage] = useState("");
-  const [volunteerOnly, setVolunteerOnly] = useState(
-    () => new URLSearchParams(search).get("volunteers") === "1",
-  );
   const [selectedVolunteer, setSelectedVolunteer] = useState(0);
-  const [rawSupportGroups, setSupportGroups] = useState([]);
-  const [groupsLoading, setGroupsLoading] = useState(true);
-  const [groupsError, setGroupsError] = useState("");
-  const [reloadGroups, setReloadGroups] = useState(0);
-
-  useEffect(() => {
-    if (page !== "support-groups") return undefined;
-    const controller = new AbortController();
-    setGroupsLoading(true);
-    setGroupsError("");
-    fetch(supportGroupsUrl, { signal: controller.signal })
-      .then(async (response) => {
-        if (!response.ok) {
-          throw new Error(
-            "Support groups could not be loaded. Please try again.",
-          );
-        }
-        const data = await response.json();
-        if (!Array.isArray(data))
-          throw new Error("Unexpected support-group response.");
-        return data;
-      })
-      .then((data) => {
-        if (!controller.signal.aborted) setSupportGroups(data);
-      })
-      .catch((error) => {
-        if (!controller.signal.aborted) {
-          setGroupsError(
-            error.message || "Support groups could not be loaded.",
-          );
-          setSupportGroups([]);
-        }
-      })
-      .finally(() => {
-        if (!controller.signal.aborted) setGroupsLoading(false);
-      });
-    return () => controller.abort();
-  }, [reloadGroups, page]);
-
-  const { t,translateContent, translateLabel } = useLanguage();
-  const supportGroups=translateContent(rawSupportGroups,'records/organisations');
+  const { t, translateLabel } = useLanguage();
   const cs = t.caregiverSupport;
   const m = t.header.menu;
   const currentGuidanceTopics = cs.guidanceTopics || guidanceTopics;
 
   const topic =
     currentGuidanceTopics.find((item) => item.id === activeTopic) ?? currentGuidanceTopics[0];
-  const availableLanguages = useMemo(
-    () =>
-      [
-        ...new Set(
-          supportGroups.flatMap((group) =>
-            Array.isArray(group.languages) ? group.languages : [],
-          ),
-        ),
-      ].sort((a, b) => a.localeCompare(b)),
-    [supportGroups],
-  );
-  const filteredGroups = useMemo(
-    () =>
-      supportGroups.filter(
-        (group) =>
-          (!city ||
-            (group.city || "")
-              .toLowerCase()
-              .includes(city.trim().toLowerCase())) &&
-          (!language ||
-            (Array.isArray(group.languages) &&
-              group.languages.some(
-                (item) => item.toLowerCase() === language.toLowerCase(),
-              ))) &&
-          (!volunteerOnly || group.accepting_volunteers === true),
-      ),
-    [supportGroups, city, language, volunteerOnly],
-  );
-
-  const resetFilters = () => {
-    setCity("");
-    setLanguage("");
-    setVolunteerOnly(false);
-  };
-
-  const findVolunteerGroups = () => {
-    setVolunteerOnly(true);
-    navigate("/caregiver-support/support-groups?volunteers=1");
-  };
+  const findVolunteerGroups = () => navigate("/caregiver-support/support-groups?volunteers=1");
 
   const pageLabels = {
     training: { title: m.caregiverTraining, intro: cs.trainingIntro },
     "certificate-verification": { title: m.certVerification, intro: cs.checkCertDesc },
-    "support-groups": { title: m.supportGroups, intro: cs.supportGroupsIntro },
+    "support-groups": { title: m.supportGroups, intro: t.directory.groupIntro },
     volunteer: { title: m.volunteer, intro: cs.volunteerIntro },
   };
 
@@ -539,146 +456,9 @@ function CaregiverSupport() {
           <SectionHeading
             eyebrow={cs.supportGroupsKicker || "03 / Support Groups"}
             title={cs.supportGroupsTitle || "Connection makes a difference"}
-            description={cs.supportGroupsIntro || "Find published support groups by city, language and volunteer availability. Only records approved for publication appear here."}
+            description={t.directory.groupIntro}
           />
-          <div className="caregiver-directory">
-            <div className="caregiver-directory-head">
-              <div>
-                <h3>{cs.findSupportGroup || "Find a support group"}</h3>
-                <p>{cs.searchApproved || "Search the approved group directory."}</p>
-              </div>
-              <span className="caregiver-directory-count">
-                {groupsLoading
-                  ? (cs.loadingGroups || "Loading groups…")
-                  : groupsError
-                    ? (cs.unavailable || "Unavailable")
-                    : `${filteredGroups.length} ${cs.listingsCount || "listings"}`}
-              </span>
-            </div>
-            <div className="caregiver-filter-grid">
-              <label>
-                {cs.cityLocation || "City / location"}
-                <input
-                  type="search"
-                  value={city}
-                  onChange={(event) => setCity(event.target.value)}
-                  placeholder={cs.cityPlaceholder || "e.g. Kuching"}
-                />
-              </label>
-              <label>
-                {t.learnEvents?.language || "Language"}
-                <select
-                  value={language}
-                  onChange={(event) => setLanguage(event.target.value)}
-                >
-                  <option value="">{cs.allLanguages || "All languages"}</option>
-                  {availableLanguages.map((item) => (
-                    <option key={item} value={item}>
-                      {item}
-                    </option>
-                  ))}
-                </select>
-              </label>
-            </div>
-            <div className="caregiver-filter-footer">
-              <label className="caregiver-filter-check">
-                <input
-                  type="checkbox"
-                  checked={volunteerOnly}
-                  onChange={(event) => setVolunteerOnly(event.target.checked)}
-                />{" "}
-                {cs.acceptingVolunteers || "Accepting volunteers only"}
-              </label>
-              <button
-                type="button"
-                className="caregiver-clear-button"
-                onClick={resetFilters}
-              >
-                {cs.clearFilters || "Clear filters"}
-              </button>
-            </div>
-            {groupsLoading ? (
-              <div className="caregiver-empty-state" role="status">
-                <h4><Trans id="groupsLoading">Loading support groups…</Trans></h4>
-                <p><Trans id="groupsChecking">Checking the latest published listings.</Trans></p>
-              </div>
-            ) : groupsError ? (
-              <div className="caregiver-empty-state" role="alert">
-                <h4><Trans id="groupsError">Unable to load support groups</Trans></h4>
-                <p>{groupsError}</p>
-                <button
-                  type="button"
-                  className="caregiver-text-action"
-                  onClick={() => setReloadGroups((n) => n + 1)}
-                ><Trans id="retryArrow">
-                  Try again →
-                </Trans></button>
-              </div>
-            ) : filteredGroups.length > 0 ? (
-              <div className="caregiver-results" aria-live="polite">
-                {filteredGroups.map((group) => (
-                  <article className="caregiver-result-card" key={group.id}>
-                    <span className="caregiver-result-approved">
-                      {cs.reviewedListing || "Published listing"}
-                    </span>
-                    <h4>{group.name}</h4>
-                    {group.city && (
-                      <p>
-                        <strong><Trans id="cityColon">City:</Trans></strong> {group.city}
-                      </p>
-                    )}
-                    <p>
-                      <strong><Trans id="languagesColon">Languages:</Trans></strong>{" "}
-                      {Array.isArray(group.languages) && group.languages.length
-                        ? group.languages.join(", ")
-                        : "Not specified"}
-                    </p>
-                    <p>
-                      <strong><Trans id="acceptingVolunteers">Accepting volunteers:</Trans></strong>{" "}
-                      {group.accepting_volunteers ? "Yes" : "No"}
-                    </p>
-                    {group.email && (
-                      <a href={`mailto:${group.email}`}>{cs.emailOrganisation || "Email organisation"}</a>
-                    )}
-                    {group.website && /^https?:\/\//i.test(group.website) && (
-                      <a
-                        href={group.website}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        {cs.officialWebsite || "Official website ↗"}
-                      </a>
-                    )}
-                  </article>
-                ))}
-              </div>
-            ) : (
-              <div className="caregiver-empty-state" role="status">
-                <span className="caregiver-empty-symbol" aria-hidden="true">
-                  ⌕
-                </span>
-                <h4>
-                  {supportGroups.length === 0
-                    ? (cs.emptyComingSoon || "No published support groups yet")
-                    : (cs.emptyNoMatch || "No groups match these filters")}
-                </h4>
-                <p>
-                  {supportGroups.length === 0
-                    ? (cs.emptyComingSoonDesc || "There are no support-group listings currently published in the directory.")
-                    : (cs.emptyNoMatchDesc || "Try another city or language, or clear the volunteer filter.")}
-                </p>
-                {supportGroups.length > 0 && (
-                  <button
-                    type="button"
-                    className="caregiver-text-action"
-                    onClick={resetFilters}
-                  >
-                    {cs.resetSearch || "Reset search →"}
-                  </button>
-                )}
-              </div>
-            )}
-          </div>
+          <DirectoryListings key={search} groupsOnly initial={{ volunteers: new URLSearchParams(search).get('volunteers') === '1' }} />
           <div className="caregiver-listing-note">
             <div>
               <strong>{cs.partOfGroup || "Are you part of a support group or NGO?"}</strong>

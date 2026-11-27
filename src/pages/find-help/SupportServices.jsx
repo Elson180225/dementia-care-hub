@@ -1,4 +1,5 @@
 import Trans from "../../i18n/Trans";
+import { translateDirectoryListings } from '../../../shared/directory.js';
 import { useEffect, useMemo, useState } from "react";
 
 import { useLanguage } from "../../i18n/LanguageContext";
@@ -122,7 +123,7 @@ function SupportServices() {
   }, []);
 
   const managedServices = useMemo(() => {
-    return translateContent(publishedServices, 'records/organisations').flatMap(
+    return translateDirectoryListings(publishedServices, translateContent).flatMap(
       (record) => {
         const serviceTypes =
           Array.isArray(publishedServices.find(item=>item.id===record.id)?.services) &&

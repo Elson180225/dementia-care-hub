@@ -1,6 +1,8 @@
 const dueContent = `
  WITH content AS (
-  SELECT 'Directory' AS kind, 'Directory listing' AS type, name AS title, review_status, next_review_at FROM organisations
+  SELECT 'Directory' AS kind, 'Organisation' AS type, name AS title, review_status, next_review_at FROM organisations
+  UNION ALL SELECT 'Directory', 'Directory listing', concat(o.name, ' · ', s.service_type), s.review_status, s.next_review_at
+   FROM directory_services s JOIN organisations o ON o.id=s.organisation_id WHERE o.review_status<>'archived'
   UNION ALL SELECT 'Learning resources', 'Learning resource', title, review_status, next_review_at FROM learning_resources
   UNION ALL SELECT 'Content and FAQs', 'Content page', title, review_status, next_review_at FROM content_pages
   UNION ALL SELECT 'Content and FAQs', 'FAQ', question, review_status, next_review_at FROM faqs

@@ -123,7 +123,7 @@ Activity state path: `draft -> submitted -> approved -> published -> completed -
 | 5 ABOUT | `content_pages.body` holds project team, partners, milestones and approved project information without inventing additional public account roles |
 | 6 CONTACT | Existing enquiry API is preserved; project contact details fit approved content. Existing enquiries still use the existing file store |
 | 7 LANGUAGE | Language fields on shared content/records; page identity is unique by slug and language |
-| 8 GET UPDATED | `subscribers`: required name/email/locality/language, consent timestamp/version, confirmation and unsubscribe timestamps, provider reference; no phone or password |
+| 8 GET UPDATED | `subscribers`: required name, email and locality including country, consent timestamp/version, confirmation and unsubscribe timestamps, provider reference; no phone or password |
 | 9 TRAINER | One profile, assignments with Trainer/Co-Trainer/Speaker roles, activity submission and verified completion reporting |
 | 10 CAREGIVER | Shared organisation support-group/volunteer flags; DCS certificate reference, recipient, programme, issuer, issue/completion dates, location, validity and verification consent |
 | 11 ADMIN; DEMENT master | Shared-record review/publication, audit/status history, protected admin access, maintenance dates and archive states |

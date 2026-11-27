@@ -9,7 +9,7 @@ try {
  const {senders=[]}=await request('/senders');
  if(!senders.some(s=>s.active && s.email.toLowerCase()===process.env.BREVO_SENDER_EMAIL.toLowerCase()))throw new Error('BREVO_SENDER_EMAIL does not match an active verified Brevo sender.');
  const {attributes=[]}=await request('/contacts/attributes');
- for(const name of ['NAME','CITY','STATE','LANGUAGE']) {
+ for(const name of ['NAME','COUNTRY','CITY','STATE']) {
   const existing=attributes.find(a=>a.name===name);
   if(existing && existing.type!=='text')throw new Error(name+' must be a text attribute. Existing attribute retained.');
   if(!existing) {

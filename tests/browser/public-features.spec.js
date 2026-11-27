@@ -99,6 +99,67 @@ test('search opens a published directory result', async ({ page }) => {
   await expect(page.locator('#finder-results').getByRole('heading', { name: organisation.name })).toBeVisible();
 });
 
+test('Contact uses six categories, counts the message and retains details after a failed send', async ({ page }) => {
+  await page.route('**/api/public/contact-settings', route => route.fulfill({ json: {
+    projectEmail: 'project@example.test', organiserFacebook: 'https://www.facebook.com/example', whatsappCommunity: 'https://chat.whatsapp.com/example',
+  } }));
+  await page.route('**/api/enquiries', route => route.fulfill({ status: 503, json: {} }));
+  await page.goto('/about/contact');
+  const type = page.getByRole('combobox', { name: /what is your enquiry about/i });
+  await expect(type.locator('option')).toHaveCount(7);
+  await expect(page.getByRole('link', { name: /project email/i })).toHaveAttribute('href', 'mailto:project@example.test');
+  await expect(page.getByRole('link', { name: /join our whatsapp community/i })).toHaveAttribute('href', 'https://chat.whatsapp.com/example');
+  await page.getByLabel(/your name/i).fill('Example visitor');
+  await page.getByLabel(/your email address/i).fill('visitor@example.test');
+  await type.selectOption('Education & Training');
+  const message = page.locator('#contact-message');
+  await message.fill('文'.repeat(2001));
+  await expect(message).toHaveValue('文'.repeat(2000));
+  await expect(page.getByText('2,000 / 2,000')).toBeVisible();
+  await page.getByRole('button', { name: 'Send Message', exact: false }).click();
+  await expect(page.getByText(/could not be sent/)).toBeVisible();
+  await expect(message).toHaveValue('文'.repeat(2000));
+});
+
+test('Get Updated submits country and consent and shows the confirmation', async ({ page }) => {
+  await page.route('**/api/public/subscribe', route => {
+    expect(route.request().postDataJSON()).toMatchObject({
+      country: 'Malaysia', state: 'Sarawak', city: 'Miri', consent: true,
+    });
+    expect(route.request().postDataJSON()).not.toHaveProperty('language');
+    return route.fulfill({ json: { status: 'subscribed', unsubscribeLink: '/get-updated?unsubscribe=example' } });
+  });
+  await page.goto('/get-updated');
+  await page.getByRole('textbox', { name: /^name/i }).fill('Example visitor');
+  await page.getByRole('textbox', { name: /^email/i }).fill('visitor@example.test');
+  await page.getByRole('textbox', { name: /^country/i }).fill('Malaysia');
+  await page.getByRole('textbox', { name: /^state \/ province \/ region/i }).fill('Sarawak');
+  await page.getByRole('textbox', { name: /^city \/ town/i }).fill('Miri');
+  await expect(page.getByLabel(/preferred language/i)).toHaveCount(0);
+  await expect(page.getByRole('link', { name: 'Privacy Policy', exact: true }).first()).toBeVisible();
+  await page.getByRole('checkbox').check();
+  await page.getByRole('button', { name: 'Subscribe', exact: true }).click();
+  await expect(page.getByText(/you are now subscribed/i)).toBeVisible();
+  await expect(page.getByRole('link', { name: 'Return to Home' })).toBeVisible();
+});
+
+test('Support Groups and Resource Finder display the same published group and contact details', async ({ page }) => {
+  const group = {
+    id: 'support-group-listing', name: 'Miri Caregiver Circle', category: 'support-group',
+    group_type: 'Community-led', service_type: 'Caregiver meetings', city: 'Miri',
+    address: '12 Community Road', phone: '085123456', email: 'group@example.test',
+  };
+  await page.route('**/api/public/organisations*', route => route.fulfill({ json: [group] }));
+  await page.goto('/caregiver-support/support-groups');
+  await page.getByRole('combobox', { name: 'Group type' }).selectOption('Community-led');
+  await expect(page.getByRole('heading', { name: group.name })).toBeVisible();
+  await expect(page.getByRole('link', { name: group.email })).toHaveAttribute('href', `mailto:${group.email}`);
+  await page.goto('/find-help/resource-finder?category=healthcare');
+  await page.getByRole('combobox', { name: 'Type of support' }).selectOption(group.service_type);
+  await expect(page.getByRole('heading', { name: group.name })).toBeVisible();
+  await expect(page.getByRole('link', { name: group.phone })).toHaveAttribute('href', `tel:${group.phone}`);
+});
+
 test('public page share includes the clean URL and excludes subscription links', async ({ page, baseURL }) => {
   await page.goto('/understand-dementia?tracking=example#early-signs');
   const share = page.getByRole('link', { name: 'Share on WhatsApp' });

@@ -21,8 +21,8 @@ test('PostgreSQL portal and administrative workflows',{skip:!process.env.TEST_DA
  const connection=new URL(process.env.TEST_DATABASE_URL);connection.searchParams.set('options',`-c search_path=${schema},public`);
  const db=new pg.Pool({connectionString:connection.toString()});let server;
  try {
-  for(const name of ['001_shared_records.sql','003_admin_auth.sql','004_record_details.sql','005_admin_workflow.sql','006_portal_operations.sql','007_content_feedback.sql','008_idle_sessions.sql','014_enquiry_notifications.sql','015_trainer_listing_approval.sql','016_trainer_certificate_evidence.sql','017_trainer_details_and_resource_examples.sql','018_trainer_assessment_status.sql','012_participants.sql','015_event_registration.sql','016_registration_setup.sql','017_participant_history.sql','019_programme_intakes.sql','022_password_reset.sql','023_trainer_governance.sql','024_trainer_archive.sql','025_persistent_learn_events.sql']) await db.query(await readFile(new URL('../database/'+name,import.meta.url),'utf8'));
-  server=spawn(process.execPath,['server/index.js'],{env:{...process.env,DATABASE_URL:connection.toString(),SUBSCRIBER_DATABASE_URL:'',SUBSCRIBER_TOKEN_SECRET:'test-secret-'.repeat(5),REMINDERS_ENABLED:'false',API_PORT:'3098'},stdio:['ignore','pipe','pipe']});
+  for(const name of ['001_shared_records.sql','003_admin_auth.sql','004_record_details.sql','005_admin_workflow.sql','006_portal_operations.sql','007_content_feedback.sql','008_idle_sessions.sql','014_enquiry_notifications.sql','015_trainer_listing_approval.sql','016_trainer_certificate_evidence.sql','017_trainer_details_and_resource_examples.sql','018_trainer_assessment_status.sql','012_participants.sql','015_event_registration.sql','016_registration_setup.sql','017_participant_history.sql','019_programme_intakes.sql','022_password_reset.sql','023_trainer_governance.sql','024_trainer_archive.sql','025_persistent_learn_events.sql','028_subscriber_country.sql','029_directory_service_listings.sql','030_contact_settings.sql']) await db.query(await readFile(new URL('../database/'+name,import.meta.url),'utf8'));
+  server=spawn(process.execPath,['server/index.js'],{env:{...process.env,DATABASE_URL:connection.toString(),SUBSCRIBER_DATABASE_URL:'',SUBSCRIBER_TOKEN_SECRET:'test-secret-'.repeat(5),REMINDERS_ENABLED:'false',BREVO_API_KEY:'',API_PORT:'3098'},stdio:['ignore','pipe','pipe']});
   let serverErrors='';server.stderr.on('data',d=>{serverErrors+=d;});
   await new Promise((resolve,reject)=>{server.stdout.once('data',resolve);server.once('error',reject);server.once('exit',()=>reject(new Error('Test API exited: '+serverErrors)));});
   async function request(path,data,cookie='',method) {
@@ -170,9 +170,19 @@ test('PostgreSQL portal and administrative workflows',{skip:!process.env.TEST_DA
    const values={};for(const [name,,type] of recordTypes[kind].fields) values[name]=type==='array'?[]:type==='checkbox'?false:Array.isArray(type)?type[0]:name==='language'?'English':'';
    return {...values,...review,...overrides};
   }
-  const organisation=record('organisations',{name:'Test facility',services:['Support'],category:'services'});
+  const organisation=record('organisations',{name:'Test facility',category:'Community-led',phone:'1234'});
   const orgId=ok(await request('admin/records/organisations',{values:organisation},admin.cookie)).data.id;
-  assert.equal(ok(await request('public/organisations?category=services')).data.filter(r=>!r.is_example).length,1);
+  const respite=record('directory_services',{organisation_id:orgId,service_type:'Respite',category:'services',city:'Miri'});
+  const group=record('directory_services',{organisation_id:orgId,service_type:'Caregiver meetings',category:'support-group',group_type:'Community-led'});
+  const respiteId=ok(await request('admin/records/directory_services',{values:respite},admin.cookie)).data.id;
+  const groupId=ok(await request('admin/records/directory_services',{values:group},admin.cookie)).data.id;
+  assert.equal(ok(await request('public/organisations?category=services')).data[0].id,respiteId);
+  assert.deepEqual(ok(await request('public/organisations?category=support-group')).data.map(row=>row.id),[groupId]);
+  ok(await request('admin/records/organisations',{id:orgId,values:{...organisation,phone:'5678'}},admin.cookie));
+  assert.deepEqual(ok(await request('public/organisations')).data.map(row=>row.phone),['5678','5678']);
+  assert.equal(ok(await request('admin/records/directory_services?category=services&location=Miri',null,admin.cookie)).data[0].id,respiteId);
+  ok(await request('admin/records/directory_services',{id:respiteId,values:{...respite,publication_status:'unpublished'}},admin.cookie));
+  assert.deepEqual(ok(await request('public/organisations')).data.map(row=>row.id),[groupId]);
   ok(await request('admin/records/organisations',{id:orgId,values:{...organisation,review_status:'archived'}},admin.cookie));
   assert.equal(ok(await request('public/organisations')).data.filter(r=>!r.is_example).length,0);
   const resource=record('learning_resources',{title:'Test guide',url:'https://example.org/guide',copyright_permission:'RCBC permission recorded'});
@@ -182,12 +192,14 @@ test('PostgreSQL portal and administrative workflows',{skip:!process.env.TEST_DA
   assert.equal(ok(await request('public/learning_resources')).data.length,0);
   ok(await request('admin/records/content_pages',{values:record('content_pages',{slug:'home',title:'Project note',body:'Plain text update'})},admin.cookie));
   assert.equal(ok(await request('public/content_pages')).data[0].body.text,'Plain text update');
-  const enquiry={id:randomUUID(),name:'Visitor',email:'visitor@test.example',type:'Collaboration',message:'Please contact me about the project.',website:'',startedAt:Date.now()-3000};
+  const enquiry={id:randomUUID(),name:'Visitor',email:'visitor@test.example',type:'Collaboration & Partnership',message:'Please contact me about the project.',website:'',startedAt:Date.now()-3000};
   ok(await request('enquiries',enquiry));ok(await request('enquiries',enquiry));
   const enquiries=ok(await request('admin/records/enquiries',null,admin.cookie)).data;assert.equal(enquiries.length,1);
   ok(await request('admin/records/enquiries',{id:enquiries[0].id,values:{status:'closed',admin_comment:''}},admin.cookie),400);
   ok(await request('admin/records/enquiries',{id:enquiries[0].id,values:{status:'follow-up',admin_comment:'Replied by email'}},admin.cookie));
   ok(await request('admin/records/enquiries',{id:enquiries[0].id,values:{status:'closed',admin_comment:'Followed up internally'}},admin.cookie));
+  assert.equal(ok(await request('admin/records/enquiries?status=new',null,admin.cookie)).data.length,0);
+  assert.equal(ok(await request('admin/records/enquiries?status=closed&type=Collaboration%20%26%20Partnership',null,admin.cookie)).data.length,1);
   const closed=(await db.query('SELECT * FROM enquiries')).rows[0];
   assert.equal(closed.status,'closed');assert.ok(closed.followed_up_at);assert.ok(closed.closed_at);
   const history=ok(await request('admin/enquiry-history?id='+closed.id,null,admin.cookie)).data;
@@ -199,8 +211,15 @@ test('PostgreSQL portal and administrative workflows',{skip:!process.env.TEST_DA
   ok(await request('admin/records/faqs',{id:faqId,remove:true},admin.cookie),400);
   ok(await request('admin/records/faqs',{id:faqId,values:{...faq,review_status:'archived'}},admin.cookie));
   assert.equal(ok(await request('public/faqs')).data.length,0);
-  const subscriber=ok(await request('public/subscribe',{name:'Subscriber',email:'subscriber@test.example',city:'Bintulu',state:'Sarawak',language:'English',consent:true}));
+  const subscriber=ok(await request('public/subscribe',{name:'Subscriber',email:'subscriber@test.example',country:'Malaysia',city:'Bintulu',state:'Sarawak',consent:true}));
   assert.ok(subscriber.data.unsubscribeLink);
+  assert.equal(ok(await request('admin/records/subscribers?country=malaysia&status=active',null,admin.cookie)).data.length,1);
+  assert.equal(ok(await request('admin/records/subscribers?country=Singapore',null,admin.cookie)).data.length,0);
+  ok(await request('admin/contact-settings'),401);
+  const contactDetails={projectEmail:'contact@test.example', organiserFacebook:'https://www.facebook.com/example-rotary', whatsappCommunity:'https://chat.whatsapp.com/exampleInvite'};
+  ok(await request('admin/contact-settings',{...contactDetails,whatsappCommunity:'https://other.example/invalid'},admin.cookie),400);
+  ok(await request('admin/contact-settings',contactDetails,admin.cookie));
+  assert.deepEqual(ok(await request('public/contact-settings')).data,contactDetails);
   const exportAudience=async(cookie='')=>fetch('http://127.0.0.1:3098/api/admin/subscribers/export',{headers:{cookie}});
   assert.equal((await exportAudience()).status,401);
   assert.equal((await exportAudience(trainer.cookie)).status,403);

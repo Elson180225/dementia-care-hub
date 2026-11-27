@@ -3,7 +3,7 @@ const quote=s=>'"'+s.replaceAll('"','""')+'"';
 export async function migrateSubscriberDatabase(db,{standalone=true}={}) {
  await db.query('SELECT pg_advisory_xact_lock(718422)');
  await db.query('CREATE TABLE IF NOT EXISTS subscriber_schema_migrations(name text PRIMARY KEY,applied_at timestamptz DEFAULT now())');
- for(const name of ['001_subscribers.sql','002_reminders.sql','003_event_notification_stages.sql']) {
+ for(const name of ['001_subscribers.sql','002_reminders.sql','003_event_notification_stages.sql','004_subscriber_country.sql']) {
   if((await db.query('SELECT 1 FROM subscriber_schema_migrations WHERE name=$1',[name])).rowCount) continue;
   if(name==='001_subscribers.sql') {
    const schema=(await db.query('SELECT current_schema() AS name')).rows[0].name;

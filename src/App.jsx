@@ -272,7 +272,9 @@ function App() {
   <Route path="contribution" element={<Contribution />} />
   <Route path="activities" element={<LearnEventsCMS />} />
   <Route path="conducted" element={<Conducted admin />} />
-  <Route path="records" element={<Records />} />
+  <Route path="records" element={<Records key="website" />} />
+  <Route path="directory" element={<Records key="directory" module="directory" />} />
+  <Route path="enquiries-subscribers" element={<Records key="communications" module="communications" />} />
   <Route path="users" element={<Users />} />
 </Route>
 

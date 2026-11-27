@@ -31,7 +31,7 @@ npm run db:migrate
 npm run db:migrate:subscribers
 ```
 
-The first migration targets local website tables. The second targets subscriber storage and adds `reminder_deliveries`. It supports previous successful standalone migrations. Compatible existing subscriber tables are adopted. Recognised empty legacy tables using `full_name`, `city_state`, and `preferred_language` are preserved in an archive schema; populated legacy or unknown schemas stop migration without deleting data. Existing local subscribers are not copied automatically. Preserve consent timestamps, opt-outs, IDs and unsubscribe hashes when migrating real data.
+The first migration targets local website tables. The second targets subscriber storage and applies the country, resubscription and reminder migrations. It supports previous successful standalone migrations. Compatible existing subscriber tables are adopted. Recognised empty legacy tables using `full_name`, `city_state`, and `preferred_language` are preserved in an archive schema; populated legacy or unknown schemas stop migration without deleting data. Existing local subscribers are not copied automatically. Preserve consent timestamps, opt-outs, IDs and unsubscribe hashes when migrating real data.
 
 The standalone schema enables RLS and removes browser API grants. Use the migration owner initially; a restricted runtime role needs explicit table/sequence grants and suitable RLS policies. Subscriber audit actor UUIDs refer to authenticated admins from the local database without a cross-database foreign key.
 
@@ -40,7 +40,7 @@ The standalone schema enables RLS and removes browser API grants. Use the migrat
 1. Create/activate a Brevo account. Add and verify the approved RCBC sender, and authenticate its domain following the DNS records Brevo supplies. Use that exact sender email in `BREVO_SENDER_EMAIL`.
 2. Create a dedicated Get Updated contact list. Put its numeric list ID in `BREVO_LIST_ID`.
 3. Generate a normal API key under Settings > SMTP & API > API Keys & MCP. Do not use an SMTP password or convert it to an MCP key. Store it only on the backend.
-4. Create normal text attributes `NAME`, `CITY`, `STATE`, `LANGUAGE`. `EMAIL` already exists. Alternatively, `npm run brevo:setup` creates missing text attributes and verifies the sender/list. It preserves existing attributes and does not send email.
+4. Create normal text attributes `NAME`, `COUNTRY`, `CITY`, `STATE`. `EMAIL` already exists. Alternatively, `npm run brevo:setup` creates missing text attributes and verifies the sender/list. It preserves existing attributes and does not send email.
 5. Run `npm run brevo:check` to verify the configuration without changes. If Brevo blocks the server IP, review [Authorised IPs](https://app.brevo.com/security/authorised_ips), recognise the server IP, and authorise it. A dynamic IP may need authorising again.
 
 The setup/check scripts also validate `APP_BASE_URL`, sender settings and the unsubscribe secret. Generate the secret once in a private terminal:
@@ -55,7 +55,7 @@ References: [Brevo API keys](https://help.brevo.com/hc/en-us/articles/209467485-
 
 ## Signup, admin access and manual campaigns
 
-Start `npm run server` and, in another terminal, `npm run dev`. Visit `/get-updated`, submit your own email with name, city, state, preferred language and explicit consent, and save the website unsubscribe link returned on the first signup. Repeated signup preserves existing preferences, including opt-outs. There is no automatic welcome or double-opt-in message.
+Start `npm run server` and, in another terminal, `npm run dev`. Visit `/get-updated`, submit your own email with name, country, state or region, city or town and explicit consent, and save the website unsubscribe link returned on the first signup. First signup sends a Brevo confirmation with an unsubscribe link when email is configured. Duplicate signup preserves active records. Previously unsubscribed addresses get a one-time email link to confirm renewed consent.
 
 Verify both connections:
 
@@ -66,9 +66,9 @@ Invoke-RestMethod 'http://127.0.0.1:3001/api/health/subscribers'
 
 If needed, create a first administrator with `npm run admin:invite -- your-approved-admin@example.com`. Open the private printed invitation URL, register with the invited email and a password of at least 12 characters, then sign in at `/admin`.
 
-Content and records retains the merged database editor. Its Get Updated panel adds manual audience sync, CSV export, and reminder status. Subscriber editor operations use Supabase; other record types stay local. Login/refresh state retains empty arrays for fields omitted by the API.
+Enquiries & Subscribers includes the subscriber record filters, CSV export, manual audience sync, and reminder status. Subscriber editor operations use Supabase; other record types stay local. Login/refresh state retains empty arrays for fields omitted by the API.
 
-For manual campaigns, sync before every send. Local website opt-outs are blocked in Brevo before contacts are added. Existing provider blocks are never cleared. Sync filters match locality exactly ignoring case; they add contacts to the list rather than removing earlier contacts. Choose the corresponding Brevo recipient segment before sending a manual campaign. Sync itself does not send email. Active-only CSV export is an alternative, but imports alone do not revoke contacts previously imported: reconcile all website opt-outs manually if not using API sync.
+For manual campaigns, sync before every send. Website opt-outs are removed from the dedicated Get Updated list before active contacts are added. Existing provider blocks are never cleared. Sync filters match locality exactly ignoring case; they add contacts to the list rather than removing earlier contacts. Choose the corresponding Brevo recipient segment before sending a manual campaign. Sync itself does not send email. Active-only CSV export is an alternative, but imports alone do not revoke contacts previously imported: reconcile all website opt-outs manually if not using API sync.
 
 ## Automatic reminder rules
 
@@ -82,7 +82,7 @@ With `REMINDERS_ENABLED=true`, the running API scans immediately after startup a
 
 Only published, uncancelled events qualify. Invitations and last calls require open registration and skip events whose recorded confirmed registrations have reached capacity. Events can use website registration or a valid external form. A late publication or a late confirmation can qualify for its email on the next scan while the relevant window remains open.
 
-Subscriber invitations and last calls require consent, matching language, and matching city for in-person events that have a city. They use Brevo’s contact blocklist and include a site unsubscribe link. Final reminders use the participant list and do not require a Get Updated subscription. For Google Forms events, import registrations and confirm participants in the portal so the system can identify them for the final reminder and skip them when sending registration emails. Brevo’s transactional suppression still applies.
+Subscriber invitations and last calls require consent and matching city for in-person events that have a city. They use Brevo’s contact blocklist and include a site unsubscribe link. Final reminders use the participant list and do not require a Get Updated subscription. For Google Forms events, import registrations and confirm participants in the portal so the system can identify them for the final reminder and skip them when sending registration emails. Brevo’s transactional suppression still applies.
 
 In the event editor, use **Venue** for the exact address and **Registration instructions** for parking, drop-off, caregiver stay requirements, and any respite arrangements. The emails include the available information, start and end times in Malaysia time, and calendar links. Subscriber emails also put the registration deadline near the top when it is set. Recipients can open Google Calendar directly or download a calendar file for Apple Calendar or Outlook.
 
@@ -111,11 +111,11 @@ Database integration tests use `TEST_DATABASE_URL` to create and remove isolated
 ## Test one real reminder
 
 1. Keep `REMINDERS_ENABLED=false` while preparing the test. Restart the API if changing `.env`.
-2. Use only subscribers you intend to contact. In the admin subscriber editor, verify your own consented test email and language/locality. The reminder worker reads Supabase subscribers directly, not just the configured Brevo list.
-3. Create a workshop or seminar for about 24 days from now with open registration and a deadline 17 days from now. Choose a matching language and city, then approve and publish it. The event should be outside the invite window.
+2. Use only subscribers you intend to contact. In the admin subscriber editor, verify your own consented test email and locality. The reminder worker reads Supabase subscribers directly, not just the configured Brevo list.
+3. Create a workshop or seminar for about 24 days from now with open registration and a deadline 17 days from now. Choose a matching city, then approve and publish it. The event should be outside the invite window.
 4. Move the event inside 21 days of its start or move its registration deadline within 14 days. The preview should count the invitation. To test a final reminder, create a separate event that starts within 72 hours and confirm only your own test registration.
 5. Set `REMINDERS_ENABLED=true`, then restart the API. Startup scans immediately; subsequent scans run every minute. You can also run `npm run reminders:run` for a one-time live scan. Both paths use the same lock/ledger.
-6. Open Content and records > Check automatic reminders. Confirm a `sent` entry, then check Brevo's transactional logs and your inbox/spam folder. If tracking remains `retry`/`failed`, inspect sender approval, key/IP restrictions, available quota and provider logs.
+6. Open Enquiries & Subscribers > Subscribers > Check event reminder emails. Confirm a `sent` entry, then check Brevo's transactional logs and your inbox/spam folder. If tracking remains `retry`/`failed`, inspect sender approval, key/IP restrictions, available quota and provider logs.
 7. Run a second scan and confirm each stage sends only once for the same occurrence. In the email, open the event link and test the calendar links.
 8. Using a second intended test event, verify draft/approved-only/cancelled events are excluded. Use your received unsubscribe link, confirm the action on the website, and verify no reminder is sent for another occurrence.
 
