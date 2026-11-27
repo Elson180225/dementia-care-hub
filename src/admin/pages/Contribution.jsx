@@ -1,4 +1,7 @@
+import { useState } from "react";
 import { useTrainer } from "../../trainer-portal/TrainerContext";
+import { buildAnnualReport, reportYears } from "../annualReport";
+import { buildXlsx } from "../xlsx";
 
 // Stops spreadsheet programs from running text that starts with = + - @ as a formula.
 const safe = (v) => {
@@ -22,6 +25,9 @@ function download(filename, text) {
 
 export default function Contribution() {
   const { state } = useTrainer();
+  const years = reportYears(state.activities);
+  const [reportYear, setReportYear] = useState(years[0]);
+  const report = buildAnnualReport(state, reportYear);
   const rows = state.activities
     .filter((a) => a.completion.status === "verified")
     .sort((a, b) => b.date.localeCompare(a.date));
@@ -36,6 +42,16 @@ export default function Contribution() {
   }, {});
 
   const trainerRows=rows.flatMap(a=>(a.trainers || []).map(t=>({...a,trainerId:t.trainerId,trainerName:state.profiles.find(p=>p.id===t.trainerId)?.name || t.trainerId,role:t.role,individualHours:Number(t.hours||0)})));
+  function exportAnnualReport() {
+    const bytes = buildXlsx(report.sheets);
+    const url = URL.createObjectURL(new Blob([bytes], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" }));
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = report.filename;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
   function exportCsv() {
     const head = ["Year", "Trainer", "Activity", "Role", "Hours", "Participants"];
     const body = trainerRows.map((a) => [
@@ -47,9 +63,30 @@ export default function Contribution() {
 
   return (
     <>
-      <h1>Trainer hours</h1>
+      <h1>Trainer Hours &amp; Reports</h1>
       <p>Hours are added up automatically from completed activities you have checked. Nobody needs to enter them twice.</p>
-      <button className="tp-btn" onClick={exportCsv} disabled={rows.length === 0}>Download as spreadsheet (CSV)</button>
+
+      <section className="tp-card">
+        <h2>Annual training report</h2>
+        <p>One Excel workbook with five sheets: Annual Summary, Activity Master, Trainer Contribution, Trainer Annual Summary, and Geographical &amp; Activity Analysis. Only verified activities count.</p>
+        <label className="tp-field">Reporting year
+          <select value={reportYear} onChange={(e) => setReportYear(Number(e.target.value))}>
+            {years.map((y) => <option key={y} value={y}>{y}</option>)}
+          </select>
+        </label>
+        <div className="tp-stats">
+          <div className="tp-stat"><span>Verified activities</span><strong>{report.totals.activities}</strong></div>
+          <div className="tp-stat"><span>Active trainers</span><strong>{report.totals.activeTrainers}</strong></div>
+          <div className="tp-stat"><span>Participant attendances</span><strong>{report.totals.attendance}</strong></div>
+          <div className="tp-stat"><span>Trainer contribution hours</span><strong>{report.totals.trainerHours}</strong></div>
+          <div className="tp-stat"><span>Net activity hours</span><strong>{report.totals.activityHours}</strong></div>
+          <div className="tp-stat"><span>Locations reached</span><strong>{report.totals.places}</strong></div>
+        </div>
+        <div className="tp-actions">
+          <button className="tp-btn" onClick={exportAnnualReport}>Download {reportYear} annual report (Excel)</button>
+          <button className="tp-btn tp-btn-ghost" onClick={exportCsv} disabled={rows.length === 0}>Download trainer hours (CSV)</button>
+        </div>
+      </section>
 
       <h2>Totals by year</h2>
       <div className="tp-table-wrap">
