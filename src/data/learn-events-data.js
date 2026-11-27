@@ -157,7 +157,7 @@ export const activities = [
     location: "Bintulu Civic Centre — Conference Hall",
     city: "Bintulu",
     language: "Bahasa Malaysia / English",
-    speaker: "Rotary HopeCare Facilitators & Clinical Team",
+    speaker: "RCBC Hope Care Facilitators & Clinical Team",
     trainerId: 2,
     description:
       "In-person community dialogue bringing family caregivers, community elders, and health volunteers together to share caregiving challenges and discuss local clinic resources in Bintulu.",

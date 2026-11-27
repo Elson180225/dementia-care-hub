@@ -13,7 +13,7 @@ import "./HeroSlideshow.css";
 const slides = [
   {
     src: alzheimersHero,
-    alt: "Rotary Hope Care Alzheimer's Care artwork",
+    alt: "RCBC Hope Care Alzheimer's Care artwork",
     label: "Hope Care",
   },
   {

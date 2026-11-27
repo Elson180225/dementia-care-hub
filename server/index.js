@@ -69,14 +69,14 @@ const server = createServer(async (req, res) => {
   if (url.pathname === '/api/health' && req.method === 'GET') {
     return sendJson(res, 200, {
       status: 'OK',
-      service: 'Dementia Care Hub API',
+      service: 'Dementia Care Connect API',
     });
   }
 
   // Describe the initial API structure
   if (url.pathname === '/api' && req.method === 'GET') {
     return sendJson(res, 200, {
-      name: 'Dementia Care Hub API',
+      name: 'Dementia Care Connect API',
       version: '1.0.0',
       modules: [
         'authentication',
@@ -111,7 +111,7 @@ server.on('error',error=>{
  process.exitCode=1;
 });
 server.listen(port, host, () => {
-  console.log(`Dementia Care Hub API listening on http://${host}:${port}`);
+  console.log(`Dementia Care Connect API listening on http://${host}:${port}`);
   startEnquiryNotificationWorker();
   try {startReminderWorker();} catch(error) {console.error('Reminder worker disabled:',error.message);}
 });

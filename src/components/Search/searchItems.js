@@ -126,7 +126,7 @@ export const searchItems = [
   {
     title: "About the Project",
     description:
-      "Learn more about Rotary Hope Care and the Alzheimer's Care project.",
+      "Learn more about RCBC Hope Care and the Alzheimer's Care project.",
     path: "/about",
     category: "About the Project",
     keywords: "about rotary hope care project",
