@@ -12,6 +12,8 @@ import {
   acknowledgements,
 } from "../data/about";
 import "./AboutProject.css";
+import HeroPhoto, { HeroWithPhoto } from "../components/HeroPhoto/HeroPhoto";
+import heroPhoto from "../assets/Group_Photo.png";
 
 function Section({ id, title, children, records = [] }) {
   return (
@@ -55,11 +57,11 @@ export default function AboutProject() {
   return (
     <main className="about-page">
       <header className="about-hero">
-        <div className="about-container">
+        <div className="about-container"><HeroWithPhoto photo={<HeroPhoto src={heroPhoto} alt="The RCBC Alzheimer’s Care Project team at a training event" />}>
           <p className="about-kicker">{ap.kicker}</p>
           <h1>{ap.project || overview.project}</h1>
           <p className="about-theme">“{ap.theme || overview.theme}”</p>
-        </div>
+        </HeroWithPhoto></div>
       </header>
 
       <div className="about-container about-layout">
