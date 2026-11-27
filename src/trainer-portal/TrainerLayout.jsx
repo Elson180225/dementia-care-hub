@@ -9,8 +9,8 @@ import "./TrainerPortal.css";
 const groups = [
   { links: [
     { to: "/trainer-portal", label: "Dashboard", end: true, icon: "overview" },
-    { to: "/trainer-portal/activities", label: "My workshops", icon: "workshops" },
-    { to: "/trainer-portal/conducted", label: "Completed workshops", icon: "completed" },
+    { to: "/trainer-portal/activities", label: "My Training Activities", icon: "workshops" },
+    { to: "/trainer-portal/conducted", label: "Completed Activities", icon: "completed" },
     { to: "/trainer-portal/training-records", label: "My Training Records", icon: "hours" },
     { to: "/trainer-portal/profile", label: "My profile", icon: "profile" },
   ] },

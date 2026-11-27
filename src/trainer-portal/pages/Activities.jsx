@@ -109,7 +109,7 @@ export default function Activities({
   newButtonLabel,
 }) {
   const { state, dispatch } = useTrainer();
-  const addLabel = newButtonLabel || (admin ? "+ New event / workshop" : "+ New workshop / seminar");
+  const addLabel = newButtonLabel || (admin ? "+ New event / workshop" : "+ New training activity");
   const [uploading, setUploading] = useState(0);
   const [view, setView] = useState("cards");
   const uploadBusy = (busy) => setUploading((n) => n + (busy ? 1 : -1));
@@ -319,7 +319,7 @@ export default function Activities({
       <>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem", flexWrap: "wrap", gap: "0.5rem" }}>
           <h1 style={{ margin: 0 }}>
-            {editing.id ? (admin ? "Edit Event / Workshop" : "Edit workshop / seminar") : (admin ? "New Event / Workshop" : "New workshop / seminar")}
+            {editing.id ? (admin ? "Edit Event / Workshop" : "Edit training activity") : (admin ? "New Event / Workshop" : "New training activity")}
           </h1>
           <button type="button" className="tp-btn tp-btn-ghost" onClick={() => setEditing(null)}>
             ← Back to Listing
@@ -682,7 +682,7 @@ export default function Activities({
     <>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem", flexWrap: "wrap", gap: "1rem" }}>
         <div>
-          <h1 style={{ margin: 0 }}>{pageTitle || (admin ? "Events & workshops" : "My workshops")}</h1>
+          <h1 style={{ margin: 0 }}>{pageTitle || (admin ? "Events & workshops" : "My Training Activities")}</h1>
           {(admin || pageSubtitle) && (
             <p style={{ margin: "0.25rem 0 0", color: "var(--color-neutral-600)", fontSize: "0.95rem" }}>
               {pageSubtitle || "Add and manage community events, workshops, dialogues and online sessions."}

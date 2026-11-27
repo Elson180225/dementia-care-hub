@@ -25,7 +25,7 @@ export default function AdminLayout() {
     { label: "Events", links: [
       { to: "/admin/learn-events", label: "Events & learning", icon: "events" },
       { to: "/admin/participants", label: "Event registrations & participants", icon: "participants" },
-      { to: "/admin/conducted", label: "Completed workshops", icon: "completed" },
+      { to: "/admin/conducted", label: "Completed activities", icon: "completed" },
     ] },
     { label: "Trainers & access", links: [
       { to: "/admin/contribution", label: "Trainer hours", icon: "hours" },
