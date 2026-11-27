@@ -46,21 +46,80 @@ export const translations = {
       "hubSubtitle": "Support • Learn • Connect"
     },
     "footer": {
-      "eyebrow": "Rotary Hope Care",
+      "eyebrow": "RCBC HOPE CARE",
       "title": "Alzheimer's Care",
-      "desc": "Clear information, practical resources and community support for people living with dementia, caregivers and families.",
+      "desc": "Dementia information, practical resources and guidance for people living with dementia, caregivers and families.",
+      "initiative": "An initiative of Rotary Club of Bintulu Central (RCBC).",
       "explore": "Explore",
-      "getUpdated": "Get Updated",
-      "verifyCert": "Verify DCS certificate",
       "about": "About",
-      "guidanceTitle": "Need guidance?",
-      "guidanceDesc": "If you're not sure where to start, contact the project team and we'll help direct you to the appropriate information.",
-      "contactBtn": "Contact Us",
-      "organisation": "Rotary Club of Bintulu Central",
-      "tagline": "Hope Care • Alzheimer's Care",
-      "rights": "Rotary Hope Care. All rights reserved.",
-      "trainerPortal": "Trainer Portal",
+      "stayUpdated": "Stay Updated",
+      "getUpdated": "Get Updated",
+      "stayUpdatedDesc": "Receive updates on webinars, education, training and project activities by email.",
+      "rights": "Rotary Club of Bintulu Central (RCBC). All rights reserved.",
+      "privacy": "Privacy Policy",
+      "terms": "Terms of Use",
       "adminAccess": "Admin access"
+    },
+    "policies": {
+      "eyebrow": "RCBC HOPE CARE · Alzheimer's Care Project",
+      "contactLead": "Questions about these policies?",
+      "privacy": {
+        "title": "Privacy Policy",
+        "status": "This Privacy Policy is being prepared with RCBC. It will be completed, approved and published before the website begins collecting personal data from the public.",
+        "sections": [
+          {
+            "heading": "Who is responsible",
+            "paragraphs": [
+              "Dementia Care Connect is developed under the Alzheimer's Care Project, an initiative of Rotary Club of Bintulu Central (RCBC)."
+            ]
+          },
+          {
+            "heading": "What the final policy will cover",
+            "paragraphs": [
+              "The information collected through website forms and controlled accounts, why it is collected and how it is used.",
+              "Who can access the information, which third-party services are involved, and how information is stored, protected, kept and removed.",
+              "How to ask for access, correction or withdrawal, and how to unsubscribe from updates."
+            ]
+          },
+          {
+            "heading": "Until the policy is published",
+            "paragraphs": [
+              "Please do not include sensitive personal or medical information in any form on this website."
+            ]
+          }
+        ]
+      },
+      "terms": {
+        "title": "Terms of Use",
+        "status": "This is the platform scope and responsibilities statement agreed with RCBC. The complete Terms of Use will be published after legal review.",
+        "sections": [
+          {
+            "heading": "About this platform",
+            "paragraphs": [
+              "Dementia Care Connect is an information, education and support access platform developed under the RCBC Alzheimer's Care Project. The platform provides access to information, educational resources, training records and relevant community and service directories."
+            ]
+          },
+          {
+            "heading": "No endorsement or guarantee",
+            "paragraphs": [
+              "Inclusion of an individual, organisation, product or service within the platform does not constitute endorsement, recommendation or a guarantee of suitability, quality or performance by RCBC.",
+              "Users are encouraged to make informed decisions, conduct appropriate enquiries and independently assess the suitability of any individual, organisation, product or service before entering into any arrangement."
+            ]
+          },
+          {
+            "heading": "Independent arrangements",
+            "paragraphs": [
+              "Any independent commercial transactions, employment arrangements, service agreements or personal relationships established between users and third parties are matters between the respective parties. RCBC does not act as an intermediary, employer, commercial agent or guarantor in such independent arrangements."
+            ]
+          },
+          {
+            "heading": "Not an emergency or medical service",
+            "paragraphs": [
+              "Dementia Care Connect does not provide medical diagnosis, clinical consultation, emergency or crisis support. For a medical emergency in Malaysia, call 999."
+            ]
+          }
+        ]
+      }
     },
     "search": {
       "label": "Search",
@@ -1745,20 +1804,18 @@ export const translations = {
       "hubSubtitle": "Sokongan • Pembelajaran • Perhubungan"
     },
     "footer": {
-      "eyebrow": "Rotary Hope Care",
+      "eyebrow": "RCBC HOPE CARE",
       "title": "Penjagaan Alzheimer",
-      "desc": "Maklumat jelas, sumber praktikal dan sokongan komuniti untuk individu dengan demensia, penjaga serta keluarga.",
-      "explore": "Terokai",
-      "getUpdated": "Dapatkan Perkembangan",
-      "verifyCert": "Sahkan Sijil DCS",
-      "about": "Perihal",
-      "guidanceTitle": "Perlukan Panduan?",
-      "guidanceDesc": "Jika anda tidak pasti di mana hendak bermula, hubungi pasukan projek kami dan kami akan membantu mengarahkan anda kepada maklumat yang bersesuaian.",
-      "contactBtn": "Hubungi Kami",
-      "organisation": "Kelab Rotary Bintulu Central",
-      "tagline": "Hope Care • Penjagaan Alzheimer",
-      "rights": "Rotary Hope Care. Hak cipta terpelihara.",
-      "trainerPortal": "Portal Jurulatih",
+      "desc": "Maklumat demensia, sumber praktikal dan panduan untuk penghidap demensia, penjaga dan keluarga.",
+      "initiative": "Satu inisiatif Kelab Rotary Bintulu Central (RCBC).",
+      "explore": "Teroka",
+      "about": "Tentang",
+      "stayUpdated": "Kekal Dimaklumkan",
+      "getUpdated": "Dapatkan Maklumat Terkini",
+      "stayUpdatedDesc": "Terima maklumat terkini tentang webinar, pendidikan, latihan dan aktiviti projek melalui e-mel.",
+      "rights": "Kelab Rotary Bintulu Central (RCBC). Hak cipta terpelihara.",
+      "privacy": "Dasar Privasi",
+      "terms": "Terma Penggunaan",
       "adminAccess": "Akses pentadbir"
     },
     "search": {
@@ -3360,20 +3417,18 @@ export const translations = {
       "hubSubtitle": "支持 • 学习 • 联结"
     },
     "footer": {
-      "eyebrow": "扶轮希望关怀",
-      "title": "阿尔茨海默病关爱计划",
-      "desc": "为失智症患者、照护者与家庭提供清晰明确的资讯、实用资源与社区支持。",
-      "explore": "探索",
-      "getUpdated": "最新动态",
-      "verifyCert": "核验 DCS 证书",
+      "eyebrow": "RCBC HOPE CARE",
+      "title": "阿尔茨海默病照护",
+      "desc": "为失智症患者、照护者及家庭提供失智症资讯、实用资源与指引。",
+      "initiative": "民都鲁中区扶轮社（RCBC）发起的项目。",
+      "explore": "浏览",
       "about": "关于",
-      "guidanceTitle": "需要指引？",
-      "guidanceDesc": "如果您不确定从何开始，请联系项目团队，我们将竭诚为您指引最适宜的资讯与帮助。",
-      "contactBtn": "联系我们",
-      "organisation": "民都鲁中央扶轮社 (RCBC)",
-      "tagline": "希望关怀 • 阿尔茨海默病照护",
-      "rights": "扶轮希望关怀。保留所有权利。",
-      "trainerPortal": "培训师门户",
+      "stayUpdated": "保持关注",
+      "getUpdated": "获取最新消息",
+      "stayUpdatedDesc": "通过电子邮件接收网络研讨会、教育、培训及项目活动的最新消息。",
+      "rights": "民都鲁中区扶轮社（RCBC）。版权所有。",
+      "privacy": "隐私政策",
+      "terms": "使用条款",
       "adminAccess": "管理员登录"
     },
     "search": {
