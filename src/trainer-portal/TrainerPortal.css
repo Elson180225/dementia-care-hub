@@ -119,3 +119,29 @@ fieldset.tp-field legend { font-weight: 700; padding: 0 6px; }
   .tp-sidebar-signout { margin-top: 0; }
   .tp-main { padding: 24px 16px 56px; }
 }
+.tp-section-nav button {
+  min-height: 44px;
+  padding: 8px 14px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--color-purple-700);
+  font: inherit;
+  cursor: pointer;
+}
+.tp-section-nav button:hover { background: var(--color-purple-100); }
+.tp-section-nav button[aria-pressed="true"] {
+  background: var(--color-purple-700);
+  color: white;
+  font-weight: 700;
+}
+.tp-section-nav button:focus-visible { outline: 3px solid #a66b00; outline-offset: 2px; }
+.tp-admin-history { min-width: 700px; }
+.tp-admin-history :is(th, td):nth-child(-n+4) { min-width: 8rem; }
+.tp-admin-history td { vertical-align: top; }
+
+.tp-stat dd { margin: 4px 0 0; font-size: 1.45rem; font-weight: 700; }
+.tp-contribution-table { min-width: 650px; }
+.tp-contribution-table td { vertical-align: top; }
+.tp-contribution-table td:last-child { width: 42%; }
+.tp-contribution-table .tp-actions { margin-top: 8px; }

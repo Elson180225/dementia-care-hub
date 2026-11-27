@@ -3,7 +3,7 @@ import Activities from "../../../trainer-portal/pages/Activities";
 import TrackEditor from './TrackEditor';
 import TrackApplications from './TrackApplications';
 import './PhysicalEducationAdmin.css';
-import {isPlannedProgramme} from '../../../../shared/programme-intakes';
+import {isPlannedProgramme,canActivateProgramme,programmeLink} from '../../../../shared/programme-intakes';
 
 const BLANK_PROGRAMME = {
   id: "",
@@ -43,7 +43,7 @@ export default function PhysicalEducationAdmin({ content, onSave }) {
     const hl = Array.isArray(prog.highlights) ? prog.highlights.join("\n") : prog.highlights || "";
     setEditingProg({
       isNew: false,
-      values: {...JSON.parse(JSON.stringify(prog)),availability:isPlannedProgramme(prog)?'planned':'available'},
+      values: {...JSON.parse(JSON.stringify(prog)),availability:prog.availability||(isPlannedProgramme(prog)?'planned':'available')},
       rawHighlights: hl,
     });
   };
@@ -68,6 +68,20 @@ export default function PhysicalEducationAdmin({ content, onSave }) {
   const handleSaveModal = async () => {
     const v = editingProg.values;
     const errs = {};
+    const previous=programmes.find(p=>p.id===v.id);
+    if(previous&&isPlannedProgramme(previous)&&!isPlannedProgramme(v)) {
+      try {
+        const response=await fetch('/api/activities',{cache:'no-store'});
+        if(!response.ok)throw Error();
+        const rows=await response.json();
+        // The public endpoint only returns published, content-approved records.
+        const events=Array.isArray(rows)?rows.map(e=>({content_approval_status:'approved',...e})):rows;
+        if(!Array.isArray(events)||!canActivateProgramme(previous,v,events))
+          errs.availability='Activation requires a future published intake with explicit RCBC approval.';
+      } catch {
+        errs.availability='Unable to verify intake approval. Programme activation has been blocked.';
+      }
+    }
     if (!v.code?.trim()) errs.code = "Please enter a track code (e.g. DCS-Family).";
     if (!v.title?.trim()) errs.title = "Please enter the programme title.";
     if (!v.roleCategory?.trim()) errs.roleCategory = "Please specify who this track is designed for.";
@@ -111,10 +125,10 @@ export default function PhysicalEducationAdmin({ content, onSave }) {
   if(editingProg)return <TrackEditor editing={editingProg} onChange={setEditingProg} onSave={handleSaveModal} onClose={()=>setEditingProg(null)} errors={errors}/>;
   return <div className="physical-education-admin">
     <header className="tp-card"><h2>Physical Education programmes</h2><p>Edit what people learn, then schedule intakes. Trainer Portal access is managed separately.</p><button className="tp-btn" onClick={openCreate}>Add programme</button></header>
-    {selected?<section><button className="tp-btn tp-btn-ghost" onClick={()=>setSelectedId('')}>← All programmes</button><h2>{selected.code} — Intakes &amp; registration</h2>{isPlannedProgramme(selected)&&<p className="tp-note">Planned programme: you can prepare intake drafts, but registration stays closed until RCBC changes programme availability.</p>}<p>Each intake has its own date, venue, fee and participants. Published intakes also appear in the shared calendar.</p>
-      <Activities key={selected.id} admin programmeId={selected.id} initialFilterMode="Physical" pageTitle={selected.code+' intakes'} newButtonLabel="+ Add intake" defaultValues={{mode:'Physical',type:'Workshop',programmeId:selected.id,title:selected.code+' — ',registrationType:'paid',registrationMethod:'closed',language:selected.language||'',audience:selected.suitableFor||selected.roleCategory||''}}/>
+    {selected?<section><button className="tp-btn tp-btn-ghost" onClick={()=>setSelectedId('')}>← All programmes</button><h2>{selected.code} — Intakes &amp; registration</h2>{isPlannedProgramme(selected)&&<p className="tp-note">Planned programme: prepare an intake with registration closed, approve it in Publication & webinar library, then activate this programme. Registration remains inactive until activation.</p>}<p>Each intake has its own date, venue, fee and participants. Published intakes also appear in the shared calendar.</p>
+      {<Activities key={selected.id} admin programmeId={selected.id} initialFilterMode="Physical" pageTitle={selected.code+' intakes'} newButtonLabel={isPlannedProgramme(selected)?'+ Prepare future intake':'+ Add intake'} defaultValues={{mode:'Physical',type:'Workshop',programmeId:selected.id,title:selected.code+' — ',registrationType:'paid',registrationMethod:'closed',language:selected.language||'',audience:selected.suitableFor||selected.roleCategory||''}}/>}
     </section>:<section aria-label="Programmes"><label className="tp-field">Search programmes<input value={searchQuery} onChange={e=>setSearchQuery(e.target.value)} placeholder="Programme code or title"/></label>
-    <div className="programme-admin-grid">{programmes.filter(p=>(p.code+' '+p.title).toLowerCase().includes(searchQuery.toLowerCase())).map(p=><article className="tp-card" key={p.id}><span className="track-kicker">{p.trackNumber} · {isPlannedProgramme(p)?'Planned programme':'Education programme'}</span><h3>{p.code} — {p.title}</h3><p>{p.roleCategory}</p><p>{p.shortIntro}</p><p>{p.sessions} · {p.language}</p><div className="tp-actions"><button className="tp-btn tp-btn-ghost" onClick={()=>openEdit(p)}>Edit programme</button><button className="tp-btn" onClick={()=>setSelectedId(p.id)}>Manage intakes</button></div></article>)}</div></section>}
+    <div className="programme-admin-grid">{programmes.filter(p=>(p.code+' '+p.title).toLowerCase().includes(searchQuery.toLowerCase())).map(p=><article className="tp-card" key={p.id}><span className="track-kicker">{p.trackNumber} · {isPlannedProgramme(p)?'Planned programme':'Education programme'}</span><h3>{p.code} — {p.title}</h3><p>{p.roleCategory}</p><p>{p.shortIntro}</p><p>{p.sessions} · {p.language}</p><div className="tp-actions"><button className="tp-btn tp-btn-ghost" onClick={()=>openEdit(p)}>Edit programme</button><button className="tp-btn" disabled={isPlannedProgramme(p)} onClick={()=>setSelectedId(p.id)}>Manage intakes</button><a href={programmeLink(p)}>Permanent programme link</a></div></article>)}</div></section>}
     <details className="tp-note"><summary>Other physical events and existing unlinked intakes</summary><p>Edit an existing event to link it to its programme, rather than creating a duplicate.</p><Activities admin programmeId="" initialFilterMode="Physical" pageTitle="Other physical events" defaultValues={{mode:'Physical',type:'Workshop'}}/></details>
     <details className="tp-note"><summary>Legacy applications (read-only archive)</summary><TrackApplications/></details>
   </div>;

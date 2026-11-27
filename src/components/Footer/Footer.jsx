@@ -29,8 +29,8 @@ function Footer() {
           <div className="footer-links-group">
             <h3>{f.explore}</h3>
             <Link to="/get-updated">{f.getUpdated}</Link>
-            <Link to="/caregiver-support/verify-certificate">
-              {f.verifyCert}
+            <Link to="/learn-events/dcs-participants">
+              {t.header.menu.dcsParticipantSearch || 'Public DCS Participant Search'}
             </Link>
 
             <Link to="/understand-dementia">{m.understand}</Link>

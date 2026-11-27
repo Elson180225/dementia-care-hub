@@ -1,5 +1,5 @@
 import {trainerGovernanceAction,checkTeachingAssignments} from './trainer-governance.js';
-import {profileSnapshot,individualHours} from '../shared/trainer-governance.js';
+import {profileSnapshot,individualHours,activityTiming,organiserRecord} from '../shared/trainer-governance.js';
 import { pool, transaction } from './db.js';
 import { currentUser, body, fail } from './auth.js';
 import { isAllowedOrigin } from './origin.js';
@@ -10,6 +10,7 @@ import {validateEventPricing} from '../shared/event-registration.js';
 import {getLearnEventsData} from './learn-events-content.js';
 import {isPlannedProgramme} from '../shared/programme-intakes.js';
 import { maintenanceCounts } from './content-review.js';
+const localTime=value=>value?new Date(value).toLocaleString('sv-SE',{timeZone:'Asia/Kuala_Lumpur'}).replace(' ','T').slice(0,16):'';
 function validateLinks(single, list = []) {
  if(!Array.isArray(list) || list.some(x=>typeof x!=='string')) fail('Document and photo links must be a list of URLs');
  for(const url of [single,...list].filter(Boolean)) {
@@ -22,16 +23,16 @@ const profile = p => p && ({...p, shortProfile:p.short_profile, certifiedStatus:
 export async function snapshot(user) {
  const admin=user.role==='admin';
  const profiles=(await pool.query('SELECT p.*,u.name,u.email,u.enabled,EXISTS(SELECT 1 FROM approved_trainer_accounts a WHERE a.id=p.id) AS portal_access_active FROM trainer_profiles p JOIN users u ON u.id=p.id WHERE $1 OR p.id=$2',[admin,user.id])).rows;
- const activities=(await pool.query(`SELECT a.*,(SELECT jsonb_build_object('paid',s.paid,'enabled',s.enabled,'fee',s.fee,'instructions',s.instructions,'generalInstructions',s.general_instructions,'website',s.website_enabled,'googleUrl',s.google_url,'askPhone',s.ask_phone,'askNotes',s.ask_notes) FROM event_registration_settings s WHERE s.activity_id=a.id) AS registration_settings,coalesce(c.status,'none') AS completion_status,c.actual_venue,c.participants,c.actual_hours,c.admin_comment AS completion_comment,c.photos,
- coalesce((SELECT jsonb_agg(jsonb_build_object('trainerId',t.trainer_id,'role',t.role,'name',u.name,'hours',t.actual_hours)) FROM activity_trainers t LEFT JOIN users u ON u.id=t.trainer_id WHERE t.activity_id=a.id),'[]') AS trainers
+ const activities=(await pool.query(`SELECT a.*,(SELECT jsonb_build_object('paid',s.paid,'enabled',s.enabled,'fee',s.fee,'instructions',s.instructions,'generalInstructions',s.general_instructions,'website',s.website_enabled,'googleUrl',s.google_url,'askPhone',s.ask_phone,'askNotes',s.ask_notes) FROM event_registration_settings s WHERE s.activity_id=a.id) AS registration_settings,coalesce(c.status,'none') AS completion_status,c.actual_starts_at,c.actual_ends_at,c.actual_venue,c.participants,c.actual_hours,c.admin_comment AS completion_comment,c.photos,
+ coalesce((SELECT jsonb_agg(jsonb_build_object('trainerId',t.trainer_id,'role',t.role,'name',u.name,'hours',t.actual_hours,'topic',t.topic,'contributionStatus',t.contribution_status,'reviewComment',t.review_comment)) FROM activity_trainers t LEFT JOIN users u ON u.id=t.trainer_id WHERE t.activity_id=a.id),'[]') AS trainers
  FROM activities a LEFT JOIN completions c ON c.activity_id=a.id
  WHERE $1 OR a.created_by=$2 OR EXISTS(SELECT 1 FROM activity_trainers t WHERE t.activity_id=a.id AND t.trainer_id=$2) ORDER BY a.starts_at DESC`,[admin,user.id])).rows;
  return {session:admin?null:{id:user.id},adminSession:admin?user:null,
  profile:profile(profiles.find(p=>p.id===user.id) || profiles[0]) || {name:user.name}, profiles:profiles.map(profile),
  activities:activities.map(a=>({...a,date:new Date(a.starts_at).toLocaleString('sv-SE',{timeZone:'Asia/Kuala_Lumpur'}).replace(' ','T').slice(0,16),
- teachingModule:a.teaching_module||'',programmeId:a.programme_id||'',registrationType:a.registration_settings?(a.registration_settings.paid?'paid':'free'):'',registrationFee:a.registration_settings?.fee||'',paymentInstructions:a.registration_settings?.instructions||'',registrationInstructions:a.registration_settings?.generalInstructions||'',registrationMethod:a.registration_settings?.enabled?(a.registration_settings.website?'website':'google'):'closed',registrationGoogleUrl:a.registration_settings?.googleUrl||a.registration_link||'',registrationPhone:!!a.registration_settings?.askPhone,registrationNotes:!!a.registration_settings?.askNotes,audience:a.audience,registrationLink:a.registration_link || '',plannedHours:Number(a.planned_hours),adminComment:a.admin_comment,posterUrl:a.poster_url || '',cancelledAt:a.cancelled_at,
+ activityReference:a.activity_reference,contentApprovalStatus:a.content_approval_status,isPublic:Boolean(a.published_at && a.content_approval_status==="approved" && ["published","completed","verified","archived"].includes(a.status)),organiserKind:a.organiser_kind,organiserName:a.organiser_name,postponedAt:a.postponed_at,endDate:localTime(a.ends_at),teachingModule:a.teaching_module||'',programmeId:a.programme_id||'',registrationType:a.registration_settings?(a.registration_settings.paid?'paid':'free'):'',registrationFee:a.registration_settings?.fee||'',paymentInstructions:a.registration_settings?.instructions||'',registrationInstructions:a.registration_settings?.generalInstructions||'',registrationMethod:a.registration_settings?.enabled?(a.registration_settings.website?(a.registration_settings.googleUrl?'both':'website'):'google'):'closed',registrationGoogleUrl:a.registration_settings?.googleUrl||a.registration_link||'',registrationPhone:!!a.registration_settings?.askPhone,registrationNotes:!!a.registration_settings?.askNotes,audience:a.audience,registrationLink:a.registration_link || '',plannedHours:Number(a.planned_hours),adminComment:a.admin_comment,posterUrl:a.poster_url || '',cancelledAt:a.cancelled_at,
  registrationDeadline:a.registration_deadline?new Date(a.registration_deadline).toLocaleString('sv-SE',{timeZone:'Asia/Kuala_Lumpur'}).replace(' ','T').slice(0,16):'',capacity:a.capacity || '',
- role:a.trainers.find(t=>t.trainerId===user.id)?.role || 'Trainer',completion:{status:a.completion_status,venue:a.actual_venue,participants:a.participants,eventHours:Number(a.actual_hours),trainerHours:Object.fromEntries(a.trainers.map(t=>[t.trainerId,t.hours])),hours:Number(admin?a.actual_hours:(a.trainers.find(t=>t.trainerId===user.id)?.hours||0)),photos:a.photos || [],adminComment:a.completion_comment}})),
+ role:a.trainers.find(t=>t.trainerId===user.id)?.role || 'Trainer',completion:{actualStart:localTime(a.actual_starts_at),actualEnd:localTime(a.actual_ends_at),individualStatus:a.trainers.find(t=>t.trainerId===user.id)?.contributionStatus,status:a.completion_status,venue:a.actual_venue,participants:a.participants,eventHours:Number(a.actual_hours),trainerHours:Object.fromEntries(a.trainers.map(t=>[t.trainerId,t.hours])),hours:Number(admin?a.actual_hours:(a.trainers.find(t=>t.trainerId===user.id)?.hours||0)),photos:a.photos || [],adminComment:a.completion_comment}})),
  accessRequests:admin?(await pool.query('SELECT *,claimed_certificate_ref AS "certificateRef",submitted_at AS "requestedAt",admin_comment AS "adminComment" FROM trainer_access_requests ORDER BY submitted_at DESC')).rows:[],
  users:admin?(await pool.query('SELECT u.id,u.name,u.email,u.role,u.enabled,p.certified_status,p.certificate_ref,p.listing_status,p.listing_consent_at,p.assessment_result, p.assessment_status, p.healthcare_professional,p.independent_teaching_scope,p.certificate_file_id,p.teaching_allowed,p.teaching_permissions,p.portal_access_enabled,EXISTS(SELECT 1 FROM approved_trainer_accounts x WHERE x.id=u.id) AS portal_access_active FROM users u LEFT JOIN trainer_profiles p ON p.id=u.id ORDER BY u.created_at DESC')).rows:[],
  contributions:(await pool.query('SELECT * FROM annual_trainer_contributions WHERE $1 OR trainer_id=$2 ORDER BY year DESC',[admin,user.id])).rows,
@@ -46,7 +47,7 @@ export async function snapshot(user) {
 }
 export async function portalHandler(req,res,url,send) {
  if(req.method==='GET' && url.pathname==='/api/trainers') return send(res,200,(await pool.query('SELECT * FROM public_trainers')).rows);
- if(req.method==='GET' && url.pathname==='/api/activities') return send(res,200,(await pool.query("SELECT (SELECT jsonb_build_object('paid',s.paid,'enabled',s.enabled,'fee',s.fee) FROM event_registration_settings s WHERE s.activity_id=a.id) AS registration_settings,a.programme_id,a.id,a.title,a.starts_at,a.type,a.mode,a.venue,a.city,a.language,a.audience,a.description,a.poster_url,CASE WHEN a.cancelled_at IS NULL THEN a.registration_link ELSE NULL END AS registration_link,a.status,a.cancelled_at,a.cancellation_reason,a.registration_deadline,a.capacity,coalesce((SELECT jsonb_agg(jsonb_build_object('trainerId',t.trainer_id,'role',t.role,'name',u.name)) FROM activity_trainers t LEFT JOIN users u ON u.id=t.trainer_id WHERE t.activity_id=a.id),'[]') AS trainers FROM activities a WHERE a.status IN ('published','completed','verified','archived') AND a.published_at IS NOT NULL")).rows);
+ if(req.method==='GET' && url.pathname==='/api/activities') return send(res,200,(await pool.query("SELECT (SELECT jsonb_build_object('paid',s.paid,'enabled',s.enabled,'fee',s.fee) FROM event_registration_settings s WHERE s.activity_id=a.id) AS registration_settings,a.content_approval_status,a.activity_reference,a.organiser_kind,a.organiser_name,a.postponed_at,a.postponement_reason,a.ends_at,a.speaker_name AS speaker,a.speaker_intro,a.source_url,a.recording_url AS \"recordingLink\",a.qa_url,a.qa_text,a.programme_id,a.id,a.title,a.starts_at,a.type,a.mode,a.venue,a.city,a.language,a.audience,a.description,a.poster_url,CASE WHEN a.cancelled_at IS NULL THEN a.registration_link ELSE NULL END AS registration_link,a.status,a.cancelled_at,a.cancellation_reason,a.registration_deadline,a.capacity,coalesce((SELECT jsonb_agg(jsonb_build_object('trainerId',t.trainer_id,'role',t.role,'name',u.name)) FROM activity_trainers t LEFT JOIN users u ON u.id=t.trainer_id WHERE t.activity_id=a.id),'[]') AS trainers FROM activities a WHERE a.status IN ('published','completed','verified','archived') AND a.published_at IS NOT NULL AND a.content_approval_status='approved'")).rows);
  const user=await currentUser(req); if(!user) fail('Please sign in',401);
  if(req.method==='GET' && url.pathname==='/api/portal/trainers') return send(res,200,(await pool.query("SELECT u.id,u.name,p.city,p.language,p.teaching_allowed,p.teaching_permissions FROM users u JOIN trainer_profiles p ON p.id=u.id WHERE p.certified_status='certified' AND p.archived_at IS NULL ORDER BY u.name")).rows);
  if(req.method==='GET' && url.pathname==='/api/portal') return send(res,200,await snapshot(user));
@@ -137,7 +138,8 @@ export async function portalHandler(req,res,url,send) {
     const old=(await db.query('SELECT * FROM activities WHERE id=$1 FOR UPDATE',[id])).rows[0];
     if(!old || !transitions[decision].includes(old.status) || (decision==='published' && old.cancelled_at)) fail('Invalid activity transition',409);
     if(decision==='archived' && old.status!=='verified' && !old.cancelled_at) fail('Verify completion or cancel the activity before archiving',409);
-    if(decision==='completed' && new Date(old.starts_at)>new Date()) fail('Activity has not happened yet');
+    if(decision==='completed')fail('Submit actual completion details before marking the activity completed',409);
+    if(old.postponed_at&&decision==='published')fail('Reschedule this postponed activity before publishing',409);
     if(decision==='published')await checkTeachingAssignments(db,old,(await db.query('SELECT trainer_id FROM activity_trainers WHERE activity_id=$1',[id])).rows);
     const next=decision==='unpublished'?'approved':decision==='cancelled'?old.status:decision;
     await db.query("UPDATE activities SET status=$2,admin_comment=$3,updated_at=now(),published_at=CASE WHEN $4='published' THEN now() WHEN $4='unpublished' THEN NULL ELSE published_at END,cancelled_at=CASE WHEN $4='cancelled' THEN now() ELSE cancelled_at END,cancellation_reason=CASE WHEN $4='cancelled' THEN $3 ELSE cancellation_reason END WHERE id=$1",[id,next,comment,decision]);
@@ -151,12 +153,36 @@ export async function portalHandler(req,res,url,send) {
    await logDecision(db,user,'completions',id,status,comment,'submitted',status);return;
   }
   if(!admin && (!p || p.certified_status!=='certified')) fail('RCBC must verify your trainer access before you submit activities',403);
+  if(action.type==='CONTRIBUTION_CONFIRM'||action.type==='CONTRIBUTION_REVIEW') {
+   const activity=(await db.query('SELECT a.*,c.status AS completion_status,c.actual_hours FROM activities a JOIN completions c ON c.activity_id=a.id WHERE a.id=$1 FOR UPDATE OF a,c',[action.id])).rows[0];
+   if(!activity||activity.cancelled_at||activity.postponed_at)fail('Completed activity required',409);
+   const trainerId=action.type==='CONTRIBUTION_CONFIRM'&&!admin?user.id:action.trainerId;
+   const row=(await db.query('SELECT * FROM activity_trainers WHERE activity_id=$1 AND trainer_id=$2 FOR UPDATE',[action.id,trainerId])).rows[0];
+   if(!row||row.actual_hours===null||Number(row.actual_hours)>Number(activity.actual_hours))fail('Valid assigned contribution required',409);
+   if(action.type==='CONTRIBUTION_CONFIRM') {
+    if(admin&&!String(action.comment||'').trim())fail('Record how the trainer confirmed this contribution outside the portal.');
+    if(!['pending','returned'].includes(row.contribution_status))fail('Contribution is already confirmed',409);
+    if(action.hours!==undefined){
+     if(action.hours===''||!Number.isFinite(Number(action.hours))||Number(action.hours)<0||Number(action.hours)>Number(activity.actual_hours))fail('Individual hours cannot exceed net event duration');
+     await db.query('UPDATE activity_trainers SET actual_hours=$3 WHERE activity_id=$1 AND trainer_id=$2',[action.id,trainerId,Number(action.hours)]);
+    }
+    await db.query("UPDATE activity_trainers SET contribution_status='confirmed',confirmed_at=now(),reviewed_by=NULL,reviewed_at=NULL,review_comment='' WHERE activity_id=$1 AND trainer_id=$2",[action.id,trainerId]);
+   } else {
+    if(!admin)fail('Admin access required',403);
+    if(!['verified','returned'].includes(action.decision)||!(row.contribution_status==='confirmed'||row.contribution_status==='verified'&&action.decision==='returned'))fail('Contribution must be individually confirmed before review',409);
+    if(action.decision==='returned'&&!action.comment?.trim())fail('A comment is required');
+    await db.query('UPDATE activity_trainers SET contribution_status=$3,reviewed_by=$4,reviewed_at=now(),review_comment=$5 WHERE activity_id=$1 AND trainer_id=$2',[action.id,trainerId,action.decision,user.id,action.comment||'']);
+   }
+   if(admin)await logDecision(db,user,'activity_trainers',action.id,action.type==='CONTRIBUTION_CONFIRM'?'confirmed':action.decision,action.comment||'',row.contribution_status,action.decision||'confirmed');return;
+  }
   const id=action.id || action.activity?.id;
   const existing=(await db.query('SELECT * FROM activities WHERE id=$1 FOR UPDATE',[id])).rows[0];
   if(existing && !admin && existing.created_by!==user.id) fail('Only the activity owner can edit this record',403);
   if(action.type==='ACTIVITY_SAVE') {
    if(existing && !admin && (!['draft','returned'].includes(existing.status) || existing.cancelled_at)) fail('Activity cannot be edited in this state',409);
    const a=action.activity;
+   let timing,organiser;try{timing=activityTiming(a.date,a.endDate,a.plannedHours);organiser=organiserRecord(a.organiserKind||'rcbc',a.organiserName||'');}catch(e){fail(e.message);}
+   if(existing&&(await db.query('SELECT 1 FROM completions WHERE activity_id=$1',[id])).rowCount)fail('Completed activity details are locked; review its contribution records instead.',409);
    validateLinks(a.posterUrl);
    await validateFileLinks(db,user,[a.posterUrl]);
    if(!admin && !['Workshop','Seminar'].includes(a.type)) fail('Trainers may submit workshops and seminars only',403);
@@ -166,6 +192,8 @@ export async function portalHandler(req,res,url,send) {
     VALUES($1,$2,$3,$4::timestamp AT TIME ZONE 'Asia/Kuala_Lumpur',$5,$6,$7,$8,$9,$10,$11,$12,$13,$14)
     ON CONFLICT(id) DO UPDATE SET title=excluded.title,starts_at=excluded.starts_at,type=excluded.type,mode=excluded.mode,venue=excluded.venue,language=excluded.language,audience=excluded.audience,description=excluded.description,registration_link=excluded.registration_link,planned_hours=excluded.planned_hours,city=excluded.city,poster_url=excluded.poster_url
     WHERE activities.created_by=$2 OR $15::boolean RETURNING id`,[id,user.id,a.title,a.date,a.type,a.mode,a.venue,a.language,a.audience,a.description,a.registrationLink,a.plannedHours,a.city || '',a.posterUrl || null,admin]);
+   await db.query('UPDATE activities SET ends_at=$2,organiser_kind=$3,organiser_name=$4 WHERE id=$1',[id,timing.end,organiser.kind,organiser.name]);
+   if(existing)await db.query("UPDATE activities SET content_approval_status='pending',content_approved_by=NULL,content_approved_at=NULL WHERE id=$1",[id]);
    if(!saved.rowCount) fail('Only the activity owner can edit this record',403);
    if(admin){
     const programmeId=String(a.programmeId||'').trim();
@@ -177,22 +205,24 @@ export async function portalHandler(req,res,url,send) {
     }
     await db.query('UPDATE activities SET programme_id=$2 WHERE id=$1',[id,programmeId||null]);
     let paid;try{paid=validateEventPricing(a.registrationType,a.mode);}catch(e){fail(e.message);}
+    if(a.type==='RCBC Webinar'&&paid)fail('RCBC public education webinars must be free.');
     const oldSettings=(await db.query('SELECT paid FROM event_registration_settings WHERE activity_id=$1 FOR UPDATE',[id])).rows[0];
     if(oldSettings&&oldSettings.paid!==paid&&(await db.query('SELECT 1 FROM event_participants WHERE activity_id=$1 LIMIT 1',[id])).rowCount)fail('Cannot change free/paid classification after registrations exist.');
     if(String(a.registrationFee||'').length>100||String(a.paymentInstructions||'').length>4000)fail('Fee or payment instructions are too long');
     await db.query('INSERT INTO event_registration_settings(activity_id,paid,fee,instructions,updated_by) VALUES($1,$2,$3,$4,$5) ON CONFLICT(activity_id) DO UPDATE SET paid=$2,fee=$3,instructions=$4,updated_by=$5,updated_at=now()',[id,paid,a.registrationFee||'',a.paymentInstructions||'',user.id]);
-    if(!['website','google','closed'].includes(a.registrationMethod))fail('Choose a registration method.');
+    if(!['website','google','both','closed'].includes(a.registrationMethod))fail('Choose a registration method.');
     const google=String(a.registrationGoogleUrl??a.registrationLink??'').trim();
-    if(a.registrationMethod==='google'&&!/^https?:\/\//i.test(google))fail('Enter a valid Google Form link.');
+    if(['google','both'].includes(a.registrationMethod)&&!/^https?:\/\//i.test(google))fail('Enter a valid Google Form link.');
     if(google){try{const url=new URL(google);if(!['http:','https:'].includes(url.protocol))throw Error();}catch{fail('Enter a valid registration URL');}}
     if(String(a.registrationInstructions||'').length>4000)fail('Registration instructions are too long');
-    await db.query('UPDATE event_registration_settings SET enabled=$2,website_enabled=$3,google_url=$4,fee=$5,instructions=$6,general_instructions=$7,ask_phone=$8,ask_notes=$9 WHERE activity_id=$1',[id,a.registrationMethod!=='closed',a.registrationMethod==='website',a.registrationMethod==='google'?google:'',paid?(a.registrationFee||''):'',paid?(a.paymentInstructions||''):'',a.registrationInstructions||'',true,true]);
-    await db.query('UPDATE activities SET registration_link=$2 WHERE id=$1',[id,a.registrationMethod==='google'?google:null]);
+    await db.query('UPDATE event_registration_settings SET enabled=$2,website_enabled=$3,google_url=$4,fee=$5,instructions=$6,general_instructions=$7,ask_phone=$8,ask_notes=$9 WHERE activity_id=$1',[id,a.registrationMethod!=='closed',['website','both'].includes(a.registrationMethod),['google','both'].includes(a.registrationMethod)?google:'',paid?(a.registrationFee||''):'',paid?(a.paymentInstructions||''):'',a.registrationInstructions||'',true,true]);
+    await db.query('UPDATE activities SET registration_link=$2 WHERE id=$1',[id,['google','both'].includes(a.registrationMethod)?google:null]);
    }
    if(a.registrationDeadline && new Date(a.registrationDeadline)>new Date(a.date)) fail('Registration deadline must be before the activity');
    if(a.capacity && (!Number.isInteger(Number(a.capacity)) || Number(a.capacity)<=0)) fail('Capacity must be a positive integer');
    await db.query("UPDATE activities SET registration_deadline=$2::timestamp AT TIME ZONE 'Asia/Kuala_Lumpur',capacity=$3,updated_at=now() WHERE id=$1",[id,a.registrationDeadline || null,a.capacity || null]);
-   if(admin && a.status && ['draft','submitted','approved','published','completed','verified','archived'].includes(a.status)) {
+   if(admin && a.status && !['draft','submitted','approved','published'].includes(a.status))fail('Use the completion workflow to verify a finished activity');
+   if(admin && a.status && ['draft','submitted','approved','published'].includes(a.status)) {
     await db.query("UPDATE activities SET status=$2,published_at=CASE WHEN $2 IN ('published','completed','verified','archived') THEN COALESCE(published_at, now()) ELSE published_at END,updated_at=now() WHERE id=$1",[id,a.status]);
    } else if(existing && ['completed','verified','archived'].includes(existing.status)) {
     await db.query("UPDATE activities SET status=$2,published_at=COALESCE(published_at, now()),updated_at=now() WHERE id=$1",[id,existing.status]);
@@ -207,13 +237,30 @@ export async function portalHandler(req,res,url,send) {
     await db.query('DELETE FROM activity_trainers WHERE activity_id=$1 AND NOT (trainer_id=ANY($2::uuid[]))',[id,a.trainers.map(t=>t.trainerId)]);
    } else if(!admin) await db.query('INSERT INTO activity_trainers(activity_id,trainer_id,role) VALUES($1,$2,$3) ON CONFLICT DO NOTHING',[id,user.id,a.role || 'Trainer']);
    if(a.trainers) {
-    for(const t of a.trainers) await db.query('INSERT INTO activity_trainers(activity_id,trainer_id,role) VALUES($1,$2,$3) ON CONFLICT(activity_id,trainer_id) DO UPDATE SET role=excluded.role',[id,t.trainerId,t.role]);
+    for(const t of a.trainers){
+     if(!['Trainer','Co-Trainer','Speaker'].includes(t.role)||typeof (t.topic||'')!=='string'||String(t.topic||'').length>300)fail('Check trainer role and topic');
+     await db.query('INSERT INTO activity_trainers(activity_id,trainer_id,role,topic) VALUES($1,$2,$3,$4) ON CONFLICT(activity_id,trainer_id) DO UPDATE SET role=excluded.role,topic=excluded.topic',[id,t.trainerId,t.role,String(t.topic||'').trim()]);
+    }
    }
    await db.query('UPDATE activities SET teaching_module=$2 WHERE id=$1',[id,String(a.teachingModule||'').slice(0,300)]);
    if(!admin&&!a.trainers)await checkTeachingAssignments(db,{...a},[{trainerId:user.id}]);
    if(admin) await logDecision(db,user,'activities',id,existing && existing.starts_at.toISOString()!==new Date(a.date+'+08:00').toISOString()?'rescheduled':'corrected','',existing?.status || null,existing?.status || 'draft');return;
   }
   if(!existing) fail('Activity not found',404);
+  if(action.type==='ACTIVITY_POSTPONE'||action.type==='ACTIVITY_RESUME') {
+   if(!admin)fail('Admin access required',403);
+   if(!['approved','published'].includes(existing.status)||existing.cancelled_at)fail('Only upcoming approved or published activities can be postponed',409);
+   if((await db.query('SELECT 1 FROM completions WHERE activity_id=$1',[id])).rowCount)fail('Completed activities cannot be postponed',409);
+   if(action.type==='ACTIVITY_POSTPONE') {
+    if(!action.comment?.trim())fail('Give a postponement reason');
+    await db.query('UPDATE activities SET postponed_at=now(),postponement_reason=$2 WHERE id=$1',[id,action.comment.trim()]);
+   }else{
+    if(!existing.postponed_at)fail('Activity is not postponed',409);
+    let timing;try{timing=activityTiming(action.date,action.endDate,existing.planned_hours);}catch(e){fail(e.message);}
+    await db.query("UPDATE activities SET starts_at=$2,ends_at=$3,postponed_at=NULL,postponement_reason=$4,registration_deadline=NULL,content_approval_status='pending',content_approved_by=NULL,content_approved_at=NULL WHERE id=$1",[id,timing.start,timing.end,'']);
+   }
+   await logDecision(db,user,'activities',id,action.type==='ACTIVITY_POSTPONE'?'postponed':'rescheduled',action.comment||'',existing.status,existing.status);return;
+  }
   if(action.type==='ACTIVITY_DELETE') {
    if(!admin && (existing.created_by!==user.id || !['draft','returned'].includes(existing.status))) fail('Only draft activities can be deleted',403);
    await db.query('DELETE FROM completions WHERE activity_id=$1',[id]);
@@ -229,8 +276,16 @@ export async function portalHandler(req,res,url,send) {
    await checkTeachingAssignments(db,existing,(await db.query('SELECT trainer_id FROM activity_trainers WHERE activity_id=$1',[id])).rows);
    await db.query("UPDATE activities SET status='submitted',admin_comment='' WHERE id=$1",[id]); return;
   }
+  if(action.type==='COMPLETION_REOPEN'){
+   if(!admin||!String(action.comment||'').trim())fail('Admin access and a correction reason are required',403);
+   const old=(await db.query('SELECT * FROM completions WHERE activity_id=$1 FOR UPDATE',[id])).rows[0];
+   if(!old||old.status!=='verified')fail('Choose a verified completion record',409);
+   await db.query("UPDATE completions SET status='returned',verified_by=NULL,verified_at=NULL,admin_comment=$2 WHERE activity_id=$1",[id,action.comment]);
+   await db.query("UPDATE activities SET status='completed' WHERE id=$1",[id]);
+   await logDecision(db,user,'completions',id,'reopened-for-correction',action.comment,'verified','returned');return;
+  }
   if(action.type==='COMPLETION_SAVE' || action.type==='COMPLETION_SUBMIT') {
-   if(!['published','completed'].includes(existing.status) || existing.cancelled_at || new Date(existing.starts_at)>new Date()) fail('Completion requires a published activity that has happened',409);
+   if(!['published','completed'].includes(existing.status) || existing.cancelled_at || existing.postponed_at || new Date(existing.starts_at)>new Date()) fail('Completion requires a published activity that has happened',409);
    const old=(await db.query('SELECT * FROM completions WHERE activity_id=$1 FOR UPDATE',[id])).rows[0];
    if(old && ['submitted','verified'].includes(old.status)) fail('Completion is locked for review',409);
    const v=action.values;
@@ -238,10 +293,12 @@ export async function portalHandler(req,res,url,send) {
    validateLinks(null,v.photos || []);
    await validateFileLinks(db,user,v.photos || []);
    if(!v.venue?.trim() || !Number.isInteger(Number(v.participants)) || Number(v.participants)<0 || !Number.isFinite(Number(v.hours)) || Number(v.hours)<=0) fail('Valid venue, participants and hours are required');
+   let timing;try{timing=activityTiming(v.actualStart,v.actualEnd,v.hours);}catch(e){fail(e.message);}
+   if(timing.end>new Date())fail('Actual completion cannot be in the future');
    const assigned=(await db.query('SELECT trainer_id FROM activity_trainers WHERE activity_id=$1',[id])).rows;
-   let hours;try{hours=individualHours(assigned,v.trainerHours);}catch(e){fail(e.message);}
-   for(const h of hours)await db.query('UPDATE activity_trainers SET actual_hours=$3 WHERE activity_id=$1 AND trainer_id=$2',[id,h.id,h.hours]);
-   await db.query("INSERT INTO completions(activity_id,actual_venue,participants,actual_hours,photos,status) VALUES($1,$2,$3,$4,$5,'submitted') ON CONFLICT(activity_id) DO UPDATE SET actual_venue=excluded.actual_venue,participants=excluded.participants,actual_hours=excluded.actual_hours,photos=excluded.photos,status='submitted',admin_comment=''",[id,v.venue,v.participants,v.hours,JSON.stringify(v.photos || [])]);
+   let hours;try{hours=individualHours(assigned,v.trainerHours,timing.hours);}catch(e){fail(e.message);}
+   for(const h of hours)await db.query("UPDATE activity_trainers SET actual_hours=$3,contribution_status='pending',confirmed_at=NULL,reviewed_by=NULL,reviewed_at=NULL,review_comment='' WHERE activity_id=$1 AND trainer_id=$2",[id,h.id,h.hours]);
+   await db.query("INSERT INTO completions(activity_id,actual_venue,participants,actual_hours,photos,actual_starts_at,actual_ends_at,status) VALUES($1,$2,$3,$4,$5,$6,$7,'submitted') ON CONFLICT(activity_id) DO UPDATE SET actual_venue=excluded.actual_venue,participants=excluded.participants,actual_hours=excluded.actual_hours,photos=excluded.photos,actual_starts_at=excluded.actual_starts_at,actual_ends_at=excluded.actual_ends_at,status='submitted',admin_comment=''",[id,v.venue,v.participants,v.hours,JSON.stringify(v.photos || []),timing.start,timing.end]);
    await db.query("UPDATE activities SET status='completed' WHERE id=$1",[id]); return;
   }
   fail('Unsupported action');

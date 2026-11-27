@@ -11,7 +11,7 @@ import {randomUUID} from 'node:crypto';
 export async function translationSources(db=pool,content=null){
  const sources=sourceLeaves(translations.en);
  sourceLeaves(content || await getLearnEventsData(),'cms',sources);
- const activities=(await db.query("SELECT id,title,description,audience,venue,registration_link FROM activities WHERE published_at IS NOT NULL AND status IN ('published','completed','verified','archived')")).rows;
+ const activities=(await db.query("SELECT id,title,description,audience,venue,speaker_intro,speaker_name,qa_text,organiser_name FROM activities WHERE content_approval_status='approved' AND published_at IS NOT NULL AND status IN ('published','completed','verified','archived')")).rows;
  sourceLeaves(activities,'activities',sources);
  const settings=(await db.query("SELECT s.activity_id AS id,s.fee,s.instructions,s.general_instructions FROM event_registration_settings s JOIN activities a ON a.id=s.activity_id WHERE a.published_at IS NOT NULL AND a.status IN ('published','completed','verified','archived')")).rows;
  sourceLeaves(settings,'registration',sources);

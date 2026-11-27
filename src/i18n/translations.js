@@ -1,6 +1,8 @@
 import {publicCopy,addMissingCopy} from '../../shared/public-copy.js';
 import {inlineCopy} from './inlineCopy.js';
 import {addSupplementalCopy} from './supplementalCopy.js';
+import {educationCopy} from './educationCopy.js';
+import {dcsPublicCopy} from '../../shared/dcs-public-copy.js';
 export const translations = {
   "en": {
     "header": {
@@ -5004,3 +5006,5 @@ for (const [key, [en, ms, zh]] of Object.entries(inlineCopy)) {
   }
 }
 addSupplementalCopy(translations);
+Object.assign(translations.en.inlineCopy,educationCopy,dcsPublicCopy);
+translations.en.header.menu.dcsParticipantSearch=educationCopy.educationRegistryLink;

@@ -1,4 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
+import {useLocation} from 'react-router-dom';
+import {useTrainer} from '../../trainer-portal/TrainerContext';
 import { api } from "../../trainer-portal/TrainerContext";
 import { Field, describe } from "../../trainer-portal/ui";
 import { recordTypes } from "../../../shared/admin-records.js";
@@ -62,7 +64,9 @@ const reviewDue = (r) =>
   (r.review_status !== "archived" && r.next_review_at && new Date(r.next_review_at) <= new Date());
 
 export default function Records() {
-  const [kind, setKind] = useState(KINDS[0]);
+  const {state}=useTrainer();
+  const {search}=useLocation();
+  const [kind, setKind] = useState(()=>new URLSearchParams(search).get('kind')==='learning_resources'?'learning_resources':KINDS[0]);
   const config = recordTypes[kind];
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -156,6 +160,7 @@ export default function Records() {
               "aria-invalid": Boolean(errors[name]), "aria-describedby": describe(id, errors[name]),
             };
             const text = label + (mandatory ? "" : " (optional)");
+            if(kind==='learning_resources'&&name==='activity_id')return <Field key={name} id={id} label="Original activity" required={v.publication_status==='published'} error={errors[name]}><select {...common}><option value="">Choose the original activity</option>{state.activities.map(a=><option key={a.id} value={a.id}>{a.title} — {a.date.slice(0,10)} ({a.content_approval_status||'pending'} publication review)</option>)}</select></Field>;
             if (type === "checkbox")
               return (
                 <Field key={name} id={id} label={label} example={name === 'is_example' ? 'Keep this ticked for fictional demonstration records. These must not be presented as real services.' : 'Tick this option only when it applies to this record.'}>

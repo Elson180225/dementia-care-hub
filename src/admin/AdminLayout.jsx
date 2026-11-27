@@ -23,12 +23,13 @@ export default function AdminLayout() {
       { to: "/admin/review", label: "Approvals", icon: "approvals", count: waiting },
     ] },
     { label: "Events", links: [
-      { to: "/admin/learn-events", label: "Events & learning", icon: "events" },
+      { to: "/admin/learn-events", label: "Education & Events", icon: "events" },
+      { to: "/admin/dcs-registry", label: "DCS training registry", icon: "content" },
       { to: "/admin/participants", label: "Event registrations & participants", icon: "participants" },
-      { to: "/admin/conducted", label: "Completed workshops", icon: "completed" },
+      { to: "/admin/conducted", label: "Completion reviews", icon: "completed" },
     ] },
     { label: "Trainers & access", links: [
-      { to: "/admin/contribution", label: "Trainer hours", icon: "hours" },
+      { to: "/admin/contribution", label: "Training reports & records", icon: "hours" },
       { to: "/admin/users", label: "Users", icon: "users" },
     ] },
     { label: "Website", links: [

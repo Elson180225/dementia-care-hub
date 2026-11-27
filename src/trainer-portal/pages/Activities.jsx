@@ -1,4 +1,4 @@
-import {teachingPermission} from "../../../shared/trainer-governance";
+import {teachingPermission,activityTiming,organiserRecord} from "../../../shared/trainer-governance";
 import UploadField from "../UploadField";
 import {validateEventPricing,normaliseRegistrationType} from "../../../shared/event-registration";
 import { Link } from "react-router-dom";
@@ -41,6 +41,9 @@ const SARAWAK_DIVISIONS = [
 ];
 
 const blank = {
+  endDate: "",
+  organiserKind: "rcbc",
+  organiserName: "RCBC",
   title: "",
   date: "",
   type: "Workshop",
@@ -69,6 +72,8 @@ const blank = {
 
 function validate(v) {
   const e = {};
+  try{activityTiming(v.date,v.endDate,v.plannedHours);}catch(error){e.endDate=error.message;}
+  try{organiserRecord(v.organiserKind,v.organiserName);}catch(error){e.organiserName=error.message;}
   if (!v.title?.trim()) e.title = "Please enter a title.";
   if (!v.date || Number.isNaN(Date.parse(v.date))) e.date = "Please choose a valid date and time.";
   if (v.mode === "Physical" && !v.venue?.trim()) e.venue = "Please enter the venue.";
@@ -103,6 +108,7 @@ export default function Activities({
   programmeId = null,
   initialFilterType = "all",
   initialFilterMode = "all",
+  fixedMode,
   defaultValues = null,
   pageTitle,
   pageSubtitle,
@@ -125,7 +131,7 @@ export default function Activities({
   // Search & Filter State
   const [searchQuery, setSearchQuery] = useState("");
   const [filterType, setFilterType] = useState(initialFilterType || "all");
-  const [filterMode, setFilterMode] = useState(initialFilterMode || "all");
+  const [filterMode, setFilterMode] = useState(fixedMode || initialFilterMode || "all");
   const [filterStatus, setFilterStatus] = useState("all");
   const [filterCity, setFilterCity] = useState("all");
   const [page, setPage] = useState(1);
@@ -161,6 +167,7 @@ export default function Activities({
             id: a.id,
             values: {
               ...Object.fromEntries(Object.keys(blank).map((k) => [k, a[k] ?? ""])),
+              endDate:a.endDate||new Date(new Date(a.date+'+08:00').getTime()+Number(a.plannedHours)*3600000+28800000).toISOString().slice(0,16),
               status: a.status || "published",
               registrationType: normaliseRegistrationType(a.registrationType),
             },
@@ -285,14 +292,14 @@ export default function Activities({
   const hasActiveFilters =
     searchQuery.trim() !== "" ||
     filterType !== "all" ||
-    filterMode !== "all" ||
+    (!fixedMode && filterMode !== "all") ||
     filterStatus !== "all" ||
     filterCity !== "all";
 
   const resetFilters = () => {
     setSearchQuery("");
     setFilterType("all");
-    setFilterMode("all");
+    setFilterMode(fixedMode || "all");
     setFilterStatus("all");
     setFilterCity("all");
     setPage(1);
@@ -331,17 +338,18 @@ export default function Activities({
           {input("date", "Date & time", { type: "datetime-local" })}
 
           {admin && (
-            <Field id="status" label="Record Status" hint="Controls where this activity appears (e.g. Published on upcoming events, Completed in webinar archive).">
+            <Field id="status" label="Record Status" hint="Public details also require content approval. Use Completed workshops to record actual delivery.">
               <select id="status" name="status" value={v.status || "published"} onChange={change}>
                 <option value="published">Published (Live on Upcoming Events & Calendar)</option>
-                <option value="completed">Completed (Archived / Past Webinar or Workshop)</option>
                 <option value="draft">Draft (Hidden from public)</option>
                 <option value="approved">Approved (Awaiting publish)</option>
-                <option value="archived">Archived</option>
               </select>
             </Field>
           )}
 
+          <Field id="endDate" label="End date and time (Malaysia)" error={errors.endDate}><input id="endDate" name="endDate" type="datetime-local" value={v.endDate} onChange={change}/></Field>
+          <Field id="organiserKind" label="Organiser"><select id="organiserKind" name="organiserKind" value={v.organiserKind} onChange={change}><option value="rcbc">RCBC</option><option value="joint">Joint organiser</option><option value="independent">Independent organiser</option></select></Field>
+          <Field id="organiserName" label="Organiser / partner name" error={errors.organiserName}><input id="organiserName" name="organiserName" value={v.organiserName} onChange={change}/></Field>
           <Field id="type" label="Activity type">
             <select id="type" name="type" value={v.type} onChange={change}>
               {(admin ? ALL_ADMIN_TYPES : ACTIVITY_TYPES).map((t) => (
@@ -387,7 +395,7 @@ export default function Activities({
           </Field>
 
           {admin&&<label className="tp-field">Physical Education programme (optional)<select disabled={Boolean(programmeId)} value={editing.values.programmeId||''} onChange={e=>setEditing({...editing,values:{...editing.values,programmeId:e.target.value}})}><option value="">Standalone event — no programme</option>{programmes.map(p=><option key={p.id} value={p.id} disabled={!teachingPermission(p,editing.values)}>{p.code||p.title} — {p.title}</option>)}</select><small>Link this dated intake to a programme so visitors can register from its overview page.</small></label>}
-          {admin&&<fieldset className="tp-field"><legend>Registration</legend><label htmlFor="registrationType">Registration fee (required)</label><select id="registrationType" value={editing.values.registrationType||''} aria-invalid={!!errors.registrationType} onChange={e=>setEditing({...editing,values:{...editing.values,registrationType:e.target.value,...(e.target.value==='free'?{registrationFee:'',paymentInstructions:''}:{})}})}><option value="">Choose Free or Paid</option><option value="free">Free — no payment required</option><option value="paid">Paid — payment required</option></select>{errors.registrationType&&<p className="tp-error">{errors.registrationType}</p>}{editing.values.registrationType==='paid'?<><label>Fee description<input maxLength={100} value={editing.values.registrationFee||''} onChange={e=>setEditing({...editing,values:{...editing.values,registrationFee:e.target.value}})}/></label><label>Payment instructions<textarea maxLength={4000} value={editing.values.paymentInstructions||''} onChange={e=>setEditing({...editing,values:{...editing.values,paymentInstructions:e.target.value}})}/></label></>:<p>{editing.values.registrationType==='free'?'Free — no payment required, for either online or physical delivery.':'Choose whether participants need to pay.'}</p>}<label>Registration method<select value={editing.values.registrationMethod||'closed'} onChange={e=>setEditing({...editing,values:{...editing.values,registrationMethod:e.target.value}})}><option value="closed">Registration closed</option><option value="google">Google Form</option><option value="website">Website registration</option></select></label>{editing.values.registrationMethod==='google'&&<label>Google Form link (required) — include a required WhatsApp number and optional questions / notes<input type="url" value={editing.values.registrationGoogleUrl||''} onChange={e=>setEditing({...editing,values:{...editing.values,registrationGoogleUrl:e.target.value}})}/></label>}{editing.values.registrationMethod==='website'&&<><p>Visitors register directly on the website. No external link or account is required.</p><p>A WhatsApp phone number is required. Optional questions / notes are always available.</p></>}<label>General registration instructions (optional)<textarea maxLength={4000} value={editing.values.registrationInstructions||''} onChange={e=>setEditing({...editing,values:{...editing.values,registrationInstructions:e.target.value}})}/></label><small>Changing the registration method affects new submissions only. Existing participant records are preserved. Paid bookings require RCBC payment verification.</small></fieldset>}
+          {admin&&<fieldset className="tp-field"><legend>Registration</legend><label htmlFor="registrationType">Registration fee (required)</label><select id="registrationType" value={editing.values.registrationType||''} aria-invalid={!!errors.registrationType} onChange={e=>setEditing({...editing,values:{...editing.values,registrationType:e.target.value,...(e.target.value==='free'?{registrationFee:'',paymentInstructions:''}:{})}})}><option value="">Choose Free or Paid</option><option value="free">Free — no payment required</option><option value="paid">Paid — payment required</option></select>{errors.registrationType&&<p className="tp-error">{errors.registrationType}</p>}{editing.values.registrationType==='paid'?<><label>Fee description<input maxLength={100} value={editing.values.registrationFee||''} onChange={e=>setEditing({...editing,values:{...editing.values,registrationFee:e.target.value}})}/></label><label>Payment instructions<textarea maxLength={4000} value={editing.values.paymentInstructions||''} onChange={e=>setEditing({...editing,values:{...editing.values,paymentInstructions:e.target.value}})}/></label></>:<p>{editing.values.registrationType==='free'?'Free — no payment required, for either online or physical delivery.':'Choose whether participants need to pay.'}</p>}<label>Registration method<select value={editing.values.registrationMethod||'closed'} onChange={e=>setEditing({...editing,values:{...editing.values,registrationMethod:e.target.value}})}><option value="closed">Registration closed</option><option value="both">Website and Google Form</option><option value="google">Google Form</option><option value="website">Website registration</option></select></label>{['google','both'].includes(editing.values.registrationMethod)&&<label>Google Form link (required) — include a required WhatsApp number and optional questions / notes<input type="url" value={editing.values.registrationGoogleUrl||''} onChange={e=>setEditing({...editing,values:{...editing.values,registrationGoogleUrl:e.target.value}})}/></label>}{['website','both'].includes(editing.values.registrationMethod)&&<><p>Visitors register directly on the website. No external link or account is required.</p><p>A WhatsApp phone number is required. Optional questions / notes are always available.</p></>}<label>General registration instructions (optional)<textarea maxLength={4000} value={editing.values.registrationInstructions||''} onChange={e=>setEditing({...editing,values:{...editing.values,registrationInstructions:e.target.value}})}/></label><small>Changing the registration method affects new submissions only. Existing participant records are preserved. Paid bookings require RCBC payment verification.</small></fieldset>}
           {!admin&&input("registrationLink", "External registration link (optional)", {
             type: "url",
             placeholder: "https://forms.google.com/...",
@@ -395,7 +403,7 @@ export default function Activities({
           })}
 
           {input("teachingModule","Teaching module (when restricted)",{hint:"Use the module name recorded in the assigned trainer’s approved teaching permissions."})}
-          {input("plannedHours", "Planned contribution hours", { type: "number", min: "0", step: "0.5" })}
+          {input("plannedHours", "Net planned hours (excluding breaks)", { type: "number", min: "0", step: "0.5" })}
 
           <fieldset className="tp-field">
             <legend>Assigned Activity Trainers</legend>
@@ -419,6 +427,7 @@ export default function Activities({
                     </option>
                   ))}
                 </select>
+                <input aria-label="Trainer topic" placeholder="Topic taught" maxLength={300} value={t.topic||''} onChange={e=>setAssigned(assigned.map((x,j)=>i===j?{...x,topic:e.target.value}:x))}/>
                 <select
                   aria-label="Activity role"
                   value={t.role}
@@ -557,6 +566,8 @@ export default function Activities({
     return (
       <>
         <div style={{ display: "inline-flex", gap: "6px", flexWrap: "wrap", justifyContent: "flex-end" }}>
+          <span>{a.activityReference} · {a.organiserKind || 'rcbc'} · {a.organiserName || 'RCBC'}{a.postponedAt?' · Postponed':''}</span>
+          {admin && !a.cancelledAt && ['approved','published'].includes(a.status) && <button type="button" className="tp-btn tp-btn-ghost" onClick={async()=>{if(a.postponedAt){const date=window.prompt('New start date and time (YYYY-MM-DDTHH:mm)',a.date);if(!date)return;const endDate=window.prompt('New end date and time (YYYY-MM-DDTHH:mm)',a.endDate);if(endDate)await dispatch({type:'ACTIVITY_RESUME',id:a.id,date,endDate});}else{const comment=window.prompt('Reason for postponement');if(comment?.trim())await dispatch({type:'ACTIVITY_POSTPONE',id:a.id,comment});}}}>{a.postponedAt?'Reschedule':'Postpone'}</button>}
           {admin && <Link className="tp-btn tp-btn-ghost" to={'/admin/participants?activity='+a.id}>View participants</Link>}
           {(admin ||
             (!a.cancelledAt &&
@@ -696,31 +707,31 @@ export default function Activities({
         >
           {addLabel}
         </button>
-      </div>      
+      </div>
       {!admin && <TrainerDisclaimer />}
 
       {/* Metric Stats Cards */}
       <div className="tp-stats">
         <div className="tp-stat">
-          <span>All</span>
-          <strong>{state.activities.length}</strong>
+          <span>Matching activities</span>
+          <strong>{totalCount}</strong>
         </div>
         <div className="tp-stat">
           <span>On the website</span>
           <strong style={{ color: "var(--color-purple-600)" }}>
-            {state.activities.filter((a) => a.status === "published" && !a.cancelledAt).length}
+            {filteredActivities.filter((a) => admin ? a.isPublic : a.status === "published" && !a.cancelledAt).length}
           </strong>
         </div>
         <div className="tp-stat">
-          <span>Draft or waiting for review</span>
+          <span>{admin ? "Needs publication review" : "Draft or waiting for review"}</span>
           <strong style={{ color: "#b45309" }}>
-            {state.activities.filter((a) => ["draft", "submitted", "returned"].includes(a.status) && !a.cancelledAt).length}
+            {filteredActivities.filter((a) => !a.cancelledAt && (admin ? a.contentApprovalStatus === "pending" : ["draft", "submitted", "returned"].includes(a.status))).length}
           </strong>
         </div>
         <div className="tp-stat">
           <span>Finished or archived</span>
           <strong style={{ color: "var(--color-neutral-600)" }}>
-            {state.activities.filter((a) => ["completed", "verified", "archived"].includes(a.status) || Boolean(a.cancelledAt)).length}
+            {filteredActivities.filter((a) => ["completed", "verified", "archived"].includes(a.status) || Boolean(a.cancelledAt)).length}
           </strong>
         </div>
       </div>
@@ -754,7 +765,7 @@ export default function Activities({
           ))}
         </select>
 
-        <select
+        {!fixedMode && <select
           className="tp-select-filter"
           value={filterMode}
           onChange={(e) => {
@@ -766,7 +777,7 @@ export default function Activities({
           <option value="all">All Modes</option>
           <option value="Online">Online</option>
           <option value="Physical">Physical</option>
-        </select>
+        </select>}
 
         <select
           className="tp-select-filter"

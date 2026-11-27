@@ -352,6 +352,10 @@ export async function managementHandler(req, res, url, send) {
                         "Permission evidence and resource URL are required before publication",
                     );
                 }
+                if(kind==='learning_resources'){
+                    const activity=(await db.query("SELECT id FROM activities WHERE id=$1 AND content_approval_status='approved' AND published_at IS NOT NULL",[values.activity_id])).rows[0];
+                    if(!activity||values.review_status!=='current')fail('Link an approved published activity and mark the resource reviewed before publication.');
+                }
             }
             if (kind !== "faqs") {
                 values.status = values.review_status === "archived"

@@ -1,0 +1,18 @@
+export const educationCopy={
+ educationSourceActivity:'View original webinar / activity',
+ educationBackLibrary:'Back to Library',educationOrganiser:'Organiser',
+ educationIndependent:'Independently organised. Website listing does not imply RCBC organisation, sponsorship or endorsement.',
+ educationSpeakerIntro:'About the speaker',educationReviewedQA:'Reviewed questions & answers',educationQAOpen:'Open reviewed Q&A document',
+ educationResources:'Approved learning resources',educationResourceOpen:'Open resource',
+ educationDcsHeading:'Dementia Care Series programme information',
+ educationPathway:'DCS-Family is the prerequisite for either DCS-TTT or DCS-Careworker. These are separate pathways following DCS-Family.',
+ educationFamilyCertificate:'DCS-Family provides family caregiver education with an RCBC Certificate of Attendance; it is not professional competency certification.',
+ educationTttCertificate:'ADFM issues DCS-TTT certificates. Attendance, assessment outcome, certification, portal access and teaching authorisation are separate decisions.',
+ educationAdfm:'Alzheimer’s Disease Foundation Malaysia (ADFM) is RCBC’s Strategic Partner and Training Facilitator for the Dementia Care Skills programmes, including DCS-Family, DCS-TTT and future DCS-Careworker.',
+ educationAdi:'ADFM is a member of Alzheimer’s Disease International (ADI). This does not mean that ADI issues individual programme certificates.',
+ educationObjectives:'Course objectives',educationPrerequisites:'Prerequisites',educationFacilitators:'Facilitator information',educationAssessment:'Assessment',educationCertificate:'Certificate information',
+ educationPending:'To be confirmed by RCBC.',educationIntakeDetails:'Dates, venues and fees are confirmed per intake.',
+ educationFuture:'Future programme. Registration is inactive until RCBC approves an intake and activates the programme.',
+ educationPermanent:'Permanent programme link',educationProgrammeLink:'View programme details',
+ educationRegistryLink:'Public DCS Participant Search',educationResourceError:'Learning resources could not be loaded. Please refresh to try again.',
+};

@@ -46,7 +46,7 @@ const eventSql = `
  FROM activities a
  LEFT JOIN event_registration_settings s ON s.activity_id = a.id
  LEFT JOIN learn_events_content cms ON a.programme_id IS NOT NULL AND cms.id = 'main'
- WHERE a.status = 'published' AND a.published_at IS NOT NULL AND a.cancelled_at IS NULL`;
+ WHERE a.status = 'published' AND a.published_at IS NOT NULL AND a.cancelled_at IS NULL AND a.postponed_at IS NULL AND a.content_approval_status='approved'`;
 
 function due(event, stage, now, settings) {
  const untilStart = new Date(event.starts_at) - now;

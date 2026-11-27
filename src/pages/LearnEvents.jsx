@@ -10,6 +10,7 @@ import { onlineHeadingText } from '../../shared/online-headings';
 import EventRegistration from '../components/EventRegistration';
 import EventPriceLabel from '../components/EventPriceLabel';
 import ProgrammeIntakes from '../components/ProgrammeIntakes';
+import DcsProgrammeGuidance from '../components/DcsProgrammeGuidance';
 import '../components/EventDetails.css';
 import {lockDialogScroll} from '../components/dialogScroll';
 import {eventDate,eventTime,eventDateTime} from '../../shared/event-dates';
@@ -132,7 +133,7 @@ function usePublicActivities() {
               registrationDeadlineFormatted: formatDeadlineDate(a.registration_deadline),
               capacity: a.capacity,
               isClosed,
-              status: isCancelled ? 'cancelled' : isCompleted ? 'completed' : isClosed ? 'registration-closed' : 'upcoming'
+              status: isCancelled ? 'cancelled' : a.postponed_at ? 'postponed' : isCompleted ? 'completed' : isClosed ? 'registration-closed' : 'upcoming'
             };
           }));
         }
@@ -298,6 +299,14 @@ function ModeIcon({ mode }) {
    ACTIVITY LANDING PAGE MODAL
    Reusable detail view for any activity — matches PDF Section 4
    ================================================================ */
+function ActivityLearningResources({activityId}){
+ const [rows,setRows]=useState([]),[error,setError]=useState('');
+ const {translateContent}=useLanguage();
+ useEffect(()=>{let active=true;setRows([]);setError('');fetch('/api/public/activity-resources?activity='+activityId).then(r=>{if(!r.ok)throw Error();return r.json();}).then(data=>{if(active)setRows(data);}).catch(()=>{if(active)setError('Learning resources could not be loaded. Please refresh to try again.');});return()=>{active=false;};},[activityId]);
+ if(error)return <p role="status"><Trans id="educationResourceError">Learning resources could not be loaded. Please refresh to try again.</Trans></p>;
+ if(!rows.length)return null;
+ return <section className="event-detail-description"><h3><Trans id="educationResources">Approved learning resources</Trans></h3><ul>{translateContent(rows,'records/learning_resources').map(r=><li key={r.id}><strong>{r.title}</strong><p>{r.description}</p>{publicLink(r.url)&&<a href={publicLink(r.url)} target="_blank" rel="noreferrer"><Trans id="educationResourceOpen">Open resource</Trans> ↗</a>}</li>)}</ul></section>;
+}
 function ActivityModal({ activity, onClose, standalone = false }) {
   const [managedRegistration,setManagedRegistration]=useState(null);
   const {t,translateLabel}=useLanguage();
@@ -328,7 +337,7 @@ function ActivityModal({ activity, onClose, standalone = false }) {
   const Heading = standalone ? "h1" : "h2";
   const content = <div className={standalone ? "event-page" : "event-detail-backdrop"} onMouseDown={e=>{if(e.target===e.currentTarget)onClose?.();}}>
     <section className="event-detail-dialog" role={standalone ? undefined : "dialog"} aria-modal={standalone ? undefined : true} aria-labelledby="event-detail-title" tabIndex={-1} ref={dialogRef}>
-      <div className="event-detail-toolbar"><span><Trans id="learnSiteTitle">Education &amp; Events</Trans></span>{standalone ? <Link to="/learn-events/upcoming-calendar">All events</Link> : <button type="button" onClick={onClose} aria-label={translateLabel("Close event details", "eventDetailsClose")}><span className="dialog-close-icon" aria-hidden="true" /></button>}</div>
+      <div className="event-detail-toolbar"><span><Trans id="learnSiteTitle">Education &amp; Events</Trans></span>{standalone ? <Link to="/learn-events/online-education"><Trans id="educationBackLibrary">Back to Library</Trans></Link> : <button type="button" onClick={onClose} aria-label={translateLabel("Close event details", "eventDetailsClose")}><span className="dialog-close-icon" aria-hidden="true" /></button>}</div>
       <div className="event-detail-layout">
         <aside className="event-detail-visual" aria-label={translateLabel("Event poster", "eventPoster")}>
           {poster?<><a href={poster} target="_blank" rel="noreferrer" aria-label={'Open full-size poster for '+activity.title+' in a new tab'}><img src={poster} alt={'Poster for '+activity.title}/></a><p><Trans id="eventPoster">Event poster</Trans></p><a className="event-poster-link" href={poster} target="_blank" rel="noreferrer"><Trans id="fullPoster">View full-size poster ↗</Trans></a></>:<div className="event-detail-no-poster"><span aria-hidden="true">▤</span><p><Trans id="rcbcEvents">RCBC Education &amp; Events</Trans></p><strong>{activity.title}</strong><p><Trans id="eventSideInfo">Event information and registration details are shown alongside.</Trans></p></div>}
@@ -338,6 +347,7 @@ function ActivityModal({ activity, onClose, standalone = false }) {
           <div className="event-detail-links"><WhatsAppShare title={activity.title} path={eventPath(activity.id)} />{!standalone && <Link to={eventPath(activity.id)} onClick={onClose}>Open event page</Link>}</div>
           <LastReviewed value={activity.last_reviewed_at} />
           <dl className="event-detail-facts">
+            <div><dt><Trans id="educationOrganiser">Organiser</Trans></dt><dd>{activity.organiser_name||'RCBC'}{activity.organiser_kind==='independent'&&<p><Trans id="educationIndependent">Independently organised. Website listing does not imply RCBC organisation, sponsorship or endorsement.</Trans></p>}</dd></div>
             <div><dt>{am.suitableFor||'Suitable for'}</dt><dd>{activity.suitableFor||activity.audience||'Public, families and caregivers'}</dd></div>
             <div><dt>{am.dateTime||'Date & time'}</dt><dd>{activity.rawDate?formatActivityDate(activity.rawDate):activity.date||'Date to be confirmed'}{(activity.rawDate||activity.time)&&<><br/>{activity.rawDate?formatActivityTime(activity.rawDate):activity.time}</>}<small><Trans id="malaysiaTime">Malaysia time (MYT)</Trans></small></dd></div>
             <div><dt>{am.mode||'Mode'}</dt><dd><ModeIcon mode={activity.mode}/></dd></div>
@@ -348,6 +358,9 @@ function ActivityModal({ activity, onClose, standalone = false }) {
             <div><dt>{am.speakerTrainer||'Speaker / trainer'}</dt><dd>{activity.speaker||'RCBC Education Team'}{activity.trainerId&&<><br/><Link to="/learn-events/certified-trainers" onClick={onClose}>{am.viewTrainerProfile||'View trainer profile'} →</Link></>}</dd></div>
           </dl>
           {activity.description&&<section className="event-detail-description"><h3>{am.whatYouWillLearn||'What you will learn'}</h3><p>{activity.description}</p></section>}
+          {activity.speaker_intro&&<section className="event-detail-description"><h3><Trans id="educationSpeakerIntro">About the speaker</Trans></h3><p>{activity.speaker_intro}</p></section>}
+          {(activity.qa_text||publicLink(activity.qa_url))&&<section className="event-detail-description"><h3><Trans id="educationReviewedQA">Reviewed questions &amp; answers</Trans></h3>{activity.qa_text&&<p style={{whiteSpace:'pre-wrap'}}>{activity.qa_text}</p>}{publicLink(activity.qa_url)&&<a href={publicLink(activity.qa_url)} target="_blank" rel="noreferrer"><Trans id="educationQAOpen">Open reviewed Q&amp;A document</Trans> ↗</a>}</section>}
+          <ActivityLearningResources activityId={activity.id}/>
           <section className="event-detail-registration" aria-label={translateLabel("Registration and availability", "registrationAvailability")}>
             <EventRegistration key={activity.id} activityId={activity.id} onManaged={setManagedRegistration}/>
             {managedRegistration===false&&(activity.status==='cancelled'?<p className="event-detail-state" role="status"><Trans id="eventCancelled">This activity has been cancelled. Registration is unavailable.</Trans></p>:completed?<p className="event-detail-state" role="status"><Trans id="eventEnded">This activity has ended. Registration is closed.</Trans></p>:isEventClosed(activity)?<p className="event-detail-state" role="status"><Trans id="eventClosed">Registration is closed for this activity.</Trans></p>:publicLink(activity.registrationLink)?<div className="event-detail-external"><h3><Trans id="registerForEvent">Register for this event</Trans></h3><p><Trans id="externalForm">Complete the organiser’s registration form. No website account is needed.</Trans></p><a href={publicLink(activity.registrationLink)} target="_blank" rel="noreferrer" className="activity-action-btn activity-action-register">{am.registerNow||'Register now'} ↗<small>{am.externalTabNote||'Opens an external form in a new tab'}</small></a></div>:<p className="event-detail-state" role="status"><Trans id="eventNotYet">Registration is not available yet. Please check back or </Trans><Link to="/about/contact" onClick={onClose}><Trans id="contactRcbc">contact RCBC</Trans></Link>.</p>)}
@@ -664,14 +677,18 @@ function pageItems(items, filters, page) {
    SECTION 1: ONLINE EDUCATION
    ================================================================ */
 function OnlineEducation() {
-  const { search } = useLocation();
+  const { search,hash } = useLocation();
   const { t, translateLabel } = useLanguage();
   const activities = usePublicActivities();
   const cmsContent = useLearnEventsContent();
   const onlineCms = cmsContent.onlineEducation || {};
   const le = onlineHeadingText(t.learnEvents,onlineCms.sectionHeader,'en');
   const upcomingTopics = orderWebinars((onlineCms.upcomingTopics ?? []).map(topic => ({...topic,...topicDateFields(topic.dateISO || topic.date)})));
-  const approvedList = onlineCms.approvedResources ?? [];
+  const [masterResources,setMasterResources]=useState([]);
+  useEffect(()=>{if(hash.startsWith('#learning-resource-')&&masterResources.length)document.getElementById(decodeURIComponent(hash.slice(1)))?.scrollIntoView({block:'center'});},[hash,masterResources]);
+  useEffect(()=>{let active=true;fetch('/api/public/learning_resources').then(r=>{if(!r.ok)throw Error();return r.json();}).then(rows=>{if(active)setMasterResources(rows);}).catch(()=>{});return()=>{active=false;};},[]);
+  const {translateContent}=useLanguage();
+  const approvedList = translateContent(masterResources,'records/learning_resources').map(r=>({...r,type:r.resource_type,year:r.source_year||'',videoUrl:['Recording','Video'].includes(r.resource_type)?r.url:'',qaUrl:r.resource_type==='Q&A'?r.url:'',resourceUrl:r.url}));
   const [selected, setSelected] = useState(null);
   const [selectedQa, setSelectedQa] = useState(null);
   const defaultFilters = { query: "", language: "All", timing: "All" };
@@ -1012,11 +1029,12 @@ function OnlineEducation() {
                 const images = folder ? getQaImages(folder, []) : [];
                 const matchedQa = images.length ? {title:r.title, language:r.language, images, pages:images.length} : null;
                 const qaUrl = publicLink(r.qaUrl);
-                const videoTargetUrl = publicLink(r.videoUrl || r.url);
+                const videoTargetUrl = publicLink(r.videoUrl);
 
                 return (
-                  <article className="resource-card" key={r.id}>
+                  <article className="resource-card" key={r.id} id={'learning-resource-'+r.id}>
                     <div className="resource-card-top">
+                      <LastReviewed value={r.last_reviewed_at}/>
                       <span className="resource-type">{r.type}</span>
                       <span className="resource-year">{r.year}</span>
                     </div>
@@ -1055,6 +1073,8 @@ function OnlineEducation() {
                         Review Q&amp;A →
                       </Trans></button> : <span><Trans id="qaUnavailable">Q&amp;A material not yet available</Trans></span>}
                     </div>
+                    {r.resourceUrl&&!videoTargetUrl&&!qaUrl&&<a href={publicLink(r.resourceUrl)} target="_blank" rel="noreferrer"><Trans id="educationResourceOpen">Open resource</Trans> ↗</a>}
+                    {r.activity_id&&<Link to={eventPath(r.activity_id)}><Trans id="educationSourceActivity">View original webinar / activity</Trans> →</Link>}
                   </article>
                 );
               })}
@@ -1088,7 +1108,10 @@ function PhysicalEducation() {
   const { t, translateLabel } = useLanguage();
   const le = t.learnEvents;
   const cmsContent = useLearnEventsContent();
-  const [activeTrackId, setActiveTrackId] = useState("dcs-family");
+  const {search:programmeSearch}=useLocation();
+  const selectedProgramme=new URLSearchParams(programmeSearch).get('programme');
+  const [activeTrackId, setActiveTrackId] = useState(selectedProgramme||"dcs-family");
+  useEffect(()=>{if(selectedProgramme)setActiveTrackId(selectedProgramme);},[selectedProgramme]);
   const [selectedIntake,setSelectedIntake]=useState(null);
 
   const trackImages = {
@@ -1386,6 +1409,7 @@ function PhysicalEducation() {
 
       {/* Reusable Program Modal (createPortal) */}
       <ProgrammeIntakes programme={activeTrack} onSelect={setSelectedIntake}/>
+      <DcsProgrammeGuidance programmes={[activeTrack]}/>
       {selectedIntake&&<ActivityModal key={selectedIntake.id} activity={selectedIntake} onClose={()=>setSelectedIntake(null)}/>}
     </main>
   );
@@ -3486,7 +3510,7 @@ function LearnEvents({ module }) {
       </section>
 
       {/* ---- Section content ---- */}
-      {module === "online-education" && <><PublishedRecords kind="learning_resources" title={translateLabel("Approved learning resources", "approvedResources")} /><OnlineEducation /></>}
+      {module === "online-education" && <OnlineEducation />}
       {module === "physical-education" && <PhysicalEducation />}
       {module === "events" && <EventsSection />}
       {module === "certified-trainers" && <CertifiedTrainers />}

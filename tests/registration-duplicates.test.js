@@ -26,7 +26,7 @@ test('website allows shared emails, rejects active duplicate phones and retains 
  const existing={activity_id:intake,email:'MEI@example.com',phone:'+60123456789',status:'cancelled',payment_verified_at:'retained',registration_state:'confirmed'};
  const rows=[existing];let locks=0;
  pool.query=async(sql,args)=>{
-  if(sql.includes('SELECT * FROM activities'))return {rows:[{id:args[0],title:'Test intake',starts_at:'2099-01-01T00:00:00Z',published_at:'2026-01-01',status:'published'}]};
+  if(sql.includes('SELECT * FROM activities'))return {rows:[{id:args[0],title:'Test intake',starts_at:'2099-01-01T00:00:00Z',published_at:'2026-01-01',status:'published',content_approval_status:'approved'}]};
   if(sql.includes('SELECT * FROM event_registration_settings'))return {rows:[{activity_id:args[0],enabled:true,website_enabled:true,ask_phone:true,paid:true}]};
   throw Error('Unexpected pool query');
  };

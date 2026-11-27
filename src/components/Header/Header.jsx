@@ -67,10 +67,6 @@ function getMenuItems(m,u) {
           path: "/caregiver-support/training",
         },
         {
-          label: m.certVerification,
-          path: "/caregiver-support/certificate-verification",
-        },
-        {
           label: m.supportGroups,
           path: "/caregiver-support/support-groups",
         },
@@ -104,6 +100,7 @@ function getMenuItems(m,u) {
           label: m.upcomingCalendar,
           path: "/learn-events/upcoming-calendar",
         },
+        {label: m.dcsParticipantSearch || 'Public DCS Participant Search', path:'/learn-events/dcs-participants'},
       ],
     },
     {

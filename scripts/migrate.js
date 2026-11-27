@@ -17,6 +17,12 @@ try {
     await db.query('INSERT INTO schema_migrations(name) VALUES($1)',[name]);
    }
   }
+  for(const name of ['028_dcs_registry.sql','029_activity_records.sql','030_webinar_publication.sql','031_participant_attendance.sql','032_learning_resource_master.sql']){
+   if(!(await db.query('SELECT 1 FROM schema_migrations WHERE name=$1',[name])).rowCount){
+    await db.query(await readFile(new URL('../database/'+name,import.meta.url),'utf8'));
+    await db.query('INSERT INTO schema_migrations(name) VALUES($1)',[name]);
+   }
+  }
   await db.query('SELECT seed_historical_webinars()');
  });
  console.log('PostgreSQL migrations applied.');

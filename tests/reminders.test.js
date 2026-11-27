@@ -56,7 +56,7 @@ test('calendar files preserve Malaysia dates, fold Unicode and escape newlines',
  assert.ok(unfolded.includes('SUMMARY:'+event.title.replace(';','\\;')));
  assert.ok(unfolded.includes('DESCRIPTION:Arrival\\nPlease use gate A.'));
  const url=new URL('/api/public/event-calendar?activity='+event.id,env.APP_BASE_URL);
- const db={query:async(sql,params)=>{assert.match(sql,/status='published'.*cancelled_at IS NULL/);assert.deepEqual(params,[event.id]);return {rows:[event]};}};
+ const db={query:async(sql,params)=>{assert.match(sql,/status='published'.*cancelled_at IS NULL/);assert.match(sql,/postponed_at IS NULL/);assert.match(sql,/content_approval_status='approved'/);assert.deepEqual(params,[event.id]);return {rows:[event]};}};
  const response={writeHead:(status,headers)=>{assert.equal(status,200);assert.match(headers['Content-Type'],/text\/calendar/);},end:body=>body};
  assert.match(await eventCalendarHandler({method:'GET'},response,url,assert.fail,db),/BEGIN:VCALENDAR/);
 });
@@ -131,7 +131,7 @@ test('split-database reminder integration: idempotency, suppression, retry and c
   await website.query(`
    CREATE TABLE activities(id uuid PRIMARY KEY,title text,starts_at timestamptz,type text,mode text,city text,
     language text,status text,published_at timestamptz,cancelled_at timestamptz,venue text,description text,
-    registration_link text,registration_deadline timestamptz,programme_id text,capacity int,planned_hours numeric);
+    registration_link text,registration_deadline timestamptz,programme_id text,capacity int,planned_hours numeric,postponed_at timestamptz,content_approval_status text NOT NULL DEFAULT 'pending');
    CREATE TABLE event_registration_settings(activity_id uuid PRIMARY KEY, enabled boolean, website_enabled boolean, google_url text, general_instructions text);
    CREATE TABLE event_participants(id uuid PRIMARY KEY,activity_id uuid,name text,email text,status text,registration_state text);
    CREATE TABLE learn_events_content(id text PRIMARY KEY, data jsonb);
@@ -149,11 +149,11 @@ test('split-database reminder integration: idempotency, suppression, retry and c
   await addSubscriber('other-city@example.com',{city:'Kuching'});
   await addSubscriber('blocked@example.com');
   async function addActivity(extra={}) {
-   const a={...activity,id:randomUUID(),status:'published',published_at:new Date(),type:'Seminar',...extra};
+   const a={...activity,id:randomUUID(),status:'published',published_at:new Date(),content_approval_status:'approved',type:'Seminar',...extra};
    await website.query(`INSERT INTO activities(id,title,starts_at,type,mode,city,language,status,published_at,cancelled_at,
-    description,registration_deadline,registration_link,programme_id) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14)`,
+    description,registration_deadline,registration_link,programme_id,postponed_at,content_approval_status) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16)`,
     [a.id,a.title,a.starts_at,a.type,a.mode,a.city,a.language,a.status,a.published_at,a.cancelled_at,a.description,
-     a.registration_deadline,a.registration_link,a.programme_id]);
+     a.registration_deadline,a.registration_link,a.programme_id,a.postponed_at||null,a.content_approval_status]);
    if(a.settings !== null) await website.query('INSERT INTO event_registration_settings VALUES($1,$2,$3,$4,$5)',
     [a.id,a.settings?.enabled ?? true,a.settings?.website ?? true,a.settings?.url ?? '',a.settings?.instructions ?? '']);
    return a;
@@ -168,6 +168,8 @@ test('split-database reminder integration: idempotency, suppression, retry and c
   await addActivity({settings:{website:false,url:'javascript:bad'}});
   await addActivity({programme_id:'planned-programme'});
   await addActivity({published_at:null});
+  await addActivity({content_approval_status:'pending'});
+  await addActivity({postponed_at:new Date()});
   let sends=0;
   const request=async(path,{data}={})=>{
    if(path.startsWith('/contacts/'))return {emailBlacklisted:path.includes('blocked')};

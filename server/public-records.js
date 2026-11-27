@@ -15,6 +15,10 @@ export async function publicRecordsHandler(req,res,url,send) {
  const kind=url.pathname.split('/')[3];
  if(req.method==='GET' && publicColumns[kind]) {
   const category=url.searchParams.get('category');
+  if(kind==='learning_resources'){
+   const rows=(await pool.query(`SELECT ${publicColumns[kind]} FROM learning_resources WHERE publication_status='published' AND review_status='current' AND EXISTS(SELECT 1 FROM activities a WHERE a.id=learning_resources.activity_id AND a.content_approval_status='approved' AND a.published_at IS NOT NULL AND a.status IN ('published','completed','verified','archived')) ORDER BY id LIMIT 500`)).rows;
+   return send(res,200,rows);
+  }
   const rows=(await pool.query(`SELECT ${publicColumns[kind]} FROM ${kind} WHERE publication_status='published' AND review_status<>'archived' ${kind==='organisations'?"AND NOT is_example":''} ${['content_pages','faqs'].includes(kind)?"AND language='English'":''} ${kind==='organisations' && category?'AND category=$1':''} ORDER BY id LIMIT 500`,kind==='organisations' && category?[category]:[])).rows;
   return send(res,200,rows);
  }
@@ -26,7 +30,7 @@ export async function publicRecordsHandler(req,res,url,send) {
  const data=await body(req);
  if(kind==='verify-certificate') {
   if(!data.name?.trim() || !data.certificateRef?.trim()) fail('Name and certificate reference are required');
-  const match=(await pool.query("SELECT programme,certificate_ref,completion_date,issued_at,issuer,status FROM dcs_certificates WHERE lower(recipient_name)=lower($1) AND certificate_ref=$2 AND verification_consent_at IS NOT NULL",[data.name.trim(),data.certificateRef.trim()])).rows[0];
+  const match=(await pool.query("SELECT r.programme,r.certificate_ref,r.completion_date,r.issued_at,r.issuer,r.status FROM dcs_registry_records r JOIN dcs_registry_participants p ON p.id=r.participant_id WHERE lower(p.name)=lower($1) AND r.certificate_ref=$2 AND r.verified AND r.public_consent AND r.approved_public_display",[data.name.trim(),data.certificateRef.trim()])).rows[0];
   return send(res,200,{certificate:match || null});
  }
  if(kind==='unsubscribe') {

@@ -5,7 +5,7 @@ const sum = (rows, pick) => rows.reduce((total, row) => total + Number(pick(row)
 
 export function yearSummary(activities, year) {
   const rows = activities.filter(
-    (a) => a.completion.status === "verified" && new Date(a.date).getFullYear() === year
+    (a) => a.completion.status === "verified" && !a.cancelledAt && !a.postponedAt && Number((a.completion.actualStart||a.date||'').slice(0,4)) === year
   );
   return {
     conducted: rows.length,
@@ -64,9 +64,8 @@ export function buildQueue({ accessRequests, profile, profiles = [profile], acti
         kind: "Workshop / Seminar submission",
         title: a.title,
         detail: `${fmtDate(a.date)} · ${a.mode} · ${a.language}`,
-        // One decision: approving a trainer's workshop also publishes it (RCBC: remove duplicate admin steps).
-        approveLabel: "Approve and publish",
-        approveDecision: "published",
+        approveLabel: "Approve activity",
+        approveDecision: "approved",
       })
     );
 
