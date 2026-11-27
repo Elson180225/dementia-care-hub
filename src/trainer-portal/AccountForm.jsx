@@ -11,6 +11,7 @@ export default function AccountForm({role='trainer',signup=false,application=fal
   const [fieldErrors,setFieldErrors]=useState({});const [messageTone,setMessageTone]=useState('error');
   const [certificateEvidence,setCertificateEvidence]=useState(null),[readingCertificate,setReadingCertificate]=useState(false),[certificateError,setCertificateError]=useState('');
   const [showPassword,setShowPassword]=useState(false);const passwordId=useId();
+  const [mfa,setMfa]=useState(null);const mfaId=useId();
   const base=role==='admin'?'/admin':'/trainer-portal';
   const signIn=!signup&&!application&&!forgot&&!reset;
   const resetToken=params.get('token') || '';
@@ -20,7 +21,8 @@ export default function AccountForm({role='trainer',signup=false,application=fal
     const errors={};
     for(const input of event.currentTarget.elements) {
     if(!input.name || input.disabled || input.validity?.valid) continue;
-    if(input.validity.valueMissing && input.type==='checkbox') errors[input.name]='Please confirm you have read the eligibility and teaching conditions.';
+    if(input.name==='mfaCode') errors[input.name]='Enter the 6-digit code from your authenticator app.';
+    else if(input.validity.valueMissing && input.type==='checkbox') errors[input.name]='Please confirm you have read the eligibility and teaching conditions.';
     else if(input.validity.valueMissing) errors[input.name]='Please enter '+({name:'your full name',email:'your email address',password:'your password',confirmPassword:'your password again',city:'your city',certificateRef:'your certificate reference',invitation:'your RCBC invitation code'}[input.name] || 'this information')+'.';
     else if(input.validity.typeMismatch) errors[input.name]='Please enter a valid email address.';
     else if(input.validity.tooShort) errors[input.name]=`Use at least ${input.minLength} characters.`;
@@ -58,7 +60,8 @@ export default function AccountForm({role='trainer',signup=false,application=fal
     setMessageTone('success');
     if(application) {setRequest(result.application);if(intent==='resubmit') setCertificateEvidence(null);setMessage(intent==='resubmit'?'Amendments submitted to RCBC.':'Application status loaded.');}
     else if(signup) {setMessage(result.message);setCertificateEvidence(null);}
-    else {await refresh();clearError();navigate(base);}
+    else if(result.mfaRequired||result.mfaSetup) {setMfa(result);setMessage('');}
+    else {setMfa(null);await refresh();clearError();navigate(base);}
     }catch(e){setMessageTone('error');setMessage(e.message);}finally{setBusy(false);}
   }
   return <div className={(signIn||forgot||reset)?`account-shell account-shell-${role}`:'account-secondary'}>
@@ -98,7 +101,23 @@ export default function AccountForm({role='trainer',signup=false,application=fal
 
   {signup && role==='trainer' && <label className="tp-field account-ack"><span><input type="checkbox" name="eligibilityAck" required aria-invalid={!!fieldErrors.eligibilityAck} /> I have read the <Link to={base+'/eligibility'} target="_blank" rel="noopener">eligibility &amp; teaching conditions</Link>. <span className="required-marker" aria-label="required">*</span></span>{fieldErrors.eligibilityAck && <FormFeedback>{fieldErrors.eligibilityAck}</FormFeedback>}</label>}
 
-  <button className="tp-btn account-submit" disabled={busy || readingCertificate || (reset && !resetToken)}>{busy?'Please wait...':forgot?'Send reset link':reset?'Update password':application?'Check status':signup?(role==='trainer'?'Submit application':'Submit registration'):role==='admin'?'Sign in to dashboard':'Sign in to trainer portal'}</button>
+  {signIn && mfa && <div className="account-mfa">
+    {mfa.mfaSetup && <div className="account-mfa-setup">
+      <h2>Set up two-step sign-in</h2>
+      <p>RCBC admin accounts need a code from an authenticator app (such as Google Authenticator or Microsoft Authenticator) each time you sign in.</p>
+      <ol>
+        <li>Open the app on your phone and choose <strong>Add account</strong> → <strong>Enter a setup key</strong>.</li>
+        <li>Enter this key: <code className="account-mfa-key">{mfa.secret.match(/.{1,4}/g).join(' ')}</code></li>
+        <li>Type the 6-digit code the app shows below.</li>
+      </ol>
+      <p><a href={mfa.otpauthUrl}>Open in authenticator app</a> (on the phone with the app installed)</p>
+    </div>}
+    <label className="tp-field" htmlFor={mfaId}><span className="account-field-label">6-digit code from your authenticator app <span className="required-marker" aria-label="required">*</span></span>
+      <input id={mfaId} name="mfaCode" inputMode="numeric" autoComplete="one-time-code" pattern="[0-9]{6}" maxLength={6} required autoFocus aria-invalid={!!fieldErrors.mfaCode} />
+      {fieldErrors.mfaCode && <FormFeedback>{fieldErrors.mfaCode}</FormFeedback>}</label>
+  </div>}
+
+  <button className="tp-btn account-submit" disabled={busy || readingCertificate || (reset && !resetToken)}>{busy?'Please wait...':forgot?'Send reset link':reset?'Update password':application?'Check status':signup?(role==='trainer'?'Submit application':'Submit registration'):mfa?'Verify code and sign in':role==='admin'?'Sign in to dashboard':'Sign in to trainer portal'}</button>
 
   {application && request && ['submitted','returned'].includes(request.status) && <button className="tp-btn tp-btn-ghost" value="resubmit" disabled={busy || readingCertificate}>Submit amendments</button>}
   {(forgot||reset||!signIn) && <FormFeedback tone={message ? messageTone : 'warning'}>{reset&&!resetToken?'This password reset link is incomplete. Request a new link from the sign-in page.':message || sessionError}</FormFeedback>}
