@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { Field } from '../trainer-portal/ui';
 import { api } from '../trainer-portal/TrainerContext';
 import { useLanguage } from '../i18n/LanguageContext';
@@ -8,10 +8,12 @@ export default function ProjectServices({ certificate = false }) {
   const { t } = useLanguage();
   const ps = t.projectServices || {};
   const [params] = useSearchParams();
-  const token = params.get('unsubscribe');
+  const renewing = params.has('resubscribe');
+  const token = params.get('unsubscribe') ?? params.get('resubscribe');
   const [message, setMessage] = useState('');
   const [busy, setBusy] = useState(false);
   const [result, setResult] = useState(null);
+  const [completed, setCompleted] = useState(false);
   const [unsubscribe, setUnsubscribe] = useState('');
 
   async function submit(e) {
@@ -23,7 +25,7 @@ export default function ProjectServices({ certificate = false }) {
     data.consent = data.consent === 'on';
     try {
       const r = await api(
-        '/api/public/' + (certificate ? 'verify-certificate' : token ? 'unsubscribe' : 'subscribe'),
+        '/api/public/' + (certificate ? 'verify-certificate' : token ? (renewing ? 'resubscribe' : 'unsubscribe') : 'subscribe'),
         { ...data, token }
       );
       if (certificate) {
@@ -34,7 +36,8 @@ export default function ProjectServices({ certificate = false }) {
             : ps.certNotFound || 'No consented certificate match found. Please check details with RCBC.'
         );
       } else {
-        setMessage(token ? ps.unsubscribedMsg || 'You have been unsubscribed.' : r.message);
+        setCompleted(r.status === 'subscribed' || Boolean(token));
+        setMessage(r.status === 'subscribed' ? ps.subscribedMsg : token ? ps.unsubscribedMsg : ps.existingMsg);
         setUnsubscribe(r.unsubscribeLink || '');
       }
     } catch (err) {
@@ -44,7 +47,6 @@ export default function ProjectServices({ certificate = false }) {
     }
   }
 
-  const langOptions = ps.langOptions || ['English', 'Bahasa Malaysia', 'Chinese'];
 
   return (
     <main className="tp-page">
@@ -53,7 +55,7 @@ export default function ProjectServices({ certificate = false }) {
           {certificate
             ? ps.verifyTitle || 'Verify a DCS certificate'
             : token
-            ? ps.unsubscribeTitle || 'Unsubscribe from updates'
+            ? (renewing ? ps.renewTitle : ps.unsubscribeTitle)
             : ps.subscribeTitle || 'Get Updated'}
         </h1>
         {!certificate && !token && (
@@ -62,50 +64,38 @@ export default function ProjectServices({ certificate = false }) {
               'Stay connected with Dementia Care Connect. Register to receive updates on upcoming webinars, education, training and project activities.'}
           </p>
         )}
-        <form className="tp-card" onSubmit={submit}>
+        <form className="tp-card" onSubmit={submit} hidden={!certificate && completed}>
           {!token && (
             <>
-              <Field id="updates-name" label={certificate ? ps.nameOnCertificate || 'Name on certificate' : ps.name || 'Name'} required><input id="updates-name" name="name" required /></Field>
+              <Field id="updates-name" label={certificate ? ps.nameOnCertificate || 'Name on certificate' : ps.name || 'Name'} required><input id="updates-name" name="name" autoComplete="name" maxLength={150} required /></Field>
               {certificate ? (
                 <Field id="updates-certificateRef" label={ps.certificateRef || 'Certificate reference'} required><input id="updates-certificateRef" name="certificateRef" required /></Field>
               ) : (
                 <>
-                  <Field id="updates-email" label={ps.email || 'Email'} required><input id="updates-email" name="email" type="email" required /></Field>
-                  <Field id="updates-city" label={ps.city || 'City'} required><input id="updates-city" name="city" required /></Field>
-                  <Field id="updates-state" label={ps.state || 'State'} required><input id="updates-state" name="state" required /></Field>
-                  <Field id="updates-language" label={ps.preferredLanguage || 'Preferred language'} required><select required id="updates-language" name="language">
-                      {['English','Bahasa Malaysia','Chinese'].map((x,index) => (
-                        <option key={x} value={x}>{langOptions[index]||x}</option>
-                      ))}
-                    </select></Field>
-                  <p>
-                    {ps.consentInfo ||
-                      'Receive updates and reminders about upcoming webinars, seminars, education and project activities. RCBC stores your name, email, locality, language and consent for this purpose. Authorised administrators and our email provider process these details. No public account is created. Every reminder includes an unsubscribe link. Contact RCBC through the Contact page for correction or deletion requests.'}
-                  </p>
-                  <Field id="updates-consent" label={ps.consentCheckbox || 'I agree to receive project updates from RCBC by email.'} required example="Tick this box only if you want email updates. You can unsubscribe using the link shown after signup or in any automatic reminder.">
-                    <input id="updates-consent" name="consent" type="checkbox" required />
+                  <Field id="updates-email" label={ps.email} required><input id="updates-email" name="email" type="email" autoComplete="email" maxLength={254} required /></Field>
+                  <Field id="updates-country" label={ps.country} required><input id="updates-country" name="country" autoComplete="country-name" maxLength={150} required /></Field>
+                  <Field id="updates-state" label={ps.state} required><input id="updates-state" name="state" autoComplete="address-level1" maxLength={150} required /></Field>
+                  <Field id="updates-city" label={ps.city} required><input id="updates-city" name="city" autoComplete="address-level2" maxLength={150} required /></Field>
+                  <p>{ps.languageNotice}</p>
+                  <p id="updates-privacy">{ps.consentInfo} {ps.privacyIntro} <Link to="/privacy-policy">{ps.privacyPolicy}</Link>.</p>
+                  <Field id="updates-consent" label={ps.consentCheckbox} required>
+                    <input id="updates-consent" name="consent" type="checkbox" aria-describedby="updates-privacy" required />
                   </Field>
                 </>
               )}
             </>
           )}
+          {token && renewing && <p>{ps.renewNotice}</p>}
+          {!certificate && !token && <p>{ps.requiredFields}</p>}
           <button className="tp-btn" disabled={busy}>
             {busy
               ? ps.wait || 'Please wait...'
               : certificate
               ? ps.verifyBtn || 'Verify certificate'
               : token
-              ? ps.unsubscribeBtn || 'Confirm unsubscribe'
+              ? (renewing ? ps.renewBtn : ps.unsubscribeBtn)
               : ps.subscribeBtn || 'Subscribe'}
           </button>
-          <p role="status">{message}</p>
-          {unsubscribe && (
-            <p>
-              {ps.saveUnsubscribe || 'Save your'}{' '}
-              <a href={unsubscribe}>{ps.unsubscribeLink || 'unsubscribe link'}</a>{' '}
-              {ps.manageSubscription || 'for managing this subscription.'}
-            </p>
-          )}
           {result && (
             <dl className="tp-dl">
               {Object.entries(result).map(([key, value]) => (
@@ -121,6 +111,13 @@ export default function ProjectServices({ certificate = false }) {
             </dl>
           )}
         </form>
+        <div role="status">
+          {message && <p>{message}</p>}
+          {unsubscribe && <p>{ps.subscribedDetail} {ps.saveUnsubscribe}{' '}
+            <a href={unsubscribe}>{ps.unsubscribeLink}</a> {ps.manageSubscription}</p>}
+          {!certificate && completed && !unsubscribe && <p><Link to="/get-updated">{ps.subscribeAgain}</Link></p>}
+          {!certificate && completed && <Link to="/">{ps.returnHome}</Link>}
+        </div>
         {certificate && (
           <p>
             {ps.certOnlyNotice ||

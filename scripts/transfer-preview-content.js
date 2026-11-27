@@ -2,13 +2,31 @@ import {readFile,writeFile} from 'node:fs/promises';
 import {pathToFileURL} from 'node:url';
 import pg from 'pg';
 import {isDeepStrictEqual} from 'node:util';
+import {createHash} from 'node:crypto';
 import {pool} from '../server/db.js';
 import {translationSources} from '../server/translations.js';
 import {defaultReviewType} from '../shared/translation-review.js';
 import {translationPage} from '../shared/translation-workspace.js';
 import {cleanDeploymentContent,isTestingEvent,translationImportStatus,deploymentEvent,registrationSourceKey} from '../shared/deployment-content.js';
 
-const recordKinds=['organisations','content_pages','faqs','learning_resources'];
+const recordKinds=['organisations','directory_services','content_pages','faqs','learning_resources'];
+const legacyCategories=['healthcare','services','financial','equipment','support-group'];
+function legacyDirectoryServices(organisation) {
+ if (!Array.isArray(organisation.services)) return [];
+ const isSupportGroup = label => /support[ -]*group/i.test(label);
+ const isGroup = organisation.category === 'support-group';
+ const types = organisation.services.length ? [...organisation.services] : [isGroup || organisation.support_group ? 'Support Group' : 'Other'];
+ if (organisation.support_group && !isGroup && !types.some(isSupportGroup)) types.push('Support Group');
+ return [...new Set(types.map(type => type.trim()).filter(Boolean))].map(service_type => {
+  const category = isGroup || isSupportGroup(service_type) ? 'support-group'
+   : legacyCategories.includes(organisation.category) ? organisation.category : 'information';
+  return {
+   ...organisation, organisation_id: organisation.id, category, service_type, description: organisation.specialist_field,
+   id: createHash('md5').update(`legacy-directory-service:${organisation.id}:${category}:${service_type}`).digest('hex'),
+   address: null, city: null, state: null, postcode: null,
+  };
+ });
+}
 const jsonFile=(path,data)=>writeFile(path,JSON.stringify(data,null,2),{mode:0o600,flag:'wx'});
 export async function exportContent(db){
  const exists=(await db.query("SELECT to_regclass('learn_events_content') AS name")).rows[0].name;
@@ -20,7 +38,7 @@ export async function exportContent(db){
  // Existing registration configuration is unverified test setup. Never export it.
  const registration=[];
  const records={};
- for(const kind of recordKinds)records[kind]=(await db.query("SELECT * FROM "+kind+" WHERE publication_status='published' AND review_status<>'archived'"+(kind==='organisations'?' AND NOT is_example':''))).rows
+ for(const kind of recordKinds)records[kind]=(await db.query("SELECT * FROM "+kind+" WHERE publication_status='published' AND review_status<>'archived'"+(kind==='organisations'?' AND NOT is_example':kind==='directory_services'?' AND id IN (SELECT id FROM published_directory)':''))).rows
   .filter(r=>!r.activity_id||ids.includes(r.activity_id));
  const bundle={version:1,registrationPolicy:'closed-until-admin-reviewed',exportedAt:new Date().toISOString(),cms:cleanDeploymentContent(cms),activities,registration,records,
   translations:(await db.query('SELECT * FROM translation_entries')).rows,
@@ -78,8 +96,14 @@ export async function importContent(db,bundle,{adminEmail,apply=false,backupPath
   }
   // Ignore registration settings even in older bundles. Missing settings mean closed,
   // and avoid falsely classifying an unreviewed event as free or paid.
-  for(const kind of recordKinds)for(const r of bundle.records?.[kind]||[]){
+  const records={...bundle.records};
+  records.directory_services ??= (records.organisations || []).filter(r => !r.is_example).flatMap(legacyDirectoryServices);
+  for(const kind of recordKinds)for(const r of records[kind]||[]){
    if(r.is_example||r.activity_id&&!ids.includes(r.activity_id))continue;
+   if(kind==='organisations' && Array.isArray(r.services) && legacyCategories.includes(r.category)){
+    report.records+=await insertMissing(db,kind,{...r,category:'Unspecified'});
+    continue;
+   }
    report.records+=await insertMissing(db,kind,r);
   }
   for(const f of bundle.files||[])if(f.kind!=='payment-evidence')report.files+=await insertMissing(db,'files',{...f,owner_id:actor.id,data:Buffer.from(f.data,'base64')});

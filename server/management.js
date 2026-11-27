@@ -5,6 +5,8 @@ import { body, currentUser, digest, fail } from "./auth.js";
 import { isAllowedOrigin } from "./origin.js";
 import { decision } from "./decisions.js";
 import { recordTypes } from "../shared/admin-records.js";
+import { adminRecordQuery } from "./admin-record-filters.js";
+import { contactSettings, saveContactSettings } from "./contact-settings.js";
 import {
     subscriberAuditTable,
     subscriberPool,
@@ -32,20 +34,27 @@ export async function managementHandler(req, res, url, send) {
     if (req.method === "POST" && !isAllowedOrigin(req.headers.origin)) {
         fail("Origin not allowed", 403);
     }
+    if (url.pathname === "/api/admin/contact-settings") {
+        if (req.method === "GET") return send(res, 200, await contactSettings(pool));
+        if (req.method === "POST") return send(res, 200, await saveContactSettings(pool, await body(req), user.id));
+        fail("Method not allowed", 405);
+    }
     if (
         url.pathname === "/api/admin/subscribers/export" && req.method === "GET"
     ) {
+        const admin = url.searchParams.get("records") === "1";
         const rows =
             (await subscriberPool.query(
-                audienceQuery(Object.fromEntries(url.searchParams)),
+                admin
+                    ? adminRecordQuery("subscribers", "subscribers", url.searchParams, { exportAll: true })
+                    : audienceQuery(Object.fromEntries(url.searchParams)),
             )).rows;
         res.writeHead(200, {
             "Content-Type": "text/csv; charset=utf-8",
-            "Content-Disposition":
-                'attachment; filename="get-updated-brevo.csv"',
+            "Content-Disposition": admin ? 'attachment; filename="subscriber-records.csv"' : 'attachment; filename="get-updated-brevo.csv"',
             "Cache-Control": "no-store",
         });
-        return res.end(subscriberCsv(rows));
+        return res.end(subscriberCsv(rows, { admin }));
     }
     if (
         url.pathname === "/api/admin/subscribers/sync" && req.method === "POST"
@@ -232,11 +241,15 @@ export async function managementHandler(req, res, url, send) {
         ? subscriberTransaction
         : transaction;
     if (req.method === "GET") {
+        if (kind === "organisations" && url.searchParams.get("choices") === "1") {
+            const { rows } = await recordsPool.query("SELECT id,name FROM organisations ORDER BY name,id");
+            return send(res, 200, rows);
+        }
         return send(
             res,
             200,
             (await recordsPool.query(
-                `SELECT * FROM ${config.table} ORDER BY id DESC LIMIT 500`,
+                adminRecordQuery(kind, config.table, url.searchParams),
             )).rows,
         );
     }
@@ -257,6 +270,7 @@ export async function managementHandler(req, res, url, send) {
             if (
                 ![
                     "organisations",
+                    "directory_services",
                     "learning_resources",
                     "faqs",
                     "content_pages",
@@ -269,6 +283,9 @@ export async function managementHandler(req, res, url, send) {
                     [kind, id],
                 )).rowCount
             ) fail("Previously published records must be archived");
+            if (kind === "organisations" && (await db.query(
+                "SELECT 1 FROM directory_services WHERE organisation_id=$1 LIMIT 1", [id],
+            )).rowCount) fail("This organisation has service listings. Archive the organisation to retain them.");
             await db.query(`DELETE FROM ${config.table} WHERE id=$1`, [id]);
             await decision(
                 db,
@@ -322,6 +339,13 @@ export async function managementHandler(req, res, url, send) {
             }
             values[name] = v;
         }
+        if (kind === "directory_services") {
+            if (!/^[a-f\d]{8}(?:-[a-f\d]{4}){3}-[a-f\d]{12}$/i.test(values.organisation_id) ||
+                !(await db.query("SELECT 1 FROM organisations WHERE id=$1 FOR KEY SHARE", [values.organisation_id])).rowCount) {
+                fail("Choose an existing organisation");
+            }
+            values.group_type = values.category === "support-group" ? values.group_type || null : null;
+        }
         if ("review_status" in values) {
             if (values.review_status === "archived") {
                 values.publication_status = "unpublished";
@@ -353,7 +377,7 @@ export async function managementHandler(req, res, url, send) {
                     );
                 }
             }
-            if (kind !== "faqs") {
+            if (!["faqs", "directory_services"].includes(kind)) {
                 values.status = values.review_status === "archived"
                     ? "archived"
                     : values.publication_status === "published"
@@ -368,10 +392,11 @@ export async function managementHandler(req, res, url, send) {
             (!values.consent_at || !values.name || !values.city ||
                 !values.state)
         ) fail("Name, locality and opt-in consent evidence are required");
+        if (kind === "subscribers" && !values.country && (!old || old.country)) fail("Country is required");
         if (kind === "enquiries") {
             if (values.status !== "new" && !values.admin_comment?.trim()) {
                 fail(
-                    "Add a follow-up note before marking an enquiry in progress or closed",
+                    "Add a follow-up note before marking an enquiry in progress or responded",
                 );
             }
             if (values.status === "follow-up" && old.status !== "follow-up") {

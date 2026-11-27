@@ -15,10 +15,12 @@ export async function translationSources(db=pool,content=null){
  sourceLeaves(activities,'activities',sources);
  const settings=(await db.query("SELECT s.activity_id AS id,s.fee,s.instructions,s.general_instructions FROM event_registration_settings s JOIN activities a ON a.id=s.activity_id WHERE a.published_at IS NOT NULL AND a.status IN ('published','completed','verified','archived')")).rows;
  sourceLeaves(settings,'registration',sources);
- for(const [kind,fields]of Object.entries({content_pages:'id,title,body',faqs:'id,question,answer',learning_resources:'id,title,description,audience',organisations:'id,name,services,eligibility,fees,opening_hours,volunteer_details'})){
-  const rows=(await db.query(`SELECT ${fields} FROM ${kind} WHERE publication_status='published' AND review_status<>'archived' AND language='English' ${kind==='organisations'?'AND NOT is_example':''}`)).rows;
+ for(const [kind,fields]of Object.entries({content_pages:'id,title,body',faqs:'id,question,answer',learning_resources:'id,title,description,audience'})){
+  const rows=(await db.query(`SELECT ${fields} FROM ${kind} WHERE publication_status='published' AND review_status<>'archived' AND language='English'`)).rows;
   sourceLeaves(rows,'records/'+kind,sources);
  }
+ sourceLeaves((await db.query("SELECT DISTINCT organisation_id AS id,name FROM published_directory")).rows,'records/organisations',sources);
+ sourceLeaves((await db.query("SELECT id,service_type,description,eligibility,fees,opening_hours,volunteer_details FROM published_directory WHERE language='English'")).rows,'records/directory_services',sources);
  return sources;
 }
 export async function translationCatalogue(){

@@ -30,7 +30,8 @@ test('review digest matches Maintenance and claims one Brevo send per Malaysia d
   try {
    await db.query('BEGIN');
    await db.query(`
-    CREATE TEMP TABLE organisations (name text, review_status text, next_review_at timestamptz);
+    CREATE TEMP TABLE organisations (name text, review_status text, next_review_at timestamptz, id uuid DEFAULT gen_random_uuid());
+    CREATE TEMP TABLE directory_services (organisation_id uuid, service_type text, review_status text, next_review_at timestamptz);
     CREATE TEMP TABLE learning_resources (title text, review_status text, next_review_at timestamptz);
     CREATE TEMP TABLE content_pages (LIKE learning_resources);
     CREATE TEMP TABLE faqs (question text, review_status text, next_review_at timestamptz);
@@ -58,7 +59,7 @@ test('review digest matches Maintenance and claims one Brevo send per Malaysia d
    assert.equal((await runReviewReminder({ ...options, env: {} })).status, 'disabled');
    assert.equal((await runReviewReminder(options)).status, 'nothing-due');
    await db.query(`
-    INSERT INTO organisations VALUES
+    INSERT INTO organisations(name,review_status,next_review_at) VALUES
      ('Clinic', 'current', '2020-01-01T19:00:00Z'),
      ('Archived clinic', 'archived', '2020-01-01'),
      ('Future clinic', 'current', '2099-01-01');
@@ -74,7 +75,7 @@ test('review digest matches Maintenance and claims one Brevo send per Malaysia d
 
    assert.deepEqual((await maintenanceCounts(db)).map(row => row.count), [1, 1, 2, 1]);
    assert.deepEqual(await runReviewReminder({ ...options, dryRun: true }), { status: 'previewed', count: 4 });
-   assert.match(preview[0], /Clinic \| Directory listing \| 2 Jan 2020/);
+   assert.match(preview[0], /Clinic \| Organisation \| 2 Jan 2020/);
    assert.match(preview[0], /Learning guide \| Learning resource \| No due date set/);
    assert.match(preview[0], /About dementia \| Content page/);
    assert.match(preview[0], /What is dementia\? \| FAQ/);

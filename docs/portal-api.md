@@ -42,7 +42,7 @@ Use separate browser profiles or an incognito session when testing trainer/admin
 | Events and workshops | Admin creation of webinars, DCS programmes and project events; edit/reschedule; optional trainer assignment; completion records |
 | Content and records | Directory, learning resources, FAQs and website text; source/language/review dates, correct/unpublish/archive, removal of never-published drafts |
 | Users and access | Enable/disable accounts, suspend certification, official certificate references, internal admin invitations; prevents self-disable of admin |
-| Project records | Subscriber consent/locality/language, unsubscribe status and opted-in CSV export; DCS certificate references and consent; contact enquiry follow-up |
+| Project records | Subscriber consent and country/locality, unsubscribe status and opted-in CSV export; DCS certificate references and consent; contact enquiry follow-up |
 
 Publication of managed directory/content requires a source and last-reviewed date. Learning-resource publication also requires permission evidence and a resource link. Archived records are always unpublished. Public managed blocks read the same records on Find Help pages, online learning, FAQs and matching home/about/understanding slugs. Existing static editorial material is retained; it is not silently reclassified as verified database content. Only the database-backed blocks are edited through the new management screens. Use `home`, `about`, or `understand-dementia` for managed page updates.
 

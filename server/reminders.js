@@ -23,7 +23,6 @@ export function reminderSettings(env = process.env) {
 
 export function matchesAudience(activity, subscriber) {
  return !!subscriber.consent_at && !subscriber.unsubscribed_at
-  && (activity.language === 'All' || activity.language === subscriber.language)
   && (activity.mode === 'Online' || !activity.city?.trim() || activity.city.trim().toLowerCase() === subscriber.city?.trim().toLowerCase());
 }
 
@@ -70,7 +69,7 @@ async function candidates(website, db, activity, stage, now) {
 
  const registered = new Set(participants.map(p => p.email.trim().toLowerCase()));
  const { rows: subscribers } = await db.query(
-  'SELECT id,name,email,city,language,consent_at,unsubscribed_at FROM subscribers WHERE consent_at IS NOT NULL AND unsubscribed_at IS NULL ORDER BY id',
+  'SELECT id,name,email,city,consent_at,unsubscribed_at FROM subscribers WHERE consent_at IS NOT NULL AND unsubscribed_at IS NULL ORDER BY id',
  );
  const audience = subscribers.filter(s => matchesAudience(activity, s) && !registered.has(s.email.trim().toLowerCase()));
  if (stage !== 'last-call') return audience;

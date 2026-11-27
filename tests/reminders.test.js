@@ -15,11 +15,11 @@ const env={BREVO_API_KEY:'test-key',BREVO_SENDER_EMAIL:'sender@example.com',APP_
 const subscriber={id:randomUUID(),name:'Test <reader>',email:'test@example.com',language:'English',city:'Bintulu',consent_at:new Date()};
 const activity={id:randomUUID(),title:'<script>Test</script>',language:'English',mode:'Physical',city:'bintulu',starts_at:new Date(Date.now()+3600000),description:'<img src=x>',registration_link:'javascript:bad'};
 
-test('recipient selection requires consent, language and physical locality',()=>{
+test('recipient selection requires consent and physical locality',()=>{
  assert.equal(matchesAudience(activity,subscriber),true);
  assert.equal(matchesAudience(activity,{...subscriber,consent_at:null}),false);
  assert.equal(matchesAudience(activity,{...subscriber,unsubscribed_at:new Date()}),false);
- assert.equal(matchesAudience(activity,{...subscriber,language:'Chinese'}),false);
+ assert.equal(matchesAudience(activity,{...subscriber,language:'Chinese'}),true);
  assert.equal(matchesAudience(activity,{...subscriber,city:'Kuching'}),false);
  assert.equal(matchesAudience({...activity,mode:'Online'},{...subscriber,city:'Kuching'}),true);
 });
@@ -86,7 +86,7 @@ test('Brevo distinguishes ambiguous sends from explicit retryable rejection',asy
 });
 test('manual sync applies opt-outs first and never resets Brevo blocks',async()=>{
  const calls=[];await syncBrevo([subscriber],[{email:'out@example.com'}],{env,request:async(path,options)=>calls.push({path,...options})});
- assert.equal(calls[0].data.emailBlacklisted,true);
+ assert.deepEqual(calls[0].data.unlinkListIds,[12]);
  assert.equal(calls[1].data.emailBlacklisted,undefined);
  assert.deepEqual(calls[1].data.listIds,[12]);
  const query=audienceQuery({city:"x' OR true--"});
@@ -145,7 +145,6 @@ test('split-database reminder integration: idempotency, suppression, retry and c
   }
   const good=await addSubscriber('good@example.com');
   await addSubscriber('optout@example.com',{unsubscribed_at:new Date()});
-  await addSubscriber('other-language@example.com',{language:'Chinese'});
   await addSubscriber('other-city@example.com',{city:'Kuching'});
   await addSubscriber('blocked@example.com');
   async function addActivity(extra={}) {
