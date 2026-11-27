@@ -44,7 +44,7 @@ export default function Conducted({admin=false}) {
 
   return (
     <>
-      <h1>Completed workshops</h1>
+      <h1>Completed Activities</h1>
            <ul className="ev-grid">
         {eligible.map((a) => (
           <EventCard key={a.id} activity={a} wide={openId === a.id}

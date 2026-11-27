@@ -20,7 +20,8 @@ export default function AccountForm({role='trainer',signup=false,application=fal
     const errors={};
     for(const input of event.currentTarget.elements) {
     if(!input.name || input.disabled || input.validity?.valid) continue;
-    if(input.validity.valueMissing) errors[input.name]='Please enter '+({name:'your full name',email:'your email address',password:'your password',confirmPassword:'your password again',city:'your city',certificateRef:'your certificate reference',invitation:'your RCBC invitation code'}[input.name] || 'this information')+'.';
+    if(input.validity.valueMissing && input.type==='checkbox') errors[input.name]='Please confirm you have read the eligibility and teaching conditions.';
+    else if(input.validity.valueMissing) errors[input.name]='Please enter '+({name:'your full name',email:'your email address',password:'your password',confirmPassword:'your password again',city:'your city',certificateRef:'your certificate reference',invitation:'your RCBC invitation code'}[input.name] || 'this information')+'.';
     else if(input.validity.typeMismatch) errors[input.name]='Please enter a valid email address.';
     else if(input.validity.tooShort) errors[input.name]=`Use at least ${input.minLength} characters.`;
     else errors[input.name]='Please check this information.';
@@ -63,11 +64,11 @@ export default function AccountForm({role='trainer',signup=false,application=fal
   return <div className={(signIn||forgot||reset)?`account-shell account-shell-${role}`:'account-secondary'}>
   <section className="tp-card account-form-card">
   {(signIn||forgot||reset)&&<div className="account-form-intro"><Link to={forgot||reset?base:"/"} className="account-home-link">{forgot||reset?'← Back to sign in':'← Back to website'}</Link><span className="account-access-label">{role==='admin'?'ADMINISTRATOR ACCESS':'CERTIFIED TRAINER ACCESS'}</span></div>}
-  <h1>{forgot?'Forgot your password?':reset?'Choose a new password':signIn?'Welcome back':role==='admin'?'RCBC Administrative Dashboard':'Certified Trainer Portal'}{!signIn&&!forgot&&!reset&&`: ${application?'Check application':'Register'}`}</h1>
+  <h1>{forgot?'Forgot your password?':reset?'Choose a new password':signIn?'Welcome back':role==='admin'?'RCBC Administrative Dashboard':'Certified Trainer Portal'}{!signIn&&!forgot&&!reset&&`: ${application?'Check application':role==='trainer'?'Apply for Trainer Portal Access':'Register'}`}</h1>
   {signIn&&<p className="account-subtitle">Sign in to your {role==='admin'?'administrative dashboard':'trainer portal'}.</p>}
   {forgot&&<p className="account-subtitle">Enter the email address linked to your account. If an eligible account exists, RCBC will send a password reset link.</p>}
   {reset&&<p className="account-subtitle">Enter a new password of at least 12 characters. The reset link can only be used once.</p>}
-  {!forgot&&!reset&&<p>{role==='admin'?'Administrator access requires an invitation issued internally by RCBC.':'RCBC verifies identity and certification before granting portal access. Public visitors do not need an account.'}</p>}
+  {!forgot&&!reset&&<p>{role==='admin'?'Administrator access requires an invitation issued internally by RCBC.':(signup?'All applications are subject to verification and approval by the RCBC Alzheimer’s Care Project team. You will receive an application status update via email within 30 calendar days.':'RCBC verifies identity and certification before granting portal access. Public visitors do not need an account.')}</p>}
   <form onSubmit={submit} noValidate onChange={() => {setFieldErrors({});setMessage('');clearError();}}>
   {signup && <label className="tp-field"><span className="account-field-label">Full name <span className="required-marker" aria-label="required">*</span><FieldInfo label="Full name" example={fieldExample("name")} /></span><input name="name" aria-invalid={!!fieldErrors.name} aria-describedby={fieldErrors.name ? `${passwordId}-name-error` : undefined} required autoComplete="name" maxLength={150}/><FormFeedback id={`${passwordId}-name-error`}>{fieldErrors.name}</FormFeedback></label>}
 
@@ -95,7 +96,9 @@ export default function AccountForm({role='trainer',signup=false,application=fal
 
   {signup && role==='admin' && <label className="tp-field"><span className="account-field-label">RCBC invitation code <span className="required-marker" aria-label="required">*</span><FieldInfo label="RCBC invitation code" example={fieldExample("invitation")} /></span><input name="invitation" aria-invalid={!!fieldErrors.invitation} aria-describedby={fieldErrors.invitation ? `${passwordId}-invitation-error` : undefined} required defaultValue={params.get('invitation') || ''} autoComplete="off"/><FormFeedback id={`${passwordId}-invitation-error`}>{fieldErrors.invitation}</FormFeedback></label>}
 
-  <button className="tp-btn account-submit" disabled={busy || readingCertificate || (reset && !resetToken)}>{busy?'Please wait...':forgot?'Send reset link':reset?'Update password':application?'Check status':signup?'Submit registration':role==='admin'?'Sign in to dashboard':'Sign in to trainer portal'}</button>
+  {signup && role==='trainer' && <label className="tp-field account-ack"><span><input type="checkbox" name="eligibilityAck" required aria-invalid={!!fieldErrors.eligibilityAck} /> I have read the <Link to={base+'/eligibility'} target="_blank" rel="noopener">eligibility &amp; teaching conditions</Link>. <span className="required-marker" aria-label="required">*</span></span>{fieldErrors.eligibilityAck && <FormFeedback>{fieldErrors.eligibilityAck}</FormFeedback>}</label>}
+
+  <button className="tp-btn account-submit" disabled={busy || readingCertificate || (reset && !resetToken)}>{busy?'Please wait...':forgot?'Send reset link':reset?'Update password':application?'Check status':signup?(role==='trainer'?'Submit application':'Submit registration'):role==='admin'?'Sign in to dashboard':'Sign in to trainer portal'}</button>
 
   {application && request && ['submitted','returned'].includes(request.status) && <button className="tp-btn tp-btn-ghost" value="resubmit" disabled={busy || readingCertificate}>Submit amendments</button>}
   {(forgot||reset||!signIn) && <FormFeedback tone={message ? messageTone : 'warning'}>{reset&&!resetToken?'This password reset link is incomplete. Request a new link from the sign-in page.':message || sessionError}</FormFeedback>}
@@ -107,7 +110,7 @@ export default function AccountForm({role='trainer',signup=false,application=fal
   {signIn&&<Link to={base+'/forgot-password'}>Forgot password?</Link>}
   {(forgot||reset)&&<Link to={base}>Return to sign in</Link>}
   {!signIn&&!forgot&&!reset&&<Link to={base}>Sign in</Link>}
-  {role==='trainer' && !forgot && !reset && <><Link to={base+'/signup'}>Register as a trainer</Link><Link to={base+'/application'}>Check application / submit amendments</Link></>}
+  {role==='trainer' && !forgot && !reset && <><Link to={base+'/eligibility'}>Check your eligibility &amp; teaching conditions</Link><Link to={base+'/signup'}>Apply for Trainer Portal Access</Link><Link to={base+'/application'}>Check application / submit amendments</Link></>}
   </div>
 
   {signIn&&<p className="account-footer-note">{role==='admin'?'For authorised RCBC administrators. Please contact your RCBC coordinator if you need an invitation.':'Supporting dementia education and community care across Sarawak.'}</p>}

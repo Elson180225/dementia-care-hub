@@ -41,6 +41,7 @@ import MyProfile from "./trainer-portal/pages/MyProfile";
 import TrainerActivities from "./trainer-portal/pages/Activities";
 import Conducted from "./trainer-portal/pages/Conducted";
 import Hours from "./trainer-portal/pages/Hours";
+import Eligibility from "./trainer-portal/pages/Eligibility";
 
 /* Admin Dashboard */
 import AdminLayout from "./admin/AdminLayout";
@@ -75,6 +76,7 @@ function App() {
           <Route path="/get-updated" element={<ProjectServices />} />
           <Route path="/caregiver-support/verify-certificate" element={<ProjectServices certificate />} />
           <Route path="/trainer-portal/application" element={<main className="tp-page"><div className="tp-container"><AccountForm application /></div></main>} />
+          <Route path="/trainer-portal/eligibility" element={<main className="tp-page"><div className="tp-container"><Eligibility /></div></main>} />
           <Route path="/trainer-portal/signup" element={<main className="tp-page"><div className="tp-container"><AccountForm signup /></div></main>} />
           <Route path="/admin/signup" element={<main className="tp-page"><div className="tp-container"><AccountForm role="admin" signup /></div></main>} />
           <Route path="/trainer-portal/forgot-password" element={<main className="tp-page"><div className="tp-container"><AccountForm forgot /></div></main>} />
