@@ -596,15 +596,6 @@ function Header() {
               ))}
             </nav>
 
-            {/* GET SUPPORT */}
-            <Link
-              to="/find-help"
-              className="support-btn"
-              onClick={closeMobileMenu}
-            >
-              {t.header.getSupport}
-            </Link>
-
             {/* MOBILE MENU BUTTON */}
             <button
               type="button"
@@ -651,13 +642,6 @@ function Header() {
                 </details>
               ))}
 
-              <Link
-                to="/find-help"
-                className="mobile-support-link"
-                onClick={closeMobileMenu}
-              >
-                {t.header.getSupport}
-              </Link>
             </nav>
           )}
         </div>
