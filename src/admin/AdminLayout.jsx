@@ -38,6 +38,7 @@ export default function AdminLayout() {
       { to: "/admin/trainers", label: "Trainer Management", icon: "users" },
     ] },
     { label: "Community & communication", links: [
+      { to: "/admin/volunteers", label: "Volunteer Resource Pool", icon: "users" },
       { to: "/admin/enquiries-subscribers", label: "Enquiries & Subscribers", icon: "content" },
     ] },
     { label: "Reports & records", links: [

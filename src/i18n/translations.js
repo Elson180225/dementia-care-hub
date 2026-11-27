@@ -1,3 +1,4 @@
+import {applyCaregiverDraft} from "./caregiverDraft.js";
 import {publicCopy,addMissingCopy} from '../../shared/public-copy.js';
 import {inlineCopy} from './inlineCopy.js';
 import {addSupplementalCopy} from './supplementalCopy.js';
@@ -5146,3 +5147,5 @@ const draftTwoForms = {
 for (const [section, copy] of Object.entries(draftTwoForms)) {
   Object.assign(translations.en[section] ??= {}, copy);
 }
+
+applyCaregiverDraft(translations);
