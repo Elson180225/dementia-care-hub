@@ -20,7 +20,7 @@ export async function runReviewReminder({
  const dashboard = new URL('/admin', env.APP_BASE_URL);
  if (!['https:', 'http:'].includes(dashboard.protocol)) throw new Error('APP_BASE_URL must use HTTP or HTTPS');
  const day = reviewDay.format(now);
- const subject = 'Dementia Care Hub content review reminder';
+ const subject = 'Dementia Care Connect content review reminder';
  const textContent = [
   `${count} content item${count === 1 ? ' is' : 's are'} due for review.`,
   '',

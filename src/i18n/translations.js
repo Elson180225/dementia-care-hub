@@ -564,7 +564,7 @@ export const translations = {
         "noMatchingDesc": "We couldn't find any events matching your selected search query or filters.",
         "clearAllFilters": "Clear All Filters",
         "mediaHeadlines": "Sarawak Dementia Care in the Headlines",
-        "mediaDesc": "Major regional news articles and press features reporting on the Rotary HopeCare initiative, public dialogues, and train-the-trainer education.",
+        "mediaDesc": "Major regional news articles and press features reporting on the RCBC Hope Care initiative, public dialogues, and train-the-trainer education.",
         "registerGoogleForm": "Register via Google Form ↗"
       },
       "certifiedTrainersSection": {
@@ -1213,7 +1213,7 @@ export const translations = {
       "whatsapp": "Join Our WhatsApp Community",
       "organiser": "Our Organiser",
       "rcbc": "Rotary Club of Bintulu Central (RCBC)",
-      "rcbcSub": "Dementia Care Hub is an initiative of the Alzheimer's Care Project organised by RCBC.",
+      "rcbcSub": "Dementia Care Connect is an initiative of the Alzheimer's Care Project organised by RCBC.",
       "officialEmail": "Official RCBC Email",
       "website": "RCBC Official Website",
       "name": "Your Name",
@@ -1224,7 +1224,7 @@ export const translations = {
       "success": "Thank you! Your enquiry has been received.",
       "failure": "Something went wrong. Please try again or reach out to us directly.",
       "boundaryTitle": "Our service boundary",
-      "boundaryText": "Dementia Care Hub does not provide emergency, medical consultation or crisis support services.",
+      "boundaryText": "Dementia Care Connect does not provide emergency, medical consultation or crisis support services.",
       "boundaryHelp": "For external services, visit",
       "boundaryEvents": "For event registration, visit the relevant",
       "required": "(required)",
@@ -2267,7 +2267,7 @@ export const translations = {
         "noMatchingDesc": "Kami tidak dapat menemui sebarang acara yang sepadan dengan pertanyaan carian atau penapis yang dipilih.",
         "clearAllFilters": "Kosongkan Semua Penapis",
         "mediaHeadlines": "Penjagaan Demensia Sarawak Dalam Berita Utama",
-        "mediaDesc": "Laporan akhbar serantau utama dan liputan media mengenai inisiatif Rotary HopeCare, dialog awam, dan latihan kejurulatihan.",
+        "mediaDesc": "Laporan akhbar serantau utama dan liputan media mengenai inisiatif RCBC Hope Care, dialog awam, dan latihan kejurulatihan.",
         "registerGoogleForm": "Daftar melalui Google Form ↗"
       },
       "certifiedTrainersSection": {
@@ -2828,7 +2828,7 @@ export const translations = {
       "whatsapp": "Sertai Komuniti WhatsApp Kami",
       "organiser": "Penganjur Kami",
       "rcbc": "Kelab Rotary Bintulu Central (RCBC)",
-      "rcbcSub": "Dementia Care Hub adalah inisiatif di bawah Projek Penjagaan Alzheimer yang dianjurkan oleh RCBC.",
+      "rcbcSub": "Dementia Care Connect adalah inisiatif di bawah Projek Penjagaan Alzheimer yang dianjurkan oleh RCBC.",
       "officialEmail": "Emel Rasmi RCBC",
       "website": "Laman Web Rasmi RCBC",
       "name": "Nama Anda",
@@ -2839,7 +2839,7 @@ export const translations = {
       "success": "Terima kasih! Pertanyaan anda telah berjaya diterima.",
       "failure": "Ralat telah berlaku. Sila cuba lagi atau hubungi kami secara terus.",
       "boundaryTitle": "Had perkhidmatan kami",
-      "boundaryText": "Dementia Care Hub tidak menyediakan perkhidmatan kecemasan, perundingan perubatan atau sokongan krisis.",
+      "boundaryText": "Dementia Care Connect tidak menyediakan perkhidmatan kecemasan, perundingan perubatan atau sokongan krisis.",
       "boundaryHelp": "Untuk perkhidmatan luaran, layari",
       "boundaryEvents": "Untuk pendaftaran acara, layari",
       "required": "(diperlukan)",
