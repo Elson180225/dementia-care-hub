@@ -19,6 +19,7 @@ import LearnEvents, { PublicEventPage } from "./pages/LearnEvents";
 import PublicPageActions from "./components/PublicFeatures";
 import NotFound from "./pages/NotFound";
 import Contact from "./pages/Contact";
+import PolicyPage from "./pages/PolicyPage";
 import UnderstandDementia from "./pages/UnderstandDementia";
 import CaregiverSupport from "./pages/CaregiverSupport";
 import AboutProject from "./pages/AboutProject";
@@ -82,6 +83,8 @@ function App() {
           <Route path="/admin/reset-password" element={<main className="tp-page"><div className="tp-container"><AccountForm role="admin" reset /></div></main>} />
           <Route path="/about/contact" element={<Contact />} />
           <Route path="/contact" element={<Navigate to="/about/contact" replace />} />
+          <Route path="/privacy-policy" element={<PolicyPage kind="privacy" />} />
+          <Route path="/terms-of-use" element={<PolicyPage kind="terms" />} />
           {/* =========================
               HOME
           ========================== */}
