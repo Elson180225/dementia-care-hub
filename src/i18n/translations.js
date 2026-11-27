@@ -144,6 +144,9 @@ export const translations = {
       "projectTheme": "Understanding the Missing Pieces",
       "description": "Clear information, practical help and learning for people with dementia, their families and carers.",
       "browseTopics": "Browse topics ↓",
+      "findYourPath": "Find Your Path",
+      "understandButton": "Understanding Dementia",
+      "notSureGuide": "Not sure? Answer 4 quick questions",
       "facts": {
         "free": "Free to use",
         "languages": "English, Bahasa Malaysia and 中文",
@@ -163,12 +166,12 @@ export const translations = {
         "link": "Find Help & Support"
       },
       "pathway3": {
-        "title": "I am caring for someone",
-        "desc": "Guidance, training and support groups for carers.",
+        "title": "I am living with dementia or caring for someone",
+        "desc": "Practical guidance and support for people living with dementia, carers and families.",
         "link": "Caregiver Support"
       },
       "pathway4": {
-        "title": "I want to learn or take part",
+        "title": "I want to learn or participate",
         "desc": "Webinars, workshops and events you can join.",
         "link": "Education & Events"
       }
@@ -1862,7 +1865,7 @@ export const translations = {
       },
       "pathway3": {
         "number": "03",
-        "title": "Saya sedang menjaga seseorang",
+        "title": "Saya menghidap demensia atau sedang menjaga seseorang",
         "desc": "Panduan penjaga, latihan penjaga, kumpulan sokongan dan sumber bantuan penjaga yang berkaitan.",
         "link": "Sokongan Penjaga"
       },
@@ -3475,7 +3478,7 @@ export const translations = {
       },
       "pathway3": {
         "number": "03",
-        "title": "我正在照护身边的人",
+        "title": "我是失智症患者或正在照顾他人",
         "desc": "照护者实用指引、照护技能培训、同伴互助支持小组及相关照护资源。",
         "link": "照护者支持"
       },

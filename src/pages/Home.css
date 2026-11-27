@@ -1272,3 +1272,27 @@ button.hero-btn {
     transform: none;
   }
 }
+
+/* Small text link that reopens the first-visit welcome guide */
+.home-page .hero-guide-link {
+  display: inline-block;
+  margin-top: 18px;
+  padding: 4px 0;
+  border: 0;
+  background: none;
+  color: var(--color-gold-300);
+  font: inherit;
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  cursor: pointer;
+}
+
+.home-page .hero-guide-link:hover {
+  color: #ffffff;
+}
+
+.home-page .hero-guide-link:focus-visible {
+  outline: 3px solid var(--color-gold-300);
+  outline-offset: 3px;
+}
