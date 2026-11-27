@@ -2,6 +2,8 @@
 
 A platform supporting people living with dementia, caregivers and families, with public resources, event information and trainer/admin portals.
 
+> **Handing over to RCBC?** Start with the [Handover Guide](docs/HANDOVER.md): accounts to transfer, settings, deploying, backups, costs and known limitations.
+
 ## Local setup
 
 Install a current Node.js LTS release and PostgreSQL. From the project folder, install dependencies:
