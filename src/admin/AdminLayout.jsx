@@ -16,32 +16,41 @@ export default function AdminLayout() {
 
   const waiting = buildQueue(state).length;
 
-  // Grouped so related pages sit together: daily tasks, events, trainers, website.
+  // Grouped as RCBC's Admin Portal Draft 02 (section 24, Final Working Structure).
   const groups = [
-    { label: "Daily", links: [
+    { label: "Overview & approvals", links: [
       { to: "/admin", label: "Overview", end: true, icon: "overview" },
       { to: "/admin/review", label: "Approvals", icon: "approvals", count: waiting },
     ] },
-    { label: "Events", links: [
-      { to: "/admin/learn-events", label: "Events & learning", icon: "events" },
-      { to: "/admin/participants", label: "Event registrations & participants", icon: "participants" },
-      { to: "/admin/conducted", label: "Completed activities", icon: "completed" },
+    { label: "Content & resources", links: [
+      { to: "/admin/records", label: "Content & Resources", icon: "content" },
+      { to: "/admin/translations", label: "Language & Translations", icon: "content" },
     ] },
-    { label: "Trainers & access", links: [
-      { to: "/admin/contribution", label: "Trainer hours", icon: "hours" },
-      { to: "/admin/users", label: "Users", icon: "users" },
-    ] },
-    { label: "Website", links: [
-      { to: "/admin/translations", label: "Language & translations", icon: "content" },
-      { to: "/admin/records", label: "Content & records", icon: "content" },
+    { label: "Directory", links: [
       { to: "/admin/directory", label: "Directory Management", icon: "content" },
+    ] },
+    { label: "Education & events", links: [
+      { to: "/admin/learn-events", label: "Education & Events", icon: "events" },
+      { to: "/admin/participants", label: "Registrations & Participants", icon: "participants" },
+      { to: "/admin/conducted", label: "Completed Activities", icon: "completed" },
+    ] },
+    { label: "Training & trainers", links: [
+      { to: "/admin/trainers", label: "Trainer Management", icon: "users" },
+    ] },
+    { label: "Community & communication", links: [
       { to: "/admin/enquiries-subscribers", label: "Enquiries & Subscribers", icon: "content" },
+    ] },
+    { label: "Reports & records", links: [
+      { to: "/admin/contribution", label: "Trainer Hours & Reports", icon: "hours" },
+    ] },
+    { label: "Administration & security", links: [
+      { to: "/admin/users", label: "Users & Access", icon: "users" },
     ] },
   ];
 
   return (
     <PortalShell
-      eyebrow="RCBC Admin"
+      eyebrow="RCBC Admin Portal"
       title="Dementia Care Connect"
       userName={state.adminSession.name}
       onSignOut={() => dispatch({ type: "ADMIN_SIGN_OUT" })}

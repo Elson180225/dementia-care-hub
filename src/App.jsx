@@ -267,6 +267,7 @@ function App() {
   <Route path="translations" element={<Translations />} />
   <Route index element={<AdminOverview />} />
   <Route path="learn-events" element={<LearnEventsCMS />} />
+  <Route path="trainers" element={<LearnEventsCMS key="trainers" initialTab="trainers" />} />
   <Route path="participants" element={<Participants />} />
   <Route path="review" element={<ReviewQueue />} />
   <Route path="contribution" element={<Contribution />} />

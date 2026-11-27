@@ -8,8 +8,8 @@ import OutreachNewsAdmin from "./learn-events/OutreachNewsAdmin";
 import CertifiedTrainersAdmin from "./learn-events/CertifiedTrainersAdmin";
 import "../../trainer-portal/TrainerPortal.css";
 
-export default function LearnEventsCMS() {
-  const [activeTab, setActiveTab] = useState("sessions"); // sessions | online | physical | roadmap | outreach | trainers
+export default function LearnEventsCMS({ initialTab = "sessions" }) {
+  const [activeTab, setActiveTab] = useState(initialTab); // sessions | online | physical | roadmap | outreach | trainers
   const [content, setContent] = useState(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
