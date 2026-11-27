@@ -6,6 +6,8 @@ import { useLanguage } from '../i18n/LanguageContext';
 import { enquiryMessageLimit, enquiryTypes, validateEnquiry } from '../../shared/enquiry.js';
 import { contact as defaultContact } from '../data/contact';
 import './Contact.css';
+import HeroPhoto, { HeroWithPhoto } from "../components/HeroPhoto/HeroPhoto";
+import heroPhoto from "../assets/Group_Photo_2.png";
 
 function Channel({ href, title, children, pendingNote }) {
   const { t } = useLanguage();
@@ -88,7 +90,7 @@ export default function Contact() {
   }
 
   return <main className="contact-page">
-    <header className="contact-hero"><div className="contact-container"><p className="contact-kicker">{c.kicker || "ALZHEIMER’S CARE PROJECT"}</p><h1>{c.title || "Contact us"}</h1><p>{c.subtitle || "Project enquiries, community updates and connection with our organisers."}</p></div></header>
+    <header className="contact-hero"><div className="contact-container"><HeroWithPhoto photo={<HeroPhoto src={heroPhoto} alt="Alzheimer’s Care Project participants waving at a group session" />}><p className="contact-kicker">{c.kicker || "ALZHEIMER’S CARE PROJECT"}</p><h1>{c.title || "Contact us"}</h1><p>{c.subtitle || "Project enquiries, community updates and connection with our organisers."}</p></HeroWithPhoto></div></header>
     <div className="contact-container contact-grid">
       <section aria-labelledby="project-contact">
         <h2 id="project-contact">{c.projectContact}</h2>

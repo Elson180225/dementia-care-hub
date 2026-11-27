@@ -4,6 +4,8 @@ import { useLanguage } from "../../i18n/LanguageContext";
 
 import "./GovernmentFinancial.css";
 import ReadMore from "../../components/ReadMore/ReadMore";
+import HeroPhoto, { HeroWithPhoto } from "../../components/HeroPhoto/HeroPhoto";
+import heroPhoto from "../../assets/banner-healthy-ageing.jpg";
 
 const categories = [
   "All",
@@ -151,7 +153,7 @@ function GovernmentFinancial() {
       ====================================================== */}
 
       <section className="government-hero">
-        <div className="government-container">
+        <div className="government-container"><HeroWithPhoto photo={<HeroPhoto src={heroPhoto} alt="An older couple walking together in a park" />}>
           <span className="government-kicker">
             {gf.kicker || "Find Help & Support"}
           </span>
@@ -161,7 +163,7 @@ function GovernmentFinancial() {
           </h1>
 
           <ReadMore text={gf.subtitle || "Find information about official government programmes, financial support and other external resources that may be relevant to you or your family."} />
-        </div>
+        </HeroWithPhoto></div>
       </section>
 
       {/* =====================================================
