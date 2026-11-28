@@ -5,10 +5,15 @@ import { enquiryStatuses, enquiryTypes } from '../../../shared/enquiry.js';
 import { serviceCategories } from '../../../shared/directory.js';
 import { recordTypes } from "../../../shared/admin-records.js";
 import ContactSettings from '../ContactSettings';
+import ListingRequestManager from '../ListingRequestManager';
 import EmailInventory from '../EmailInventory';
 import SubscriberAudience from '../SubscriberAudience';
 
 const ABOUT_SECTIONS = { overview: 'About the project', mission: 'What we aim to do', journey: 'Our journey', organiser: 'Organiser', partner: 'Partner roles', advisors: 'Advisors', supported: 'Supporting organisations', acknowledgements: 'Our thanks' };
+const ADVANCE_PLANNING = {
+  slug: "advance-plannng",
+  title: "Advance Planning",
+};
 const enquiryStatus = value => enquiryStatuses[value] || value;
 const modules = {
   website: { title: 'Content & records', kinds: ['learning_resources', 'faqs', 'content_pages', 'dcs_certificates'] },
@@ -279,10 +284,60 @@ export default function Records({ module = 'website' }) {
         )}
       </div>
       {kind === 'content_pages' && <section className="tp-card"><h3>About the Project</h3><p>Add approved text to each section as it becomes available. Published entries replace the matching section in the selected language. Use separate entries for partners and contributors.</p><div className="tp-actions">{Object.entries(ABOUT_SECTIONS).map(([id,title]) => <button className="tp-btn tp-btn-ghost" key={id} onClick={() => { setErrors({}); setEditing({values:{...toForm(config),slug:`about-${id}`,title}}); }}>Add {title.toLowerCase()}</button>)}</div></section>}
+
+{kind === 'content_pages' && (
+  <section className="tp-card">
+    <h3>Advance Planning</h3>
+
+    <p>
+      Manage the Advance Planning information displayed
+      on the Find Help & Support page.
+      Only publish content approved by RCBC.
+    </p>
+
+    <div className="tp-actions">
+      <button
+        type="button"
+        className="tp-btn"
+        onClick={() => {
+          const existing = rows.find(
+            row =>
+              row.slug === ADVANCE_PLANNING.slug &&
+              row.language === "English"
+          );
+
+          setErrors({});
+
+          setEditing(
+            existing
+              ? {
+                  id: existing.id,
+                  values: toForm(config, existing),
+                }
+              : {
+                  values: {
+                    ...toForm(config),
+                    ...ADVANCE_PLANNING,
+                    language: "English",
+                  },
+                }
+          );
+        }}
+      >
+        Manage Advance Planning
+      </button>
+    </div>
+  </section>
+)}
+
       {module !== 'website' && <RecordFilters key={kind + filterReset} kind={kind} filters={filters} onApply={applyFilters}
         onReset={() => { applyFilters({}); setFilterReset(current => current + 1); }} />}
       {kind === 'subscribers' && <SubscriberAudience />}
       {kind === 'enquiries' && <ContactSettings />}
+      {module === 'directory' &&
+        kind === 'organisations' && (
+          <ListingRequestManager />
+      )}
       {notice && <p className="tp-note" role="status">{notice}</p>}
       {loading && <p role="status">Loading records…</p>}
 

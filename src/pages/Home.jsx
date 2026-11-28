@@ -80,7 +80,11 @@ function Home() {
   const step = (by) => setActive((index) => (index + by + PATHWAYS.length) % PATHWAYS.length);
 
   return (
-    <main className="home-page">
+    <main
+  id="main-content"
+  className="home-page"
+  tabIndex={-1}
+>
       <PublishedRecords kind="content_pages" slug="home" title={t.inlineCopy.projectUpdates} />
 
       {/* HERO: one message, one main button */}

@@ -31,6 +31,7 @@ import SupportServices from "./pages/find-help/SupportServices";
 import GovernmentFinancial from "./pages/find-help/GovernmentFinancial";
 import EquipmentPractical from "./pages/find-help/EquipmentPractical";
 import ResourceFinder from "./pages/find-help/ResourceFinder";
+import ListingRequest from "./pages/find-help/ListingRequest";
 
 /* Trainer Portal */
 import AccountForm from "./trainer-portal/AccountForm";
@@ -59,13 +60,58 @@ function PublicOnly({ children }) {
   return pathname.startsWith("/admin") || pathname.startsWith("/trainer-portal") ? null : children;
 }
 
-import { LanguageProvider } from "./i18n/LanguageContext";
+import {
+  LanguageProvider,
+  useLanguage
+} from "./i18n/LanguageContext";
+
+
+function SkipToContent() {
+  const { language } = useLanguage();
+
+  const labels = {
+    en: "Skip to main content",
+    ms: "Langkau ke kandungan utama",
+    zh: "跳至主要内容"
+  };
+
+  function skipToMain(event) {
+    const main = document.querySelector("main");
+
+    if (!main) return;
+
+    event.preventDefault();
+
+    if (!main.hasAttribute("tabindex")) {
+      main.setAttribute("tabindex", "-1");
+    }
+
+    main.focus({ preventScroll: true });
+
+    main.scrollIntoView({
+      behavior: "auto",
+      block: "start"
+    });
+  }
+
+  return (
+    <a
+      href="#main-content"
+      className="skip-to-content"
+      onClick={skipToMain}
+    >
+      {labels[language] || labels.en}
+    </a>
+  );
+}
+
 
 function App() {
   return (
     <BrowserRouter>
       <LanguageProvider>
         <PublicOnly>
+          <SkipToContent />
           <Header />
           <TranslationNotice />
           <WelcomeGuide />
@@ -154,6 +200,16 @@ function App() {
           <Route
             path="/find-help/resource-finder"
             element={<ResourceFinder />}
+          />
+
+          <Route
+            path="/find-help/apply-for-listing"
+            element={<ListingRequest key="apply" requestType="apply" />}
+          />
+
+          <Route
+            path="/find-help/update-listing"
+            element={<ListingRequest key="update" requestType="update" />}
           />
 
           {/* =========================

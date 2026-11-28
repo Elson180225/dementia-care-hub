@@ -882,4 +882,82 @@
   }
 }
 
+
+/* SCRUM-228 — Advance Planning */
+
+.find-help-planning {
+  padding: 64px 0;
+  background: linear-gradient(135deg, #f5effb, #fff9ed);
+  scroll-margin-top: 150px;
+}
+
+.find-help-planning-card {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 18px;
+  padding: clamp(24px, 5vw, 48px);
+  border: 1px solid #e3d9ed;
+  border-left: 5px solid #8050ae;
+  border-radius: 24px;
+  background: #ffffff;
+  box-shadow: 0 12px 35px rgba(69, 32, 109, 0.07);
+  overflow-wrap: anywhere;
+}
+
+.find-help-planning-card > span {
+  color: #62358e;
+  font-size: 14px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.find-help-planning-card h2 {
+  margin: 0 0 16px;
+  color: #45206d;
+  font-size: clamp(30px, 4vw, 46px);
+  line-height: 1.15;
+}
+
+.find-help-planning-card p {
+  max-width: 850px;
+  margin: 12px 0;
+  color: #514a59;
+  font-size: 17px;
+  line-height: 1.8;
+  white-space: pre-line;
+}
+
+.find-help-planning-card a {
+  color: #592d85;
+  font-weight: 700;
+  text-underline-offset: 4px;
+}
+
+.find-help-planning-card button:focus-visible,
+.find-help-planning-card a:focus-visible {
+  outline: 3px solid #592d85;
+  outline-offset: 4px;
+}
+
+@media (max-width: 700px) {
+  .find-help-planning {
+    padding: 36px 0;
+    scroll-margin-top: 100px;
+  }
+
+  .find-help-planning-card {
+    padding: 24px;
+    border-radius: 18px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .find-help-planning * {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
 }

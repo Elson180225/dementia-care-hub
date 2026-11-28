@@ -205,6 +205,8 @@ function AssessmentHealthcare() {
             >
               {t.header?.menu?.whatIsDementia || "Learn about dementia"}
             </Link>
+            <a href="#healthcare-pathways" className="assessment-secondary-button"><Trans>Healthcare pathways</Trans></a>
+            <a href="#caregiver-health" className="assessment-secondary-button"><Trans>Caregiver health</Trans></a>
           </div>
         </div>
       </section>
@@ -326,6 +328,7 @@ function AssessmentHealthcare() {
                         ? "assessment-check-item-done"
                         : ""
                     }`}
+                    aria-pressed={checked}
                     onClick={() =>
                       toggleItem(item.id)
                     }
@@ -355,7 +358,7 @@ function AssessmentHealthcare() {
           HEALTHCARE PATHWAYS
       ====================================================== */}
 
-      <section className="assessment-pathways">
+      <section className="assessment-pathways" id="healthcare-pathways">
         <div className="assessment-container">
           <div className="assessment-section-heading">
             <span>
@@ -379,6 +382,7 @@ function AssessmentHealthcare() {
                   ? "assessment-pathway-active"
                   : ""
               }
+              aria-pressed={activePathway === "government"}
               onClick={() =>
                 setActivePathway("government")
               }
@@ -393,6 +397,7 @@ function AssessmentHealthcare() {
                   ? "assessment-pathway-active"
                   : ""
               }
+              aria-pressed={activePathway === "private"}
               onClick={() =>
                 setActivePathway("private")
               }
@@ -482,6 +487,7 @@ function AssessmentHealthcare() {
                   </p>
                 </div>
               </div>
+              <p className="assessment-pathway-next"><a href="#geko"><Trans>Learn about GEKO community geriatric care</Trans> →</a></p>
             </div>
           )}
 
@@ -549,8 +555,62 @@ function AssessmentHealthcare() {
                   </p>
                 </div>
               </div>
+              <p className="assessment-pathway-next"><Trans>Ask the provider about consultation costs, insurance coverage and follow-up before booking.</Trans></p>
             </div>
           )}
+        </div>
+      </section>
+
+      {/* SCRUM-225: additional healthcare guidance */}
+      <section className="assessment-related assessment-health-extra" id="geko">
+        <div className="assessment-container">
+          <div className="assessment-section-heading">
+            <span><Trans>Community geriatric care</Trans></span>
+            <h2>GEKO (Geriatrik Komuniti)</h2>
+            <p><Trans>GEKO is a community geriatrics initiative in Sarawak that supports older adults through coordinated primary care, including assessment of frailty and everyday functioning.</Trans></p>
+          </div>
+          <div className="assessment-health-grid">
+            <article className="assessment-provider-card">
+              <div className="assessment-provider-visual"><AssessmentVisualIcon type="assessment" /></div>
+              <h3><Trans>What GEKO can help with</Trans></h3>
+              <ul>
+                <li><Trans>Assessment of mobility, memory and everyday functioning.</Trans></li>
+                <li><Trans>Individual care planning and follow-up.</Trans></li>
+                <li><Trans>Coordination with healthcare professionals and caregivers.</Trans></li>
+              </ul>
+            </article>
+            <article className="assessment-provider-card">
+              <div className="assessment-provider-visual"><AssessmentVisualIcon type="clinic" /></div>
+              <h3><Trans>How to get started</Trans></h3>
+              <p><Trans>Ask your local government health clinic whether GEKO services are available and whether an assessment or referral is appropriate. Availability and eligibility may vary.</Trans></p>
+              <p><a href="https://pubmed.ncbi.nlm.nih.gov/39082778/" target="_blank" rel="noopener noreferrer"><Trans>Read the published GEKO study (2024)</Trans> ↗</a></p>
+              <Link to="/find-help/resource-finder?category=healthcare"><Trans>Explore healthcare resources</Trans> →</Link>
+            </article>
+          </div>
+        </div>
+      </section>
+      <section className="assessment-pathways assessment-health-extra" id="caregiver-health">
+        <div className="assessment-container">
+          <div className="assessment-section-heading">
+            <span><Trans>Looking after yourself</Trans></span>
+            <h2><Trans>Caregiver health and wellbeing</Trans></h2>
+            <p><Trans>Your own health matters too. Caring for someone with dementia can be physically and emotionally demanding.</Trans></p>
+          </div>
+          <div className="assessment-health-grid">
+            <article className="assessment-provider-card">
+              <div className="assessment-provider-visual"><AssessmentVisualIcon type="support" /></div>
+              <h3><Trans>Look after your physical health</Trans></h3>
+              <p><Trans>Make time for regular meals, rest, movement and your own healthcare appointments.</Trans></p>
+            </article>
+            <article className="assessment-provider-card">
+              <div className="assessment-provider-visual"><AssessmentVisualIcon type="followup" /></div>
+              <h3><Trans>Ask for help early</Trans></h3>
+              <p><Trans>Share caring responsibilities where possible. Speak with a healthcare professional if stress, low mood or sleep difficulties persist.</Trans></p>
+              <Link to="/caregiver-support"><Trans>Explore caregiver guidance</Trans> →</Link>
+              <br />
+              <Link to="/caregiver-support/support-groups"><Trans>Find support groups</Trans> →</Link>
+            </article>
+          </div>
         </div>
       </section>
 
