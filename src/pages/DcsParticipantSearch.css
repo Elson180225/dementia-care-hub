@@ -1,1 +1,243 @@
-.dcs-public{max-width:1100px;margin:auto;padding:3rem 1.25rem;color:var(--color-purple-900,#352047)}.dcs-public header{max-width:760px;margin-bottom:2rem}.dcs-public h1{font-size:clamp(2rem,4vw,3rem);line-height:1.15}.dcs-public p{line-height:1.7}.dcs-public form{display:flex;flex-wrap:wrap;align-items:end;gap:1rem;background:#f6f2fa;border:1px solid #e5d9f2;border-radius:16px;padding:1.5rem}.dcs-public label{flex:1;min-width:min(100%,180px);font-size:1rem}.dcs-public input,.dcs-public select{display:block;box-sizing:border-box;width:100%;font:inherit;padding:.75rem;margin-top:.5rem;border:1px solid #cdb6e4;border-radius:8px;background:white}.dcs-public button{font:inherit;background:var(--color-purple-700,#59308d);color:white;border:0;border-radius:8px;padding:.8rem 1.2rem;cursor:pointer}.dcs-public button:disabled{opacity:.5;cursor:default}.dcs-results{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,280px),1fr));gap:1.25rem;margin:1.5rem 0}.dcs-results article{padding:1.5rem;border:1px solid #e5d9f2;border-radius:16px;background:#fff}.dcs-results dt{font-weight:700;margin-top:.8rem}.dcs-results dd{margin:.25rem 0;overflow-wrap:anywhere}.dcs-public nav{display:flex;flex-wrap:wrap;gap:1rem;align-items:center}.dcs-public :focus-visible{outline:3px solid #ae7b22;outline-offset:3px}
+.dcs-registry-page {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 3rem 1.25rem;
+  color: var(--color-purple-900, #352047);
+}
+
+.dcs-registry-page header {
+  max-width: 760px;
+  margin-bottom: 2rem;
+}
+
+.dcs-registry-page h1 {
+  font-size: clamp(2rem, 4vw, 3rem);
+  line-height: 1.15;
+}
+
+.dcs-registry-page p {
+  line-height: 1.7;
+}
+
+.dcs-hub {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr));
+  gap: 1rem;
+  margin: 0 0 2rem;
+}
+
+.dcs-hub-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  min-height: 100%;
+  padding: 1.25rem 1.35rem;
+  border: 1px solid #e5d9f2;
+  border-radius: 16px;
+  background: #fff;
+  color: inherit;
+  text-decoration: none;
+  line-height: 1.55;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.dcs-hub-card strong {
+  font-size: 1.05rem;
+  color: var(--color-purple-900, #352047);
+}
+
+.dcs-hub-card span {
+  flex: 1;
+  color: #5a4965;
+}
+
+.dcs-hub-card em {
+  font-style: normal;
+  font-weight: 700;
+  color: var(--color-purple-700, #59308d);
+}
+
+.dcs-hub-card:not(.is-current):hover {
+  border-color: #b896d8;
+  box-shadow: 0 8px 20px rgba(69, 32, 109, 0.08);
+}
+
+.dcs-hub-card.is-current {
+  border-color: var(--color-purple-600, #5d2f91);
+  box-shadow: inset 4px 0 0 var(--color-purple-600, #5d2f91);
+  background: #fff;
+}
+
+.dcs-hub-card.is-current em {
+  color: #5a4965;
+  font-weight: 600;
+}
+
+.dcs-search-form {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  padding: 1.5rem;
+  border: 1px solid #e5d9f2;
+  border-radius: 16px;
+  background: #f6f2fa;
+}
+
+.dcs-search-form > label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  flex: 1;
+  min-width: min(100%, 180px);
+  font-size: 1rem;
+  line-height: 1.5;
+  font-weight: 600;
+}
+
+.dcs-search-form :is(input, select) {
+  display: block;
+  box-sizing: border-box;
+  width: 100%;
+  font: inherit;
+  height: 48px;
+  min-height: 48px;
+  padding: 0.65rem 0.75rem;
+  margin: 0;
+  line-height: 1.5;
+  border: 1px solid #cdb6e4;
+  border-radius: 8px;
+  background: #fff;
+}
+
+.dcs-search-form > button {
+  min-height: 48px;
+  box-sizing: border-box;
+  line-height: 1.5;
+  font: inherit;
+  font-weight: 700;
+  background: var(--color-purple-700, #59308d);
+  color: #fff;
+  border: 0;
+  border-radius: 8px;
+  padding: 0.8rem 1.2rem;
+  cursor: pointer;
+}
+
+.dcs-search-form > button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.dcs-verify-form {
+  display: block;
+  max-width: 640px;
+  margin: 1.5rem 0 0;
+  padding: 1.5rem 1.75rem;
+  border: 1px solid #e5d9f2;
+  border-radius: 16px;
+  background: #fff;
+}
+
+.dcs-verify-form .tp-field {
+  margin: 1.25rem 0;
+}
+
+.dcs-verify-form .field-label-row {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+}
+
+.dcs-verify-form .tp-field > label {
+  display: block;
+  margin-bottom: 0.35rem;
+  font-weight: 700;
+}
+
+.dcs-verify-form .required-marker {
+  display: inline;
+  white-space: nowrap;
+  color: #a12121;
+  font-weight: 700;
+}
+
+.dcs-verify-form .tp-field :is(input, select, textarea) {
+  width: 100%;
+}
+
+.dcs-verify-form .tp-btn {
+  margin-top: 0.5rem;
+  min-height: 48px;
+}
+
+.dcs-verify-foot {
+  max-width: 640px;
+  margin-top: 0.75rem;
+  font-size: 0.95rem;
+  color: #5a4965;
+}
+
+.dcs-results {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
+  gap: 1.25rem;
+  margin: 1.5rem 0;
+}
+
+.dcs-results article {
+  padding: 1.5rem;
+  border: 1px solid #e5d9f2;
+  border-radius: 16px;
+  background: #fff;
+}
+
+.dcs-results dt {
+  font-weight: 700;
+  margin-top: 0.8rem;
+}
+
+.dcs-results dd {
+  margin: 0.25rem 0;
+  overflow-wrap: anywhere;
+}
+
+.dcs-registry-page nav.dcs-pagination {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: center;
+}
+
+.dcs-registry-page :focus-visible {
+  outline: 3px solid #ae7b22;
+  outline-offset: 3px;
+}
+
+/* Legacy alias when main keeps dcs-public */
+.dcs-public.dcs-registry-page {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 3rem 1.25rem;
+}
+
+@media (max-width: 600px) {
+  .dcs-search-form {
+    padding: 1rem;
+  }
+
+  .dcs-search-form > label {
+    flex-basis: 100%;
+    min-width: 0;
+  }
+
+  .dcs-search-form > button {
+    width: 100%;
+  }
+
+  .dcs-verify-form .tp-btn {
+    width: 100%;
+  }
+}

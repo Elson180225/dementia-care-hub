@@ -20,5 +20,16 @@ export const dcsPublicCopy={
  dcsRegistryPagination:'Search result pages',
  dcsRegistryPrevious:'Previous',
  dcsRegistryPage:'Page',
- dcsRegistryNext:'Next'
+ dcsRegistryNext:'Next',
+ dcsRegistryHubLabel:'Choose how to use the registry',
+ dcsRegistryVerifyCardTitle:'Verify a certificate',
+ dcsRegistryVerifyCardDesc:'Enter the name and certificate number exactly as printed. No browsing — you receive only a yes/no style result.',
+ dcsRegistryVerifyCardCta:'Open certificate verification',
+ dcsRegistryVerifyCardCurrent:'You are on certificate verification',
+ dcsRegistryBrowseCardTitle:'Search the public register',
+ dcsRegistryBrowseCardDesc:'Browse training records that the participant agreed may appear on the website. Use filters to narrow results.',
+ dcsRegistryBrowseCardCta:'You are on public search',
+ dcsRegistryBrowseCardCurrent:'You are on public search',
+ dcsRegistryBrowseLink:'Search public register instead',
+ dcsRegistryBrowseCardLinkCta:'Search the public register'
 };

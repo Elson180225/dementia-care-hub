@@ -1,7 +1,7 @@
 import {test,expect} from '@playwright/test';
 import {workbookXlsx} from '../../server/education-reports.js';
 const id='00000000-0000-4000-8000-000000000010';
-const activity={id,title:'Approved family workshop',starts_at:'2099-12-01T01:00:00Z',status:'published',mode:'Physical',type:'Workshop',venue:'Community Hall',city:'Kuching',organiser_kind:'independent',organiser_name:'Community organiser',speaker:'Approved Speaker',speaker_intro:'An approved speaker introduction.',qa_text:'Question: What will I learn? Answer: Approved caregiving information.'};
+const activity={id,title:'Approved family workshop',starts_at:'2099-12-01T01:00:00Z',status:'published',programme_id:'dcs-family',mode:'Physical',type:'Workshop',venue:'Community Hall',city:'Kuching',organiser_kind:'independent',organiser_name:'Community organiser',speaker:'Approved Speaker',speaker_intro:'An approved speaker introduction.',qa_text:'Question: What will I learn? Answer: Approved caregiving information.'};
 const admin={id:'admin',name:'Test Administrator',role:'admin'};
 test.beforeEach(async({page})=>{
  await page.route('**/api/**',async route=>{
@@ -11,7 +11,7 @@ test.beforeEach(async({page})=>{
    '/api/public/dcs-registry':{rows:[{name:'Approved Participant',programme:'DCS-Family',training_location:'Kuching',attendance_date:'2026-11-01',certificate_ref:null}],total:1,pageSize:20},
    '/api/admin/dcs-registry':{rows:[],total:0},'/api/public/learn-events-content':{physicalEducation:{programmes:[{id:'dcs-family',code:'DCS-Family',title:'Family programme',suitableFor:'Families',highlights:[],availability:'available'}]}},
    '/api/admin/learn-events-content':{onlineEducation:{},physicalEducation:{programmes:[]},events:{},certifiedTrainers:{},_revision:1},
-   '/api/admin/webinar-library':[{...activity,content_approval_status:'pending',updated_at:'2026-11-01T00:00:00Z'}],
+   '/api/admin/webinar-library':[{...activity,starts_at:'2025-10-01T01:00:00Z',status:'completed',content_approval_status:'pending',updated_at:'2026-11-01T00:00:00Z'}],
   };await route.fulfill({json:responses[url.pathname]??[]});
  });
 });
@@ -29,6 +29,9 @@ test('event page exposes approved Q&A, organiser and both registration choices',
 });
 test('public training search shows approved limited fields on mobile',async({page})=>{
  await page.setViewportSize({width:390,height:844});await page.goto('/learn-events/dcs-participants');
+ const programme=page.getByRole('combobox');
+ await expect(programme.locator('option')).toHaveCount(4);
+ await programme.selectOption('DCS-Family');
  await page.getByRole('button',{name:'Search registry',exact:true}).click();
  await expect(page.getByRole('heading',{name:'Approved Participant'})).toBeVisible();
  await expect(page.getByText('No certificate issued yet')).toBeVisible();
@@ -100,4 +103,14 @@ test('trainer review shows correction notes only on request', async ({page}) => 
  await page.getByRole('button',{name:'Request correction'}).click();
  await expect(page.getByRole('textbox',{name:'What should the trainer correct?'})).toBeVisible();
  await expect(page.getByRole('button',{name:'Send correction request'})).toBeDisabled();
+});
+
+test('a DCS course links its scheduled intake to the activity page', async ({page})=>{
+ await page.goto('/learn-events/physical-education?programme=dcs-family');
+ await expect(page.getByRole('heading',{name:'Family programme',exact:true})).toBeVisible();
+ await expect(page.getByRole('heading',{name:'ADFM Training Partnership'})).toBeVisible();
+ const intake=page.locator('#programme-intakes').getByRole('link').filter({hasText:/intake details/i});
+ await expect(intake).toHaveAttribute('href','/learn-events/event/'+id);
+ await intake.click();
+ await expect(page.getByRole('heading',{name:activity.title,exact:true})).toBeVisible();
 });

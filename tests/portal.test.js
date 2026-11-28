@@ -195,6 +195,11 @@ test('PostgreSQL portal and administrative workflows',{skip:!process.env.TEST_DA
   assert.equal(ok(await request('public/learning_resources')).data.length,1);
   ok(await request('admin/records/learning_resources',{id:resourceId,values:{...resource,publication_status:'unpublished'}},admin.cookie));
   assert.equal(ok(await request('public/learning_resources')).data.length,0);
+  const qaOnly=record('learning_resources',{title:'Grouped Q&A pack',resource_type:'Q&A',activity_id:activity.id,qa_folder:'Oral Health Webinar',url:'',copyright_permission:'RCBC permission recorded'});
+  const qaId=ok(await request('admin/records/learning_resources',{values:qaOnly},admin.cookie)).data.id;
+  assert.equal(ok(await request('public/learning_resources')).data.filter(r=>r.id===qaId).length,1);
+  assert.equal(ok(await request('public/learning_resources')).data.find(r=>r.id===qaId).qa_folder,'Oral Health Webinar');
+  ok(await request('admin/records/learning_resources',{values:{...record('learning_resources',{title:'Broken Q&A',resource_type:'Q&A',activity_id:activity.id,url:''}),publication_status:'published',review_status:'current',source:'RCBC',last_reviewed_at:'2026-10-18T10:00',copyright_permission:'RCBC'}},admin.cookie),400);
   ok(await request('admin/records/content_pages',{values:record('content_pages',{slug:'home',title:'Project note',body:'Plain text update'})},admin.cookie));
   assert.equal(ok(await request('public/content_pages')).data[0].body.text,'Plain text update');
   const enquiry={id:randomUUID(),name:'Visitor',email:'visitor@test.example',type:'Collaboration',message:'Please contact me about the project.',website:'',startedAt:Date.now()-3000};

@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {normalizeRecord,previewRecords,parseRegistryCsv,registryCsv,publicRecord,searchOptions,columns,assertCurrentRecord,reviewChoices,requiredFields} from '../shared/dcs-registry.js';
+import {normalizeRecord,previewRecords,parseRegistryCsv,registryCsv,publicRecord,searchOptions,columns,assertCurrentRecord,reviewChoices,requiredFields,registryPendingReview} from '../shared/dcs-registry.js';
 import {dcsRegistryHandler} from '../server/dcs-registry.js';
 import {pool} from '../server/db.js';
 import {Readable} from 'node:stream';
@@ -48,7 +48,13 @@ test('untrusted approval and internal fields never enter public output or normal
 });
 test('pagination and filters are bounded and validated',()=>{
  assert.equal(searchOptions(new URLSearchParams('page=2')).offset,20);
+ assert.equal(searchOptions(new URLSearchParams('pending=1')).pending,true);
+ assert.throws(()=>searchOptions(new URLSearchParams('pending=yes')));
  for(const query of ['page=0','page=1.5','page=100001','status=valid','year=abc','year=26','year=2026.5','location='+ 'x'.repeat(201),'q='+ 'x'.repeat(201)]) assert.throws(()=>searchOptions(new URLSearchParams(query)));
+});
+test('pending review helper matches triple approval rule',()=>{
+ assert.equal(registryPendingReview({verified:false,public_consent:true,approved_public_display:true}),true);
+ assert.equal(registryPendingReview({verified:true,public_consent:true,approved_public_display:true}),false);
 });
 test('admin endpoints reject unauthenticated requests and public endpoint rejects writes',async()=>{
  for(const method of ['GET','POST']) await assert.rejects(dcsRegistryHandler({method,headers:{}},{},new URL('http://localhost/api/admin/dcs-registry'),()=>assert.fail()),e=>e.status===401);

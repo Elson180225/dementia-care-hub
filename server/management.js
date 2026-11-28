@@ -26,6 +26,11 @@ function validUrl(value) {
         fail("Links must be valid HTTP or HTTPS URLs");
     }
 }
+function resourceUrl(value) {
+    if (!value) return;
+    if (/^\/api\/files\/[a-f0-9-]{36}$/.test(value)) return;
+    validUrl(value);
+}
 export async function managementHandler(req, res, url, send) {
     const user = await currentUser(req);
     if (user?.role !== "admin") fail("Admin access required", user ? 403 : 401);
@@ -300,7 +305,10 @@ export async function managementHandler(req, res, url, send) {
                 if (Array.isArray(type) && !type.includes(v)) {
                     fail("Choose a valid " + label);
                 }
-                if (type === "url") validUrl(v);
+                if (type === "url") {
+                    if (kind === "learning_resources") resourceUrl(v);
+                    else validUrl(v);
+                }
                 if (
                     type === "email" && v &&
                     !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)
@@ -346,15 +354,23 @@ export async function managementHandler(req, res, url, send) {
                 }
                 if (
                     kind === "learning_resources" &&
-                    (!values.copyright_permission || !values.url)
+                    (!values.copyright_permission ||
+                        (!values.url && !(values.resource_type === "Q&A" && values.qa_folder)))
                 ) {
                     fail(
-                        "Permission evidence and resource URL are required before publication",
+                        "Permission evidence is required. Published Q&A may use a Grouped Q&A folder instead of an external link, or provide an uploaded file or HTTPS URL.",
                     );
                 }
                 if(kind==='learning_resources'){
-                    const activity=(await db.query("SELECT id FROM activities WHERE id=$1 AND content_approval_status='approved' AND published_at IS NOT NULL",[values.activity_id])).rows[0];
-                    if(!activity||values.review_status!=='current')fail('Link an approved published activity and mark the resource reviewed before publication.');
+                    if(!values.activity_id)fail('Choose the original webinar or event this material belongs to.');
+                    const activity=(await db.query("SELECT id,content_approval_status,title FROM activities WHERE id=$1",[values.activity_id])).rows[0];
+                    if(!activity)fail('The linked activity was not found.');
+                    if(activity.content_approval_status!=='approved')fail('Complete publication review for the linked activity (“'+activity.title+'”) under Publication & webinar library before publishing this resource.');
+                    if(!(await db.query('SELECT id FROM activities WHERE id=$1 AND published_at IS NOT NULL',[values.activity_id])).rows[0])fail('The linked activity must have a publication date before this resource can go public.');
+                    if(values.review_status!=='current'){
+                        if(!values.last_reviewed_at)fail('Add a last-reviewed date before publishing.');
+                        values.review_status='current';
+                    }
                 }
             }
             if (kind !== "faqs") {

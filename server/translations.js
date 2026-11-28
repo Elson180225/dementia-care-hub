@@ -6,6 +6,7 @@ import {body,currentUser,fail} from './auth.js';
 import {isAllowedOrigin} from './origin.js';
 import {translationPages,translationPage,friendlyField} from '../shared/translation-workspace.js';
 import {canBulkApprove} from '../shared/bulk-translation-approval.js';
+import {mergePublishedTranslations} from '../shared/published-bundled-translations.js';
 import {randomUUID} from 'node:crypto';
 
 export async function translationSources(db=pool,content=null){
@@ -33,7 +34,9 @@ export async function translationsHandler(req,res,url,send){
   const language=url.searchParams.get('language');
   if(!reviewLanguages.includes(language))return send(res,200,{approved:{}});
   const sources=await translationCatalogue(),rows=(await pool.query("SELECT source_key,source_text,translated_text FROM translation_entries WHERE language=$1 AND status='approved'",[language])).rows;
-  return send(res,200,{approved:Object.fromEntries(rows.filter(r=>sources[r.source_key]===r.source_text).map(r=>[r.source_key,{source:r.source_text,text:r.translated_text}]))});
+  const dbApproved=Object.fromEntries(rows.filter(r=>sources[r.source_key]===r.source_text).map(r=>[r.source_key,{source:r.source_text,text:r.translated_text}]));
+  const approved=mergePublishedTranslations(dbApproved,sources,language);
+  return send(res,200,{approved});
  }
  const user=await currentUser(req);if(!user)fail('Sign in to review translations.',401);
  const scopes=(await pool.query('SELECT scope FROM translation_experts WHERE user_id=$1',[user.id])).rows.map(r=>r.scope);

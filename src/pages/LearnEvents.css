@@ -334,9 +334,21 @@
 
 .resource-card-top {
   display: flex;
+  flex-wrap: wrap;
   justify-content: space-between;
   align-items: center;
+  gap: 8px 12px;
   margin-bottom: 12px;
+}
+
+.resource-card-link {
+  display: inline-block;
+  margin-top: 12px;
+  font-weight: 600;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.2em;
+  text-decoration-skip-ink: auto;
 }
 
 .resource-type {
@@ -394,9 +406,15 @@
   border-radius: 9px;
   font-size: 0.9rem;
   font-weight: 700;
+  line-height: 1.2;
   text-decoration: none;
   cursor: pointer;
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  box-sizing: border-box;
+}
+
+.resource-action-btn svg {
+  flex-shrink: 0;
 }
 
 .resource-btn-video {
@@ -449,11 +467,18 @@
   letter-spacing: -0.02em;
 }
 
-.dcs-section-header p {
+.dcs-section-header p,
+.dcs-pathway-line {
   color: var(--color-neutral-600);
   font-size: 1.05rem;
   line-height: 1.55;
   margin: 0;
+}
+
+.dcs-pathway-line {
+  margin-top: 8px;
+  color: var(--color-purple-700);
+  font-weight: 600;
 }
 
 /* 3-Track Tab Switcher Cards */
@@ -549,7 +574,14 @@
   font-size: 0.9rem;
   color: var(--color-neutral-600);
   line-height: 1.4;
-  flex: 1;
+}
+
+.tab-card-role {
+  margin: 10px 0 0;
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  color: var(--color-purple-700);
 }
 
 .tab-active-indicator {
@@ -1369,7 +1401,7 @@
 .qa-modal-backdrop {
   position: fixed;
   inset: 0;
-  z-index: 6000;
+  z-index: 15000;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1416,26 +1448,123 @@
   font-size: clamp(1.4rem, 3vw, 2rem);
 }
 
+.qa-modal-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px 20px;
+  margin-bottom: 18px;
+}
+
 .qa-modal-heading p {
-  margin: 0 0 18px;
+  margin: 0;
   color: var(--color-neutral-500);
+}
+
+.qa-zoom-controls {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: var(--color-neutral-100);
+}
+
+.qa-zoom-btn {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border: 0;
+  border-radius: 50%;
+  font-size: 1.25rem;
+  line-height: 1;
+  color: var(--color-purple-600);
+  background: #fff;
+  cursor: pointer;
+}
+
+.qa-zoom-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.qa-zoom-label {
+  min-width: 3.5rem;
+  text-align: center;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--color-neutral-600);
 }
 
 .qa-viewer {
   position: relative;
   display: flex;
-  align-items: center;
+  align-items: stretch;
   justify-content: center;
   min-height: 300px;
   border-radius: 10px;
   background: var(--color-neutral-100);
 }
 
-.qa-viewer img {
+.qa-viewer-stage {
+  flex: 1;
+  overflow: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 300px;
+  max-height: min(70vh, 720px);
+  margin: 0 52px;
+  padding: 16px;
+}
+
+.qa-viewer-stage img {
   display: block;
-  max-width: calc(100% - 110px);
-  max-height: 65vh;
+  max-width: 100%;
+  max-height: 100%;
   object-fit: contain;
+  transform-origin: center center;
+  transition: transform 0.15s ease;
+}
+
+.event-detail-resources .resource-action-btn {
+  max-width: 100%;
+  margin-top: 10px;
+}
+
+.event-resource-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.event-resource-item {
+  margin: 0 0 18px;
+  padding: 0 0 18px;
+  border-bottom: 1px solid #e8dfef;
+}
+
+.event-resource-item:last-child {
+  margin-bottom: 0;
+  padding-bottom: 0;
+  border-bottom: 0;
+}
+
+.event-resource-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.event-resource-link {
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+  text-decoration-skip-ink: auto;
 }
 
 .qa-nav {

@@ -13,3 +13,12 @@ export function eventTime(value){
 export function eventDateTime(value){
  return date(value)?eventDate(value)+', '+eventTime(value):'Date and time to be confirmed';
 }
+export function eventTimeRange(start,end,plannedHours){
+ const s=date(start);
+ if(!s)return 'Time to be confirmed';
+ const finish=end?date(end):Number(plannedHours)>0?new Date(s.getTime()+Number(plannedHours)*3600000):null;
+ const from=eventTime(start);
+ if(!finish||finish<=s)return from;
+ const to=finish.toLocaleTimeString('en-GB',{timeZone:zone,hour:'numeric',minute:'2-digit',hour12:true});
+ return from+' – '+to;
+}

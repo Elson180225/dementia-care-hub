@@ -100,7 +100,7 @@ function getMenuItems(m,u) {
           label: m.upcomingCalendar,
           path: "/learn-events/upcoming-calendar",
         },
-        {label: m.dcsParticipantSearch || 'Public DCS Participant Search', path:'/learn-events/dcs-participants'},
+        {label: m.dcsTrainingCertification || 'DCS training & certification', path:'/learn-events/dcs-participants'},
       ],
     },
     {

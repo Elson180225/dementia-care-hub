@@ -34,7 +34,7 @@ function Footer() {
           <div className="footer-links-group">
             <h3>{f.explore}</h3>
             <Link to="/learn-events/dcs-participants">
-              {t.header.menu.dcsParticipantSearch || 'Public DCS Participant Search'}
+              {t.header.menu.dcsTrainingCertification || 'DCS training & certification'}
             </Link>
 
             <Link to="/understand-dementia">{m.understand}</Link>

@@ -1,3 +1,4 @@
+import {webinarReview} from '../shared/webinar-library.js';
 import {trainerGovernanceAction,checkTeachingAssignments} from './trainer-governance.js';
 import {profileSnapshot,individualHours,activityTiming,organiserRecord} from '../shared/trainer-governance.js';
 import { pool, transaction } from './db.js';
@@ -46,8 +47,8 @@ export async function snapshot(user) {
  ORDER BY l.id DESC LIMIT 300`,[admin,user.id])).rows};
 }
 export async function portalHandler(req,res,url,send) {
- if(req.method==='GET' && url.pathname==='/api/trainers') return send(res,200,(await pool.query('SELECT * FROM public_trainers')).rows);
- if(req.method==='GET' && url.pathname==='/api/activities') return send(res,200,(await pool.query("SELECT (SELECT jsonb_build_object('paid',s.paid,'enabled',s.enabled,'fee',s.fee) FROM event_registration_settings s WHERE s.activity_id=a.id) AS registration_settings,a.content_approval_status,a.activity_reference,a.organiser_kind,a.organiser_name,a.postponed_at,a.postponement_reason,a.ends_at,a.speaker_name AS speaker,a.speaker_intro,a.source_url,a.recording_url AS \"recordingLink\",a.qa_url,a.qa_text,a.programme_id,a.id,a.title,a.starts_at,a.type,a.mode,a.venue,a.city,a.language,a.audience,a.description,a.poster_url,CASE WHEN a.cancelled_at IS NULL THEN a.registration_link ELSE NULL END AS registration_link,a.status,a.cancelled_at,a.cancellation_reason,a.registration_deadline,a.capacity,coalesce((SELECT jsonb_agg(jsonb_build_object('trainerId',t.trainer_id,'role',t.role,'name',u.name)) FROM activity_trainers t LEFT JOIN users u ON u.id=t.trainer_id WHERE t.activity_id=a.id),'[]') AS trainers FROM activities a WHERE a.status IN ('published','completed','verified','archived') AND a.published_at IS NOT NULL AND a.content_approval_status='approved'")).rows);
+ if(req.method==='GET' && url.pathname==='/api/trainers') return send(res,200,(await pool.query("SELECT v.*, CASE WHEN v.teaching_allowed THEN p.approved_snapshot->>'public_teaching_conditions' END AS public_teaching_conditions FROM public_trainers v JOIN trainer_profiles p ON p.id=v.id")).rows);
+ if(req.method==='GET' && url.pathname==='/api/activities') return send(res,200,(await pool.query("SELECT (SELECT jsonb_build_object('paid',s.paid,'enabled',s.enabled,'fee',s.fee) FROM event_registration_settings s WHERE s.activity_id=a.id) AS registration_settings,a.content_approval_status,a.activity_reference,a.organiser_kind,a.organiser_name,a.postponed_at,a.postponement_reason,a.speaker_name AS speaker,a.speaker_intro,a.source_url,a.recording_url AS \"recordingLink\",a.qa_url,a.qa_text,a.programme_id,a.id,a.title,a.starts_at,a.ends_at,a.planned_hours,a.type,a.mode,a.venue,a.city,a.language,a.audience,a.description,a.poster_url,CASE WHEN a.cancelled_at IS NULL THEN a.registration_link ELSE NULL END AS registration_link,a.status,a.cancelled_at,a.cancellation_reason,a.registration_deadline,a.capacity,coalesce((SELECT jsonb_agg(jsonb_build_object('trainerId',t.trainer_id,'role',t.role,'name',u.name)) FROM activity_trainers t LEFT JOIN users u ON u.id=t.trainer_id WHERE t.activity_id=a.id),'[]') AS trainers FROM activities a WHERE a.status IN ('published','completed','verified','archived') AND a.published_at IS NOT NULL AND a.content_approval_status='approved'")).rows);
  const user=await currentUser(req); if(!user) fail('Please sign in',401);
  if(req.method==='GET' && url.pathname==='/api/portal/trainers') return send(res,200,(await pool.query("SELECT u.id,u.name,p.city,p.language,p.teaching_allowed,p.teaching_permissions FROM users u JOIN trainer_profiles p ON p.id=u.id WHERE p.certified_status='certified' AND p.archived_at IS NULL ORDER BY u.name")).rows);
  if(req.method==='GET' && url.pathname==='/api/portal') return send(res,200,await snapshot(user));
@@ -193,7 +194,15 @@ export async function portalHandler(req,res,url,send) {
     ON CONFLICT(id) DO UPDATE SET title=excluded.title,starts_at=excluded.starts_at,type=excluded.type,mode=excluded.mode,venue=excluded.venue,language=excluded.language,audience=excluded.audience,description=excluded.description,registration_link=excluded.registration_link,planned_hours=excluded.planned_hours,city=excluded.city,poster_url=excluded.poster_url
     WHERE activities.created_by=$2 OR $15::boolean RETURNING id`,[id,user.id,a.title,a.date,a.type,a.mode,a.venue,a.language,a.audience,a.description,a.registrationLink,a.plannedHours,a.city || '',a.posterUrl || null,admin]);
    await db.query('UPDATE activities SET ends_at=$2,organiser_kind=$3,organiser_name=$4 WHERE id=$1',[id,timing.end,organiser.kind,organiser.name]);
-   if(existing)await db.query("UPDATE activities SET content_approval_status='pending',content_approved_by=NULL,content_approved_at=NULL WHERE id=$1",[id]);
+   if(admin && a.publicationReview) {
+    let review;
+    try { review=webinarReview(a.publicationReview); } catch(error) { fail(error.message); }
+    await db.query(`UPDATE activities SET source_url=$2,speaker_name=$3,speaker_intro=$4,recording_url=$5,qa_url=$6,qa_text=$7,
+      content_approval_status=$8,content_approved_by=CASE WHEN $8='approved' THEN $9::uuid END,
+      content_approved_at=CASE WHEN $8='approved' THEN now() END WHERE id=$1`,
+    [id,review.source_url,review.speaker_name,review.speaker_intro,review.recording_url,review.qa_url,review.qa_text,review.content_approval_status,user.id]);
+    await logDecision(db,user,'activities',id,review.content_approval_status==='approved'?'content-approved':'content-unpublished','Activity publication review',existing?.content_approval_status,review.content_approval_status);
+   } else if(existing)await db.query("UPDATE activities SET content_approval_status='pending',content_approved_by=NULL,content_approved_at=NULL WHERE id=$1",[id]);
    if(!saved.rowCount) fail('Only the activity owner can edit this record',403);
    if(admin){
     const programmeId=String(a.programmeId||'').trim();
@@ -263,9 +272,15 @@ export async function portalHandler(req,res,url,send) {
   }
   if(action.type==='ACTIVITY_DELETE') {
    if(!admin && (existing.created_by!==user.id || !['draft','returned'].includes(existing.status))) fail('Only draft activities can be deleted',403);
+   await db.query('DELETE FROM event_confirmation_deliveries WHERE participant_id IN (SELECT id FROM event_participants WHERE activity_id=$1)',[id]);
+   await db.query('DELETE FROM participant_reminders WHERE participant_id IN (SELECT id FROM event_participants WHERE activity_id=$1)',[id]);
+   await db.query('DELETE FROM event_attendance_reminders WHERE activity_id=$1',[id]);
+   await db.query('DELETE FROM event_participants WHERE activity_id=$1',[id]);
+   await db.query('DELETE FROM participant_imports WHERE activity_id=$1',[id]);
+   await db.query('DELETE FROM event_registration_settings WHERE activity_id=$1',[id]);
+   await db.query('UPDATE learning_resources SET activity_id=NULL WHERE activity_id=$1',[id]);
+   await db.query('UPDATE dcs_registry_records SET activity_id=NULL WHERE activity_id=$1',[id]);
    await db.query('DELETE FROM completions WHERE activity_id=$1',[id]);
-   await db.query('DELETE FROM evidence_records WHERE activity_id=$1',[id]);
-   await db.query('UPDATE cpd_records SET activity_id=NULL WHERE activity_id=$1',[id]);
    await db.query('DELETE FROM activity_trainers WHERE activity_id=$1',[id]);
    await db.query('DELETE FROM activities WHERE id=$1',[id]);
    if(admin) await logDecision(db,user,'activities',id,'deleted','',existing.status,'deleted');

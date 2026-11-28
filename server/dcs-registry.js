@@ -27,7 +27,8 @@ export async function dcsRegistryHandler(req,res,url,send) {
  if(req.method==='GET') {
   let o;try{o=searchOptions(url.searchParams);}catch(e){fail(e.message);}
   const args=[o.q,o.programme,publicAccess?'':o.status,o.location,o.year];
-  const where=` WHERE ($1='' OR strpos(lower(p.name),lower($1))>0 OR strpos(lower(coalesce(r.certificate_ref,'')),lower($1))>0) AND ($2='' OR r.programme=$2) AND ($3='' OR r.status=$3) AND ($4='' OR r.training_location=$4) AND ($5='' OR extract(year FROM r.attendance_date)::text=$5)`+(publicAccess?' AND r.verified AND r.public_consent AND r.approved_public_display':'');
+  const pendingClause=!publicAccess&&o.pending?' AND NOT (r.verified AND r.public_consent AND r.approved_public_display)':'';
+  const where=` WHERE ($1='' OR strpos(lower(p.name),lower($1))>0 OR strpos(lower(coalesce(r.certificate_ref,'')),lower($1))>0) AND ($2='' OR regexp_replace(lower(r.programme),'[^a-z0-9]','','g')=regexp_replace(lower($2),'[^a-z0-9]','','g') OR ($2='DCS-Careworker' AND regexp_replace(lower(r.programme),'[^a-z0-9]','','g')='dcsworker')) AND ($3='' OR r.status=$3) AND ($4='' OR r.training_location=$4) AND ($5='' OR extract(year FROM r.attendance_date)::text=$5)`+pendingClause+(publicAccess?' AND r.verified AND r.public_consent AND r.approved_public_display':'');
   if(!publicAccess&&url.searchParams.get('export')==='csv') return send(res,200,{csv:registryCsv((await pool.query(select+where+' ORDER BY p.name,r.id',args)).rows)});
   const total=Number((await pool.query('SELECT count(*) FROM dcs_registry_records r JOIN dcs_registry_participants p ON p.id=r.participant_id'+where,args)).rows[0].count);
   // Explicit public projection prevents accidental contact/identity metadata exposure.

@@ -1,3 +1,14 @@
+export const dcsProgrammes = [
+ {id:'dcs-family', code:'DCS-Family'},
+ {id:'dcs-ttt', code:'DCS-TTT'},
+ {id:'dcs-care-worker', code:'DCS-Careworker'},
+];
+export function dcsProgrammeRecords(programmes) {
+ return dcsProgrammes.flatMap(({id}) => {
+  const programme = programmes.find(p => p.id === id);
+  return programme ? [programme] : [];
+ });
+}
 export function isPlannedProgramme(p) {
  return p.availability ? ['planned','future'].includes(p.availability) : ['dcs-care-worker','dcs-worker'].includes(p.id)||/^DCS[\s-]*(Care[\s-]*)?Worker$/i.test(p.code||'');
 }

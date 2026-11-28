@@ -514,7 +514,7 @@ function CaregiverSupport() {
               </p>
               <Link
                 className="caregiver-button caregiver-button-green"
-                to="/caregiver-support/verify-certificate"
+                to="/learn-events/verify-certificate"
               >
                 {cs.verifyCertBtn || "Verify a certificate"} <span aria-hidden="true">↗</span>
               </Link>

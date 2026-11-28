@@ -1,6 +1,7 @@
 import {publicCopy,addMissingCopy} from '../../shared/public-copy.js';
 import {inlineCopy} from './inlineCopy.js';
 import {addSupplementalCopy} from './supplementalCopy.js';
+import {educationCopyMs,educationCopyZh,dcsPublicCopyMs,dcsPublicCopyZh,headerMenuLocales} from './educationCopyLocales.js';
 import {educationCopy} from './educationCopy.js';
 import {dcsPublicCopy} from '../../shared/dcs-public-copy.js';
 export const translations = {
@@ -3837,7 +3838,7 @@ export const translations = {
         "phone": "电话 / WhatsApp 号码 *",
         "phonePlaceholder": "例如：+60 12-345 6789",
         "email": "电子邮箱 *",
-        "emailPlaceholder": "例如：grace@example.com",
+        "emailPlaceholder": "例： pengguna@contoh.com",
         "role": "身份 / 背景",
         "preferredLanguage": "首选语言",
         "preferredCity": "首选城市 / 培训地点",
@@ -5064,5 +5065,13 @@ for (const [key, [en, ms, zh]] of Object.entries(inlineCopy)) {
   }
 }
 addSupplementalCopy(translations);
-Object.assign(translations.en.inlineCopy,educationCopy,dcsPublicCopy);
-translations.en.header.menu.dcsParticipantSearch=educationCopy.educationRegistryLink;
+Object.assign(translations.en.inlineCopy, educationCopy, dcsPublicCopy);
+Object.assign(translations.ms.inlineCopy, educationCopyMs, dcsPublicCopyMs);
+Object.assign(translations.zh.inlineCopy, educationCopyZh, dcsPublicCopyZh);
+translations.en.header.menu.dcsTrainingCertification = educationCopy.educationRegistryLink;
+translations.ms.header.menu.dcsTrainingCertification = headerMenuLocales.ms.dcsTrainingCertification;
+translations.zh.header.menu.dcsTrainingCertification = headerMenuLocales.zh.dcsTrainingCertification;
+
+addMissingCopy(translations.ms, translations.en);
+addMissingCopy(translations.zh, translations.en);
+addSupplementalCopy(translations);

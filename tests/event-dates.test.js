@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {eventDate,eventTime,eventDateTime} from '../shared/event-dates.js';
+import {eventDate,eventTime,eventDateTime,eventTimeRange} from '../shared/event-dates.js';
 import {participantEventGroup,eventsForGroup} from '../shared/participant-event-groups.js';
 test('UTC deadlines display Malaysia day rollover with no seconds or raw timestamp',()=>{
  const value='2027-02-04T16:00:00.000Z';
@@ -13,6 +13,11 @@ test('event time uses explicit Malaysia timezone and invalid dates have readable
  assert.match(eventTime('2027-02-10T23:00:00Z'),/7:00\s*am/i);
  assert.equal(eventDateTime('invalid'),'Date and time to be confirmed');
  assert.equal(eventDateTime(null),'Date and time to be confirmed');
+});
+test('event time range uses Malaysia timezone and poster-aligned end times',()=>{
+ assert.match(eventTimeRange('2024-03-15T01:00:00.000Z',null,1.5),/9:00\s*am/i);
+ assert.match(eventTimeRange('2024-03-15T01:00:00.000Z',null,1.5),/10:30\s*am/i);
+ assert.equal(eventTimeRange('2024-07-20T06:00:00.000Z','2024-07-20T07:30:00.000Z'),'2:00 pm – 3:30 pm');
 });
 test('participant groups use programme IDs, never title matching, and retain orphaned records',()=>{
  const programmes=[{id:'family'},{id:'ttt'}];

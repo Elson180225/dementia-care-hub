@@ -558,7 +558,10 @@ export async function authHandler(req,res,path,send) {
     [user.id]
    );
 
-   if(admin) await db.query('SELECT seed_historical_webinars()');
+   if(admin) {
+    await db.query('SELECT seed_historical_webinars()');
+    await db.query('SELECT apply_historical_demo_approval()').catch(() => {});
+   }
    if(!admin) {
     await db.query(
      `INSERT INTO trainer_profiles(

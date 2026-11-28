@@ -6,7 +6,7 @@ import { body, digest, fail } from './auth.js';
 import { isAllowedOrigin } from './origin.js';
 const publicColumns={
  organisations:'is_example,id,name,category,services,specialist_field,address,city,state,postcode,phone,email,website,languages,opening_hours,eligibility,fees,accepting_volunteers,volunteer_details,support_group,source,source_url,language,last_reviewed_at,review_status',
- learning_resources:'id,activity_id,title,resource_type,topic,language,audience,description,url,source,source_url,last_reviewed_at,review_status',
+ learning_resources:'id,activity_id,qa_folder,title,resource_type,topic,language,audience,description,url,source,source_url,last_reviewed_at,review_status',
  content_pages:'id,slug,language,title,body,source,source_url,last_reviewed_at,review_status',
  faqs:'id,slug,language,question,answer,category,source,source_url,last_reviewed_at,review_status',
 };
@@ -16,7 +16,8 @@ export async function publicRecordsHandler(req,res,url,send) {
  if(req.method==='GET' && publicColumns[kind]) {
   const category=url.searchParams.get('category');
   if(kind==='learning_resources'){
-   const rows=(await pool.query(`SELECT ${publicColumns[kind]} FROM learning_resources WHERE publication_status='published' AND review_status='current' AND EXISTS(SELECT 1 FROM activities a WHERE a.id=learning_resources.activity_id AND a.content_approval_status='approved' AND a.published_at IS NOT NULL AND a.status IN ('published','completed','verified','archived')) ORDER BY id LIMIT 500`)).rows;
+   const columns=publicColumns[kind].split(',').map((name)=>`learning_resources.${name.trim()}`).join(',');
+   const rows=(await pool.query(`SELECT ${columns},EXTRACT(YEAR FROM a.starts_at)::int AS source_year FROM learning_resources LEFT JOIN activities a ON a.id=learning_resources.activity_id WHERE learning_resources.publication_status='published' AND learning_resources.review_status='current' AND EXISTS(SELECT 1 FROM activities act WHERE act.id=learning_resources.activity_id AND act.content_approval_status='approved' AND act.published_at IS NOT NULL AND act.status IN ('published','completed','verified','archived')) ORDER BY learning_resources.id LIMIT 500`)).rows;
    return send(res,200,rows);
   }
   const rows=(await pool.query(`SELECT ${publicColumns[kind]} FROM ${kind} WHERE publication_status='published' AND review_status<>'archived' ${kind==='organisations'?"AND NOT is_example":''} ${['content_pages','faqs'].includes(kind)?"AND language='English'":''} ${kind==='organisations' && category?'AND category=$1':''} ORDER BY id LIMIT 500`,kind==='organisations' && category?[category]:[])).rows;

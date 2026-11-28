@@ -3,7 +3,9 @@ import {useLocation} from 'react-router-dom';
 import {useTrainer} from '../../trainer-portal/TrainerContext';
 import { api } from "../../trainer-portal/TrainerContext";
 import { Field, describe } from "../../trainer-portal/ui";
+import UploadField from "../../trainer-portal/UploadField";
 import { recordTypes } from "../../../shared/admin-records.js";
+import { qaFolderCatalog, qaFolders } from "../../../shared/qa-folder-catalog.js";
 import EmailInventory from '../EmailInventory';
 import SubscriberAudience from '../SubscriberAudience';
 
@@ -56,6 +58,12 @@ function validate(config, values) {
   }
   if (values.publication_status === "published" && "source" in values && (!values.source?.trim() || !values.last_reviewed_at))
     e.publication_status = "Add a source and last-reviewed date before publishing.";
+  if (kind === "learning_resources" && values.publication_status === "published") {
+    if (!values.activity_id?.trim()) e.activity_id = "Link the original activity before publishing.";
+    if (!values.copyright_permission?.trim()) e.copyright_permission = "Record copyright / permission evidence before publishing.";
+    if (values.resource_type === "Q&A" && !values.url?.trim() && !values.qa_folder?.trim())
+      e.url = "Choose a Grouped Q&A folder or provide an uploaded file / HTTPS link.";
+  }
   return e;
 }
 
@@ -145,6 +153,7 @@ export default function Records() {
         <h1>{editing.id ? `Edit ${config.label.toLowerCase()} record` : `New ${config.label.toLowerCase()} record`}</h1>
         {kind === 'enquiries' && (() => { const row = rows.find(r => r.id === editing.id); return row && <article className="tp-card"><h2>Visitor message</h2><p>{row.name} · <a href={`mailto:${row.email}`}>{row.email}</a></p><p>{row.type}</p><p style={{whiteSpace:'pre-wrap'}}>{row.message}</p><p>Received: {fmt(row.received_at)}</p></article>; })()}
         {kind === 'content_pages' && <p>RCBC supplies and approves About text. Save as unpublished until approved, then record the approver, source and review date before publishing.</p>}
+        {kind === 'learning_resources' && <p>Link each item to its original webinar or event. For Q&amp;A stored under <code>src/assets/Grouped_Q&amp;A</code>, choose the matching folder below. You can also upload a PDF or image instead of using an external link.</p>}
         <form className="tp-card" noValidate onSubmit={(e) => { e.preventDefault(); save(); }}>
           {config.fields.map(([name, label, type, required]) => {
             const id = `rec-${name}`;
@@ -153,14 +162,17 @@ export default function Records() {
               (name === 'last_reviewed_at' && (v.review_status === 'current' || v.publication_status === 'published')) ||
               (name === 'source' && v.publication_status === 'published') ||
               (name === 'reviewer' && kind === 'content_pages' && v.slug?.startsWith('about-') && v.publication_status === 'published') ||
-              (['copyright_permission', 'url'].includes(name) && kind === 'learning_resources' && v.publication_status === 'published');
+              (name === 'copyright_permission' && kind === 'learning_resources' && v.publication_status === 'published') ||
+              (name === 'url' && kind === 'learning_resources' && v.publication_status === 'published' && !(v.resource_type === 'Q&A' && v.qa_folder));
             const common = {
               id, value: v[name], onChange: (e) => set(name, e.target.value),
               required: Boolean(mandatory),
               "aria-invalid": Boolean(errors[name]), "aria-describedby": describe(id, errors[name]),
             };
             const text = label + (mandatory ? "" : " (optional)");
-            if(kind==='learning_resources'&&name==='activity_id')return <Field key={name} id={id} label="Original activity" required={v.publication_status==='published'} error={errors[name]}><select {...common}><option value="">Choose the original activity</option>{state.activities.map(a=><option key={a.id} value={a.id}>{a.title} — {a.date.slice(0,10)} ({a.content_approval_status||'pending'} publication review)</option>)}</select></Field>;
+            if(kind==='learning_resources'&&name==='activity_id')return <Field key={name} id={id} label="Original activity" required={v.publication_status==='published'} error={errors[name]}><select {...common} onChange={e=>{const activityId=e.target.value;const match=qaFolderCatalog.find(row=>row.activityId===activityId);set('activity_id',activityId);if(match?.folder&&!v.qa_folder)set('qa_folder',match.folder);}}><option value="">Choose the original activity</option>{state.activities.map(a=><option key={a.id} value={a.id}>{a.title} — {a.date.slice(0,10)} ({a.content_approval_status||'pending'} publication review)</option>)}</select></Field>;
+            if(kind==='learning_resources'&&name==='qa_folder')return <Field key={name} id={id} label="Grouped Q&A folder" error={errors[name]}><select {...common}><option value="">No bundled Q&amp;A images</option>{qaFolders.map(folder=><option key={folder} value={folder}>{folder}</option>)}</select><p className="tp-note">Displayed from <code>Grouped_Q&amp;A/{v.qa_folder || '…'}</code> on the public site when published.</p></Field>;
+            if(kind==='learning_resources'&&name==='url')return <div key={name}><UploadField kind="document" label="Upload resource file" value={v[name] || ''} onChange={(val)=>set(name,val)} disabled={busy} help="Upload a PDF, slide image, or poster file for this learning resource."/><Field id={id} label="Or paste an HTTPS resource link" required={Boolean(mandatory)} error={errors[name]}><input type="url" {...common} /></Field></div>;
             if (type === "checkbox")
               return (
                 <Field key={name} id={id} label={label} example={name === 'is_example' ? 'Keep this ticked for fictional demonstration records. These must not be presented as real services.' : 'Tick this option only when it applies to this record.'}>
@@ -233,6 +245,9 @@ export default function Records() {
                     {r.publication_status === "published" ? "Published" : "Not public"}
                   </span>{" "}
                   <span className="tp-chip tp-chip-grey">{r.review_status}</span>{" "}
+                  {kind === "learning_resources" && r.publication_status === "published" && r.review_status !== "current" && (
+                    <span className="tp-chip tp-chip-amber">Not on public site until reviewed</span>
+                  )}
                   {reviewDue(r) && <span className="tp-chip tp-chip-amber">Review due</span>}
                 </p>
               </>
@@ -257,7 +272,11 @@ export default function Records() {
                     </button>
                   ) : (
                     <button className="tp-btn" disabled={busy}
-                      onClick={() => quick(r, { publication_status: "published" }, "Record published.")}>
+                      onClick={() => quick(r, {
+                        publication_status: "published",
+                        review_status: "current",
+                        last_reviewed_at: r.last_reviewed_at || nowLocal(),
+                      }, "Record published.")}>
                       Publish
                     </button>
                   )}

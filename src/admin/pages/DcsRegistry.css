@@ -2,4 +2,18 @@
 
 .dcs-admin fieldset[id] { scroll-margin-top: 5rem; }
 .dcs-admin legend[tabindex] { scroll-margin-top: 5rem; }
-.dcs-admin .tp-actions { align-items: center; }
+.dcs-admin .tp-actions { align-items: center; flex-wrap: wrap; gap: .5rem; }
+.dcs-tabs { display: flex; flex-wrap: wrap; gap: .5rem; margin: 1.25rem 0; }
+.dcs-tabs button { background: #f6f2fa; color: #352047; border: 1px solid #e5d9f2; padding: .65rem 1rem; border-radius: 999px; font-weight: 600; cursor: pointer; }
+.dcs-tabs button.is-active { background: var(--color-purple-700,#59308d); color: #fff; border-color: var(--color-purple-700,#59308d); }
+.dcs-panel { scroll-margin-top: 4rem; }
+.dcs-help { color: #5a4965; line-height: 1.6; }
+.dcs-notice { background: #f0faf4; border: 1px solid #cfe8d8; padding: 1rem; border-radius: 12px; }
+.dcs-subfieldset { border: 1px dashed #e5d9f2; border-radius: 12px; padding: 1rem; margin: 1rem 0; }
+.dcs-subfieldset legend { font-size: 1rem; padding: 0 .35rem; }
+.dcs-review-steps { margin: 0 0 1rem 1.25rem; padding: 0; line-height: 1.75; }
+.dcs-review-steps li { margin: .5rem 0; }
+.dcs-row-actions { display: flex; flex-direction: column; gap: .35rem; align-items: stretch; min-width: 7.5rem; }
+.dcs-row-actions button.dcs-primary { background: var(--color-purple-700,#59308d); }
+.dcs-row-actions button.dcs-secondary { background: #fff; color: var(--color-purple-700,#59308d); border: 1px solid #cdb6e4; }
+.dcs-review-panel { margin-top: 1rem; border: 2px solid #cdb6e4; border-radius: 16px; padding: 0 1rem 1rem; background: #fdfbff; }

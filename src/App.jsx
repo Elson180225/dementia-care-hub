@@ -76,7 +76,8 @@ function App() {
 
         <Routes>
           <Route path="/get-updated" element={<ProjectServices />} />
-          <Route path="/caregiver-support/verify-certificate" element={<Navigate to="/learn-events/dcs-participants" replace />} />
+          <Route path="/learn-events/verify-certificate" element={<ProjectServices certificate />} />
+          <Route path="/caregiver-support/verify-certificate" element={<Navigate to="/learn-events/verify-certificate" replace />} />
           <Route path="/learn-events/dcs-participants" element={<DcsParticipantSearch />} />
           <Route path="/trainer-portal/application" element={<main className="tp-page"><div className="tp-container"><AccountForm application /></div></main>} />
           <Route path="/trainer-portal/eligibility" element={<main className="tp-page"><div className="tp-container"><Eligibility /></div></main>} />
@@ -121,7 +122,7 @@ function App() {
           <Route path="/caregiver-support/wellbeing" element={<Navigate to="/caregiver-support" replace />} />
           <Route path="/caregiver-support/guidance" element={<Navigate to="/caregiver-support" replace />} />
           <Route path="/caregiver-support/training" element={<CaregiverSupport key="training" />} />
-          <Route path="/caregiver-support/certificate-verification" element={<Navigate to="/learn-events/dcs-participants" replace />} />
+          <Route path="/caregiver-support/certificate-verification" element={<Navigate to="/learn-events/verify-certificate" replace />} />
           <Route path="/caregiver-support/support-groups" element={<CaregiverSupport key="support-groups" />} />
           <Route path="/caregiver-support/volunteer" element={<CaregiverSupport key="volunteer" />} />
 

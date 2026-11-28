@@ -14,7 +14,7 @@ export function validatePermissions(permissions){
  }
  return permissions;
 }
-export function profileSnapshot(p,name){return {name,city:p.city,language:p.language,short_profile:p.short_profile,qualifications:p.qualifications,experience:p.experience,photo_url:p.photo_url,contact_email:p.contact_email||'',contact_phone:p.contact_phone||''};}
+export function profileSnapshot(p,name){return {name,city:p.city,language:p.language,short_profile:p.short_profile,qualifications:p.qualifications,experience:p.experience,photo_url:p.photo_url,public_teaching_conditions:p.public_teaching_conditions||'',contact_email:p.contact_email||'',contact_phone:p.contact_phone||''};}
 export function individualHours(trainers,values,netHours=Infinity){
  if(!values||typeof values!=='object'||Array.isArray(values))throw Error('Record actual contribution hours for each assigned trainer.');
  const ids=new Set(trainers.map(t=>t.trainer_id||t.trainerId));

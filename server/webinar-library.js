@@ -9,7 +9,7 @@ export async function webinarLibraryHandler(req,res,url,send){
   const id=url.searchParams.get('activity');if(!/^[a-f0-9-]{36}$/i.test(id||''))fail('Choose an activity.');
   const activity=(await pool.query("SELECT id FROM activities WHERE id=$1 AND content_approval_status='approved' AND published_at IS NOT NULL AND status IN ('published','completed','verified','archived')",[id])).rows[0];
   if(!activity)fail('Activity not found',404);
-  const rows=(await pool.query("SELECT id,title,resource_type,description,url FROM learning_resources WHERE activity_id=$1 AND publication_status='published' AND review_status='current' ORDER BY title",[id])).rows;
+  const rows=(await pool.query("SELECT id,activity_id,title,resource_type,language,description,url,qa_folder FROM learning_resources WHERE activity_id=$1 AND publication_status='published' AND review_status='current' ORDER BY title",[id])).rows;
   return send(res,200,rows);
  }
  const user=await currentUser(req);if(user?.role!=='admin')fail('Admin access required',user?403:401);

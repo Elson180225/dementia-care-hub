@@ -193,7 +193,7 @@ export default function RoadmapAdmin({ content, onSave }) {
         </div>
       ) : (
         <div className="tp-table-wrap">
-          <table className="tp-table">
+          <table className="tp-table tp-roadmap-table">
             <thead>
               <tr>
                 <th style={{ minWidth: "150px" }}>Edition Label</th>

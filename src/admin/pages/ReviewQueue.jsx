@@ -68,7 +68,7 @@ export default function ReviewQueue() {
   return (
     <>
       <h1>Approvals</h1>
-      <section className="tp-card"><h2>Education &amp; Events reviews</h2><p>Choose what you want to review.</p><div className="tp-actions"><Link className="tp-btn tp-btn-ghost" to="/admin/learn-events?section=library&review=pending">Review publication &amp; webinar materials ({pendingPublication} pending)</Link><Link className="tp-btn tp-btn-ghost" to="/admin/dcs-registry">Review training records &amp; public consent</Link><Link className="tp-btn tp-btn-ghost" to="/admin/contribution">Review individual contributions</Link></div></section>
+      <section className="tp-card"><h2>Education &amp; Events reviews</h2><p>Choose what you want to review.</p><div className="tp-actions"><Link className="tp-btn tp-btn-ghost" to="/admin/learn-events?section=library&review=pending">Review publication &amp; webinar materials ({pendingPublication} pending)</Link><Link className="tp-btn tp-btn-ghost" to="/admin/dcs-registry?tab=review">Review training records &amp; public consent</Link><Link className="tp-btn tp-btn-ghost" to="/admin/contribution">Review individual contributions</Link></div></section>
 
       <h2>Requests and submissions</h2>
       {queue.length === 0 && <p className="tp-card">No requests in this queue. Use the links above to check publication, training records and contributions.</p>}

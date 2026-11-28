@@ -61,9 +61,15 @@ export function publicRecord(r) {
  return {name:r.name,programme:r.programme,training_location:r.training_location,attendance_date:r.attendance_date,certificate_ref:r.certificate_ref};
 }
 export function searchOptions(params) {
- const page=Number(params.get('page')||1);
- if(!Number.isSafeInteger(page)||page<1||page>100000) throw new Error('Invalid page');
- const q=(params.get('q')||'').trim(),programme=(params.get('programme')||'').trim(),status=params.get('status')||'',location=(params.get('location')||'').trim(),year=params.get('year')||'';
- if(q.length>200||programme.length>200||location.length>200||status&&!['attended','completed'].includes(status)||year&&!/^[1-9]\d{3}$/.test(year)) throw new Error('Invalid filter');
- return {page,q,programme,status,location,year,limit:20,offset:(page-1)*20};
+  const page=Number(params.get('page')||1);
+  if(!Number.isSafeInteger(page)||page<1||page>100000) throw new Error('Invalid page');
+  const q=(params.get('q')||'').trim(),programme=(params.get('programme')||'').trim(),status=params.get('status')||'',location=(params.get('location')||'').trim(),year=params.get('year')||'';
+  const pendingParam=params.get('pending');
+  const pending=pendingParam==='1';
+  if(q.length>200||programme.length>200||location.length>200||status&&!['attended','completed'].includes(status)||year&&!/^[1-9]\d{3}$/.test(year)||(pendingParam!=null&&pendingParam!==''&&!pending)) throw new Error('Invalid filter');
+  return {page,q,programme,status,location,year,pending,limit:20,offset:(page-1)*20};
+}
+
+export function registryPendingReview(record) {
+  return !(record.verified && record.public_consent && record.approved_public_display);
 }

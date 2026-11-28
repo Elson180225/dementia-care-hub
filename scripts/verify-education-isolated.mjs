@@ -16,9 +16,10 @@ const migrations=[...runner.matchAll(/'(\d{3}_[\w-]+\.sql)'/g)].map(m=>m[1]);
 for(const file of [...new Set(migrations)]){try{await db.exec(await readFile(new URL('../database/'+file,import.meta.url),'utf8'));console.log('OK',file);}catch(e){console.error('FAILED',file,e.message);await db.close();process.exit(1);}}
 await db.query("INSERT INTO users(id,name,email,password_hash,role) VALUES('00000000-0000-4000-8000-000000000001','Test admin','admin@example.test','not-a-real-password','admin')");
 await db.query('SELECT seed_historical_webinars()');
-assert.equal((await db.query("SELECT count(*)::int AS n FROM activities WHERE content_approval_status='approved'")).rows[0].n,0);
+await db.query('SELECT apply_historical_demo_approval()');
 assert.equal((await db.query("SELECT count(*)::int AS n FROM activities")).rows[0].n,12);
-console.log('PASS: fresh installation retains 12 historical records privately after repeat seeding.');
+assert.equal((await db.query("SELECT count(*)::int AS n FROM activities WHERE id::text LIKE 'a0000001-0000-0000-0000-%' AND content_approval_status='approved'")).rows[0].n,12);
+console.log('PASS: 12 historical webinars are RCBC-approved for demonstration; publication review still required for new activities.');
 const query=async(sql,params)=>{const result=await db.query(sql,params);return {...result,rowCount:result.rows.length||result.affectedRows||0};};
 pool.query=query;pool.connect=async()=>({query,release(){}});
 const admin='00000000-0000-4000-8000-000000000001';
@@ -30,7 +31,10 @@ await call(portalHandler,'/api/portal/actions',{type:'ACTIVITY_SAVE',activity});
 assert.equal((await call(portalHandler,'/api/activities',null,false)).data.length,0);
 await assert.rejects(call(eventRegistrationHandler,'/api/public/event-registration?activity='+eventId,null,false),e=>e.status===404);
 async function approve(id){const row=(await call(webinarLibraryHandler,'/api/admin/webinar-library')).data.find(r=>r.id===id);await call(webinarLibraryHandler,'/api/admin/webinar-library',{...row,revision:row.updated_at.toISOString(),content_approval_status:'approved',rightsConfirmed:true});}
-await approve(eventId);
+const review={content_approval_status:'approved',speaker_intro:'Reviewed speaker introduction'};
+await assert.rejects(call(portalHandler,'/api/portal/actions',{type:'ACTIVITY_SAVE',activity:{...activity,publicationReview:review}}),/Confirm RCBC approval/);
+await call(portalHandler,'/api/portal/actions',{type:'ACTIVITY_SAVE',activity:{...activity,publicationReview:{...review,rightsConfirmed:true}}});
+assert.equal((await call(portalHandler,'/api/activities',null,false)).data[0].speaker_intro,review.speaker_intro);
 assert.equal((await call(portalHandler,'/api/activities',null,false)).data.length,1);
 const regPath='/api/public/event-registration?activity='+eventId;
 const participant={name:'Elder One',email:'family@example.test',phone:'0123456789',notes:'Question for speaker',consent:true};

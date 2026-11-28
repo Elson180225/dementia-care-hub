@@ -1,7 +1,7 @@
 import {teachingPermission,activityTiming,organiserRecord} from "../../../shared/trainer-governance";
 import UploadField from "../UploadField";
 import {validateEventPricing,normaliseRegistrationType} from "../../../shared/event-registration";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { useEffect, useMemo, useState } from "react";
 import { useTrainer } from "../TrainerContext";
 import { ACTIVITY_TYPES, LANGUAGES, MODES, STATUS_LABEL } from "../constants";
@@ -103,6 +103,12 @@ function validate(v) {
   return e;
 }
 
+const publicationFields = [
+  ['source_url','Original source / Facebook post'], ['speaker_name','Speaker name'],
+  ['speaker_intro','Speaker introduction'], ['recording_url','Recording link'],
+  ['qa_url','Reviewed Q&A document link'], ['qa_text','Reviewed Q&A'],
+];
+
 export default function Activities({
   admin = false,
   programmeId = null,
@@ -115,6 +121,7 @@ export default function Activities({
   newButtonLabel,
 }) {
   const { state, dispatch } = useTrainer();
+  const [params,setParams]=useSearchParams();
   const addLabel = newButtonLabel || (admin ? "+ New event / workshop" : "+ New training activity");
   const [uploading, setUploading] = useState(0);
   const [view, setView] = useState("cards");
@@ -170,11 +177,23 @@ export default function Activities({
               endDate:a.endDate||new Date(new Date(a.date+'+08:00').getTime()+Number(a.plannedHours)*3600000+28800000).toISOString().slice(0,16),
               status: a.status || "published",
               registrationType: normaliseRegistrationType(a.registrationType),
+              ...Object.fromEntries(publicationFields.map(([key])=>[key,a[key]||""])),
             },
           }
         : { values: { ...blank, status: admin ? "published" : "draft", ...(defaultValues || {}) } }
     );
   };
+
+  const activityToReview=admin && state.activities.find(a=>a.id===params.get('activity'));
+  useEffect(()=>{
+    if(!activityToReview)return;
+    open(activityToReview);
+    setParams(previous=>{
+      const next=new URLSearchParams(previous);
+      next.delete('activity');
+      return next;
+    },{replace:true});
+  },[activityToReview]);
 
   const change = (e) => {
     const { name, value } = e.target;
@@ -208,6 +227,9 @@ export default function Activities({
   async function save(saveMode = "draft") {
     const found = validate(editing.values);
     if(admin){try{validateEventPricing(editing.values.registrationType,editing.values.mode);}catch(e){found.registrationType=e.message;}}
+    if(admin && saveMode !== "draft" && editing.values.status === "published" && !editing.values.rightsConfirmed) {
+      found.rightsConfirmed="Confirm RCBC approval and publication permissions.";
+    }
     setErrors(found);
     if (Object.keys(found).length) {
       document.getElementById(Object.keys(found)[0])?.focus();
@@ -223,16 +245,17 @@ export default function Activities({
       status: admin ? (saveMode === "draft" ? "draft" : resolvedStatus) : editing.values.status,
       venue,
       trainers: assigned,
+      ...(admin && {publicationReview:{
+        ...Object.fromEntries(publicationFields.map(([key])=>[key,editing.values[key]])),
+        content_approval_status:saveMode!=="draft"&&resolvedStatus==="published"?"approved":"pending",
+        rightsConfirmed:editing.values.rightsConfirmed===true,
+      }}),
     };
 
     const ok = await dispatch({ type: "ACTIVITY_SAVE", activity: payload });
     if (!ok) return;
 
-    if (admin && saveMode === "publish" && (!currentActivity || currentActivity.status === "draft" || currentActivity.status === "returned")) {
-      await dispatch({ type: "ACTIVITY_SUBMIT", id });
-      await dispatch({ type: "ADMIN_REVIEW", target: "activity", id, decision: "approved" });
-      await dispatch({ type: "ADMIN_REVIEW", target: "activity", id, decision: "published" });
-    } else if (saveMode === "submit") {
+    if (saveMode === "submit") {
       await dispatch({ type: "ACTIVITY_SUBMIT", id });
     }
     setEditing(null);
@@ -338,9 +361,9 @@ export default function Activities({
           {input("date", "Date & time", { type: "datetime-local" })}
 
           {admin && (
-            <Field id="status" label="Record Status" hint="Public details also require content approval. Use Completed workshops to record actual delivery.">
+            <Field id="status" label="Record Status" hint="Choose the status to save. Published requires RCBC approval below.">
               <select id="status" name="status" value={v.status || "published"} onChange={change}>
-                <option value="published">Published (Live on Upcoming Events & Calendar)</option>
+                <option value="published">Published</option>
                 <option value="draft">Draft (Hidden from public)</option>
                 <option value="approved">Approved (Awaiting publish)</option>
               </select>
@@ -507,6 +530,19 @@ export default function Activities({
           />
 
           {admin&&<aside className="tp-card" aria-label="Intake preview"><h3>Public intake preview</h3><h4>{v.title||"Intake title"}</h4><p>{v.date||"Choose a date"} · {v.venue||"Venue to be confirmed"} {v.city}</p><p>{v.registrationType?<EventPriceLabel event={{mode:v.mode,registration_settings:{paid:v.registrationType==="paid",fee:v.registrationFee}}}/>:"Choose Free or Paid to preview pricing"}</p><p>{v.registrationMethod==="website"?"Register directly on the website":v.registrationMethod==="google"?"Register through Google Form":"Registration closed"}</p><p>Paid submissions require RCBC payment verification and approval. This preview does not create a booking.</p></aside>}
+          {admin && <fieldset className="tp-card">
+            <legend>Review &amp; publish</legend>
+            <p>{state.activities.find(a=>a.id===editing.id)?.isPublic?'Currently on the website.':'Currently private.'}</p>
+            {publicationFields.map(([key,label])=><label key={key} className="tp-field">{label}
+              {['qa_text','speaker_intro'].includes(key)
+                ? <textarea name={key} value={v[key]||''} onChange={change} rows={3}/>
+                : <input name={key} type={key.endsWith('_url')?'url':'text'} value={v[key]||''} onChange={change}/>}
+            </label>)}
+            <label className="tp-field"><span><input id="rightsConfirmed" type="checkbox" checked={!!v.rightsConfirmed}
+              onChange={e=>setEditing({...editing,values:{...v,rightsConfirmed:e.target.checked}})}/>
+              {' '}RCBC has checked the information and confirmed permission to publish the materials.</span></label>
+            {errors.rightsConfirmed && <p role="alert">{errors.rightsConfirmed}</p>}
+          </fieldset>}
           <div className="tp-actions" style={{ marginTop: "1.5rem" }}>
             {admin ? (
               <>
@@ -515,9 +551,9 @@ export default function Activities({
                   className="tp-btn"
                   disabled={uploading > 0}
                   onClick={() => save("publish")}
-                  title="Saves and immediately publishes this event to the public website"
+
                 >
-                  Save &amp; Publish Live
+                  {v.status==="published" ? "Review and publish" : "Save activity"}
                 </button>
                 <button
                   type="button"
@@ -565,9 +601,8 @@ export default function Activities({
   function renderActions(a) {
     return (
       <>
-        <div style={{ display: "inline-flex", gap: "6px", flexWrap: "wrap", justifyContent: "flex-end" }}>
-          <span>{a.activityReference} · {a.organiserKind || 'rcbc'} · {a.organiserName || 'RCBC'}{a.postponedAt?' · Postponed':''}</span>
-          {admin && !a.cancelledAt && ['approved','published'].includes(a.status) && <button type="button" className="tp-btn tp-btn-ghost" onClick={async()=>{if(a.postponedAt){const date=window.prompt('New start date and time (YYYY-MM-DDTHH:mm)',a.date);if(!date)return;const endDate=window.prompt('New end date and time (YYYY-MM-DDTHH:mm)',a.endDate);if(endDate)await dispatch({type:'ACTIVITY_RESUME',id:a.id,date,endDate});}else{const comment=window.prompt('Reason for postponement');if(comment?.trim())await dispatch({type:'ACTIVITY_POSTPONE',id:a.id,comment});}}}>{a.postponedAt?'Reschedule':'Postpone'}</button>}
+        <div className="tp-activity-actions">
+          <span className="tp-activity-reference">{a.activityReference} · {a.organiserKind || 'rcbc'} · {a.organiserName || 'RCBC'}{a.postponedAt?' · Postponed':''}</span>
           {admin && <Link className="tp-btn tp-btn-ghost" to={'/admin/participants?activity='+a.id}>View participants</Link>}
           {(admin ||
             (!a.cancelledAt &&
@@ -583,6 +618,8 @@ export default function Activities({
             </button>
           )}
 
+          <details className="tp-more-actions"><summary>More actions</summary><div className="tp-more-actions-content">
+          {admin && !a.cancelledAt && ['approved','published'].includes(a.status) && <button type="button" className="tp-btn tp-btn-ghost" onClick={async()=>{if(a.postponedAt){const date=window.prompt('New start date and time (YYYY-MM-DDTHH:mm)',a.date);if(!date)return;const endDate=window.prompt('New end date and time (YYYY-MM-DDTHH:mm)',a.endDate);if(endDate)await dispatch({type:'ACTIVITY_RESUME',id:a.id,date,endDate});}else{const comment=window.prompt('Reason for postponement');if(comment?.trim())await dispatch({type:'ACTIVITY_POSTPONE',id:a.id,comment});}}}>{a.postponedAt?'Reschedule':'Postpone'}</button>}
           {(admin ||
             (["draft", "returned"].includes(a.status) &&
               a.created_by === state.session?.id)) && (
@@ -646,6 +683,7 @@ export default function Activities({
               )}
             </>
           )}
+          </div></details>
         </div>
 
         {/* Cancel prompt sub-row */}
