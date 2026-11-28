@@ -780,3 +780,75 @@
   text-underline-offset: 3px;
 }
 .understand-anchor-target { display: block; scroll-margin-top: 120px; }
+
+
+/* SCRUM-226: simplified navigation, FAQ and next-step cards */
+.understand-page .understand-hero {
+  background: radial-gradient(ellipse at top right, #7951a4 0%, transparent 55%), linear-gradient(125deg, #43216b, #592d85);
+}
+.understand-page .page-jump-nav {
+  background: #faf7fd;
+  border-bottom: 1px solid #e4d9ee;
+  padding: 18px 0;
+}
+.understand-page .page-jump-nav ol {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.understand-page .page-jump-nav li { min-width: 0; }
+.understand-page .page-jump-nav a {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  padding: 12px 16px;
+  border: 1px solid #dfd1ed;
+  border-radius: 12px;
+  background: #fff;
+  color: #49236e;
+  text-align: center;
+  font-weight: 700;
+  text-decoration: none;
+  overflow-wrap: anywhere;
+}
+.understand-page .page-jump-nav a:hover { background: #eee5f8; text-decoration: underline; }
+.understand-page .understand-faq-list details {
+  border-radius: 15px;
+  border-color: #e1d7ea;
+  box-shadow: 0 5px 16px #43216b08;
+}
+.understand-page .understand-faq-list summary { min-height: 56px; font-size: 1rem; }
+.understand-page .understand-faq-list details[open] summary { background: #eee5f8; color: #49236e; }
+.understand-page .understand-faq-list details[open] summary span { transform: rotate(45deg); }
+.understand-page .understand-faq-list details p { padding: 18px 20px 22px; }
+.understand-page #further-care { padding-block: 52px; background: linear-gradient(120deg, #faf7fd, #fffaf0); }
+.understand-page .understand-next-steps { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.understand-page .understand-next-steps a {
+  display: flex;
+  align-items: center;
+  min-height: 76px;
+  padding: 20px;
+  border: 1px solid #d9c9ea;
+  border-radius: 16px;
+  background: #eee5f8;
+  color: #49236e;
+  font-size: 1.1rem;
+  transition: transform .18s ease, box-shadow .18s ease;
+}
+.understand-page .understand-next-steps a:nth-child(2) { background: #fff1d8; color: #69430e; border-color: #ecd7aa; }
+.understand-page .understand-next-steps a:hover { transform: translateY(-2px); box-shadow: 0 8px 22px #43216b12; }
+.understand-page :is(a, button, summary, input):focus-visible { outline: 3px solid #69409a; outline-offset: 4px; }
+.understand-page .understand-hero :is(a, button):focus-visible { outline-color: #ffe0a3; }
+.understand-page .understand-faq-list summary:focus-visible { outline-offset: -4px; }
+@media (max-width: 700px) {
+  .understand-page .page-jump-nav ol { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .understand-page .understand-next-steps { grid-template-columns: 1fr; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .understand-page .understand-next-steps a { transition: none; }
+  .understand-page .understand-next-steps a:hover { transform: none; }
+}

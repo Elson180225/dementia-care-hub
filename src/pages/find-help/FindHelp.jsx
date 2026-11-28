@@ -1,3 +1,5 @@
+import { useEffect, useState } from "react";
+import { LastReviewed } from "../../components/PublicFeatures";
 import { Link } from "react-router-dom";
 import { useLanguage } from "../../i18n/LanguageContext";
 
@@ -79,8 +81,25 @@ function getAreaIcon(path) {
 }
 
 function FindHelp() {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const fh = t.findHelp;
+  const [planningRows, setPlanningRows] = useState([]);
+  useEffect(() => {
+    const controller = new AbortController();
+    fetch("/api/public/content_pages", { signal: controller.signal, cache: "no-store" })
+      .then(response => response.ok ? response.json() : [])
+      .then(rows => {
+        if (!controller.signal.aborted && Array.isArray(rows)) setPlanningRows(rows);
+      })
+      .catch(() => { if (!controller.signal.aborted) setPlanningRows([]); });
+    return () => controller.abort();
+  }, []);
+  const planningLanguage = { en: "English", ms: "Bahasa Malaysia", zh: "Chinese" }[language] || "English";
+  const planningRecord = planningRows.find(row =>
+    row.slug === "advance-planning" && row.language === planningLanguage &&
+    row.review_status === "current" && row.publication_status !== "unpublished" &&
+    typeof row.body?.text === "string" && row.body.text.trim()
+  );
 
   // These short card headings are part of the translation catalogue,
   // rather than English-only text selected by the language switch.
@@ -135,7 +154,7 @@ function FindHelp() {
                   {fh.card1?.number || "01"}
                 </span>
 
-                <span className="find-help-card-arrow">
+                <span className="find-help-card-arrow" aria-hidden="true">
                   ↗
                 </span>
               </div>
@@ -179,7 +198,7 @@ function FindHelp() {
               </p>
 
               <div className="diagnosis-links">
-                <Link to="/learn-events/dementia-education">
+                <Link to="/understand-dementia">
                   {fh.card2?.link1 || "Understanding the diagnosis"}
                 </Link>
 
@@ -204,16 +223,16 @@ function FindHelp() {
                 </Link>
 
                 <Link to="/caregiver-support/support-groups">
-                  {fh.card2?.peerSupport}
+                  {fh.card2?.peerSupport || "Peer / community support"}
                 </Link>
-
-                <a href="#advance-planning">
-                  {fh.card2?.planningLink}
-                </a>
 
                 <Link to="/learn-events">
                   {fh.card2?.link7 || "Education & learning resources"}
                 </Link>
+
+                <a href="#advance-planning">
+                  {fh.card2?.planningLink || "Advance Planning"}
+                </a>
               </div>
             </div>
 
@@ -228,7 +247,7 @@ function FindHelp() {
                   {fh.card3?.number || "03"}
                 </span>
 
-                <span className="find-help-card-arrow">
+                <span className="find-help-card-arrow" aria-hidden="true">
                   ↗
                 </span>
               </div>
@@ -253,7 +272,7 @@ function FindHelp() {
         </div>
       </section>
 
-      {/* ADVANCE PLANNING PLACEHOLDER */}
+      {/* ADMIN-MANAGED ADVANCE PLANNING */}
 
       <section
         className="find-help-planning"
@@ -261,12 +280,20 @@ function FindHelp() {
       >
         <div className="find-help-container">
           <div className="find-help-planning-card">
-            <span>{fh.planningEyebrow}</span>
+            <div className="find-help-planning-visual">
+              <div className="find-help-card-icon"><FindHelpVisualIcon type="diagnosed" /></div>
+              <span>{fh.planningEyebrow}</span>
+            </div>
 
             <div>
-              <h2>{fh.planningTitle}</h2>
+              <h2>{planningRecord?.title || fh.planningTitle}</h2>
 
-              <ReadMore text={fh.planningText} />
+              {planningRecord ? (
+                <>
+                  <p className="find-help-planning-body">{planningRecord.body.text}</p>
+                  <LastReviewed value={planningRecord.last_reviewed_at} />
+                </>
+              ) : <ReadMore text={fh.planningText} />}
             </div>
           </div>
         </div>
@@ -323,7 +350,7 @@ function FindHelp() {
                 </div>
                 <span>{area.num}</span>
                 <h3>{area.title}</h3>
-                <ReadMore text={area.text} />
+                <p>{area.text}</p>
               </Link>
             ))}
           </div>

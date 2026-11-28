@@ -1501,3 +1501,61 @@ span:first-child {
     transition: none !important;
   }
 }
+
+/* SCRUM-225: healthcare pathway and wellbeing cards */
+.assessment-page section[id] { scroll-margin-top: 150px; }
+.assessment-page .assessment-pathway-selector {
+  display: grid; grid-template-columns: repeat(2,minmax(0,1fr));
+  max-width: 680px; gap: 12px; padding: 0; background: transparent;
+}
+.assessment-page .assessment-pathway-selector button {
+  min-height: 64px; border-radius: 16px; border: 2px solid transparent;
+  background: #eee5f8; color: #49236e; font-size: 1.05rem;
+}
+.assessment-page .assessment-pathway-selector button:nth-child(2) {
+  background: #fff1d8; color: #69430e;
+}
+.assessment-page .assessment-pathway-selector button[aria-pressed="true"] {
+  border-color: #592d85; box-shadow: 0 5px 16px #49236e20;
+}
+.assessment-page .assessment-pathway-selector button[aria-pressed="true"]::after {
+  content: " ✓";
+}
+.assessment-page .assessment-pathway-content {
+  border: 1px solid #e6dced; box-shadow: 0 12px 32px #49236e0c;
+}
+.assessment-page .assessment-pathway-next {
+  margin: 24px 0 0; padding: 16px 20px; border-radius: 12px;
+  background: #f3edf9; color: #49236e; line-height: 1.65;
+}
+.assessment-page .assessment-health-extra { padding: clamp(56px,7vw,96px) 0; }
+.assessment-page #geko { background: linear-gradient(135deg,#edf7ef,#f9fcfa); }
+.assessment-page #caregiver-health { background: linear-gradient(135deg,#f4edf9,#fffaf0); }
+.assessment-page .assessment-health-grid {
+  display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 22px; margin-top: 30px;
+}
+.assessment-page .assessment-health-grid .assessment-provider-card {
+  padding: clamp(22px,3vw,36px); border-radius: 22px; min-width: 0;
+  border: 1px solid #ded5e6; box-shadow: 0 10px 25px #49236e0d;
+}
+.assessment-page #geko .assessment-provider-visual { background: #dcefe2; color: #24563c; border-color: #c4e1ce; }
+.assessment-page #caregiver-health .assessment-provider-visual { background: #eee5f8; color: #49236e; }
+.assessment-page .assessment-health-grid h3 { margin: 12px 0; line-height: 1.25; }
+.assessment-page .assessment-health-grid p,
+.assessment-page .assessment-health-grid li { color: #403748; font-size: 1.05rem; line-height: 1.7; }
+.assessment-page .assessment-health-grid ul { padding-inline-start: 24px; }
+.assessment-page .assessment-health-grid li + li { margin-top: 10px; }
+.assessment-page .assessment-health-grid a,
+.assessment-page .assessment-pathway-next a { color: #49236e; font-weight: 700; text-decoration: underline; text-underline-offset: 3px; overflow-wrap: anywhere; }
+.assessment-page :is(a,button,select):focus-visible { outline: 3px solid #592d85; outline-offset: 4px; }
+.assessment-page .assessment-hero :is(a,button):focus-visible { outline-color: #ffdf92; }
+@media (max-width: 650px) {
+  .assessment-page .assessment-health-grid,
+  .assessment-page .assessment-pathway-selector { grid-template-columns: 1fr; }
+  .assessment-page .assessment-hero h1 { font-size: clamp(34px,9vw,52px); overflow-wrap: anywhere; }
+  .assessment-page .assessment-pathway-content:hover .assessment-flow-arrow { transform: rotate(90deg); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .assessment-page *, .assessment-page *::before, .assessment-page *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+  .assessment-page .assessment-provider-card:hover, .assessment-page .assessment-check-item:hover { transform: none; }
+}

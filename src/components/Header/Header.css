@@ -1259,3 +1259,27 @@
     grid-template-columns: minmax(0, 1fr);
   }
 }
+
+/* SCRUM-227 — Accessible skip link */
+
+.skip-to-content {
+  position: fixed;
+  top: 12px;
+  left: 12px;
+  z-index: 100000;
+  padding: 14px 22px;
+  background: #45206d;
+  color: #ffffff;
+  border: 2px solid #ffffff;
+  border-radius: 10px;
+  font-size: 18px;
+  font-weight: 700;
+  text-decoration: none;
+  transform: translateY(-200%);
+}
+
+.skip-to-content:focus {
+  transform: translateY(0);
+  outline: 3px solid #e7ae45;
+  outline-offset: 3px;
+}

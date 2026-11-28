@@ -11,15 +11,8 @@ function getMenuItems(m,u) {
       label: m.understand,
       path: "/understand-dementia",
       children: [
-        // RCBC reading order. Keep the basics first so visitors have context.
-        // New labels stay in English until RCBC approves translations.
-        { label: u.basics, path: "/understand-dementia#overview" },
-        { label: u.reviewCopy.normalTitle, path: "/understand-dementia#normal-ageing" },
-        { label: u.reviewCopy.changesTitle, path: "/understand-dementia#changes-to-watch" },
-        { label: u.reviewCopy.earlyTitle, path: "/understand-dementia#early-signs" },
-        { label: u.reviewCopy.selfCheckTitle, path: "/understand-dementia#self-check" },
-        { label: u.reviewCopy.professionalTitle, path: "/understand-dementia#medical-advice" },
-        { label: u.reviewCopy.furtherTitle, path: "/understand-dementia#further-care" },
+        { label: u.whatIs, path: "/understand-dementia#overview" },
+        { label: m.signsChanges, path: "/understand-dementia#normal-ageing" },
         { label: u.healthyTitle, path: "/understand-dementia#healthy-living" },
         { label: u.faq, path: "/understand-dementia#understand-faq" },
       ],
@@ -537,7 +530,33 @@ function Header() {
                   className="nav-item"
                   key={item.label}
                   onMouseEnter={() => setOpenMenu(item.label)}
-                  onMouseLeave={() => setOpenMenu(null)}
+
+                  onMouseLeave={(event) => {
+                    if (!event.currentTarget.contains(document.activeElement)) {
+                      setOpenMenu(null);
+                    }
+                  }}
+
+                  onFocus={() => setOpenMenu(item.label)}
+
+                  onBlur={(event) => {
+                    if (!event.currentTarget.contains(event.relatedTarget)) {
+                      setOpenMenu(null);
+                    }
+                  }}
+
+                  onKeyDown={(event) => {
+                    if (event.key === "Escape" && openMenu === item.label) {
+                      event.preventDefault();
+
+                      event.currentTarget
+                        .querySelector(".nav-link")
+                        ?.focus();
+
+                      setOpenMenu(null);
+                    }
+                  }}
+
                 >
                   {item.menuOnly ? (
                     <button

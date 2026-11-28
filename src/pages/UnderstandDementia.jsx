@@ -15,6 +15,32 @@ import heroPhoto from "../assets/banner-healthy-ageing.jpg";
 // Use these slugs and publish only reviewed material. Otherwise show neutral copy.
 
 
+// Additional navigation FAQs use existing project information and routes.
+const extraFaqs = {
+  en: [
+    ["Can younger people develop dementia?", "Yes. Dementia can sometimes affect people under 65."],
+    ["How can I prepare for a healthcare assessment?", "Write down the changes you have noticed and bring relevant health and medication information."],
+    ["Can healthy habits guarantee that I will not develop dementia?", "No. Healthy habits support wellbeing but cannot guarantee prevention."],
+    ["Where can I learn more about dementia care?", "Explore the Education & Events section for learning resources and workshops."],
+    ["Can this website book a medical appointment for me?", "No. This website provides information and navigation. Contact healthcare providers directly for appointments."],
+  ],
+  ms: [
+    ["Bolehkah golongan lebih muda mengalami demensia?", "Ya. Demensia kadangkala boleh berlaku pada individu di bawah usia 65 tahun."],
+    ["Bagaimanakah saya boleh membuat persediaan untuk penilaian kesihatan?", "Catat perubahan yang anda perhatikan dan bawa maklumat kesihatan serta ubat-ubatan yang berkaitan."],
+    ["Adakah amalan sihat menjamin saya tidak akan mengalami demensia?", "Tidak. Amalan sihat menyokong kesejahteraan tetapi tidak menjamin pencegahan."],
+    ["Di manakah saya boleh mengetahui lebih lanjut tentang penjagaan demensia?", "Terokai bahagian Pendidikan dan Acara untuk bahan pembelajaran serta bengkel."],
+    ["Bolehkah laman web ini membuat janji temu perubatan untuk saya?", "Tidak. Laman web ini menyediakan maklumat dan panduan. Hubungi penyedia penjagaan kesihatan secara langsung untuk janji temu."],
+  ],
+  zh: [
+    ["年轻人也可能患失智症吗？", "是的。失智症有时也会影响65岁以下的人。"],
+    ["如何为医疗评估做好准备？", "记录您观察到的变化，并携带相关健康和用药资料。"],
+    ["健康的生活习惯能保证不患失智症吗？", "不能。健康习惯有助于身心健康，但不能保证预防失智症。"],
+    ["在哪里可以进一步了解失智症照护？", "请浏览教育与活动板块，了解学习资源和工作坊。"],
+    ["这个网站可以帮我预约就诊吗？", "不能。本网站提供信息和指引。请直接联系医疗服务机构预约。"],
+  ],
+};
+const nextStepTitles = { en: "What would you like to do next?", ms: "Apakah langkah seterusnya yang anda inginkan?", zh: "您接下来想做什么？" };
+
 function UnderstandDementia() {
   const { hash } = useLocation();
 
@@ -54,6 +80,11 @@ function UnderstandDementia() {
       link: faq.link || understandingDementiaContent.faqs[idx]?.link,
     })),
   };
+  const faqItems = [...t.faqs];
+  for (const [q, a] of (extraFaqs[language] || extraFaqs.en)) {
+    if (!faqItems.some((faq) => faq.q === q)) faqItems.push({ q, a });
+  }
+  const visibleFaqs = faqItems.slice(0, 10);
   const reviewCopy = t.reviewCopy;
   const LIVING_SECTIONS = t.livingSections;
   const [publishedLivingCopy, setPublishedLivingCopy] = useState({});
@@ -125,14 +156,9 @@ function UnderstandDementia() {
           <ol>
             {[
               ["overview", t.whatIs],
-              ["normal-ageing", reviewCopy.normalTitle],
-              ["changes-to-watch", reviewCopy.changesTitle],
-              ["early-signs", reviewCopy.earlyTitle],
-              ["self-check", reviewCopy.selfCheckTitle],
-              ["medical-advice", reviewCopy.professionalTitle],
-              ["further-care", reviewCopy.furtherTitle],
+              ["changes-to-watch", translationsData.header.menu.signsChanges],
               ["healthy-living", t.healthyTitle],
-              ["understand-faq", t.faqTitle],
+              ["understand-faq", t.faq],
             ].map(([id, label]) => (
               <li key={id}>
                 <a href={`#${id}`}>{label}</a>
@@ -381,8 +407,7 @@ function UnderstandDementia() {
         <div className="understand-container">
           <div className="understand-section-heading">
             <p className="understand-eyebrow">06 / {reviewCopy.furtherTitle}</p>
-            <h2>{reviewCopy.furtherTitle}</h2>
-            <ReadMore text={reviewCopy.furtherIntro} />
+            <h2>{nextStepTitles[language] || nextStepTitles.en}</h2>
           </div>
           <div className="understand-next-steps">
             <Link to="/caregiver-support">{reviewCopy.caregiverLink} →</Link>
@@ -437,7 +462,7 @@ function UnderstandDementia() {
             <ReadMore text={t.faqIntro} />
           </div>
           <div className="understand-faq-list">
-            {t.faqs.map((faq) => (
+            {visibleFaqs.map((faq) => (
               <details key={faq.q}>
                 <summary>
                   {faq.q}

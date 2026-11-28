@@ -5169,6 +5169,27 @@ for (const [section, copy] of Object.entries(draftTwoForms)) {
   Object.assign(translations.en[section] ??= {}, copy);
 }
 
+
+Object.assign(translations.en.directory ??= {}, {
+  emptyTitle: "No matching resources found",
+  emptyGuidance: "Try a nearby location or adjust your filters.",
+  changeLocation: "Change Location",
+  reset: "Reset Filters",
+});
+
+Object.assign(translations.ms.directory ??= {}, {
+  emptyTitle: "Tiada sumber yang sepadan ditemui",
+  emptyGuidance: "Cuba lokasi berdekatan atau laraskan penapis anda.",
+  changeLocation: "Tukar Lokasi",
+  reset: "Tetapkan Semula Penapis",
+});
+
+Object.assign(translations.zh.directory ??= {}, {
+  emptyTitle: "未找到匹配的资源",
+  emptyGuidance: "请尝试附近的地点或调整筛选条件。",
+  changeLocation: "更改地点",
+  reset: "重置筛选条件",
+});
 translations.ms.contact.enquiryOptions = [
   'Pertanyaan Umum',
   'Pendidikan dan Latihan',

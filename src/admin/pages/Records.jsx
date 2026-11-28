@@ -7,12 +7,17 @@ import { enquiryStatuses, enquiryTypes } from '../../../shared/enquiry.js';
 import { serviceCategories } from '../../../shared/directory.js';
 import { recordTypes } from "../../../shared/admin-records.js";
 import ContactSettings from '../ContactSettings';
+import ListingRequestManager from '../ListingRequestManager';
 import { qaFolderCatalog, qaFolders } from "../../../shared/qa-folder-catalog.js";
 import EmailInventory from '../EmailInventory';
 import SubscriberAudience from '../SubscriberAudience';
 
 const CAREGIVER_SECTIONS = Object.fromEntries([['home-safety','Home Safety'],['daily-care','Daily Care'],['communication','Communication'],['behaviour','Changes in Behaviour'],['activities','Activities at Home']].map(([id,title])=>['caregiver-guidance-'+id,title]).concat(['Caregiver Stress','Caregiver Burden','Emotional Wellbeing','Resilience','How Am I Coping','Rest and Support'].map((title,i)=>['caregiver-wellbeing-'+(i+1),title]),['Understanding Dementia as a Family','Family Communication','Shared Caregiving','Primary Caregiver','Family Care Planning','Family Relationships'].map((title,i)=>['caregiver-family-'+(i+1),title])));
 const ABOUT_SECTIONS = { overview: 'About the project', mission: 'Mission and vision', objectives: 'Objectives', 'phase-1': 'Phase 1', 'phase-2': 'Phase 2', organiser: 'Organiser', partner: 'Partner roles', advisors: 'Advisors', supported: 'Supporting organisations', acknowledgements: 'Our thanks' };
+const ADVANCE_PLANNING = {
+  slug: "advance-planning",
+  title: "Advance Planning",
+};
 const enquiryStatus = value => enquiryStatuses[value] || value;
 const modules = {
   website: { title: 'Content & records', kinds: ['learning_resources', 'faqs', 'content_pages', 'dcs_certificates'] },
@@ -180,7 +185,7 @@ function toPayload(config, values) {
   return out;
 }
 
-function validate(config, values) {
+function validate(config, values, kind ) {
   const e = {};
   for (const [name, label, type, required] of config.fields) {
     const v = values[name];
@@ -278,7 +283,7 @@ export default function Records({ module = 'website' }) {
   }
 
   async function save() {
-    const found = validate(config, editing.values);
+    const found = validate(config, editing.values, kind );
     if (kind === 'subscribers' && !editing.id && !editing.values.country.trim()) found.country = 'Country is required.';
     setErrors(found);
     if (Object.keys(found).length) return;
@@ -382,10 +387,60 @@ export default function Records({ module = 'website' }) {
       {kind === 'content_pages' && <section className="tp-card"><h3>Caregiver Support</h3><p>Publish professionally reviewed topic content using the matching slug, source and review date.</p><div className="tp-actions">{Object.entries(CAREGIVER_SECTIONS).map(([slug,title])=><button className="tp-btn tp-btn-ghost" key={slug} onClick={()=>{setErrors({});setEditing({values:{...toForm(config),slug,title}});}}>Add {title}</button>)}</div></section>}
       {kind === 'learning_resources' && <section className="tp-card"><h3>Caregiver resources</h3><p>Use topic caregiver-family-resource-1 through -5, or caregiver-wellbeing-resource-1 through -3. Publish only professionally approved resources with permissions.</p></section>}
       {kind === 'content_pages' && <section className="tp-card"><h3>About the Project</h3><p>Add approved text to each section as it becomes available. Published entries replace the matching section in the selected language. Use separate entries for partners and contributors.</p><div className="tp-actions">{Object.entries(ABOUT_SECTIONS).map(([id,title]) => <button className="tp-btn tp-btn-ghost" key={id} onClick={() => { setErrors({}); setEditing({values:{...toForm(config),slug:`about-${id}`,title}}); }}>Add {title.toLowerCase()}</button>)}</div></section>}
+
+{kind === 'content_pages' && (
+  <section className="tp-card">
+    <h3>Advance Planning</h3>
+
+    <p>
+      Manage the Advance Planning information displayed
+      on the Find Help & Support page.
+      Only publish content approved by RCBC.
+    </p>
+
+    <div className="tp-actions">
+      <button
+        type="button"
+        className="tp-btn"
+        onClick={() => {
+          const existing = rows.find(
+            row =>
+              row.slug === ADVANCE_PLANNING.slug &&
+              row.language === "English"
+          );
+
+          setErrors({});
+
+          setEditing(
+            existing
+              ? {
+                  id: existing.id,
+                  values: toForm(config, existing),
+                }
+              : {
+                  values: {
+                    ...toForm(config),
+                    ...ADVANCE_PLANNING,
+                    language: "English",
+                  },
+                }
+          );
+        }}
+      >
+        Manage Advance Planning
+      </button>
+    </div>
+  </section>
+)}
+
       {module !== 'website' && <RecordFilters key={kind + filterReset} kind={kind} filters={filters} onApply={applyFilters}
         onReset={() => { applyFilters({}); setFilterReset(current => current + 1); }} />}
       {kind === 'subscribers' && <SubscriberAudience />}
       {kind === 'enquiries' && <ContactSettings />}
+      {module === 'directory' &&
+        kind === 'organisations' && (
+          <ListingRequestManager />
+      )}
       {notice && <p className="tp-note" role="status">{notice}</p>}
       {loading && <p role="status">Loading records…</p>}
 
