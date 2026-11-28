@@ -23,15 +23,15 @@ WHERE a.id = s.id::uuid;
 
 UPDATE learning_resources SET
  qa_folder = 'Understanding the Missing Pieces',
- activity_id = 'a0000001-0000-0000-0000-000000000001'::uuid
+ activity_id = coalesce((SELECT id FROM activities WHERE id = 'a0000001-0000-0000-0000-000000000001'), activity_id)
 WHERE title ILIKE '%Understanding the Missing Pieces%' OR legacy_cms_key = 'cms:101';
 
 UPDATE learning_resources SET
  qa_folder = 'Oral Health Webinar',
- activity_id = 'a0000001-0000-0000-0000-000000000010'::uuid
+ activity_id = coalesce((SELECT id FROM activities WHERE id = 'a0000001-0000-0000-0000-000000000010'), activity_id)
 WHERE title ILIKE '%Oral Health%' OR legacy_cms_key = 'cms:102';
 
 UPDATE learning_resources SET
  qa_folder = 'Prevention&Early Detection (Chinese)',
- activity_id = 'a0000001-0000-0000-0000-000000000003'::uuid
+ activity_id = coalesce((SELECT id FROM activities WHERE id = 'a0000001-0000-0000-0000-000000000003'), activity_id)
 WHERE title ILIKE '%Prevention & Early Detection%' OR legacy_cms_key = 'cms:103';

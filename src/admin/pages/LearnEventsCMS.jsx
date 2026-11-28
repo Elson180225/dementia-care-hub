@@ -10,9 +10,9 @@ import CertifiedTrainersAdmin from "./learn-events/CertifiedTrainersAdmin";
 import WebinarLibrary from './WebinarLibrary';
 import "../../trainer-portal/TrainerPortal.css";
 
-export default function LearnEventsCMS() {
+export default function LearnEventsCMS({ initialTab = "sessions" }) {
   const {search}=useLocation();
-  const [activeTab, setActiveTab] = useState(()=>new URLSearchParams(search).get('section')==='library'?'library':'sessions');
+  const [activeTab, setActiveTab] = useState(()=>new URLSearchParams(search).get('section')==='library'?'library':initialTab);
   useEffect(()=>{const params=new URLSearchParams(search);if(params.get('activity'))setActiveTab('sessions');else if(params.get('section')==='library')setActiveTab('library');},[search]);
   const [content, setContent] = useState(null);
   const [loading, setLoading] = useState(true);

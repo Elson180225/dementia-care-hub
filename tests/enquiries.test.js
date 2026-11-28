@@ -13,7 +13,7 @@ async function fixture(t, options = {}) {
   await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
   t.after(async () => { await new Promise(resolve => server.close(resolve)); await rm(directory, { recursive: true, force: true }); });
   const url = `http://127.0.0.1:${server.address().port}/api/enquiries`;
-  const payload = { id: randomUUID(), name: 'Test Visitor', email: 'visitor@example.org', type: 'Collaboration', message: 'A project enquiry.', website: '', startedAt: Date.now() - 3000 };
+  const payload = { id: randomUUID(), name: 'Test Visitor', email: 'visitor@example.org', type: 'Collaboration & Partnership', message: 'A project enquiry.', website: '', startedAt: Date.now() - 3000 };
   const send = (data = payload, headers = {}) => fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json', ...headers }, body: JSON.stringify(data) });
   return { directory, send, payload };
 }

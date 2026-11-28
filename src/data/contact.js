@@ -1,11 +1,11 @@
+import { defaultProjectEmail } from '../../shared/contact-settings.js';
+
 // Publish only channels confirmed as project-owned or organisation-managed.
 export const contact = {
-  projectEmail: 'alzheimerscare2024@gmail.com',
+  projectEmail: defaultProjectEmail,
   facebook: 'https://www.facebook.com/AlzheimersCarebyRCBC',
   messenger: 'https://www.facebook.com/messages/t/AlzheimersCarebyRCBC',
   whatsappCommunity: '',
-  organiserEmail: '',
-  organiserWebsite: '',
+  organiserEmail: 'rcbcbintulu@gmail.com',
   organiserFacebook: '',
-  approvedPostalAddress: '',
 };

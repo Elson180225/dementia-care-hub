@@ -22,6 +22,7 @@ import { serveWebsite } from './website.js';
 import {webinarLibraryHandler} from './webinar-library.js';
 import {dcsRegistryHandler} from './dcs-registry.js';
 import {educationReportsHandler} from './education-reports.js';
+import { volunteersHandler } from './volunteers.js';
 
 const port = Number(process.env.PORT || process.env.API_PORT || 3001);
 // Local default stays private; hosting sets HOST=0.0.0.0 so the platform can reach the server.
@@ -59,6 +60,7 @@ const server = createServer(async (req, res) => {
   if(['/api/admin/event-registration','/api/public/event-registration'].includes(url.pathname)) return await eventRegistrationHandler(req,res,url,sendJson);
   if(url.pathname==='/api/public/event-calendar') return await eventCalendarHandler(req,res,url,sendJson);
   if(['/api/admin/track-applications','/api/public/track-applications'].includes(url.pathname)) return await trackApplicationsHandler(req,res,url,sendJson);
+  if(['/api/admin/volunteers','/api/public/volunteer-registrations'].includes(url.pathname)) return await volunteersHandler(req,res,url,sendJson);
   if(url.pathname.startsWith('/api/admin/')) return await managementHandler(req,res,url,sendJson);
   if(url.pathname.startsWith('/api/public/')) return await publicRecordsHandler(req,res,url,sendJson);
   if(url.pathname.startsWith('/api/auth/')) return await authHandler(req,res,url.pathname,sendJson);

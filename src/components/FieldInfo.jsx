@@ -3,7 +3,7 @@ import './FieldInfo.css';
 
 export function fieldExample(name, type) {
  const key = String(name || '').toLowerCase().replace(/[-_]/g, ' ');
- if (/password/.test(key)) return 'Example: use a unique password with at least 12 characters when registering. Never reuse this example as your password.';
+ if (/password/.test(key)) return 'Example: use a unique password with at least 15 characters (a short phrase of 3–4 words works well) when registering. Never reuse this example as your password.';
  if (/email/.test(key) || type === 'email') return 'Example: name@example.org';
  if (/message|enquiry/.test(key)) return 'Example: I would like to learn more about your upcoming caregiver workshops.';
  if (/invitation/.test(key)) return 'Example: paste the invitation code supplied by your RCBC administrator.';

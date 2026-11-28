@@ -189,11 +189,11 @@ export async function portalHandler(req,res,url,send) {
    if(!admin && !['Workshop','Seminar'].includes(a.type)) fail('Trainers may submit workshops and seminars only',403);
    if(!a.title?.trim() || !a.description?.trim() || !a.audience?.trim() || !Number.isFinite(Number(a.plannedHours)) || Number(a.plannedHours)<=0 || !a.date || Number.isNaN(Date.parse(a.date))) fail('Complete the required activity fields');
    if(a.registrationLink && !/^https?:\/\//i.test(a.registrationLink)) fail('Registration link must use HTTP or HTTPS');
-   const saved=await db.query(`INSERT INTO activities(id,created_by,title,starts_at,type,mode,venue,language,audience,description,registration_link,planned_hours,city,poster_url)
-    VALUES($1,$2,$3,$4::timestamp AT TIME ZONE 'Asia/Kuala_Lumpur',$5,$6,$7,$8,$9,$10,$11,$12,$13,$14)
-    ON CONFLICT(id) DO UPDATE SET title=excluded.title,starts_at=excluded.starts_at,type=excluded.type,mode=excluded.mode,venue=excluded.venue,language=excluded.language,audience=excluded.audience,description=excluded.description,registration_link=excluded.registration_link,planned_hours=excluded.planned_hours,city=excluded.city,poster_url=excluded.poster_url
-    WHERE activities.created_by=$2 OR $15::boolean RETURNING id`,[id,user.id,a.title,a.date,a.type,a.mode,a.venue,a.language,a.audience,a.description,a.registrationLink,a.plannedHours,a.city || '',a.posterUrl || null,admin]);
-   await db.query('UPDATE activities SET ends_at=$2,organiser_kind=$3,organiser_name=$4 WHERE id=$1',[id,timing.end,organiser.kind,organiser.name]);
+   const saved=await db.query(`INSERT INTO activities(id,created_by,title,starts_at,type,mode,venue,language,audience,description,registration_link,planned_hours,city,poster_url,ends_at,organiser_kind,organiser_name)
+    VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17)
+    ON CONFLICT(id) DO UPDATE SET title=excluded.title,starts_at=excluded.starts_at,type=excluded.type,mode=excluded.mode,venue=excluded.venue,language=excluded.language,audience=excluded.audience,description=excluded.description,registration_link=excluded.registration_link,planned_hours=excluded.planned_hours,city=excluded.city,poster_url=excluded.poster_url,ends_at=excluded.ends_at,organiser_kind=excluded.organiser_kind,organiser_name=excluded.organiser_name
+    WHERE activities.created_by=$2 OR $18::boolean RETURNING id`,[id,user.id,a.title,timing.start,a.type,a.mode,a.venue,a.language,a.audience,a.description,a.registrationLink,timing.hours,a.city || '',a.posterUrl || null,timing.end,organiser.kind,organiser.name,admin]);
+   if(!saved.rowCount) fail('Only the activity owner can edit this record',403);
    if(admin && a.publicationReview) {
     let review;
     try { review=webinarReview(a.publicationReview); } catch(error) { fail(error.message); }
@@ -203,7 +203,6 @@ export async function portalHandler(req,res,url,send) {
     [id,review.source_url,review.speaker_name,review.speaker_intro,review.recording_url,review.qa_url,review.qa_text,review.content_approval_status,user.id]);
     await logDecision(db,user,'activities',id,review.content_approval_status==='approved'?'content-approved':'content-unpublished','Activity publication review',existing?.content_approval_status,review.content_approval_status);
    } else if(existing)await db.query("UPDATE activities SET content_approval_status='pending',content_approved_by=NULL,content_approved_at=NULL WHERE id=$1",[id]);
-   if(!saved.rowCount) fail('Only the activity owner can edit this record',403);
    if(admin){
     const programmeId=String(a.programmeId||'').trim();
     if(programmeId){

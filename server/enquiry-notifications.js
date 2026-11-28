@@ -10,7 +10,7 @@ export function enquiryNotificationMessage(row, env = process.env) {
  return {
   sender: { name: env.BREVO_SENDER_NAME || 'RCBC Dementia Care', email: env.BREVO_SENDER_EMAIL },
   to: [{ email: env.ENQUIRY_ADMIN_EMAIL }], replyTo: { email: row.email, name: row.name },
-  subject: 'New project enquiry',
+  subject: row.type ? `New project enquiry: ${row.type.replace(/[\r\n]+/g, ' ')}` : 'New project enquiry',
   ...enquiryEmailContent(row, env),
   tags: ['project-enquiry'], headers: { idempotencyKey: row.id }
  };

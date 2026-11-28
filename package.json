@@ -20,6 +20,7 @@
     "brevo:check": "node --env-file-if-exists=.env scripts/check-brevo.js",
     "brevo:setup": "node --env-file-if-exists=.env scripts/check-brevo.js --setup",
     "admin:invite": "node --env-file-if-exists=.env scripts/invite-admin.js",
+    "admin:reset-mfa": "node --env-file-if-exists=.env scripts/reset-admin-mfa.js",
     "test:browser": "playwright test"
   },
   "dependencies": {

@@ -1,10 +1,13 @@
 import Trans from "../../i18n/Trans";
+import { translateDirectoryListings } from '../../../shared/directory.js';
 import { useEffect, useMemo, useState } from "react";
 
 import { useLanguage } from "../../i18n/LanguageContext";
 
 import "./SupportServices.css";
 import ReadMore from "../../components/ReadMore/ReadMore";
+import HeroPhoto, { HeroWithPhoto } from "../../components/HeroPhoto/HeroPhoto";
+import heroPhoto from "../../assets/Senior-citizens-chatting.png";
 
 const categories = [
   "All",
@@ -122,7 +125,7 @@ function SupportServices() {
   }, []);
 
   const managedServices = useMemo(() => {
-    return translateContent(publishedServices, 'records/organisations').flatMap(
+    return translateDirectoryListings(publishedServices, translateContent).flatMap(
       (record) => {
         const serviceTypes =
           Array.isArray(publishedServices.find(item=>item.id===record.id)?.services) &&
@@ -259,7 +262,7 @@ function SupportServices() {
       ====================================================== */}
 
       <section className="support-services-hero">
-        <div className="support-services-container">
+        <div className="support-services-container"><HeroWithPhoto photo={<HeroPhoto src={heroPhoto} alt="Older adults talking together and smiling" />}>
           <span className="support-services-kicker">
             {ss.kicker || "Find Help & Support"}
           </span>
@@ -269,7 +272,7 @@ function SupportServices() {
           </h1>
 
           <ReadMore text={ss.subtitle || "Browse available external support services and providers by service type and location."} />
-        </div>
+        </HeroWithPhoto></div>
       </section>
 
       {/* =====================================================

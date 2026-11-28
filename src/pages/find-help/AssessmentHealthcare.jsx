@@ -7,6 +7,8 @@ import { useLanguage } from "../../i18n/LanguageContext";
 
 import "./AssessmentHealthcare.css";
 import ReadMore from "../../components/ReadMore/ReadMore";
+import HeroPhoto, { HeroWithPhoto } from "../../components/HeroPhoto/HeroPhoto";
+import heroPhoto from "../../assets/banner-healthcare.jpg";
 
 const preparationItems = [
   {
@@ -179,7 +181,7 @@ function AssessmentHealthcare() {
       ====================================================== */}
 
       <section className="assessment-hero">
-        <div className="assessment-container">
+        <div className="assessment-container"><HeroWithPhoto photo={<HeroPhoto src={heroPhoto} alt="A nurse listening to an older woman in a wheelchair" />}>
           <span className="assessment-kicker">
             {ah.kicker || "Find Help & Support"}
           </span>
@@ -206,7 +208,7 @@ function AssessmentHealthcare() {
               {t.header?.menu?.whatIsDementia || "Learn about dementia"}
             </Link>
           </div>
-        </div>
+        </HeroWithPhoto></div>
       </section>
 
       {/* =====================================================
@@ -831,7 +833,7 @@ function AssessmentHealthcare() {
               </strong>
             </Link>
 
-            <Link to="/find-help/resource-finder">
+            <Link to="/find-help/resource-finder?category=healthcare">
               <span>04</span>
 
               <h3>

@@ -1,17 +1,65 @@
 import { useCallback, useEffect, useState } from "react";
-import {useLocation} from 'react-router-dom';
-import {useTrainer} from '../../trainer-portal/TrainerContext';
-import { api } from "../../trainer-portal/TrainerContext";
-import { Field, describe } from "../../trainer-portal/ui";
+import { useLocation } from 'react-router-dom';
+import { api, useTrainer } from "../../trainer-portal/TrainerContext";
 import UploadField from "../../trainer-portal/UploadField";
+import { Field, describe } from "../../trainer-portal/ui";
+import { enquiryStatuses, enquiryTypes } from '../../../shared/enquiry.js';
+import { serviceCategories } from '../../../shared/directory.js';
 import { recordTypes } from "../../../shared/admin-records.js";
+import ContactSettings from '../ContactSettings';
 import { qaFolderCatalog, qaFolders } from "../../../shared/qa-folder-catalog.js";
 import EmailInventory from '../EmailInventory';
 import SubscriberAudience from '../SubscriberAudience';
 
-const ABOUT_SECTIONS = { overview: 'About the project', mission: 'What we aim to do', journey: 'Our journey', organiser: 'Organiser', partner: 'Partner roles', advisors: 'Advisors', supported: 'Supporting organisations', acknowledgements: 'Our thanks' };
-const enquiryStatus = value => ({ new: 'New', 'follow-up': 'In progress', closed: 'Closed' }[value] || value);
-const KINDS = Object.keys(recordTypes);
+const CAREGIVER_SECTIONS = Object.fromEntries([['home-safety','Home Safety'],['daily-care','Daily Care'],['communication','Communication'],['behaviour','Changes in Behaviour'],['activities','Activities at Home']].map(([id,title])=>['caregiver-guidance-'+id,title]).concat(['Caregiver Stress','Caregiver Burden','Emotional Wellbeing','Resilience','How Am I Coping','Rest and Support'].map((title,i)=>['caregiver-wellbeing-'+(i+1),title]),['Understanding Dementia as a Family','Family Communication','Shared Caregiving','Primary Caregiver','Family Care Planning','Family Relationships'].map((title,i)=>['caregiver-family-'+(i+1),title])));
+const ABOUT_SECTIONS = { overview: 'About the project', mission: 'Mission and vision', objectives: 'Objectives', 'phase-1': 'Phase 1', 'phase-2': 'Phase 2', organiser: 'Organiser', partner: 'Partner roles', advisors: 'Advisors', supported: 'Supporting organisations', acknowledgements: 'Our thanks' };
+const enquiryStatus = value => enquiryStatuses[value] || value;
+const modules = {
+  website: { title: 'Content & records', kinds: ['learning_resources', 'faqs', 'content_pages', 'dcs_certificates'] },
+  directory: { title: 'Directory Management', kinds: ['organisations', 'directory_services'] },
+  communications: { title: 'Enquiries & Subscribers', kinds: ['enquiries', 'subscribers'] },
+};
+const legacyEnquiryTypes = ['Education & Events', 'Collaboration', 'Website & Resources', 'Others'];
+const subscriberLocality = Object.entries({ country: 'Country', state: 'State / Province / Region', city: 'City / Town' });
+const reviewStatuses = { published: 'Published', unpublished: 'Unpublished', 'needs review': 'Needs review', current: 'Current', archived: 'Archived' };
+
+function RecordFilters({ kind, filters, onApply, onReset }) {
+  const field = (key, label, type = 'search') => <Field key={key} id={`filter-${key}`} label={label}>
+    <input id={`filter-${key}`} type={type} name={key} defaultValue={filters[key] || ''} maxLength={254} />
+  </Field>;
+  const select = (key, label, options, any = 'All') => <Field id={`filter-${key}`} label={label}>
+    <select id={`filter-${key}`} name={key} defaultValue={filters[key] || ''}>
+      <option value="">{any}</option>
+      {Object.entries(options).map(([value, text]) => <option key={value} value={value}>{text}</option>)}
+    </select>
+  </Field>;
+  return <form className="tp-card" onSubmit={event => {
+    event.preventDefault();
+    onApply(Object.fromEntries(new FormData(event.currentTarget)));
+  }} aria-label="Filter records">
+    <div className="tp-toolbar">
+      {kind === 'enquiries' ? <>
+        {select('type', 'Enquiry type', Object.fromEntries([...enquiryTypes, ...legacyEnquiryTypes].map(type => [type, type])), 'All enquiry types')}
+        {select('status', 'Status', enquiryStatuses, 'All statuses')}
+        {field('from', 'Received from', 'date')}
+        {field('through', 'Received through', 'date')}
+      </> : kind === 'subscribers' ? <>
+        {subscriberLocality.map(([key, label]) => field(key, label))}
+        {select('status', 'Status', { active: 'Active', unsubscribed: 'Unsubscribed' }, 'All statuses')}
+      </> : <>
+        {field('name', 'Organisation name')}
+        {kind === 'directory_services' ? select('category', 'Service category', Object.fromEntries(serviceCategories.map(key => [key, key])), 'All categories') : field('category', 'Organisation type')}
+        {field('location', 'Location')}
+        {select('status', 'Status', reviewStatuses, 'All statuses')}
+      </>}
+    </div>
+    <div className="tp-actions">
+      <button className="tp-btn" type="submit">Apply filters</button>
+      <button className="tp-btn tp-btn-ghost" type="button" onClick={onReset}>Clear filters</button>
+      {kind === 'subscribers' && <a className="tp-btn tp-btn-ghost" href={'/api/admin/subscribers/export?' + new URLSearchParams({ ...filters, records: '1' })}>Export records (CSV)</a>}
+    </div>
+  </form>;
+}
 const ZONE = { timeZone: "Asia/Kuala_Lumpur" };
 
 // PostgreSQL returns timestamps as ISO strings; the form inputs need Malaysian local time.
@@ -24,7 +72,7 @@ const toLocal = (value, type) => {
     : d.toLocaleString("sv-SE", ZONE).replace(" ", "T").slice(0, 16);
 };
 const nowLocal = () => toLocal(new Date(), "datetime-local");
-const fmt = (d) => (d ? new Date(d).toLocaleDateString("en-MY", { dateStyle: "medium" }) : "never");
+const fmt = (d) => (d ? new Date(d).toLocaleDateString("en-MY", { ...ZONE, dateStyle: "medium" }) : "never");
 
 // Convert a database row into the exact shape the server's field list expects.
 function toForm(config, row = {}) {
@@ -71,10 +119,16 @@ const reviewDue = (r) =>
   r.review_status === "needs review" ||
   (r.review_status !== "archived" && r.next_review_at && new Date(r.next_review_at) <= new Date());
 
-export default function Records() {
-  const {state}=useTrainer();
-  const {search}=useLocation();
-  const [kind, setKind] = useState(()=>new URLSearchParams(search).get('kind')==='learning_resources'?'learning_resources':KINDS[0]);
+export default function Records({ module = 'website' }) {
+  const { title, kinds } = modules[module];
+  const {state} = useTrainer();
+  const {search} = useLocation();
+  const requestedKind = new URLSearchParams(search).get('kind');
+  const [kind, setKind] = useState(() => kinds.includes(requestedKind) ? requestedKind : kinds[0]);
+  const [filters, setFilters] = useState({});
+  const [filterReset, setFilterReset] = useState(0);
+  const filterQuery = new URLSearchParams(filters).toString();
+  const [organisations, setOrganisations] = useState([]);
   const config = recordTypes[kind];
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -85,19 +139,29 @@ export default function Records() {
   const [historyError, setHistoryError] = useState("");
   const [busy, setBusy] = useState(false);
 
-  const load = useCallback(async () => {
-    setLoading(true);
-    try {
-      setRows(await api(`/api/admin/records/${kind}`));
-    } catch (e) {
-      setNotice(e.message);
-    } finally {
-      setLoading(false);
-    }
+  useEffect(() => {
+    if (kind !== 'directory_services') return;
+    let active = true;
+    api('/api/admin/records/organisations?choices=1').then(rows => {
+      if (active) setOrganisations(rows);
+    }).catch(error => { if (active) setNotice(error.message); });
+    return () => { active = false; };
   }, [kind]);
+  const load = useCallback(async (live = () => true) => {
+    try {
+      const next = await api(`/api/admin/records/${kind}?${filterQuery}`);
+      if (live()) setRows(next);
+    } catch (e) {
+      if (live()) { setRows([]); setNotice(e.message); }
+    } finally {
+      if (live()) setLoading(false);
+    }
+  }, [kind, filterQuery]);
 
   useEffect(() => {
-    load();
+    let active = true;
+    load(() => active);
+    return () => { active = false; };
   }, [load]);
 
   useEffect(() => {
@@ -107,6 +171,12 @@ export default function Records() {
     api('/api/admin/enquiry-history?id=' + encodeURIComponent(editing.id)).then(rows => { if (live) setHistory(rows); }).catch(() => { if (live) setHistoryError('Follow-up history could not be loaded.'); });
     return () => { live = false; };
   }, [kind, editing?.id]);
+
+  function applyFilters(values) {
+    if (new URLSearchParams(values).toString() === filterQuery) return;
+    setLoading(true);
+    setFilters(values);
+  }
 
   async function send(data, done) {
     setBusy(true);
@@ -126,6 +196,7 @@ export default function Records() {
 
   async function save() {
     const found = validate(config, editing.values);
+    if (kind === 'subscribers' && !editing.id && !editing.values.country.trim()) found.country = 'Country is required.';
     setErrors(found);
     if (Object.keys(found).length) return;
     if (kind === 'enquiries' && editing.values.status !== 'new' && !editing.values.admin_comment?.trim()) {
@@ -158,10 +229,11 @@ export default function Records() {
           {config.fields.map(([name, label, type, required]) => {
             const id = `rec-${name}`;
             const mandatory = required ||
+              (kind === 'subscribers' && name === 'country' && (!editing.id || Boolean(rows.find(row => row.id === editing.id)?.country))) ||
               (name === 'admin_comment' && kind === 'enquiries' && v.status !== 'new') ||
               (name === 'last_reviewed_at' && (v.review_status === 'current' || v.publication_status === 'published')) ||
               (name === 'source' && v.publication_status === 'published') ||
-              (name === 'reviewer' && kind === 'content_pages' && v.slug?.startsWith('about-') && v.publication_status === 'published') ||
+              (name === 'reviewer' && kind === 'content_pages' && /^(about|caregiver)-/.test(v.slug || '') && v.publication_status === 'published') ||
               (name === 'copyright_permission' && kind === 'learning_resources' && v.publication_status === 'published') ||
               (name === 'url' && kind === 'learning_resources' && v.publication_status === 'published' && !(v.resource_type === 'Q&A' && v.qa_folder));
             const common = {
@@ -181,12 +253,14 @@ export default function Records() {
               );
             return (
               <Field key={name} id={id} label={text} required={Boolean(mandatory)} error={errors[name]}>
-                {Array.isArray(type) ? (
-                  <select {...common}>{type.map((o) => <option key={o} value={o}>{kind === "enquiries" && name === "status" ? enquiryStatus(o) : o}</option>)}</select>
+                {type === 'organisation' ? (
+                  <select {...common}><option value="">Choose an organisation</option>{organisations.map(row => <option key={row.id} value={row.id}>{row.name}</option>)}</select>
+                ) : Array.isArray(type) ? (
+                  <select {...common}>{type.map((o) => <option key={o} value={o}>{kind === "enquiries" && name === "status" ? enquiryStatus(o) : o || 'Choose if applicable'}</option>)}</select>
                 ) : type === "textarea" || type === "array" ? (
                   <textarea rows={name === "body" ? 8 : 3} {...common} />
                 ) : (
-                  <><input type={type} {...common} list={kind === 'content_pages' && name === 'slug' ? 'about-sections' : undefined} />{kind === 'content_pages' && name === 'slug' && <datalist id="about-sections">{Object.entries(ABOUT_SECTIONS).map(([id,title]) => <option key={id} value={`about-${id}`}>{title}</option>)}</datalist>}</>
+                  <><input type={type} {...common} list={kind === 'content_pages' && name === 'slug' ? 'about-sections' : undefined} />{kind === 'content_pages' && name === 'slug' && <datalist id="about-sections">{Object.entries(ABOUT_SECTIONS).map(([id,title]) => <option key={id} value={`about-${id}`}>{title}</option>)}{Object.entries(CAREGIVER_SECTIONS).map(([slug,title])=><option key={slug} value={slug}>{title}</option>)}</datalist>}</>
                 )}
               </Field>
             );
@@ -207,18 +281,13 @@ export default function Records() {
   const reviewed = "review_status" in toForm(config);
   return (
     <>
-      <h1>Content &amp; records</h1>
-      <EmailInventory />
-      <SubscriberAudience />
-      <h2>Website records</h2>
-      <p>
-        Choose what you want to update: support directory, learning resources, FAQs, page text,
-        subscribers, DCS certificates or enquiries. Listing a provider does not mean RCBC endorses them.
-      </p>
+      <h1>{title}</h1>
+      {module === 'website' && <EmailInventory />}
+      {module === 'directory' && <p>Manage shared contact details in Organisations. Link each service listing to its organisation to publish it in the relevant public directory views.</p>}
       <div className="tp-toolbar">
         <Field id="kind" label="What to update">
-          <select id="kind" value={kind} onChange={(e) => { setKind(e.target.value); setNotice(""); }}>
-            {KINDS.map((k) => <option key={k} value={k}>{recordTypes[k].label}</option>)}
+          <select id="kind" value={kind} onChange={(e) => { setKind(e.target.value); setRows([]); setLoading(true); setFilters({}); setNotice(""); }}>
+            {kinds.map((k) => <option key={k} value={k}>{recordTypes[k].label}</option>)}
           </select>
         </Field>
         {!config.readonlyCreate && (
@@ -227,15 +296,27 @@ export default function Records() {
           </button>
         )}
       </div>
+      {kind === 'content_pages' && <section className="tp-card"><h3>Caregiver Support</h3><p>Publish professionally reviewed topic content using the matching slug, source and review date.</p><div className="tp-actions">{Object.entries(CAREGIVER_SECTIONS).map(([slug,title])=><button className="tp-btn tp-btn-ghost" key={slug} onClick={()=>{setErrors({});setEditing({values:{...toForm(config),slug,title}});}}>Add {title}</button>)}</div></section>}
+      {kind === 'learning_resources' && <section className="tp-card"><h3>Caregiver resources</h3><p>Use topic caregiver-family-resource-1 through -5, or caregiver-wellbeing-resource-1 through -3. Publish only professionally approved resources with permissions.</p></section>}
       {kind === 'content_pages' && <section className="tp-card"><h3>About the Project</h3><p>Add approved text to each section as it becomes available. Published entries replace the matching section in the selected language. Use separate entries for partners and contributors.</p><div className="tp-actions">{Object.entries(ABOUT_SECTIONS).map(([id,title]) => <button className="tp-btn tp-btn-ghost" key={id} onClick={() => { setErrors({}); setEditing({values:{...toForm(config),slug:`about-${id}`,title}}); }}>Add {title.toLowerCase()}</button>)}</div></section>}
+      {module !== 'website' && <RecordFilters key={kind + filterReset} kind={kind} filters={filters} onApply={applyFilters}
+        onReset={() => { applyFilters({}); setFilterReset(current => current + 1); }} />}
+      {kind === 'subscribers' && <SubscriberAudience />}
+      {kind === 'enquiries' && <ContactSettings />}
       {notice && <p className="tp-note" role="status">{notice}</p>}
       {loading && <p role="status">Loading records…</p>}
 
       <ul className="tp-cards">
-        {rows.map((r) => (
+        {!loading && rows.map((r) => (
           <li key={r.id} className="tp-card">
             <h2>{r[config.title] || "(untitled)"}</h2>
-            {r.category && <p className="tp-dev">{r.category}</p>}
+            {r.category && <p className="tp-dev">{r.organisation_name ? `${r.organisation_name} ? ` : ''}{r.category}</p>}
+            {kind === 'subscribers' && <>
+              <p>{r.email}</p>
+              <p>{[r.country || 'Country not recorded', r.state, r.city].filter(Boolean).join(' ? ')}</p>
+              <p>{r.unsubscribed_at ? `Unsubscribed ${fmt(r.unsubscribed_at)}` : 'Active'} ? Subscribed {fmt(r.consent_at)}</p>
+              <p>Consent recorded {new Date(r.consent_at).toLocaleString('en-MY', ZONE)} ? {r.consent_version}</p>
+            </>}
             {kind === "enquiries" && <><p><a href={`mailto:${r.email}`}>{r.email}</a> · {r.type}</p><p style={{whiteSpace:'pre-wrap'}}>{r.message}</p><p>Received: {fmt(r.received_at)}{r.followed_up_at && ` · Followed up: ${fmt(r.followed_up_at)}`}{r.closed_at && ` · Closed: ${fmt(r.closed_at)}`}</p><p>Email notification: {r.notification_status === 'sent' ? 'Sent to RCBC' : r.notification_status || 'Pending'}</p>{r.notification_error && <p>{r.notification_error}</p>}{r.admin_comment && <p>Latest note: {r.admin_comment}</p>}{r.notification_status === 'failed' && <button className="tp-btn tp-btn-ghost" disabled={busy} onClick={async () => { setBusy(true); try { await api('/api/admin/enquiry-notification-retry',{id:r.id}); setNotice('Email queued for another delivery attempt.'); await load(); } catch(e) { setNotice(e.message); } finally { setBusy(false); } }}>Retry notification</button>}</>}
             {reviewed ? (
               <>

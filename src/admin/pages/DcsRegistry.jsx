@@ -88,7 +88,7 @@ export default function DcsRegistry() {
    <fieldset className="dcs-subfieldset"><legend>1. Participant</legend><div className="dcs-fields">{editorGroups.identity.map(renderField)}</div></fieldset>
    <fieldset className="dcs-subfieldset"><legend>2. Programme & status</legend><div className="dcs-fields">{editorGroups.programme.filter(key=>key!=='completion_date'||(form.status==='completed'||form.completion_date)).map(renderField)}</div></fieldset>
    <fieldset className="dcs-subfieldset"><legend>3. Training evidence (admin only)</legend><div className="dcs-fields">{editorGroups.training.map(renderField)}</div></fieldset>
-   {(showCertificate||form.status==='completed')&&<fieldset className="dcs-subfieldset"><legend>4. Certificate (if completed)</legend><div className="dcs-fields">{editorGroups.certificate.map(renderField)}</div></fieldset>}
+   {showCertificate&&<fieldset className="dcs-subfieldset"><legend>4. Certificate (if completed)</legend><div className="dcs-fields">{editorGroups.certificate.map(renderField)}</div></fieldset>}
    <div className="tp-actions">{form.status==='completed'&&!showCertificate&&<button type="button" onClick={()=>setShowCertificate(true)}>Add certificate details</button>}<button type="submit">Save record</button><button type="button" onClick={()=>{setShowEditor(false);selectTab('records');}}>Cancel</button></div>
   </fieldset>
  </form>:<div className="dcs-panel"><p className="dcs-help">Add a new participant record or search under Find records and choose Edit.</p><button type="button" disabled={busy} onClick={()=>startRecord()}>Start new programme record</button></div>)}

@@ -1,8 +1,8 @@
 # Contact page release checklist
 
-The public page uses Dementia Care Connect. All project and organiser contact options remain visible. Options without an approved destination show a confirmation notice and direct visitors to the enquiry form. They are not clickable until configured.
+The public page uses Dementia Care Connect. All project and organiser contact options remain visible. Options awaiting an approved URL show a confirmation notice. They are not clickable until configured.
 
-- Populate `src/data/contact.js` with approved project email, Facebook Page, Messenger, WhatsApp Community invite and RCBC contacts. Verify each destination with RCBC. Publish a postal address only after approval.
+- Confirm the existing project email, Facebook Page and Messenger links with RCBC. Set the project email, WhatsApp Community invite and organiser Facebook Page URL under Admin > Enquiries & Subscribers > Public contact details. Saving publishes the details on Contact Us.
 - Ask RCBC to approve public wording, translated notices and privacy/retention arrangements.
 - Run `npm run db:migrate` before starting the updated API.
 - Set `ENQUIRY_ADMIN_EMAIL` to the designated RCBC recipient. Configure `BREVO_API_KEY`, verified `BREVO_SENDER_EMAIL`, `BREVO_SENDER_NAME` and `APP_BASE_URL`.
@@ -10,9 +10,9 @@ The public page uses Dementia Care Connect. All project and organiser contact op
 
 ## Enquiry workflow
 
-Accepted enquiries are saved in PostgreSQL and appear in Admin > Content & records > Enquiries. The notification worker checks queued enquiries every minute and emails the designated RCBC recipient when configured. A form success confirms storage, not email delivery. Administrators can inspect notification status even when delivery fails.
+Accepted enquiries are saved in PostgreSQL and appear in Admin > Enquiries & Subscribers. The notification worker checks queued enquiries every minute and emails the designated RCBC recipient when configured. A form success confirms storage, not email delivery. Administrators can inspect notification status even when delivery fails.
 
-Choose Record follow-up, reply using the visitor email link, record the action/outcome, and select In progress or Closed. Follow-up notes, status history and timestamps demonstrate handling and closure. Saving a note does not automatically send a reply to the visitor.
+Choose Record follow-up, reply using the visitor email link, record the action/outcome, and select In Progress or Responded. Follow-up notes, status history and timestamps demonstrate handling and closure. Saving a note does not automatically send a reply to the visitor.
 
 Confirmed failed notifications can be retried by an admin. Uncertain outcomes require checking Brevo logs before manual recovery to avoid duplicate messages. Email delivery is not enabled until the recipient and provider settings are configured. The optional file inbox in the standalone handler is not the running API's production workflow.
 

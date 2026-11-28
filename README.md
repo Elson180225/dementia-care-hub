@@ -2,6 +2,8 @@
 
 A platform supporting people living with dementia, caregivers and families, with public resources, event information and trainer/admin portals.
 
+> **Handing over to RCBC?** Start with the [Handover Guide](docs/HANDOVER.md): accounts to transfer, settings, deploying, backups, costs and known limitations.
+
 ## Local setup
 
 Install a current Node.js LTS release and PostgreSQL. From the project folder, install dependencies:
@@ -82,6 +84,7 @@ For a manual check with your own published data, start `npm run server` and `npm
 4. Open a published learning resource or directory record with a recorded review date. Check that the **Last reviewed** stamp shows the Malaysia date. A record without a review date should have no stamp.
 
 `npm run preview` previews the frontend build locally; it does not start the API or replace a production server.
+
 # Education & Events review workflow (November 2026)
 
 Run `npm run db:migrate` before restarting the API after updating this version. Migrations 028-032 add the DCS registry, activity contributions, publication review, actual attendance and a shared learning-resource master. Deployment must run the same migration command against its own database before starting the updated server.
@@ -106,4 +109,3 @@ node scripts/verify-education-isolated.mjs
 ```
 
 This creates only an in-memory database, applies migrations, and exercises publication guards, registration/import, payment verification, registry privacy, actual completion and individual contribution reporting with synthetic records. Browser coverage is in `tests/browser/education-feedback.spec.js`; use `npx playwright test` after installing the supported browser, or configure an installed Edge/Chrome channel.
-

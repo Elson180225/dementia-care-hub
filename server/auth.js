@@ -1,4 +1,6 @@
 import { randomBytes, scryptSync, timingSafeEqual, createHash } from 'node:crypto';
+import { generateSecret, verifyCode, otpauthUrl } from './totp.js';
+import { newPasswordProblem, PASSWORD_MAX } from './password-policy.js';
 import { pool, transaction } from './db.js';
 import { isAllowedOrigin } from './origin.js';
 import { storeCertificateEvidence } from './certificate-evidence.js';
@@ -208,6 +210,11 @@ export async function currentUser(req) {
 
 const attempts = new Map();
 
+// Required in production unless ADMIN_MFA=off; elsewhere only when ADMIN_MFA=on.
+export function adminMfaRequired(env=process.env) {
+ return env.ADMIN_MFA==='on' || (env.NODE_ENV==='production' && env.ADMIN_MFA!=='off');
+}
+
 export async function authHandler(req,res,path,send) {
  if(
   req.method==='GET' &&
@@ -380,16 +387,12 @@ export async function authHandler(req,res,path,send) {
 
   const password=data.password;
 
-  if(
-   token.length<32 ||
-   typeof password!=='string' ||
-   password.length<12 ||
-   password.length>256
-  ) {
-   fail(
-    'Use a valid reset link and a password of at least 12 characters'
-   );
+  if(token.length<32) {
+   fail('Use a valid reset link');
   }
+
+  const resetProblem=await newPasswordProblem(password);
+  if(resetProblem) fail(resetProblem);
 
   await transaction(async db=>{
    const row=(
@@ -470,7 +473,7 @@ export async function authHandler(req,res,path,send) {
  if(
   !emailPattern.test(email) ||
   typeof password!=='string' ||
-  password.length>256
+  password.length>PASSWORD_MAX
  ) {
   fail('Enter a valid email and password');
  }
@@ -479,14 +482,12 @@ export async function authHandler(req,res,path,send) {
   path==='/api/auth/register' ||
   path==='/api/auth/admin-register'
  ) {
-  if(
-   password.length<12 ||
-   !String(data.name||'').trim()
-  ) {
-   fail(
-    'Enter your name and a password of at least 12 characters'
-   );
+  if(!String(data.name||'').trim()) {
+   fail('Enter your name');
   }
+
+  const signupProblem=await newPasswordProblem(password,{email,name:data.name});
+  if(signupProblem) fail(signupProblem);
 
   const admin=
    path.endsWith('admin-register');
@@ -787,6 +788,39 @@ export async function authHandler(req,res,path,send) {
   fail(
    'RCBC has not approved your trainer access. Use Check application to see the status and feedback.',
    403
+  );
+ }
+
+ // Administrators confirm sign-in with a 6-digit code from an authenticator app
+ // (RCBC Admin Portal Draft 02). First sign-in sets the app up; later ones ask for a code.
+ if(user.role==='admin' && adminMfaRequired()) {
+  const code=String(data.mfaCode || '').trim();
+  const secret=user.mfa_enabled_at ? user.mfa_secret : (user.mfa_pending_secret || generateSecret());
+
+  if(!user.mfa_enabled_at && !user.mfa_pending_secret) {
+   await pool.query('UPDATE users SET mfa_pending_secret=$2 WHERE id=$1',[user.id,secret]);
+  }
+
+  if(!code) {
+   return send(
+    res,
+    200,
+    user.mfa_enabled_at
+     ? {mfaRequired:true}
+     : {mfaSetup:true,secret,otpauthUrl:otpauthUrl(secret,user.email)}
+   );
+  }
+
+  const step=verifyCode(secret,code,{lastStep:user.mfa_last_step});
+  if(step===null) {
+   fail('That code is not correct or has expired. Enter the current 6-digit code from your authenticator app.',401);
+  }
+
+  await pool.query(
+   user.mfa_enabled_at
+    ? 'UPDATE users SET mfa_last_step=$2 WHERE id=$1'
+    : 'UPDATE users SET mfa_secret=mfa_pending_secret,mfa_pending_secret=NULL,mfa_enabled_at=now(),mfa_last_step=$2 WHERE id=$1',
+   [user.id,step]
   );
  }
 

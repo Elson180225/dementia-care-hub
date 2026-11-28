@@ -1,3 +1,4 @@
+import {applyCaregiverDraft} from "./caregiverDraft.js";
 import {publicCopy,addMissingCopy} from '../../shared/public-copy.js';
 import {inlineCopy} from './inlineCopy.js';
 import {addSupplementalCopy} from './supplementalCopy.js';
@@ -1441,7 +1442,7 @@ export const translations = {
       "cardEquipmentDesc": "Explore everyday aids and assistive technology.",
       "cardEquipmentBtn": "Explore equipment →",
       "cardResourceFinderTitle": "Resource Finder",
-      "cardResourceFinderDesc": "Not sure what you need? Use the guided Resource Finder.",
+      "cardResourceFinderDesc": "Browse healthcare and care services by type and location.",
       "cardResourceFinderBtn": "Start finder →",
       "boundaryBoxTitle": "Information & Navigation Only",
       "boundaryBoxText": "Dementia Care Connect provides information and navigation to external healthcare services. It does not provide diagnosis, appointment booking, medical referral or clinical care.",
@@ -5065,6 +5066,110 @@ for (const [key, [en, ms, zh]] of Object.entries(inlineCopy)) {
   }
 }
 addSupplementalCopy(translations);
+
+const draftTwoForms = {
+  "contact": {
+    "enquiryType": "What is your enquiry about?",
+    "enquiryOptions": [
+      "General Enquiry",
+      "Education & Training",
+      "Events & Participation",
+      "Collaboration & Partnership",
+      "Volunteering & Project Support",
+      "Website & Resource Feedback"
+    ],
+    "selectEnquiryType": "Select enquiry type",
+    "boundaryTitle": "Before You Send a Message",
+    "enquiryScope": "This form is for enquiries related to the Alzheimer’s Care Project.",
+    "boundaryHelp": "For healthcare and care services, please visit",
+    "boundaryEvents": "For course and event registration, please visit",
+    "boundaryText": "Dementia Care Connect does not provide medical consultation, emergency or crisis support services. For a medical emergency in Malaysia, please call 999.",
+    "privacyNotice": "Your contact details will be used to respond to your enquiry. Please avoid including sensitive personal or medical information.",
+    "success": "Thank you for contacting the Alzheimer’s Care Project. Your message has been received. Our project team will respond as soon as possible.",
+    "failure": "Your message could not be sent. Your details are still in the form. Please try again.",
+    "messageHelp": "Please briefly describe your enquiry.",
+    "messageLimit": "Maximum 2,000 characters.",
+    "stayConnected": "Stay Connected",
+    "projectContactSub": "Connect with our project team and stay informed about our education, activities and community initiatives.",
+    "facebookPage": "Follow Our Facebook Page",
+    "projectEmailPurpose": "For project enquiries, collaboration and information requests.",
+    "rcbcFacebookPurpose": "Learn more about RCBC and its community service initiatives.",
+    "channelPending": "The official link will be published once confirmed."
+  },
+  "projectServices": {
+    "country": "Country",
+    "city": "City / Town",
+    "state": "State / Province / Region",
+    "languageNotice": "English is the primary language of communication for the Alzheimer’s Care Project. Individual events and activities may be conducted in other languages, as indicated in their respective announcements.",
+    "consentInfo": "Your information will be used by the RCBC Alzheimer’s Care Project team to manage your subscription and send updates on webinars, education, training and project activities via email. You may unsubscribe at any time.",
+    "privacyIntro": "For further information on how your personal data is collected, used and managed, please refer to our",
+    "privacyPolicy": "Privacy Policy",
+    "consentCheckbox": "I agree to receive project updates from Dementia Care Connect / Alzheimer’s Care Project by RCBC via email.",
+    "requiredFields": "* Required fields",
+    "subscribedMsg": "Thank you for subscribing. You are now subscribed to Dementia Care Connect updates.",
+    "subscribedDetail": "We look forward to keeping you informed about upcoming webinars, education, training and project activities.",
+    "existingMsg": "If you already subscribe, you’re all set. If you previously unsubscribed, check your email for a link to subscribe again.",
+    "unsubscribedMsg": "You have successfully unsubscribed and will no longer receive project subscription updates from Dementia Care Connect.",
+    "returnHome": "Return to Home",
+    "subscribeAgain": "Subscribe again",
+    "renewTitle": "Subscribe again to Get Updated",
+    "renewBtn": "Confirm resubscription",
+    "renewNotice": "Confirm that you agree to receive project updates from Dementia Care Connect / Alzheimer’s Care Project by RCBC via email."
+  },
+  "directory": {
+    "intro": "Search published healthcare, care services, products and information.",
+    "category": "Resource category",
+    "type": "Type of support",
+    "location": "Location",
+    "allCategories": "All Resources",
+    "allTypes": "All Types",
+    "allLocations": "All Locations",
+    "groupType": "Group type",
+    "allGroups": "All group types",
+    "governmentGroup": "Government-led",
+    "privateGroup": "NGO / private",
+    "communityGroup": "Community-led",
+    "website": "Website",
+    "hours": "Opening hours",
+    "eligibility": "Eligibility",
+    "fees": "Fees",
+    "volunteerDetails": "Volunteer details",
+    "volunteers": "Accepting volunteers only",
+    "reset": "Reset filters",
+    "loading": "Loading directory listings…",
+    "error": "Directory listings could not be loaded.",
+    "retry": "Try again",
+    "empty": "No matching resources found. Try a nearby location or adjust your filters.",
+    "details": "Service details",
+    "groupIntro": "Find a support group and contact it directly for participation arrangements.",
+    "healthcare": "Healthcare & Care Services",
+    "products": "Products & Practical Aids",
+    "information": "Information & Resources"
+  }
+};
+for (const [section, copy] of Object.entries(draftTwoForms)) {
+  Object.assign(translations.en[section] ??= {}, copy);
+}
+
+translations.ms.contact.enquiryOptions = [
+  'Pertanyaan Umum',
+  'Pendidikan dan Latihan',
+  'Acara dan Penyertaan',
+  'Kerjasama dan Perkongsian',
+  'Kesukarelawanan dan Sokongan Projek',
+  'Maklum Balas Laman Web dan Sumber',
+];
+translations.zh.contact.enquiryOptions = [
+  '一般咨询',
+  '教育与培训',
+  '活动与参与',
+  '合作与伙伴关系',
+  '志愿服务与项目支持',
+  '网站与资源反馈',
+];
+
+applyCaregiverDraft(translations);
+
 Object.assign(translations.en.inlineCopy, educationCopy, dcsPublicCopy);
 Object.assign(translations.ms.inlineCopy, educationCopyMs, dcsPublicCopyMs);
 Object.assign(translations.zh.inlineCopy, educationCopyZh, dcsPublicCopyZh);

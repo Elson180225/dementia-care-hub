@@ -43,6 +43,7 @@ BEGIN
   ('cms:102','a0000001-0000-0000-0000-000000000010'::uuid,'Oral Health Webinar'),
   ('cms:103','a0000001-0000-0000-0000-000000000003'::uuid,'Prevention&Early Detection (Chinese)')
  ) AS m(legacy_key, activity_id, qa_folder)
+ JOIN activities AS a ON a.id = m.activity_id
  WHERE r.legacy_cms_key = m.legacy_key;
 
  UPDATE learning_resources SET url = ''

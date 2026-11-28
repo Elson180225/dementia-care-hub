@@ -2,6 +2,24 @@ import { useState } from 'react';
 import { eventDateTime } from '../../../shared/event-dates';
 import { useTrainer } from '../../trainer-portal/TrainerContext';
 
+function downloadContributionCsv(year, contributions) {
+  const rows = [
+    ['Year', 'Trainer', 'Activity', 'Role', 'Hours', 'Participants'],
+    ...contributions.map(t => [year, t.name, t.activity.title, t.role, t.hours, t.activity.completion.participants]),
+  ];
+  const csv = rows.map(row => row.map(value => {
+    const text = String(value ?? '');
+    const safe = /^[=+\-@]/.test(text) ? "'" + text : text;
+    return '"' + safe.replace(/"/g, '""') + '"';
+  }).join(',')).join('\r\n');
+  const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = 'trainer-contribution.csv';
+  link.click();
+  URL.revokeObjectURL(url);
+}
+
 const statusLabels = {
   pending: 'Awaiting trainer confirmation',
   returned: 'Correction requested',
@@ -115,9 +133,12 @@ export default function Contribution() {
           {totals.map(([label, value]) => <div key={label} className="tp-stat"><dt>{label}</dt><dd>{value}</dd></div>)}
         </dl>
         <p>Participant totals count each activity’s attendance once. Trainer hours count only after both the activity and the individual hours have been verified.</p>
-        {/^\d{4}$/.test(year) && Number(year) >= 2000 && Number(year) <= 2200
-          ? <a className="tp-btn" href={'/api/admin/education-reports?' + new URLSearchParams({year,...filters})}>Download annual Excel report</a>
-          : <p>Enter a reporting year between 2000 and 2200 to download the report.</p>}
+        <div className="tp-actions">
+          {/^\d{4}$/.test(year) && Number(year) >= 2000 && Number(year) <= 2200
+            ? <a className="tp-btn" href={'/api/admin/education-reports?' + new URLSearchParams({year,...filters})}>Download annual Excel report</a>
+            : <p>Enter a reporting year between 2000 and 2200 to download the report.</p>}
+          <button type="button" className="tp-btn tp-btn-ghost" disabled={!verifiedPeople.length} onClick={() => downloadContributionCsv(year, verifiedPeople)}>Download trainer hours (CSV)</button>
+        </div>
       </section>
       <h2>Review trainer hours</h2>
       <div className="tp-table-wrap" role="region" aria-label="Trainer hours review" tabIndex={0}>

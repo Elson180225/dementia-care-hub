@@ -47,7 +47,11 @@ test('deployment content persists, repairs skipped seeds, excludes tests and tra
   await source.query("INSERT INTO files(id,owner_id,kind,name,mime,data) VALUES($1,$2,'poster','historical.png','image/png',$3)",[fileId,admin,Buffer.from([1,2,3])]);
   await source.query("UPDATE activities SET poster_url=$1 WHERE id='a0000001-0000-0000-0000-000000000001'",['/api/files/'+fileId]);
   await source.query("INSERT INTO event_registration_settings(activity_id,paid,enabled) VALUES('a0000001-0000-0000-0000-000000000001',false,false)");
-  await source.query("INSERT INTO organisations(name,category,services,language,publication_status,review_status,status,last_reviewed_at) VALUES('Genuine provider','services',ARRAY['Support'],'English','published','current','published',now())");
+  await source.query(`WITH provider AS (
+   INSERT INTO organisations(name,category,publication_status,review_status,status,last_reviewed_at)
+   VALUES('Genuine provider','Community-led','published','current','published',now()) RETURNING id
+  ) INSERT INTO directory_services(organisation_id,category,service_type,publication_status,review_status,last_reviewed_at)
+    SELECT id,'services','Support','published','current',now() FROM provider`);
   const historicalId='a0000001-0000-0000-0000-000000000001',proofId=randomUUID(),participantId=randomUUID();
   await source.query("UPDATE activities SET registration_link='https://example.test/unverified-form' WHERE id=$1",[historicalId]);
   await source.query("UPDATE event_registration_settings SET enabled=true,paid=true,fee='RM 999',instructions='TEST BANK INSTRUCTIONS',google_url='https://example.test/unverified-form',website_enabled=false WHERE activity_id=$1",[historicalId]);
@@ -82,7 +86,7 @@ test('deployment content persists, repairs skipped seeds, excludes tests and tra
   const result=await importContent(target,bundle,{adminEmail:'preview-admin@example.test',apply:true,cmsRevision:1,backupPath:join(dir,'before.local')});
   assert.equal(result.activities,12);assert.equal(result.translations.approved,1);
   assert.deepEqual((await target.query('SELECT data FROM files WHERE id=$1',[fileId])).rows[0].data,Buffer.from([1,2,3]));
-  assert.equal(result.records,1);assert.equal(result.files,1);
+  assert.equal(result.records,2);assert.equal(result.files,1);
   assert.equal(result.eventsWithRegistrationClosed,12);assert.equal(result.registrationsTransferred,0);assert.equal(result.registrationSettingsTransferred,0);
   assert.equal((await target.query('SELECT registration_link FROM activities WHERE id=$1',[historicalId])).rows[0].registration_link,null);
   for(const table of ['event_registration_settings','event_participants','event_confirmation_deliveries','participant_reminders','participant_imports'])assert.equal(Number((await target.query('SELECT count(*) FROM '+table)).rows[0].count),0,table);
