@@ -68,6 +68,12 @@ export async function trainerGovernanceAction(db,user,action,log){
  if(v.photo_url&&!/^\/api\/files\/[a-f0-9-]{36}$/.test(v.photo_url)&&!/^https?:\/\//.test(v.photo_url))fail('Choose a valid profile photograph.');
  await validateFileLinks(db,user,[v.photo_url,...docs].filter(Boolean));
  const fileId=await certificateFileId(db,user,v.certificateEvidenceUrl||'');
+ const completionDate=v.ttt_completion_date ?? old.ttt_completion_date?.toISOString?.().slice(0,10) ?? old.ttt_completion_date ?? '';
+ const portalRequested=v.portal_access_requested ?? old.portal_access_requested;
+ if(typeof portalRequested!=='boolean' || typeof completionDate!=='string' ||
+    (completionDate && (!/^\d{4}-\d{2}-\d{2}$/.test(completionDate) ||
+      !Number.isFinite(Date.parse(completionDate)) || new Date(completionDate).toISOString().slice(0,10)!==completionDate))) fail('Enter a valid DCS-TTT completion date and portal preference.');
+ if(v.portal_access_enabled && !old.portal_access_enabled && !portalRequested) fail('Record the trainer’s voluntary request or acceptance before granting portal access.');
  if(v.portal_access_enabled){
   if(old.email.endsWith('@unclaimed.invalid')&&(!v.account_email||!v.initial_password))fail('Set an account email and initial password before granting portal access.');
   if(v.certified_status!=='certified')fail('Verify certification before granting portal access.');
@@ -78,8 +84,10 @@ export async function trainerGovernanceAction(db,user,action,log){
   {const problem=await newPasswordProblem(v.initial_password,{email:v.account_email,name:v.name});if(problem)fail(problem);}
   await db.query('UPDATE users SET email=$2,password_hash=$3 WHERE id=$1',[old.id,v.account_email.trim().toLowerCase(),hashPassword(v.initial_password)]);
  }
+ const publicConditions=v.public_teaching_conditions ?? old.public_teaching_conditions ?? '';
+ if(typeof publicConditions!=='string'||publicConditions.length>2000)fail('Keep public teaching conditions within 2000 characters.');
  const status=v.approveProfile?'approved':old.status;
- const snapshot=v.approveProfile?profileSnapshot({...v,contact_email:email,contact_phone:phone},v.name.trim()):old.approved_snapshot;
+ const snapshot=v.approveProfile?profileSnapshot({...v,public_teaching_conditions:publicConditions,contact_email:email,contact_phone:phone},v.name.trim()):old.approved_snapshot;
  await db.query('UPDATE users SET name=$2 WHERE id=$1',[old.id,v.name.trim()]);
  await db.query(`UPDATE trainer_profiles SET city=$2,language=$3,short_profile=$4,qualifications=$5,experience=$6,photo_url=$7,
  supporting_documents=$8,certificate_file_id=$9,certificate_ref=$10,certified_status=$11,assessment_status=$12,assessment_result=$13,
@@ -91,6 +99,7 @@ export async function trainerGovernanceAction(db,user,action,log){
  v.certified_status,v.assessment_status,v.assessment_result,v.healthcare_professional,v.independent_teaching_scope,v.teaching_allowed,JSON.stringify(permissions),
  v.portal_access_enabled,email,phone,v.publish_email,v.publish_phone,v.email_consent,v.phone_consent,consentAt,v.consent_note,
  v.listing_status,JSON.stringify(snapshot),status,user.id]);
+ await db.query('UPDATE trainer_profiles SET ttt_completion_date=$2,portal_access_requested=$3,public_teaching_conditions=$4 WHERE id=$1',[old.id,completionDate||null,portalRequested,publicConditions]);
  if(v.portal_access_enabled){
   await db.query('UPDATE users SET enabled=true WHERE id=$1',[old.id]);
   await db.query(`INSERT INTO trainer_access_requests(user_id,name,email,city,claimed_certificate_ref,status,reviewed_by,reviewed_at)

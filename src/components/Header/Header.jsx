@@ -108,6 +108,7 @@ function getMenuItems(m,u) {
           label: m.upcomingCalendar,
           path: "/learn-events/upcoming-calendar",
         },
+        {label: m.dcsTrainingCertification || 'DCS training & certification', path:'/learn-events/dcs-participants'},
       ],
     },
     {

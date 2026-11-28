@@ -66,7 +66,7 @@ export async function eventCalendarHandler(req, res, url, send, db = pool) {
  }
  const { rows: [activity] } = await db.query(
   `SELECT id,title,starts_at,ends_at,planned_hours,venue,city,mode,description FROM activities
-   WHERE id=$1 AND status='published' AND published_at IS NOT NULL AND cancelled_at IS NULL`, [id],
+   WHERE id=$1 AND status='published' AND published_at IS NOT NULL AND cancelled_at IS NULL AND postponed_at IS NULL AND content_approval_status='approved'`, [id],
  );
  if (!activity) return send(res, 404, { error: 'Event not found' });
 

@@ -84,3 +84,28 @@ For a manual check with your own published data, start `npm run server` and `npm
 4. Open a published learning resource or directory record with a recorded review date. Check that the **Last reviewed** stamp shows the Malaysia date. A record without a review date should have no stamp.
 
 `npm run preview` previews the frontend build locally; it does not start the API or replace a production server.
+
+# Education & Events review workflow (November 2026)
+
+Run `npm run db:migrate` before restarting the API after updating this version. Migrations 028-032 add the DCS registry, activity contributions, publication review, actual attendance and a shared learning-resource master. Deployment must run the same migration command against its own database before starting the updated server.
+
+- **Education & Events → Publication & webinar library:** approve source information and publication permissions. Historical seeded activities remain private pending RCBC review; completion alone never makes them public. RCBC still needs to identify and approve the intended ten historical webinars.
+- **Physical Education:** edit a permanent programme and its linked dated intakes. To activate a future programme, prepare an intake with registration closed, review and publish that intake, then activate the programme. DCS-Family is the prerequisite for either advanced pathway.
+- **Online Education → Learning resources:** use the shared resource editor. Previous CMS resources are preserved and copied as unapproved reference records, not automatically published. Link resources to an approved activity and record source, review date and publication permission.
+- **Event registrations & participants:** website and external forms are supported, including both on one activity. External records use CSV import; this is not automatic Google Forms synchronisation. Free records are confirmed automatically; paid records require payment verification and confirmation. Shared email is allowed, active duplicate phone numbers are blocked, and capacity excess is advisory. Mark actual attendance separately. Completion and certificates belong in the DCS registry.
+- **DCS training registry:** create or import CSV/XLSX template records, preview validation, then verify identity/training information. Verification, public consent and public-display approval are three separate choices. Unknown participant records and test registrations are never automatically migrated or published. Excel imports read the first sheet, accept values rather than formulas, and are limited to 500 records/1 MB.
+- **Completion reviews / Training reports & records:** record actual net duration, attendance and each trainer's delivered topic/hours. Trainers confirm their contributions, or admin records their documented offline confirmation. Review contributions individually. Verified completion can be reopened with a reason for correction. Annual exports contain five worksheets; attendances are counted once per activity and pending contributions do not enter verified hours.
+- **Language & translations:** new public wording is under Education & Events. It remains English until translations receive the required review and approval.
+
+## Verification
+
+`npm test`, `npm run build` and `npm run lint` run the normal checks. Database-dependent tests require their explicitly configured test databases; never point those variables at production.
+
+For a disposable PostgreSQL-engine integration check that does not use your configured database:
+
+```powershell
+npm install --prefix tmp/feedback-test-db --no-save --package-lock=false @electric-sql/pglite
+node scripts/verify-education-isolated.mjs
+```
+
+This creates only an in-memory database, applies migrations, and exercises publication guards, registration/import, payment verification, registry privacy, actual completion and individual contribution reporting with synthetic records. Browser coverage is in `tests/browser/education-feedback.spec.js`; use `npx playwright test` after installing the supported browser, or configure an installed Edge/Chrome channel.

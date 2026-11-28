@@ -1,123 +1,164 @@
-import { useState } from "react";
-import { useTrainer } from "../../trainer-portal/TrainerContext";
-import { buildAnnualReport, reportYears } from "../annualReport";
-import { buildXlsx } from "../xlsx";
+import { useState } from 'react';
+import { eventDateTime } from '../../../shared/event-dates';
+import { useTrainer } from '../../trainer-portal/TrainerContext';
 
-// Stops spreadsheet programs from running text that starts with = + - @ as a formula.
-const safe = (v) => {
-  const s = String(v ?? "");
-  return /^[=+\-@]/.test(s) ? `'${s}` : s;
-};
-
-function toCsv(rows) {
-  const esc = (v) => `"${safe(v).replace(/"/g, '""')}"`;
-  return rows.map((r) => r.map(esc).join(",")).join("\r\n");
-}
-
-function download(filename, text) {
-  const url = URL.createObjectURL(new Blob([text], { type: "text/csv;charset=utf-8" }));
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = filename;
-  a.click();
+function downloadContributionCsv(year, contributions) {
+  const rows = [
+    ['Year', 'Trainer', 'Activity', 'Role', 'Hours', 'Participants'],
+    ...contributions.map(t => [year, t.name, t.activity.title, t.role, t.hours, t.activity.completion.participants]),
+  ];
+  const csv = rows.map(row => row.map(value => {
+    const text = String(value ?? '');
+    const safe = /^[=+\-@]/.test(text) ? "'" + text : text;
+    return '"' + safe.replace(/"/g, '""') + '"';
+  }).join(',')).join('\r\n');
+  const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = 'trainer-contribution.csv';
+  link.click();
   URL.revokeObjectURL(url);
 }
 
-export default function Contribution() {
-  const { state } = useTrainer();
-  const years = reportYears(state.activities);
-  const [reportYear, setReportYear] = useState(years[0]);
-  const report = buildAnnualReport(state, reportYear);
-  const rows = state.activities
-    .filter((a) => a.completion.status === "verified")
-    .sort((a, b) => b.date.localeCompare(a.date));
+const statusLabels = {
+  pending: 'Awaiting trainer confirmation',
+  returned: 'Correction requested',
+  confirmed: 'Ready to verify',
+  verified: 'Verified',
+};
 
-  const totals = rows.reduce((acc, a) => {
-    const year = new Date(a.date).getFullYear();
-    acc[year] ??= { activities: 0, hours: 0, participants: 0 };
-    acc[year].activities += 1;
-    acc[year].hours += (a.trainers||[]).reduce((total,t)=>total+Number(t.hours||0),0);
-    acc[year].participants += Number(a.completion.participants || 0);
-    return acc;
-  }, {});
+function ContributionActions({ activity, trainer, dispatch }) {
+  const [action, setAction] = useState('');
+  const [note, setNote] = useState('');
+  const [saving, setSaving] = useState(false);
+  const status = trainer.contributionStatus || 'pending';
+  const canConfirm = status === 'pending' || status === 'returned';
 
-  const trainerRows=rows.flatMap(a=>(a.trainers || []).map(t=>({...a,trainerId:t.trainerId,trainerName:state.profiles.find(p=>p.id===t.trainerId)?.name || t.trainerId,role:t.role,individualHours:Number(t.hours||0)})));
-  function exportAnnualReport() {
-    const bytes = buildXlsx(report.sheets);
-    const url = URL.createObjectURL(new Blob([bytes], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" }));
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = report.filename;
-    a.click();
-    URL.revokeObjectURL(url);
+  function close() {
+    setAction('');
+    setNote('');
   }
 
-  function exportCsv() {
-    const head = ["Year", "Trainer", "Activity", "Role", "Hours", "Participants"];
-    const body = trainerRows.map((a) => [
-      new Date(a.date).getFullYear(), a.trainerName, a.title, a.role,
-      a.individualHours, a.completion.participants,
-    ]);
-    download("trainer-contribution.csv", toCsv([head, ...body]));
+  async function submit(decision) {
+    setSaving(true);
+    try {
+      const saved = await dispatch({
+        type: decision === 'confirm' ? 'CONTRIBUTION_CONFIRM' : 'CONTRIBUTION_REVIEW',
+        id: activity.id,
+        trainerId: trainer.trainerId,
+        ...(decision === 'confirm' ? {} : { decision }),
+        comment: decision === 'verified' ? '' : note.trim(),
+      });
+      if (saved) close();
+    } finally {
+      setSaving(false);
+    }
   }
 
   return (
     <>
-      <h1>Trainer Hours &amp; Reports</h1>
-      <p>Hours are added up automatically from completed activities you have checked. Nobody needs to enter them twice.</p>
+      <strong>{statusLabels[status] || status}</strong>
+      {trainer.reviewComment && <p>{trainer.reviewComment}</p>}
+      {activity.completion.status === 'none' ? <p>Complete the activity report to start the review.</p>
+        : trainer.hours == null || Number(trainer.hours) > activity.completion.eventHours
+          ? <p>Check the trainer’s hours in the activity report before reviewing.</p>
+          : action ? (
+            <form onSubmit={e => { e.preventDefault(); if (note.trim()) submit(action); }}>
+              <label className="tp-field">
+                {action === 'confirm' ? 'How did the trainer confirm their hours?' : 'What should the trainer correct?'}
+                <textarea rows={2} required value={note} onChange={e => setNote(e.target.value)} />
+              </label>
+              <div className="tp-actions">
+                <button className="tp-btn" disabled={saving || !note.trim()}>
+                  {action === 'confirm' ? 'Save trainer confirmation' : 'Send correction request'}
+                </button>
+                <button className="tp-btn tp-btn-ghost" type="button" disabled={saving} onClick={close}>Cancel</button>
+              </div>
+            </form>
+          ) : (
+            <div className="tp-actions">
+              {canConfirm && <button className="tp-btn tp-btn-ghost" onClick={() => setAction('confirm')}>
+                Record confirmation received outside the portal
+              </button>}
+              {status === 'confirmed' && <button className="tp-btn" disabled={saving} onClick={() => submit('verified')}>Verify hours</button>}
+              {['confirmed', 'verified'].includes(status) && <button className="tp-btn tp-btn-ghost" disabled={saving} onClick={() => setAction('returned')}>
+                Request correction
+              </button>}
+            </div>
+          )}
+    </>
+  );
+}
 
-      <section className="tp-card">
-        <h2>Annual training report</h2>
-        <p>One Excel workbook with five sheets: Annual Summary, Activity Master, Trainer Contribution, Trainer Annual Summary, and Geographical &amp; Activity Analysis. Only verified activities count.</p>
-        <label className="tp-field">Reporting year
-          <select value={reportYear} onChange={(e) => setReportYear(Number(e.target.value))}>
-            {years.map((y) => <option key={y} value={y}>{y}</option>)}
-          </select>
-        </label>
-        <div className="tp-stats">
-          <div className="tp-stat"><span>Verified activities</span><strong>{report.totals.activities}</strong></div>
-          <div className="tp-stat"><span>Active trainers</span><strong>{report.totals.activeTrainers}</strong></div>
-          <div className="tp-stat"><span>Participant attendances</span><strong>{report.totals.attendance}</strong></div>
-          <div className="tp-stat"><span>Trainer contribution hours</span><strong>{report.totals.trainerHours}</strong></div>
-          <div className="tp-stat"><span>Net activity hours</span><strong>{report.totals.activityHours}</strong></div>
-          <div className="tp-stat"><span>Locations reached</span><strong>{report.totals.places}</strong></div>
+export default function Contribution() {
+  const { state, dispatch } = useTrainer();
+  const [year, setYear] = useState(String(new Date().getFullYear()));
+  const [filters, setFilters] = useState({location: '', type: '', organiser: ''});
+  const rows = state.activities.filter(a =>
+    (a.completion.actualStart || a.date)?.slice(0, 4) === year &&
+    (!filters.location || a.city === filters.location) &&
+    (!filters.type || a.type === filters.type) &&
+    (!filters.organiser || a.organiserKind === filters.organiser) &&
+    !a.cancelledAt && !a.postponedAt
+  );
+  const verified = rows.filter(a => a.completion.status === 'verified');
+  const people = rows.flatMap(a => (a.trainers || []).map(t => ({...t, activity: a})));
+  const verifiedPeople = people.filter(t => t.activity.completion.status === 'verified' && t.contributionStatus === 'verified');
+  const totals = [
+    ['Active trainers', new Set(verifiedPeople.filter(t => Number(t.hours) > 0).map(t => t.trainerId)).size],
+    ['Verified activities', verified.length],
+    ['Net activity hours', verified.reduce((n, a) => n + Number(a.completion.eventHours || 0), 0)],
+    ['Verified trainer hours', verifiedPeople.reduce((n, t) => n + Number(t.hours || 0), 0)],
+    ['Participants', verified.reduce((n, a) => n + Number(a.completion.participants || 0), 0)],
+  ];
+
+  return (
+    <>
+      <h1>Trainer contributions and annual reports</h1>
+      <section className="tp-card" aria-label="Annual report">
+        <div className="tp-form-grid">
+          <label className="tp-field">Reporting year
+            <input type="number" min="2000" max="2200" value={year} onChange={e => setYear(e.target.value)} />
+          </label>
+          {[['location','Location','city'], ['type','Activity type','type'], ['organiser','Organiser','organiserKind']].map(([key,label,field]) => (
+            <label className="tp-field" key={key}>{label}
+              <select value={filters[key]} onChange={e => setFilters({...filters,[key]:e.target.value})}>
+                <option value="">All</option>
+                {[...new Set(state.activities.map(a => a[field]).filter(Boolean))].sort().map(value => <option key={value}>{value}</option>)}
+              </select>
+            </label>
+          ))}
         </div>
+        <dl className="tp-stats">
+          {totals.map(([label, value]) => <div key={label} className="tp-stat"><dt>{label}</dt><dd>{value}</dd></div>)}
+        </dl>
+        <p>Participant totals count each activity’s attendance once. Trainer hours count only after both the activity and the individual hours have been verified.</p>
         <div className="tp-actions">
-          <button className="tp-btn" onClick={exportAnnualReport}>Download {reportYear} annual report (Excel)</button>
-          <button className="tp-btn tp-btn-ghost" onClick={exportCsv} disabled={rows.length === 0}>Download trainer hours (CSV)</button>
+          {/^\d{4}$/.test(year) && Number(year) >= 2000 && Number(year) <= 2200
+            ? <a className="tp-btn" href={'/api/admin/education-reports?' + new URLSearchParams({year,...filters})}>Download annual Excel report</a>
+            : <p>Enter a reporting year between 2000 and 2200 to download the report.</p>}
+          <button type="button" className="tp-btn tp-btn-ghost" disabled={!verifiedPeople.length} onClick={() => downloadContributionCsv(year, verifiedPeople)}>Download trainer hours (CSV)</button>
         </div>
       </section>
-
-      <h2>Totals by year</h2>
-      <div className="tp-table-wrap">
-        <table className="tp-table">
-          <caption className="tp-sr">Totals by year</caption>
-          <thead><tr><th>Year</th><th>Activities</th><th>Hours</th><th>Participants</th></tr></thead>
+      <h2>Review trainer hours</h2>
+      <div className="tp-table-wrap" role="region" aria-label="Trainer hours review" tabIndex={0}>
+        <table className="tp-table tp-contribution-table">
+          <thead><tr><th>Activity</th><th>Trainer / topic / role</th><th>Hours</th><th>Review</th></tr></thead>
           <tbody>
-            {Object.entries(totals).map(([year, t]) => (
-              <tr key={year}><td>{year}</td><td>{t.activities}</td><td>{t.hours}</td><td>{t.participants}</td></tr>
-            ))}
-            {rows.length === 0 && <tr><td colSpan="4">No checked activities yet.</td></tr>}
-          </tbody>
-        </table>
-      </div>
-
-      <h2>Hours by trainer</h2>
-      <div className="tp-table-wrap">
-        <table className="tp-table">
-          <caption className="tp-sr">Hours by trainer</caption>
-          <thead><tr><th>Year</th><th>Trainer</th><th>Activity</th><th>Role</th><th>Hours</th><th>Participants</th></tr></thead>
-          <tbody>
-            {trainerRows.map((a) => (
-              <tr key={`${a.id}-${a.trainerId}`}>
-                <td>{new Date(a.date).getFullYear()}</td>
-                <td>{a.trainerName}</td>
-                <td>{a.title}</td>
-                <td>{a.role}</td>
-                <td>{a.individualHours}</td>
-                <td>{a.completion.participants}</td>
-              </tr>
-            ))}
+            {people.map(trainer => {
+              const activity = trainer.activity;
+              const date = activity.completion.actualStart || activity.date;
+              return (
+                <tr key={activity.id + ':' + trainer.trainerId}>
+                  <td><strong>{activity.title}</strong><br />{activity.activityReference}<br />
+                    {activity.organiserName}<br />{date ? eventDateTime(date + '+08:00') : 'Date to be confirmed'}</td>
+                  <td>{trainer.name}<br />{trainer.topic || 'Topic to be recorded'} · {trainer.role}</td>
+                  <td>{trainer.hours ?? '—'}</td>
+                  <td><ContributionActions activity={activity} trainer={trainer} dispatch={dispatch} /></td>
+                </tr>
+              );
+            })}
+            {!people.length && <tr><td colSpan="4">No contributions match these filters.</td></tr>}
           </tbody>
         </table>
       </div>

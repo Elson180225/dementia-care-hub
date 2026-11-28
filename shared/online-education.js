@@ -1,4 +1,5 @@
-export const qaFolders = ['Oral Health Webinar', 'Prevention&Early Detection (Chinese)', 'Understanding the Missing Pieces'];
+import { qaFolders } from './qa-folder-catalog.js';
+export { qaFolders };
 
 export function publicLink(value) {
   if (typeof value !== 'string' || !value.trim()) return '';
@@ -31,5 +32,26 @@ export function orderWebinars(items, now = Date.now()) {
 }
 
 export function resourceQaFolder(resource) {
-  return resource.qaFolder || (Number.isInteger(resource.qaIndex) ? qaFolders[resource.qaIndex] : '') || '';
+  return resource.qa_folder || resource.qaFolder || (Number.isInteger(resource.qaIndex) ? qaFolders[resource.qaIndex] : '') || '';
+}
+
+/** External Q&A link only when the resource is not served from Grouped_Q&A. */
+export function resourceQaExternalLink(resource) {
+  const type = resource.resource_type || resource.type;
+  if (type !== 'Q&A') return '';
+  if (resourceQaFolder(resource)) return '';
+  return publicLink(resource.url || resource.qaUrl || '');
+}
+
+export function mapApprovedLearningResource(resource) {
+  const type = resource.resource_type || resource.type;
+  const bundledQa = Boolean(resourceQaFolder(resource));
+  return {
+    ...resource,
+    type,
+    year: resource.source_year || resource.year || '',
+    videoUrl: ['Recording', 'Video'].includes(type) ? resource.url : '',
+    qaUrl: type === 'Q&A' && !bundledQa ? resource.url : '',
+    resourceUrl: resource.url,
+  };
 }

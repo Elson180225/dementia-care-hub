@@ -5,14 +5,17 @@ import PublishedRecords from "../components/PublishedRecords";
 import {publicTrainer} from '../../shared/trainer-governance';
 import {ASSESSMENT_LABEL} from '../../shared/teaching-eligibility';
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { orderWebinars, publicLink, resourceQaFolder, topicDateFields } from '../../shared/online-education';
+import { mapApprovedLearningResource, orderWebinars, publicLink, resourceQaExternalLink, resourceQaFolder, topicDateFields } from '../../shared/online-education';
+import { qaFolderCatalog } from '../../shared/qa-folder-catalog.js';
 import { onlineHeadingText } from '../../shared/online-headings';
 import EventRegistration from '../components/EventRegistration';
 import EventPriceLabel from '../components/EventPriceLabel';
 import ProgrammeIntakes from '../components/ProgrammeIntakes';
+import {DcsCourseDetails, AdfmPartnership, DcsPathwayLine, pathwayRole} from '../components/DcsProgrammeGuidance';
+import {dcsProgrammeRecords, programmeLink} from '../../shared/programme-intakes';
 import '../components/EventDetails.css';
 import {lockDialogScroll} from '../components/dialogScroll';
-import {eventDate,eventTime,eventDateTime} from '../../shared/event-dates';
+import {eventDate,eventTime,eventDateTime,eventTimeRange} from '../../shared/event-dates';
 import {isPlannedProgramme} from '../../shared/programme-intakes';
 import { createPortal } from "react-dom";
 import { Link, useLocation, useParams } from "react-router-dom";
@@ -64,7 +67,7 @@ import "./LearnEvents.css";
 import ReadMore from "../components/ReadMore/ReadMore";
 
 function formatActivityDate(val) { return val ? eventDate(val) : ''; }
-function formatActivityTime(val) { return val ? eventTime(val) : ''; }
+function formatActivityTime(start,end,plannedHours) { return start ? eventTimeRange(start,end,plannedHours) : ''; }
 function formatDeadlineDate(val) { return val ? eventDateTime(val)+' (Malaysia time)' : ''; }
 
 function isEventClosed(event) {
@@ -115,8 +118,10 @@ function usePublicActivities() {
             return {
               ...a,
               rawDate: a.starts_at,
+              endDate: a.ends_at,
+              plannedHours: a.planned_hours,
               date: formatActivityDate(a.starts_at),
-              time: formatActivityTime(a.starts_at),
+              time: formatActivityTime(a.starts_at, a.ends_at, a.planned_hours),
               registrationLink: a.registration_link,
               poster: resolveMediaImage(a.poster_url, webinarImage),
               location: fullLoc,
@@ -132,7 +137,7 @@ function usePublicActivities() {
               registrationDeadlineFormatted: formatDeadlineDate(a.registration_deadline),
               capacity: a.capacity,
               isClosed,
-              status: isCancelled ? 'cancelled' : isCompleted ? 'completed' : isClosed ? 'registration-closed' : 'upcoming'
+              status: isCancelled ? 'cancelled' : a.postponed_at ? 'postponed' : isCompleted ? 'completed' : isClosed ? 'registration-closed' : 'upcoming'
             };
           }));
         }
@@ -219,12 +224,42 @@ const qaImageModules = import.meta.glob("../assets/Grouped_Q&A/**/*.jpg", {
   import: "default",
 });
 
+function qaFolderAssetPath(folderName) {
+  return `Grouped_Q&A/${folderName}/`.replace(/\\/g, '/');
+}
+
 function getQaImages(folderName, fallback) {
+  const needle = qaFolderAssetPath(folderName);
   const images = Object.entries(qaImageModules)
-    .filter(([path]) => path.includes(`/Grouped_Q&A/${folderName}/`))
+    .filter(([path]) => path.replace(/\\/g, '/').includes(needle))
     .sort(([a], [b]) => a.localeCompare(b, undefined, { numeric: true }))
     .map(([, url]) => url);
   return images.length > 0 ? images : fallback;
+}
+
+function qaViewerForActivityId(activityId, fallbackTitle, fallbackLanguage) {
+  const match = qaFolderCatalog.find((row) => row.activityId === String(activityId));
+  if (!match) return null;
+  const images = getQaImages(match.folder, []);
+  if (!images.length) return null;
+  return {
+    title: fallbackTitle || match.resourceTitle,
+    language: fallbackLanguage || 'English',
+    images,
+    pages: images.length,
+  };
+}
+
+function qaViewerForResource(resource) {
+  const folder = resourceQaFolder(resource);
+  if (folder) {
+    const images = getQaImages(folder, []);
+    if (images.length) {
+      return { title: resource.title, language: resource.language || 'English', images, pages: images.length };
+    }
+  }
+  if (resource.activity_id) return qaViewerForActivityId(resource.activity_id, resource.title, resource.language);
+  return null;
 }
 
 qaResources[0].images = getQaImages("Oral Health Webinar", qaResources[0].images);
@@ -298,8 +333,60 @@ function ModeIcon({ mode }) {
    ACTIVITY LANDING PAGE MODAL
    Reusable detail view for any activity — matches PDF Section 4
    ================================================================ */
+function ResourceQaAction({ resource, className, onOpenQa, compact = false }) {
+  const viewer = qaViewerForResource(resource);
+  const qaExternalUrl = resourceQaExternalLink(resource);
+  const type = resource.resource_type || resource.type;
+  const videoTargetUrl = type !== 'Q&A' ? publicLink(resource.url) : '';
+  if (type === 'Q&A') {
+    if (viewer) {
+      return (
+        <button type="button" className={className || 'resource-action-btn resource-btn-qa'} onClick={() => onOpenQa(viewer)}>
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <rect width="18" height="18" x="3" y="3" rx="2" ry="2" />
+            <circle cx="9" cy="9" r="2" />
+            <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21" />
+          </svg>
+          {compact ? <Trans id="educationQAOpenInline">Open Q&amp;A viewer</Trans> : <Trans id="qaReviewSimple">Review Q&amp;A →</Trans>}
+        </button>
+      );
+    }
+    if (qaExternalUrl) {
+      return (
+        <a className={className || 'resource-action-btn resource-btn-qa'} href={qaExternalUrl} target="_blank" rel="noreferrer">
+          <Trans id="qaReview">Review Q&amp;A ↗</Trans>
+        </a>
+      );
+    }
+    if (resourceQaFolder(resource)) {
+      return <span><Trans id="qaUnavailable">Q&amp;A material not yet available</Trans></span>;
+    }
+    return null;
+  }
+  if (videoTargetUrl) {
+    return (
+      <a href={videoTargetUrl} target="_blank" rel="noreferrer">
+        <Trans id="educationResourceOpen">Open resource</Trans> ↗
+      </a>
+    );
+  }
+  return null;
+}
+
+function ActivityLearningResources({activityId,onOpenQa}){
+ const [rows,setRows]=useState([]),[error,setError]=useState('');
+ const {translateContent}=useLanguage();
+ useEffect(()=>{let active=true;setRows([]);setError('');fetch('/api/public/activity-resources?activity='+activityId).then(r=>{if(!r.ok)throw Error();return r.json();}).then(data=>{if(active)setRows(data);}).catch(()=>{if(active)setError('Learning resources could not be loaded. Please refresh to try again.');});return()=>{active=false;};},[activityId]);
+ if(error)return <p role="status"><Trans id="educationResourceError">Learning resources could not be loaded. Please refresh to try again.</Trans></p>;
+ if(!rows.length)return null;
+ return <section className="event-detail-description event-detail-resources"><h3><Trans id="educationResources">Approved learning resources</Trans></h3><ul className="event-resource-list">{translateContent(rows,'records/learning_resources').map(r=>{
+  const showGenericOpen = !resourceQaFolder(r) && publicLink(r.url) && (r.resource_type || r.type) !== 'Q&A' && !['Recording','Video'].includes(r.resource_type || r.type);
+  return <li key={r.id} className="event-resource-item"><strong>{r.title}</strong><p>{r.description}</p><div className="event-resource-actions"><ResourceQaAction resource={r} className="resource-action-btn resource-btn-qa" onOpenQa={onOpenQa} />{showGenericOpen&&<a className="event-resource-link" href={publicLink(r.url)} target="_blank" rel="noreferrer"><Trans id="educationResourceOpen">Open resource</Trans> ↗</a>}</div></li>;
+ })}</ul></section>;
+}
 function ActivityModal({ activity, onClose, standalone = false }) {
   const [managedRegistration,setManagedRegistration]=useState(null);
+  const [selectedQa,setSelectedQa]=useState(null);
   const {t,translateLabel}=useLanguage();
   const am=t.learnEvents?.activityModal||{};
   const dialogRef=useRef(null),closeRef=useRef(onClose);
@@ -328,7 +415,7 @@ function ActivityModal({ activity, onClose, standalone = false }) {
   const Heading = standalone ? "h1" : "h2";
   const content = <div className={standalone ? "event-page" : "event-detail-backdrop"} onMouseDown={e=>{if(e.target===e.currentTarget)onClose?.();}}>
     <section className="event-detail-dialog" role={standalone ? undefined : "dialog"} aria-modal={standalone ? undefined : true} aria-labelledby="event-detail-title" tabIndex={-1} ref={dialogRef}>
-      <div className="event-detail-toolbar"><span><Trans id="learnSiteTitle">Education &amp; Events</Trans></span>{standalone ? <Link to="/learn-events/upcoming-calendar">All events</Link> : <button type="button" onClick={onClose} aria-label={translateLabel("Close event details", "eventDetailsClose")}><span className="dialog-close-icon" aria-hidden="true" /></button>}</div>
+      <div className="event-detail-toolbar"><span><Trans id="learnSiteTitle">Education &amp; Events</Trans></span>{standalone ? <Link to="/learn-events/online-education"><Trans id="educationBackLibrary">Back to Library</Trans></Link> : <button type="button" onClick={onClose} aria-label={translateLabel("Close event details", "eventDetailsClose")}><span className="dialog-close-icon" aria-hidden="true" /></button>}</div>
       <div className="event-detail-layout">
         <aside className="event-detail-visual" aria-label={translateLabel("Event poster", "eventPoster")}>
           {poster?<><a href={poster} target="_blank" rel="noreferrer" aria-label={'Open full-size poster for '+activity.title+' in a new tab'}><img src={poster} alt={'Poster for '+activity.title}/></a><p><Trans id="eventPoster">Event poster</Trans></p><a className="event-poster-link" href={poster} target="_blank" rel="noreferrer"><Trans id="fullPoster">View full-size poster ↗</Trans></a></>:<div className="event-detail-no-poster"><span aria-hidden="true">▤</span><p><Trans id="rcbcEvents">RCBC Education &amp; Events</Trans></p><strong>{activity.title}</strong><p><Trans id="eventSideInfo">Event information and registration details are shown alongside.</Trans></p></div>}
@@ -338,8 +425,9 @@ function ActivityModal({ activity, onClose, standalone = false }) {
           <div className="event-detail-links"><WhatsAppShare title={activity.title} path={eventPath(activity.id)} />{!standalone && <Link to={eventPath(activity.id)} onClick={onClose}>Open event page</Link>}</div>
           <LastReviewed value={activity.last_reviewed_at} />
           <dl className="event-detail-facts">
+            <div><dt><Trans id="educationOrganiser">Organiser</Trans></dt><dd>{activity.organiser_name||'RCBC'}{activity.organiser_kind==='independent'&&<p><Trans id="educationIndependent">Independently organised. Website listing does not imply RCBC organisation, sponsorship or endorsement.</Trans></p>}</dd></div>
             <div><dt>{am.suitableFor||'Suitable for'}</dt><dd>{activity.suitableFor||activity.audience||'Public, families and caregivers'}</dd></div>
-            <div><dt>{am.dateTime||'Date & time'}</dt><dd>{activity.rawDate?formatActivityDate(activity.rawDate):activity.date||'Date to be confirmed'}{(activity.rawDate||activity.time)&&<><br/>{activity.rawDate?formatActivityTime(activity.rawDate):activity.time}</>}<small><Trans id="malaysiaTime">Malaysia time (MYT)</Trans></small></dd></div>
+            <div><dt>{am.dateTime||'Date & time'}</dt><dd>{activity.rawDate?formatActivityDate(activity.rawDate):activity.date||'Date to be confirmed'}{(activity.rawDate||activity.time)&&<><br/>{activity.rawDate?formatActivityTime(activity.rawDate,activity.endDate,activity.plannedHours):activity.time}</>}<small><Trans id="malaysiaTime">Malaysia time (MYT)</Trans></small></dd></div>
             <div><dt>{am.mode||'Mode'}</dt><dd><ModeIcon mode={activity.mode}/></dd></div>
             <div><dt>{am.location||'Location'}</dt><dd>{activity.fullLocation||activity.location||(activity.mode==='Online'?'Online':activity.city||'Venue to be confirmed')}</dd></div>
             <div><dt>{am.language||'Language'}</dt><dd>{activity.language||'To be confirmed'}</dd></div>
@@ -348,6 +436,21 @@ function ActivityModal({ activity, onClose, standalone = false }) {
             <div><dt>{am.speakerTrainer||'Speaker / trainer'}</dt><dd>{activity.speaker||'RCBC Education Team'}{activity.trainerId&&<><br/><Link to="/learn-events/certified-trainers" onClick={onClose}>{am.viewTrainerProfile||'View trainer profile'} →</Link></>}</dd></div>
           </dl>
           {activity.description&&<section className="event-detail-description"><h3>{am.whatYouWillLearn||'What you will learn'}</h3><p>{activity.description}</p></section>}
+          {activity.speaker_intro&&<section className="event-detail-description"><h3><Trans id="educationSpeakerIntro">About the speaker</Trans></h3><p>{activity.speaker_intro}</p></section>}
+          {(() => {
+            const bundledForActivity = qaViewerForActivityId(activity.id, activity.title, activity.language);
+            const legacyQaUrl = publicLink(activity.qa_url);
+            const showLegacyQaUrl = legacyQaUrl && !bundledForActivity;
+            if (!activity.qa_text && !showLegacyQaUrl) return null;
+            return (
+              <section className="event-detail-description">
+                <h3><Trans id="educationReviewedQA">Reviewed questions &amp; answers</Trans></h3>
+                {activity.qa_text && <p style={{ whiteSpace: 'pre-wrap' }}>{activity.qa_text}</p>}
+                {showLegacyQaUrl && <a className="event-resource-link" href={legacyQaUrl} target="_blank" rel="noreferrer"><Trans id="educationQAOpen">Open reviewed Q&amp;A document</Trans> ↗</a>}
+              </section>
+            );
+          })()}
+          <ActivityLearningResources activityId={activity.id} onOpenQa={setSelectedQa} />
           <section className="event-detail-registration" aria-label={translateLabel("Registration and availability", "registrationAvailability")}>
             <EventRegistration key={activity.id} activityId={activity.id} onManaged={setManagedRegistration}/>
             {managedRegistration===false&&(activity.status==='cancelled'?<p className="event-detail-state" role="status"><Trans id="eventCancelled">This activity has been cancelled. Registration is unavailable.</Trans></p>:completed?<p className="event-detail-state" role="status"><Trans id="eventEnded">This activity has ended. Registration is closed.</Trans></p>:isEventClosed(activity)?<p className="event-detail-state" role="status"><Trans id="eventClosed">Registration is closed for this activity.</Trans></p>:publicLink(activity.registrationLink)?<div className="event-detail-external"><h3><Trans id="registerForEvent">Register for this event</Trans></h3><p><Trans id="externalForm">Complete the organiser’s registration form. No website account is needed.</Trans></p><a href={publicLink(activity.registrationLink)} target="_blank" rel="noreferrer" className="activity-action-btn activity-action-register">{am.registerNow||'Register now'} ↗<small>{am.externalTabNote||'Opens an external form in a new tab'}</small></a></div>:<p className="event-detail-state" role="status"><Trans id="eventNotYet">Registration is not available yet. Please check back or </Trans><Link to="/about/contact" onClick={onClose}><Trans id="contactRcbc">contact RCBC</Trans></Link>.</p>)}
@@ -356,6 +459,7 @@ function ActivityModal({ activity, onClose, standalone = false }) {
         </div>
       </div>
     </section>
+    {selectedQa && <QAModal resource={selectedQa} onClose={() => setSelectedQa(null)} />}
   </div>;
   return standalone ? content : createPortal(content,document.body);
 }
@@ -379,11 +483,21 @@ export function PublicEventPage() {
   </main>;
 }
 
+const QA_ZOOM_STEPS = [0.75, 1, 1.25, 1.5, 1.85, 2.25];
+
 function QAModal({ resource, onClose }) {
   const { t, translateLabel } = useLanguage();
   const [currentPage, setCurrentPage] = useState(0);
+  const [zoomIndex, setZoomIndex] = useState(1);
   const dialogRef = useRef(null);
+  const viewerRef = useRef(null);
   const totalPages = resource.images.length;
+  const zoom = QA_ZOOM_STEPS[zoomIndex];
+
+  useEffect(() => {
+    setCurrentPage(0);
+    setZoomIndex(1);
+  }, [resource.title]);
 
   useEffect(() => {
     dialogRef.current?.focus({ preventScroll: true });
@@ -391,6 +505,14 @@ function QAModal({ resource, onClose }) {
       if (event.key === "Escape") onClose();
       if (event.key === "ArrowLeft") setCurrentPage((page) => (page - 1 + totalPages) % totalPages);
       if (event.key === "ArrowRight") setCurrentPage((page) => (page + 1) % totalPages);
+      if ((event.ctrlKey || event.metaKey) && (event.key === "=" || event.key === "+")) {
+        event.preventDefault();
+        setZoomIndex((index) => Math.min(index + 1, QA_ZOOM_STEPS.length - 1));
+      }
+      if ((event.ctrlKey || event.metaKey) && event.key === "-") {
+        event.preventDefault();
+        setZoomIndex((index) => Math.max(index - 1, 0));
+      }
     };
     document.addEventListener("keydown", close);
     document.body.style.overflow = "hidden";
@@ -402,6 +524,8 @@ function QAModal({ resource, onClose }) {
 
   const previousPage = () => setCurrentPage((page) => (page - 1 + totalPages) % totalPages);
   const nextPage = () => setCurrentPage((page) => (page + 1) % totalPages);
+  const zoomIn = () => setZoomIndex((index) => Math.min(index + 1, QA_ZOOM_STEPS.length - 1));
+  const zoomOut = () => setZoomIndex((index) => Math.max(index - 1, 0));
 
   return createPortal(
     <div
@@ -428,9 +552,16 @@ function QAModal({ resource, onClose }) {
         <div className="qa-modal-heading">
           <span className="tag">{resource.language}</span>
           <h2 id="qa-title">{resource.title}</h2>
-          <p>{(t.learnEvents?.activityModal?.pageOf || "Page {current} of {total}").replace('{current}', currentPage + 1).replace('{total}', totalPages)}</p>
+          <div className="qa-modal-meta">
+            <p>{(t.learnEvents?.activityModal?.pageOf || "Page {current} of {total}").replace('{current}', currentPage + 1).replace('{total}', totalPages)}</p>
+            <div className="qa-zoom-controls" role="group" aria-label={translateLabel("Q&A zoom", "qaZoom")}>
+              <button type="button" className="qa-zoom-btn" onClick={zoomOut} disabled={zoomIndex === 0} aria-label={translateLabel("Zoom out Q&A", "qaZoomOut")}>−</button>
+              <span className="qa-zoom-label" aria-live="polite">{Math.round(zoom * 100)}%</span>
+              <button type="button" className="qa-zoom-btn" onClick={zoomIn} disabled={zoomIndex >= QA_ZOOM_STEPS.length - 1} aria-label={translateLabel("Zoom in Q&A", "qaZoomIn")}>+</button>
+            </div>
+          </div>
         </div>
-        <div className="qa-viewer">
+        <div className="qa-viewer" ref={viewerRef}>
           <button
             type="button"
             className="qa-nav qa-nav-prev"
@@ -439,10 +570,13 @@ function QAModal({ resource, onClose }) {
           >
             ‹
           </button>
-          <img
-            src={resource.images[currentPage]}
-            alt={`${resource.title}, page ${currentPage + 1}`}
-          />
+          <div className="qa-viewer-stage">
+            <img
+              src={resource.images[currentPage]}
+              alt={`${resource.title}, page ${currentPage + 1}`}
+              style={{ transform: `scale(${zoom})` }}
+            />
+          </div>
           <button
             type="button"
             className="qa-nav qa-nav-next"
@@ -664,14 +798,19 @@ function pageItems(items, filters, page) {
    SECTION 1: ONLINE EDUCATION
    ================================================================ */
 function OnlineEducation() {
-  const { search } = useLocation();
+  const { search,hash } = useLocation();
   const { t, translateLabel } = useLanguage();
   const activities = usePublicActivities();
   const cmsContent = useLearnEventsContent();
   const onlineCms = cmsContent.onlineEducation || {};
   const le = onlineHeadingText(t.learnEvents,onlineCms.sectionHeader,'en');
   const upcomingTopics = orderWebinars((onlineCms.upcomingTopics ?? []).map(topic => ({...topic,...topicDateFields(topic.dateISO || topic.date)})));
-  const approvedList = onlineCms.approvedResources ?? [];
+  const [masterResources,setMasterResources]=useState([]);
+  const [resourcesLoadError,setResourcesLoadError]=useState('');
+  useEffect(()=>{if(hash.startsWith('#learning-resource-')&&masterResources.length)document.getElementById(decodeURIComponent(hash.slice(1)))?.scrollIntoView({block:'center'});},[hash,masterResources]);
+  useEffect(()=>{let active=true;setResourcesLoadError('');fetch('/api/public/learning_resources').then(r=>{if(!r.ok)throw Error('Learning resources are temporarily unavailable.');return r.json();}).then(rows=>{if(active)setMasterResources(Array.isArray(rows)?rows:[]);}).catch((e)=>{if(active){setMasterResources([]);setResourcesLoadError(e.message||'Learning resources could not be loaded.');}});return()=>{active=false;};},[]);
+  const {translateContent}=useLanguage();
+  const approvedList = translateContent(masterResources,'records/learning_resources').map(mapApprovedLearningResource);
   const [selected, setSelected] = useState(null);
   const [selectedQa, setSelectedQa] = useState(null);
   const defaultFilters = { query: "", language: "All", timing: "All" };
@@ -997,6 +1136,10 @@ function OnlineEducation() {
             }}
           />
 
+          {resourcesLoadError && <p className="tp-note" role="alert">{resourcesLoadError}</p>}
+          {!resourcesLoadError && resourceResults.totalCount === 0 && archiveResources.length === 0 && masterResources.length === 0 && (
+            <p className="tp-note" role="status">No published learning resources yet. In admin, open Content &amp; records → Learning resources, link each Q&amp;A to its webinar, set review to current, then publish after the webinar is content-approved.</p>
+          )}
           {resourceResults.items.length === 0 ? (
             <ArchiveEmptyState
               label="Learning resources"
@@ -1008,15 +1151,14 @@ function OnlineEducation() {
           ) : (
             <div className="resource-grid">
               {resourceResults.items.map((r) => {
-                const folder = resourceQaFolder(r);
-                const images = folder ? getQaImages(folder, []) : [];
-                const matchedQa = images.length ? {title:r.title, language:r.language, images, pages:images.length} : null;
-                const qaUrl = publicLink(r.qaUrl);
-                const videoTargetUrl = publicLink(r.videoUrl || r.url);
+                const qaViewer = qaViewerForResource(r);
+                const qaExternalUrl = resourceQaExternalLink(r);
+                const videoTargetUrl = publicLink(r.videoUrl);
 
                 return (
-                  <article className="resource-card" key={r.id}>
+                  <article className="resource-card" key={r.id} id={'learning-resource-'+r.id}>
                     <div className="resource-card-top">
+                      <LastReviewed value={r.last_reviewed_at}/>
                       <span className="resource-type">{r.type}</span>
                       <span className="resource-year">{r.year}</span>
                     </div>
@@ -1041,10 +1183,10 @@ function OnlineEducation() {
                         Watch recording ↗
                       </Trans></a>}
 
-                      {qaUrl ? <a className="resource-action-btn resource-btn-qa" href={qaUrl} target="_blank" rel="noreferrer"><Trans id="qaReview">Review Q&amp;A ↗</Trans></a> : matchedQa ? <button
+                      {qaViewer ? <button
                         type="button"
                         className="resource-action-btn resource-btn-qa"
-                        onClick={() => setSelectedQa(matchedQa)}
+                        onClick={() => setSelectedQa(qaViewer)}
                         title={`Open and review uploaded Q&A images for ${r.title}`}
                       >
                         <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -1053,8 +1195,10 @@ function OnlineEducation() {
                           <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21" />
                         </svg><Trans id="qaReviewSimple">
                         Review Q&amp;A →
-                      </Trans></button> : <span><Trans id="qaUnavailable">Q&amp;A material not yet available</Trans></span>}
+                      </Trans></button> : qaExternalUrl ? <a className="resource-action-btn resource-btn-qa" href={qaExternalUrl} target="_blank" rel="noreferrer"><Trans id="qaReview">Review Q&amp;A ↗</Trans></a> : resourceQaFolder(r) ? <span><Trans id="qaUnavailable">Q&amp;A material not yet available</Trans></span> : null}
                     </div>
+                    {r.resourceUrl&&!videoTargetUrl&&!qaExternalUrl&&!qaViewer&&<a href={publicLink(r.resourceUrl)} target="_blank" rel="noreferrer"><Trans id="educationResourceOpen">Open resource</Trans> ↗</a>}
+                    {r.activity_id&&<Link className="resource-card-link" to={eventPath(r.activity_id)}><Trans id="educationSourceActivity">View original webinar / activity</Trans> →</Link>}
                   </article>
                 );
               })}
@@ -1088,8 +1232,9 @@ function PhysicalEducation() {
   const { t, translateLabel } = useLanguage();
   const le = t.learnEvents;
   const cmsContent = useLearnEventsContent();
-  const [activeTrackId, setActiveTrackId] = useState("dcs-family");
-  const [selectedIntake,setSelectedIntake]=useState(null);
+  const {search:programmeSearch}=useLocation();
+  const selectedProgramme=new URLSearchParams(programmeSearch).get('programme');
+  const activeTrackId = selectedProgramme || "dcs-family";
 
   const trackImages = {
     "dcs-family": dcsFamilyImage,
@@ -1097,7 +1242,7 @@ function PhysicalEducation() {
     "dcs-care-worker": healthcareSupportImg,
   };
 
-  const programmes = cmsContent.physicalEducation?.programmes || [];
+  const programmes = dcsProgrammeRecords(cmsContent.physicalEducation?.programmes || []);
 
   const activeTrack =
     programmes.find((p) => p.id === activeTrackId) || programmes[0];
@@ -1116,35 +1261,31 @@ function PhysicalEducation() {
             <p>
               {le?.showcaseDesc || "Select your role category below to view tailored in-person training curriculum, scheduled dates, and registration details."}
             </p>
+            <DcsPathwayLine/>
           </div>
 
           {/* Interactive 3-Track Tab Switcher */}
           <div
             className="dcs-tab-selector"
-            role="tablist"
+            role="group"
             aria-label={translateLabel("Dementia Care Series Learning Tracks", "learningTracks")}
           >
             {programmes.map((p) => {
-              const isActive = activeTrackId === p.id;
+              const isActive = activeTrack.id === p.id;
+              const role = pathwayRole(p.id);
               return (
-                <button
-                  key={p.id}
-                  type="button"
-                  role="tab"
-                  id={`tab-${p.id}`}
-                  aria-selected={isActive}
-                  aria-controls={`panel-${p.id}`}
-                  className={`dcs-tab-card ${isActive ? "is-active" : ""} tab-${p.id}`}
-                  onClick={() => setActiveTrackId(p.id)}
-                >
+                <Link key={p.id} id={`tab-${p.id}`} to={programmeLink(p)}
+                  aria-current={isActive?'page':undefined}
+                  className={`dcs-tab-card ${isActive ? "is-active" : ""} tab-${p.id}`}>
                   <div className="tab-card-header">
                     <span className="tab-track-badge">{p.trackNumber}</span>
-                    <span className="tab-status-chip">{p.badge}</span>
+                    <span className="tab-status-chip">{isPlannedProgramme(p)?le.intakeLabels.planned:le.programmeLabel}</span>
                   </div>
                   <h3 className="tab-card-title">{p.code}</h3>
                   <p className="tab-card-subtitle">{p.roleCategory}</p>
+                  {role&&<p className="tab-card-role"><Trans id={role.id}>{role.text}</Trans></p>}
                   <div className="tab-active-indicator" aria-hidden="true" />
-                </button>
+                </Link>
               );
             })}
           </div>
@@ -1153,7 +1294,7 @@ function PhysicalEducation() {
           <div
             key={activeTrack.id}
             id={`panel-${activeTrack.id}`}
-            role="tabpanel"
+
             aria-labelledby={`tab-${activeTrack.id}`}
             className={`dcs-active-stage dcs-stage-${activeTrack.id}`}
           >
@@ -1169,7 +1310,7 @@ function PhysicalEducation() {
               {/* Purpose Quote */}
               <div className="stage-quote-box">
                 <div className="stage-quote-mark" aria-hidden="true">&ldquo;</div>
-                <blockquote>{activeTrack.shortIntro}</blockquote>
+                <blockquote>{isPlannedProgramme(activeTrack)?"Future programme. Course details are pending RCBC confirmation.":activeTrack.shortIntro}</blockquote>
               </div>
             </div>
 
@@ -1201,29 +1342,10 @@ function PhysicalEducation() {
                         <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
                       </svg>
                     </span>
-                    {activeTrack.id === "dcs-ttt"
-                      ? (le?.accreditationMilestones || "Accreditation Pathway Milestones")
-                      : (le?.corePillars || "Core Learning Pillars & Competencies")}
+                    {le?.corePillars || "Core Learning Pillars & Competencies"}
                   </h4>
 
-                  {activeTrack.id === "dcs-ttt" ? (
-                    <div className="stage-pathway-steps">
-                      {(le?.stageSpecs?.accreditationSteps || [
-                        { title: "Application & Eligibility Review", desc: "Review of healthcare, educator, or senior community leadership background." },
-                        { title: "6 Full-Day Intensive Modules", desc: "Curriculum mastery, facilitation psychology, staging nuances, and governance." },
-                        { title: "Supervised Mock Teaching", desc: "Clinical observation, peer feedback, and rigorous delivery assessment." },
-                        { title: "Accreditation & Profile Listing", desc: "Award of RCBC Certified Trainer credential with public directory listing." }
-                      ]).map((step, idx) => (
-                        <div className="stage-step-row" key={idx}>
-                          <span className="step-num">{idx + 1}</span>
-                          <div>
-                            <strong>{step.title}</strong>
-                            <p>{step.desc}</p>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
+                  {!isPlannedProgramme(activeTrack) && (
                     <ul className="stage-pillars-list">
                       {activeTrack.highlights.map((h, i) => (
                         <li key={i}>
@@ -1277,22 +1399,7 @@ function PhysicalEducation() {
                     </Link>
                   )}
 
-                  {activeTrack.id === "dcs-care-worker" && (
-                    <button
-                      type="button"
-                      className="stage-btn-secondary"
-                      onClick={() => alert("The detailed DCS-Care Worker curriculum framework is currently being finalized with clinical partners. Register on the waitlist to receive the full syllabus upon release.")}
-                      title={translateLabel("View curriculum syllabus overview", "curriculum")}
-                    >
-                      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-                        <polyline points="14 2 14 8 20 8" />
-                        <line x1="16" y1="13" x2="8" y2="13" />
-                        <line x1="16" y1="17" x2="8" y2="17" />
-                      </svg>
-                      {le?.curriculumOverview || "Curriculum Overview"}
-                    </button>
-                  )}
+
                 </div>
               </div>
 
@@ -1311,7 +1418,7 @@ function PhysicalEducation() {
                         {le?.modeLabel || "Mode"}
                       </dt>
                       <dd>
-                        <span className="stage-mode-pill">{activeTrack.mode}</span>
+                        <span className="stage-mode-pill">{isPlannedProgramme(activeTrack)?"Pending RCBC confirmation":activeTrack.mode}</span>
                       </dd>
                     </div>
 
@@ -1323,7 +1430,7 @@ function PhysicalEducation() {
                         </svg>
                         {le?.sessionsLabel || "Sessions"}
                       </dt>
-                      <dd>{activeTrack.sessions}</dd>
+                      <dd>{isPlannedProgramme(activeTrack)?"Pending RCBC confirmation":activeTrack.sessions}</dd>
                     </div>
 
                     <div>
@@ -1338,16 +1445,7 @@ function PhysicalEducation() {
                       <dd>{activeTrack.language}</dd>
                     </div>
 
-                    <div>
-                      <dt>
-                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                          <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" />
-                          <circle cx="12" cy="10" r="3" />
-                        </svg><Trans id="serviceArea">
-                        General service area
-                      </Trans></dt>
-                      <dd>{activeTrack.location}</dd>
-                    </div>
+
 
                     <div className="spec-schedule-block">
                       <dt>
@@ -1365,19 +1463,9 @@ function PhysicalEducation() {
                     </div>
                   </dl>
                 </div>
+                <AdfmPartnership variant="inline"/>
 
-                {/* Media Preview Card */}
-                <div className="stage-media-card">
-                  <img
-                    src={resolveMediaImage(activeTrack.image, trackImages[activeTrack.id] || dcsFamilyImage)}
-                    alt={activeTrack.title}
-                  />
-                  <div className="stage-media-caption">
-                    {activeTrack.id === "dcs-family" && (le?.stageSpecs?.captions?.family || "Delivered in person by RCBC Certified Trainers in small, compassionate cohorts.")}
-                    {activeTrack.id === "dcs-ttt" && (le?.stageSpecs?.captions?.ttt || "Training is the programme. Certification is the outcome that empowers Sarawak.")}
-                    {activeTrack.id === "dcs-care-worker" && (le?.stageSpecs?.captions?.careWorker || "Mastering clinical BPSD protocols, distress communication, and safe handling.")}
-                  </div>
-                </div>
+
               </div>
             </div>
           </div>
@@ -1385,8 +1473,8 @@ function PhysicalEducation() {
       </section>
 
       {/* Reusable Program Modal (createPortal) */}
-      <ProgrammeIntakes programme={activeTrack} onSelect={setSelectedIntake}/>
-      {selectedIntake&&<ActivityModal key={selectedIntake.id} activity={selectedIntake} onClose={()=>setSelectedIntake(null)}/>}
+      <ProgrammeIntakes programme={activeTrack}/>
+      <DcsCourseDetails programme={activeTrack}/>
     </main>
   );
 }
@@ -1605,7 +1693,7 @@ function FacilitatorProfileModal({ facilitator, activities = [], onClose }) {
               </div>
 
               {/* Segmented Filter Pills */}
-              <div className="modal-activities-filter-pills" role="tablist">
+              <div className="modal-activities-filter-pills" role="group">
                 <button
                   type="button"
                   className={`modal-filter-pill ${activeTab === "all" ? "is-active" : ""}`}
@@ -1871,7 +1959,7 @@ function EventsSection() {
 
             {/* Clean Segmented Calendar Switcher */}
             <div className="calendar-switcher-dock" aria-label={translateLabel("Select calendar edition", "selectCalendar")}>
-              <div className="switcher-pills" role="tablist">
+              <div className="switcher-pills" role="group">
                 {activeRoadmaps.map((rm, idx) => (
                   <button
                     key={rm.id || idx}
@@ -2555,7 +2643,7 @@ function MedicalCarousel({ trainers: carouselTrainers, onSelect, onViewAll }) {
    ================================================================ */
 function TrainerPermissions({trainer}){
  const {t}=useLanguage(),copy=t.learnEvents.trainerGovernance;
- return <div className="trainer-permissions"><dl><dt>{copy.assessment}</dt><dd>{ASSESSMENT_LABEL[trainer.assessment_status]||'Not assessed yet'}</dd><dt>{copy.certificate}</dt><dd>{trainer.certificate_ref||'—'}</dd><dt>{copy.teaching}</dt><dd>{trainer.teaching_allowed?copy.approved:copy.notApproved}</dd></dl>{trainer.teaching_allowed&&<details><summary>{copy.scope}</summary><ul>{(trainer.teaching_permissions||[]).map(p=><li key={p.scope}>{p.scope}{p.modules.length?': '+p.modules.join(', '):''}</li>)}</ul></details>}{trainer.contact_email&&<p><a href={'mailto:'+trainer.contact_email}>{trainer.contact_email}</a></p>}{trainer.contact_phone&&<p>{trainer.contact_phone}</p>}</div>;
+ return <div className="trainer-permissions"><dl><dt>{copy.assessment}</dt><dd>{ASSESSMENT_LABEL[trainer.assessment_status]||'Not assessed yet'}</dd><dt>{copy.certificate}</dt><dd>{trainer.certificate_ref||'—'}</dd><dt>{copy.teaching}</dt><dd>{trainer.teaching_allowed?copy.approved:copy.notApproved}</dd></dl>{trainer.teaching_allowed&&<details><summary>{copy.scope}</summary><ul>{(trainer.teaching_permissions||[]).map(p=><li key={p.scope}>{p.scope}{p.modules.length?': '+p.modules.join(', '):''}</li>)}</ul>{trainer.public_teaching_conditions&&<p>{trainer.public_teaching_conditions}</p>}</details>}{trainer.contact_email&&<p><a href={'mailto:'+trainer.contact_email}>{trainer.contact_email}</a></p>}{trainer.contact_phone&&<p>{trainer.contact_phone}</p>}</div>;
 }
 function CertifiedTrainers() {
   const { t: i18nData, translateLabel } = useLanguage();
@@ -2726,7 +2814,7 @@ function CertifiedTrainers() {
           </div>
 
           <div className="directory-controls-bar">
-            <div className="directory-track-tabs" role="tablist" aria-label={translateLabel("Facilitator Category", "facilitatorCategory")}>
+            <div className="directory-track-tabs" role="group" aria-label={translateLabel("Facilitator Category", "facilitatorCategory")}>
               <button type="button" className={`track-tab-btn ${activeCategory === "all" ? "is-active" : ""}`} onClick={() => setActiveCategory("all")} role="tab" aria-selected={activeCategory === "all"}>{le?.all || "All"} ({trainers.length})</button>
               <button type="button" className={`track-tab-btn ${activeCategory === "hcp" ? "is-active" : ""}`} onClick={() => setActiveCategory("hcp")} role="tab" aria-selected={activeCategory === "hcp"}>{le.trainerGovernance.hcp} ({clinicalFacilitators.length})</button>
               <button type="button" className={`track-tab-btn ${activeCategory === "non-hcp" ? "is-active" : ""}`} onClick={() => setActiveCategory("non-hcp")} role="tab" aria-selected={activeCategory === "non-hcp"}>{le.trainerGovernance.nonHcp} ({advisoryFacilitators.length})</button>
@@ -3486,7 +3574,7 @@ function LearnEvents({ module }) {
       </section>
 
       {/* ---- Section content ---- */}
-      {module === "online-education" && <><PublishedRecords kind="learning_resources" title={translateLabel("Approved learning resources", "approvedResources")} /><OnlineEducation /></>}
+      {module === "online-education" && <OnlineEducation />}
       {module === "physical-education" && <PhysicalEducation />}
       {module === "events" && <EventsSection />}
       {module === "certified-trainers" && <CertifiedTrainers />}

@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {orderWebinars,topicDateFields,publicLink,resourceQaFolder} from '../shared/online-education.js';
+import {mapApprovedLearningResource,orderWebinars,topicDateFields,publicLink,resourceQaExternalLink,resourceQaFolder} from '../shared/online-education.js';
 
 test('upcoming dates sort nearest first, past dates newest first before pagination',()=>{
  const items=[{id:1,rawDate:'2025-01-01'},{id:2,rawDate:'2027-12-01'},{id:3,rawDate:'2026-08-01'},{id:4,rawDate:'2026-12-01'},{id:5,date:'not a date'}];
@@ -16,6 +16,20 @@ test('empty and unsafe links are unavailable',()=>{
  assert.equal(publicLink('https://forms.gle/example'),'https://forms.gle/example');
 });
 test('Q&A identity uses explicit folder or legacy index, never card order',()=>{
+ assert.equal(resourceQaFolder({qa_folder:'Prevention&Early Detection (Chinese)'}),'Prevention&Early Detection (Chinese)');
  assert.equal(resourceQaFolder({qaFolder:'Understanding the Missing Pieces'}),'Understanding the Missing Pieces');
- assert.equal(resourceQaFolder({qaIndex:0}),'Oral Health Webinar');assert.equal(resourceQaFolder({}),'');
+ assert.equal(resourceQaFolder({qaIndex:0}),'Understanding the Missing Pieces');
+ assert.equal(resourceQaFolder({qaIndex:2}),'Oral Health Webinar');
+ assert.equal(resourceQaFolder({}),'');
+});
+test('bundled Q&A ignores legacy CMS recording URLs',()=>{
+ const row={resource_type:'Q&A',qa_folder:'Oral Health Webinar',url:'https://facebook.com/AlzheimersCarebyRCBC'};
+ assert.equal(resourceQaExternalLink(row),'');
+ const mapped=mapApprovedLearningResource(row);
+ assert.equal(mapped.qaUrl,'');
+ assert.equal(mapped.videoUrl,'');
+});
+test('Q&A without a folder keeps a safe external link only',()=>{
+ assert.equal(resourceQaExternalLink({resource_type:'Q&A',url:'https://example.com/qa.pdf'}),'https://example.com/qa.pdf');
+ assert.equal(resourceQaExternalLink({resource_type:'Q&A',url:'javascript:alert(1)'}),'');
 });

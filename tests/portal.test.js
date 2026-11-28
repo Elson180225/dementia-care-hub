@@ -21,8 +21,8 @@ test('PostgreSQL portal and administrative workflows',{skip:!process.env.TEST_DA
  const connection=new URL(process.env.TEST_DATABASE_URL);connection.searchParams.set('options',`-c search_path=${schema},public`);
  const db=new pg.Pool({connectionString:connection.toString()});let server;
  try {
-  for(const name of ['001_shared_records.sql','003_admin_auth.sql','004_record_details.sql','005_admin_workflow.sql','006_portal_operations.sql','007_content_feedback.sql','008_idle_sessions.sql','014_enquiry_notifications.sql','015_trainer_listing_approval.sql','016_trainer_certificate_evidence.sql','017_trainer_details_and_resource_examples.sql','018_trainer_assessment_status.sql','012_participants.sql','015_event_registration.sql','016_registration_setup.sql','017_participant_history.sql','019_programme_intakes.sql','022_password_reset.sql','023_trainer_governance.sql','024_trainer_archive.sql','025_persistent_learn_events.sql','028_subscriber_country.sql','029_directory_service_listings.sql','030_contact_settings.sql']) await db.query(await readFile(new URL('../database/'+name,import.meta.url),'utf8'));
-  server=spawn(process.execPath,['server/index.js'],{env:{...process.env,DATABASE_URL:connection.toString(),SUBSCRIBER_DATABASE_URL:'',SUBSCRIBER_TOKEN_SECRET:'test-secret-'.repeat(5),REMINDERS_ENABLED:'false',BREVO_API_KEY:'',API_PORT:'3098'},stdio:['ignore','pipe','pipe']});
+  for(const name of ['001_shared_records.sql','003_admin_auth.sql','004_record_details.sql','005_admin_workflow.sql','006_portal_operations.sql','007_content_feedback.sql','008_idle_sessions.sql','014_enquiry_notifications.sql','015_trainer_listing_approval.sql','016_trainer_certificate_evidence.sql','017_trainer_details_and_resource_examples.sql','018_trainer_assessment_status.sql','012_participants.sql','015_event_registration.sql','016_registration_setup.sql','017_participant_history.sql','019_programme_intakes.sql','022_password_reset.sql','023_trainer_governance.sql','024_trainer_archive.sql','025_persistent_learn_events.sql','026_review_reminder_deliveries.sql','027_event_attendance_reminders.sql','028_subscriber_country.sql','029_directory_service_listings.sql','030_contact_settings.sql','031_volunteer_resource_pool.sql','031_admin_mfa.sql','028_dcs_registry.sql','029_activity_records.sql','030_webinar_publication.sql','031_participant_attendance.sql','032_learning_resource_master.sql','033_trainer_training_and_portal_preferences.sql','034_learning_qa_and_webinar_times.sql']) await db.query(await readFile(new URL('../database/'+name,import.meta.url),'utf8'));
+  server=spawn(process.execPath,['server/index.js'],{env:{...process.env,DATABASE_URL:connection.toString(),SUBSCRIBER_DATABASE_URL:'',SUBSCRIBER_TOKEN_SECRET:'test-secret-'.repeat(5),REMINDERS_ENABLED:'false',BREVO_API_KEY:'',ADMIN_MFA:'off',PASSWORD_BREACH_CHECK:'off',API_PORT:'3098'},stdio:['ignore','pipe','pipe']});
   let serverErrors='';server.stderr.on('data',d=>{serverErrors+=d;});
   await new Promise((resolve,reject)=>{server.stdout.once('data',resolve);server.once('error',reject);server.once('exit',()=>reject(new Error('Test API exited: '+serverErrors)));});
   async function request(path,data,cookie='',method) {
@@ -120,26 +120,40 @@ test('PostgreSQL portal and administrative workflows',{skip:!process.env.TEST_DA
 
   ok(await action({type:'PROFILE_SAVE',values:{...profile,photoUrl:photo}},secondLogin.cookie),403);
   await db.query('UPDATE trainer_profiles SET healthcare_professional=coalesce(healthcare_professional,false),teaching_allowed=true,teaching_permissions=$2 WHERE id=ANY($1::uuid[])',[[trainerId,secondId],JSON.stringify([{scope:'Workshop',modules:[]}])]);
-  const activity={id:randomUUID(),title:'Test workshop',date:'2026-01-01T10:00',type:'Workshop',mode:'Online',venue:'Online',language:'English',audience:'Caregivers',description:'Practical learning',plannedHours:3,trainers:[{trainerId,role:'Trainer'},{trainerId:secondId,role:'Co-Trainer'}]};
+  const activity={id:randomUUID(),title:'Test workshop',date:'2026-01-01T10:00',endDate:'2026-01-01T13:00',organiserKind:'rcbc',organiserName:'RCBC',type:'Workshop',mode:'Online',venue:'Online',language:'English',audience:'Caregivers',description:'Practical learning',plannedHours:3,trainers:[{trainerId,role:'Trainer'},{trainerId:secondId,role:'Co-Trainer'}]};
   ok(await action({type:'ACTIVITY_SAVE',activity},trainer.cookie));
   ok(await action({type:'ACTIVITY_SAVE',activity},secondLogin.cookie),403);
   ok(await action({type:'ACTIVITY_SUBMIT',id:activity.id},trainer.cookie));
   ok(await action({type:'ACTIVITY_SAVE',activity},trainer.cookie),409);
   assert.equal(ok(await request('activities')).data.some(a=>a.id===activity.id),false);
-  // The admin approval action publishes a submitted workshop in one step.
+  // Operational publication never grants content publication permission.
   ok(await action({type:'ADMIN_REVIEW',target:'activity',id:activity.id,decision:'published'},trainer.cookie),403);
   ok(await action({type:'ADMIN_REVIEW',target:'activity',id:activity.id,decision:'published'}));
   const publishedActivity=(await db.query('SELECT status,published_at FROM activities WHERE id=$1',[activity.id])).rows[0];
   assert.equal(publishedActivity.status,'published');
   assert.ok(publishedActivity.published_at);
+  assert.equal(ok(await request('activities')).data.some(a=>a.id===activity.id),false);
+  const publication=ok(await request('admin/webinar-library',null,admin.cookie)).data.find(a=>a.id===activity.id);
+  ok(await request('admin/webinar-library',{...publication,revision:publication.updated_at,content_approval_status:'approved',rightsConfirmed:true},trainer.cookie),403);
+  ok(await request('admin/webinar-library',{...publication,revision:publication.updated_at,content_approval_status:'approved',rightsConfirmed:true},admin.cookie));
   assert.ok(ok(await request('activities')).data.some(a=>a.id===activity.id));
   ok(await action({type:'ADMIN_REVIEW',target:'activity',id:activity.id,decision:'published'}),409);
-  ok(await action({type:'COMPLETION_SAVE',id:activity.id,values:{venue:'Online',hours:2,trainerHours:{[trainerId]:2,[secondId]:2},participants:12}},trainer.cookie));
+  ok(await action({type:'COMPLETION_SAVE',id:activity.id,values:{actualStart:'2026-01-01T10:00',actualEnd:'2026-01-01T13:00',venue:'Online',hours:2,trainerHours:{[trainerId]:2,[secondId]:2},participants:12}},trainer.cookie));
   assert.equal((await db.query('SELECT * FROM annual_trainer_contributions')).rowCount,0);
   ok(await action({type:'ADMIN_REVIEW',target:'completion',id:activity.id,decision:'returned',comment:'Add photo evidence'}));
   const completionPhoto=ok(await upload('activity-photo',image),201).data.url;
-  ok(await action({type:'COMPLETION_SAVE',id:activity.id,values:{venue:'Online',hours:2,trainerHours:{[trainerId]:2,[secondId]:2},participants:12,photos:[completionPhoto]}},trainer.cookie));
+  ok(await action({type:'COMPLETION_SAVE',id:activity.id,values:{actualStart:'2026-01-01T10:00',actualEnd:'2026-01-01T13:00',venue:'Online',hours:2,trainerHours:{[trainerId]:2,[secondId]:2},participants:12,photos:[completionPhoto]}},trainer.cookie));
   ok(await action({type:'ADMIN_REVIEW',target:'completion',id:activity.id,decision:'approved'}));
+  assert.equal((await db.query('SELECT * FROM annual_trainer_contributions')).rowCount,0);
+  ok(await action({type:'CONTRIBUTION_REVIEW',id:activity.id,trainerId,decision:'verified'}),409);
+  ok(await action({type:'CONTRIBUTION_CONFIRM',id:activity.id},trainer.cookie));
+  // A trainer-supplied target ID cannot confirm another trainer's contribution.
+  ok(await action({type:'CONTRIBUTION_CONFIRM',id:activity.id,trainerId:secondId},trainer.cookie),409);
+  assert.equal((await db.query('SELECT contribution_status FROM activity_trainers WHERE activity_id=$1 AND trainer_id=$2',[activity.id,secondId])).rows[0].contribution_status,'pending');
+  ok(await action({type:'CONTRIBUTION_CONFIRM',id:activity.id,trainerId:secondId}),400);
+  ok(await action({type:'CONTRIBUTION_CONFIRM',id:activity.id},secondLogin.cookie));
+  ok(await action({type:'CONTRIBUTION_REVIEW',id:activity.id,trainerId,decision:'verified'}));
+  ok(await action({type:'CONTRIBUTION_REVIEW',id:activity.id,trainerId:secondId,decision:'verified'}));
   ok(await action({type:'ADMIN_REVIEW',target:'activity',id:activity.id,decision:'archived'}));
   const totals=(await db.query('SELECT * FROM annual_trainer_contributions')).rows;
   assert.equal(totals.length,2);assert.equal(Number(totals[0].hours),2);assert.equal(Number(totals[1].participants),12);
@@ -151,13 +165,14 @@ test('PostgreSQL portal and administrative workflows',{skip:!process.env.TEST_DA
    type:'RCBC Webinar',
    trainers:[],
    date:'2026-02-01T10:00',
+   endDate:'2026-02-01T13:00',
    registrationType:'free-online',
    registrationMethod:'closed',
   };
   ok(await action({type:'ACTIVITY_SAVE',activity:adminEvent}));ok(await action({type:'ACTIVITY_SUBMIT',id:adminEvent.id}));
   ok(await action({type:'ADMIN_REVIEW',target:'activity',id:adminEvent.id,decision:'approved'}));
   ok(await action({type:'ADMIN_REVIEW',target:'activity',id:adminEvent.id,decision:'published'}));
-  ok(await action({type:'ACTIVITY_SAVE',activity:{...adminEvent,date:'2026-02-02T10:00'}}));
+  ok(await action({type:'ACTIVITY_SAVE',activity:{...adminEvent,date:'2026-02-02T10:00',endDate:'2026-02-02T13:00'}}));
   ok(await action({type:'ADMIN_REVIEW',target:'activity',id:adminEvent.id,decision:'cancelled',comment:'Venue unavailable'}));
   ok(await action({type:'ADMIN_REVIEW',target:'activity',id:adminEvent.id,decision:'archived'}));
   const review={language:'English',source:'RCBC verified source',source_url:'',last_reviewed_at:'2026-10-18T10:00',next_review_at:'',review_status:'current',publication_status:'published',admin_comment:''};
@@ -185,11 +200,16 @@ test('PostgreSQL portal and administrative workflows',{skip:!process.env.TEST_DA
   assert.deepEqual(ok(await request('public/organisations')).data.map(row=>row.id),[groupId]);
   ok(await request('admin/records/organisations',{id:orgId,values:{...organisation,review_status:'archived'}},admin.cookie));
   assert.equal(ok(await request('public/organisations')).data.filter(r=>!r.is_example).length,0);
-  const resource=record('learning_resources',{title:'Test guide',url:'https://example.org/guide',copyright_permission:'RCBC permission recorded'});
+  const resource=record('learning_resources',{title:'Test guide',activity_id:activity.id,url:'https://example.org/guide',copyright_permission:'RCBC permission recorded'});
   const resourceId=ok(await request('admin/records/learning_resources',{values:resource},admin.cookie)).data.id;
   assert.equal(ok(await request('public/learning_resources')).data.length,1);
   ok(await request('admin/records/learning_resources',{id:resourceId,values:{...resource,publication_status:'unpublished'}},admin.cookie));
   assert.equal(ok(await request('public/learning_resources')).data.length,0);
+  const qaOnly=record('learning_resources',{title:'Grouped Q&A pack',resource_type:'Q&A',activity_id:activity.id,qa_folder:'Oral Health Webinar',url:'',copyright_permission:'RCBC permission recorded'});
+  const qaId=ok(await request('admin/records/learning_resources',{values:qaOnly},admin.cookie)).data.id;
+  assert.equal(ok(await request('public/learning_resources')).data.filter(r=>r.id===qaId).length,1);
+  assert.equal(ok(await request('public/learning_resources')).data.find(r=>r.id===qaId).qa_folder,'Oral Health Webinar');
+  ok(await request('admin/records/learning_resources',{values:{...record('learning_resources',{title:'Broken Q&A',resource_type:'Q&A',activity_id:activity.id,url:''}),publication_status:'published',review_status:'current',source:'RCBC',last_reviewed_at:'2026-10-18T10:00',copyright_permission:'RCBC'}},admin.cookie),400);
   ok(await request('admin/records/content_pages',{values:record('content_pages',{slug:'home',title:'Project note',body:'Plain text update'})},admin.cookie));
   assert.equal(ok(await request('public/content_pages')).data[0].body.text,'Plain text update');
   const enquiry={id:randomUUID(),name:'Visitor',email:'visitor@test.example',type:'Collaboration & Partnership',message:'Please contact me about the project.',website:'',startedAt:Date.now()-3000};
@@ -231,7 +251,10 @@ test('PostgreSQL portal and administrative workflows',{skip:!process.env.TEST_DA
   assert.ok((await db.query('SELECT unsubscribed_at FROM subscribers')).rows[0].unsubscribed_at);
   ok(await request('public/subscribe',{email:'bad'}),400);
   ok(await request('admin/records/dcs_certificates',{values:{certificate_ref:'DCS-1',recipient_name:'Recipient',programme:'DCS-Family',issuer:'RCBC',issued_at:'2026-01-01',completion_date:'2026-01-01',training_location:'Bintulu',activity_id:'',status:'valid',verification_consent_at:'2026-01-01T12:00',admin_comment:''}},admin.cookie));
-  assert.equal(ok(await request('public/verify-certificate',{name:'Recipient',certificateRef:'DCS-1'})).data.certificate.status,'valid');
+  assert.equal(ok(await request('public/verify-certificate',{name:'Recipient',certificateRef:'DCS-1'})).data.certificate,null);
+  const person=(await db.query("INSERT INTO dcs_registry_participants(participant_key,name) VALUES('verified-recipient','Recipient') RETURNING id")).rows[0];
+  await db.query("INSERT INTO dcs_registry_records(participant_id,programme,intake,training_location,attendance_date,organiser,source_reference,status,completion_date,certificate_ref,issued_at,issuer,verified,public_consent,approved_public_display,consent_note) VALUES($1,'DCS-Family','Batch 1','Bintulu','2026-01-01','RCBC','Verified register','completed','2026-01-01','DCS-1','2026-01-01','RCBC',true,true,true,'Explicit public disclosure approval')",[person.id]);
+  assert.equal(ok(await request('public/verify-certificate',{name:'Recipient',certificateRef:'DCS-1'})).data.certificate.status,'completed');
   assert.equal(ok(await request('public/verify-certificate',{name:'Wrong name',certificateRef:'DCS-1'})).data.certificate,null);
   ok(await request('admin/users',{id:trainerId,enabled:false,certifiedStatus:'certified',certificateRef:'OFFICIAL-1'},admin.cookie));
   ok(await request('portal',null,trainer.cookie),401);

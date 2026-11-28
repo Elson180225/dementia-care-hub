@@ -108,5 +108,6 @@ export const inlineCopyMetadata = Object.fromEntries(
 );
 
 export function inlineCopyMeta(key) {
+  if(/^(education|dcsRegistry)/.test(key))return {page:'education',reviewType:/(Certificate|Ttt|Adfm|Adi|Pathway|Prerequisite|Assessment)/i.test(key)?'professional':'standard'};
   return inlineCopyMetadata[key] || null;
 }

@@ -8,7 +8,7 @@ export default function Dashboard() {
   const { state } = useTrainer();
   const { profile, activities } = state;
   const year = new Date().getFullYear();
-  const summary = yearSummary(activities, year);
+  const summary = yearSummary(activities.filter(a=>a.completion.individualStatus==='verified'), year);
   const upcoming = activities.filter(
     (a) => ["approved","published"].includes(a.status) && a.completion.status === "none" && new Date(a.date) >= new Date()
   );
@@ -21,7 +21,7 @@ export default function Dashboard() {
         <div className="tp-stat"><span>Waiting for RCBC review</span><strong>{pendingCount(profile, activities)}</strong></div>
         <div className="tp-stat"><span>Completed activities in {year}</span><strong>{summary.conducted}</strong></div>
         <div className="tp-stat"><span>Verified training hours</span><strong>{summary.hours}</strong></div>
-        <div className="tp-stat"><span>People reached</span><strong>{summary.participants}</strong></div>
+        <div className="tp-stat"><span>Participant attendances</span><strong>{summary.participants}</strong></div>
       </div>
 
       <section className="tp-card">

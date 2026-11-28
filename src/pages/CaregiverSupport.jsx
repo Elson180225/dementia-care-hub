@@ -124,7 +124,7 @@ function CaregiverSupport() {
     const legacyPath = {
       "#guidance": "/caregiver-support/guidance",
       "#training": "/caregiver-support/training",
-      "#certificate-verification": "/caregiver-support",
+      "#certificate-verification": "/learn-events/verify-certificate",
       "#support-groups": "/caregiver-support/support-groups",
       "#volunteer": "/caregiver-support/volunteer",
     }[hash];

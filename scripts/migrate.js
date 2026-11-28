@@ -1,5 +1,7 @@
 import { readFile } from 'node:fs/promises';
 import { pool, transaction } from '../server/db.js';
+import { posterFacilitators } from '../shared/poster-facilitators.js';
+import { publishBundledTranslations } from './publish-demo-translations.js';
 try {
  await transaction(async db => {
   await db.query('SELECT pg_advisory_xact_lock(718421)');
@@ -8,16 +10,35 @@ try {
    if (!(await db.query('SELECT 1 FROM schema_migrations WHERE name=$1',[name])).rowCount) {
     await db.query(await readFile(new URL('../database/'+name,import.meta.url),'utf8'));
     if(name.startsWith('023_')){
-     const cms=JSON.parse(await readFile(new URL('../shared/learn-events-content.json',import.meta.url),'utf8'));
-     for(const legacy of cms.certifiedTrainers?.trainersList||[]){
+     for(const legacy of posterFacilitators){
+      if((await db.query('SELECT 1 FROM trainer_profiles WHERE legacy_source_id=$1',[String(legacy.id)])).rowCount)continue;
       const account=(await db.query("INSERT INTO users(email,name,password_hash,role,enabled) VALUES('legacy-'||gen_random_uuid()::text||'@unclaimed.invalid',$1,repeat('0',32)||':'||repeat('0',128),'trainer',false) RETURNING id",[legacy.name||'Trainer awaiting review'])).rows[0];
-      await db.query("INSERT INTO trainer_profiles(id,city,language,short_profile,qualifications,photo_url,portal_access_enabled,legacy_source_id,legacy_source) VALUES($1,$2,$3,$4,$5,$6,false,$7,$8)",[account.id,legacy.city||'',legacy.language||'',legacy.bio||'',legacy.role||'',legacy.avatarUrl||null,legacy.id,JSON.stringify(legacy)]);
+      await db.query("INSERT INTO trainer_profiles(id,city,language,short_profile,qualifications,photo_url,portal_access_enabled,legacy_source_id,legacy_source,healthcare_professional) VALUES($1,$2,$3,$4,$5,$6,false,$7,$8,$9)",[account.id,legacy.city||'',legacy.language||'',legacy.bio||'',legacy.role||'',legacy.avatarUrl||null,String(legacy.id),JSON.stringify(legacy),legacy.healthcare_professional]);
      }
     }
     await db.query('INSERT INTO schema_migrations(name) VALUES($1)',[name]);
    }
   }
+  for(const name of ['028_dcs_registry.sql','029_activity_records.sql','030_webinar_publication.sql','031_participant_attendance.sql','032_learning_resource_master.sql','033_trainer_training_and_portal_preferences.sql','034_learning_qa_and_webinar_times.sql']){
+   if(!(await db.query('SELECT 1 FROM schema_migrations WHERE name=$1',[name])).rowCount){
+    await db.query(await readFile(new URL('../database/'+name,import.meta.url),'utf8'));
+    await db.query('INSERT INTO schema_migrations(name) VALUES($1)',[name]);
+   }
+  }
   await db.query('SELECT seed_historical_webinars()');
+  for(const name of ['035_historical_demo_approval.sql','036_learning_resources_public_repair.sql','037_poster_aligned_webinar_times.sql','038_poster_facilitators_only.sql']){
+   if(!(await db.query('SELECT 1 FROM schema_migrations WHERE name=$1',[name])).rowCount){
+    await db.query(await readFile(new URL('../database/'+name,import.meta.url),'utf8'));
+    await db.query('INSERT INTO schema_migrations(name) VALUES($1)',[name]);
+   }
+  }
+  await db.query('SELECT sync_poster_aligned_webinar_times()').catch(() => {});
+  await db.query('SELECT apply_historical_demo_approval()');
+  await db.query('SELECT repair_learning_resources_public()').catch(() => {});
+  await db.query('SELECT sync_poster_facilitators_catalog()').catch(() => {});
+  const pub = await publishBundledTranslations({ client: db });
+  if (!pub.skipped) console.log('Published bundled translations:', pub.published, 'inserted/updated,', pub.preserved, 'preserved.');
+  else console.log('Bundled translation publish skipped:', pub.reason || 'unknown');
  });
  console.log('PostgreSQL migrations applied.');
 } finally { await pool.end(); }

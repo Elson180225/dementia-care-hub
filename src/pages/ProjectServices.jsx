@@ -1,11 +1,14 @@
 import { useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
+import Trans from '../i18n/Trans';
+import { dcsPublicCopy } from '../../shared/dcs-public-copy.js';
+import './DcsParticipantSearch.css';
 import { Field } from '../trainer-portal/ui';
 import { api } from '../trainer-portal/TrainerContext';
 import { useLanguage } from '../i18n/LanguageContext';
 
 export default function ProjectServices({ certificate = false }) {
-  const { t } = useLanguage();
+  const { t, translateLabel } = useLanguage();
   const ps = t.projectServices || {};
   const [params] = useSearchParams();
   const renewing = params.has('resubscribe');
@@ -48,9 +51,28 @@ export default function ProjectServices({ certificate = false }) {
   }
 
 
+  const Copy = ({ id }) => <Trans id={id}>{dcsPublicCopy[id]}</Trans>;
+
+  const pageClass = certificate ? 'dcs-registry-page' : 'tp-page';
+  const innerClass = certificate ? '' : 'tp-container';
+
   return (
-    <main className="tp-page">
-      <div className="tp-container">
+    <main className={pageClass}>
+      <div className={innerClass}>
+        {certificate && (
+          <nav className="dcs-hub" aria-label={translateLabel?.(dcsPublicCopy.dcsRegistryHubLabel, 'dcsRegistryHubLabel') || 'Registry options'}>
+            <div className="dcs-hub-card is-current" aria-current="page">
+              <strong><Copy id="dcsRegistryVerifyCardTitle" /></strong>
+              <span><Copy id="dcsRegistryVerifyCardDesc" /></span>
+              <em><Copy id="dcsRegistryVerifyCardCurrent" /></em>
+            </div>
+            <Link className="dcs-hub-card" to="/learn-events/dcs-participants">
+              <strong><Copy id="dcsRegistryBrowseCardTitle" /></strong>
+              <span><Copy id="dcsRegistryBrowseCardDesc" /></span>
+              <em><Copy id="dcsRegistryBrowseCardLinkCta" /> →</em>
+            </Link>
+          </nav>
+        )}
         <h1>
           {certificate
             ? ps.verifyTitle || 'Verify a DCS certificate'
@@ -64,13 +86,24 @@ export default function ProjectServices({ certificate = false }) {
               'Stay connected with Dementia Care Connect. Register to receive updates on upcoming webinars, education, training and project activities.'}
           </p>
         )}
-        <form className="tp-card" onSubmit={submit} hidden={!certificate && completed}>
+        <form className={certificate ? 'dcs-verify-form' : 'tp-card'} onSubmit={submit} hidden={!certificate && completed}>
           {!token && (
             <>
-              <Field id="updates-name" label={certificate ? ps.nameOnCertificate || 'Name on certificate' : ps.name || 'Name'} required><input id="updates-name" name="name" autoComplete="name" maxLength={150} required /></Field>
               {certificate ? (
-                <Field id="updates-certificateRef" label={ps.certificateRef || 'Certificate reference'} required><input id="updates-certificateRef" name="certificateRef" required /></Field>
+                <>
+                  <div className="tp-field">
+                    <label htmlFor="updates-name">{ps.nameOnCertificate || 'Name on certificate'} <span className="required-marker" aria-hidden="true">*</span></label>
+                    <input id="updates-name" name="name" required autoComplete="name" maxLength={150} />
+                  </div>
+                  <div className="tp-field">
+                    <label htmlFor="updates-certificateRef">{ps.certificateRef || 'Certificate reference'} <span className="required-marker" aria-hidden="true">*</span></label>
+                    <input id="updates-certificateRef" name="certificateRef" required />
+                  </div>
+                </>
               ) : (
+                <Field id="updates-name" label={ps.name || 'Name'} required><input id="updates-name" name="name" required autoComplete="name" maxLength={150} /></Field>
+              )}
+              {!certificate && (
                 <>
                   <Field id="updates-email" label={ps.email} required><input id="updates-email" name="email" type="email" autoComplete="email" maxLength={254} required /></Field>
                   <Field id="updates-country" label={ps.country} required><input id="updates-country" name="country" autoComplete="country-name" maxLength={150} required /></Field>
@@ -119,7 +152,7 @@ export default function ProjectServices({ certificate = false }) {
           {!certificate && completed && <Link to="/">{ps.returnHome}</Link>}
         </div>
         {certificate && (
-          <p>
+          <p className="dcs-verify-foot">
             {ps.certOnlyNotice ||
               'Verification confirms completion of the stated programme only.'}
           </p>

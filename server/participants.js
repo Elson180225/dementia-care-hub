@@ -1,7 +1,7 @@
 import { pool, transaction } from './db.js';
 import { body, currentUser, fail } from './auth.js';
 import { isAllowedOrigin } from './origin.js';
-import { validateParticipants } from '../shared/participants.js';
+import { validateParticipants, validateAttendance } from '../shared/participants.js';
 import { createBrevo } from './brevo.js';
 import {decision} from './decisions.js';
 import {capacitySummary} from '../shared/event-registration.js';
@@ -20,7 +20,7 @@ export async function participantsHandler(req, res, url, send) {
   if (!/^[0-9a-f-]{36}$/i.test(id)) fail('Invalid workshop');
   const activity = (await pool.query('SELECT id,title,starts_at,programme_id,venue,status,cancelled_at,capacity FROM activities WHERE id=$1',[id])).rows[0];
   if (!activity) fail('Workshop not found',404);
-  if (req.method === 'GET') {const participants=(await pool.query('SELECT p.*,u.name AS removed_by_name FROM event_participants p LEFT JOIN users u ON u.id=p.removed_by WHERE p.activity_id=$1 ORDER BY p.name',[id])).rows;return send(res,200,{
+  if (req.method === 'GET') {const participants=(await pool.query('SELECT p.*,u.name AS removed_by_name,att.name AS attendance_recorded_by_name FROM event_participants p LEFT JOIN users u ON u.id=p.removed_by LEFT JOIN users att ON att.id=p.attendance_recorded_by WHERE p.activity_id=$1 ORDER BY p.name',[id])).rows;return send(res,200,{
     activity,
     participants,capacitySummary:capacitySummary(activity,participants),
     imports:(await pool.query('SELECT * FROM participant_imports WHERE activity_id=$1 ORDER BY imported_at DESC LIMIT 20',[id])).rows,
@@ -33,6 +33,20 @@ export async function participantsHandler(req, res, url, send) {
       ORDER BY created_at DESC LIMIT 100`,[id,'Final event reminder: '+activity.title])).rows,
   });}
   const data = await body(req);
+  if (data.action === 'attendance') {
+    if (!/^[a-f0-9-]{36}$/i.test(data.id || '')) fail('Invalid participant');
+    await transaction(async db => {
+      await db.query('SELECT id FROM activities WHERE id=$1 FOR UPDATE',[id]);
+      const participant=(await db.query('SELECT * FROM event_participants WHERE id=$1 AND activity_id=$2 FOR UPDATE',[data.id,id])).rows[0];
+      if (!participant) fail('Participant not found',404);
+      let attendance;
+      try { attendance=validateAttendance(participant,data.attendance); } catch(e) { fail(e.message); }
+      if (participant.attendance_status === attendance) return;
+      await db.query('UPDATE event_participants SET attendance_status=$2,attendance_recorded_at=now(),attendance_recorded_by=$3 WHERE id=$1',[data.id,attendance,user.id]);
+      await decision(db,user,'event_participants',data.id,'attendance','Actual attendance updated',participant.attendance_status,attendance);
+    },user.id);
+    return send(res,200,{ok:true});
+  }
   if (data.action === 'import') {
     let rows; try { rows = validateParticipants(data.rows); } catch(e) { fail(e.message); }
     if (rows.some(r => r.error)) fail('Resolve invalid or duplicate rows before importing.');

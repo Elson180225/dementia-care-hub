@@ -1,3 +1,18 @@
 .programme-intakes{max-width:1200px;margin:32px auto;padding:28px;background:#faf8fd;border:1px solid #e4dbea;border-radius:18px;color:#352345;scroll-margin-top:140px}
 .programme-intakes h3{font-size:1.5rem;margin:0 0 20px}.programme-intake-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,280px),1fr));gap:20px;list-style:none;padding:0;margin:20px 0}.programme-intake-grid li{background:white;border:1px solid #ded4e8;border-radius:14px;padding:24px;overflow-wrap:anywhere}.programme-intake-grid h4{font-size:1.2rem;margin:0 0 12px}.programme-intakes p{line-height:1.65}.programme-intakes details{margin-top:24px;border-top:1px solid #ded4e8;padding-top:20px}.programme-intakes summary{cursor:pointer;font-weight:700;padding:8px}.programme-intakes button{padding:12px 18px;background:#59308c;color:white;border:0;border-radius:9px;font:inherit;cursor:pointer}.programme-intakes :is(button,a,summary):focus-visible{outline:3px solid #a66b00;outline-offset:4px}
-@media(max-width:600px){.programme-intakes{padding:18px;margin:20px 12px}.programme-intake-grid{grid-template-columns:1fr}}
+.dcs-before{max-width:1200px;margin:8px auto 12px;padding:0 12px}
+.dcs-before h2{margin:0 0 14px;font-size:1.35rem;color:#3b2458}
+.dcs-facts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.dcs-facts article{background:#fff;border:1px solid #e4dbea;border-radius:14px;padding:16px 18px}
+.dcs-facts h3{margin:0 0 8px;font-size:0.82rem;letter-spacing:0.04em;text-transform:uppercase;color:#6d5484}
+.dcs-facts p{margin:0;line-height:1.55}
+.dcs-partner{max-width:1200px;margin:8px auto 48px;padding:18px 12px 0;border-top:1px solid #e4dbea;color:#4e3b5e}
+.dcs-partner h2{margin:0 0 8px;font-size:1.05rem}
+.dcs-partner p{margin:0 0 8px;line-height:1.55;font-size:0.95rem}
+.dcs-partner-links{display:flex;flex-wrap:wrap;gap:8px 18px}
+.dcs-partner a{color:#59308c;font-weight:700}
+.dcs-partner a:focus-visible,.dcs-facts :focus-visible{outline:3px solid #a66b00;outline-offset:3px}
+.dcs-partner-inline{margin-top:18px;padding-top:16px;border-top:1px solid #e4dbea}
+.dcs-partner-inline h2{font-size:1rem;margin-bottom:8px}
+@media(max-width:800px){.dcs-facts{grid-template-columns:1fr}}
+@media(max-width:600px){.programme-intakes{padding:18px;margin:20px 12px}.programme-intake-grid{grid-template-columns:1fr}.dcs-before,.dcs-partner{margin-left:12px;margin-right:12px}}

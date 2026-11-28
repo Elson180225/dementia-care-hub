@@ -31,6 +31,7 @@ export default function AdminLayout() {
     ] },
     { label: "Education & events", links: [
       { to: "/admin/learn-events", label: "Education & Events", icon: "events" },
+      { to: "/admin/dcs-registry", label: "DCS Training & Certification Registry", icon: "content" },
       { to: "/admin/participants", label: "Registrations & Participants", icon: "participants" },
       { to: "/admin/conducted", label: "Completed Activities", icon: "completed" },
     ] },

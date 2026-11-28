@@ -32,7 +32,7 @@ export function eventSchema(activity, origin) {
     '@context': 'https://schema.org', '@type': 'Event', '@id': url, url,
     name: activity.title, startDate: start.toISOString(), location,
     eventAttendanceMode: `https://schema.org/${online ? 'Online' : 'Offline'}EventAttendanceMode`,
-    eventStatus: `https://schema.org/${activity.cancelled_at || activity.status === 'cancelled' ? 'EventCancelled' : 'EventScheduled'}`,
+    eventStatus: `https://schema.org/${activity.cancelled_at || activity.status === 'cancelled' ? 'EventCancelled' : activity.postponed_at||activity.status==='postponed' ? 'EventPostponed' : 'EventScheduled'}`,
     ...(activity.description ? { description: activity.description } : {}),
   };
   const poster = activity.poster_url || activity.poster;

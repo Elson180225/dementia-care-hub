@@ -1,3 +1,5 @@
+import { posterFacilitators } from '../../shared/poster-facilitators.js';
+
 /* ============================================================
    EDUCATION & EVENTS — DATA LAYER
    Mock data matching the RCBC Phase 2 requirements:
@@ -93,7 +95,7 @@ export const activities = [
     mode: "Online",
     suitableFor: "General public, families, caregivers",
     date: "11 Apr 2026",
-    time: "80 minutes",
+    time: "10:00 AM – 11:20 AM (Malaysia time)",
     location: "Online",
     city: "Online",
     language: "English / Bahasa Malaysia",
@@ -117,7 +119,7 @@ export const activities = [
     location: "Hock Lee Hotel & Residence, Kuching",
     city: "Kuching",
     language: "English / Bahasa Malaysia / 中文",
-    speaker: "12 ADFM-Certified Trainers & Advisory Specialists",
+    speaker: "9 ADFM-certified facilitators (poster roster)",
     trainerId: null,
     description:
       "1-day intensive foundation course covering 6 core modules: Basic DCS, Person-Centred Care, Effective Communication, BPSD, Meaningful Activities, and Advance Care Planning. RM120/pax (subsidized from RM1,200). Limited to 100 seats only. CPD points available.",
@@ -249,156 +251,8 @@ export const activities = [
   },
 ];
 
-/* ---- certified trainer profiles (12 verified facilitators from ADFM credentialing) ---- */
-export const trainers = [
-  // --- Category: Medical Professionals & Clinical Facilitators (9) ---
-  {
-    id: 1,
-    name: "Dr. Mohd Asri Bin Mohd Aris",
-    role: "Medical Officer",
-    category: "medical-professional",
-    institution: "Klinik Kesihatan Batu Kawa (KK Batu Kawa)",
-    city: "Kuching",
-    language: "Bahasa Malaysia, English, Sarawak Malay",
-    initials: "MA",
-    badgeColor: "#0d716b",
-    bio: "Medical Officer at Klinik Kesihatan Batu Kawa. Certified in the ADFM DCS-TTT framework, specializing in primary care dementia education, family counseling, and clinic referral pathways.",
-  },
-  {
-    id: 2,
-    name: "Dr. Idda Syafarina Binti Albar",
-    role: "Medical Officer (UD43)",
-    category: "medical-professional",
-    institution: "KKTP, Klinik Kesihatan Tanah Putih",
-    city: "Kuching",
-    language: "Bahasa Malaysia, English",
-    initials: "IS",
-    badgeColor: "#0284c7",
-    bio: "Senior Medical Officer (UD43) at KK Tanah Putih. Dedicated to bridging community health clinics with elderly caregiver networks, conducting dementia education workshops, and managing chronic care integration.",
-  },
-  {
-    id: 3,
-    name: "Catherine Suhani Bt Sulaiman",
-    role: "Health Assistant (PPK U11)",
-    category: "medical-professional",
-    institution: "Klinik Kesihatan Kota Samarahan",
-    city: "Kota Samarahan",
-    language: "Bahasa Malaysia, Sarawak Malay, Iban",
-    initials: "CS",
-    badgeColor: "#d97706",
-    bio: "Health Assistant at KK Kota Samarahan. Certified DCS facilitator with deep grassroots community outreach experience, facilitating bilingual caregiver dialogues and practical hands-on care sessions.",
-  },
-  {
-    id: 4,
-    name: "Patricia Nawai anak Wilfred Ellie",
-    role: "Nursing Sister (U32)",
-    category: "medical-professional",
-    institution: "Pre Hospital Care, Hospital Sentosa",
-    city: "Kuching",
-    language: "English, Bahasa Malaysia, Iban",
-    initials: "PN",
-    badgeColor: "#7c3aed",
-    bio: "Nursing Sister (U32) specializing in Pre-Hospital and psychiatric care at Hospital Sentosa. Experienced trainer in patient mobility, emergency home de-escalation, and dignity-first personal care routines.",
-  },
-  {
-    id: 5,
-    name: "Dr. Yap Hung Wei",
-    role: "Medical Officer",
-    category: "medical-professional",
-    institution: "Jabatan Psikiatri dan Kesihatan Mental, Sarawak General Hospital",
-    city: "Kuching",
-    language: "English, 中文 (Mandarin), Bahasa Malaysia, Hokkien",
-    initials: "YH",
-    badgeColor: "#059669",
-    bio: "Medical Officer at Sarawak General Hospital's Department of Psychiatry & Mental Health. Facilitates DCS workshops in multilingual settings, focusing on behavioral distress management and psychiatric support.",
-  },
-  {
-    id: 6,
-    name: "Dr. Cindy Chai Syn Ying",
-    role: "Medical Officer",
-    category: "medical-professional",
-    institution: "Jabatan Psikiatri dan Kesihatan Mental, Sarawak General Hospital",
-    city: "Kuching",
-    language: "English, 中文 (Mandarin), Bahasa Malaysia",
-    initials: "CC",
-    badgeColor: "#db2777",
-    bio: "Medical Officer at SGH Psychiatry and Mental Health Department. Leads caregiver empowerment circles and multilingual public education talks on recognizing cognitive decline and caregiver mental wellbeing.",
-  },
-  {
-    id: 7,
-    name: "Siti Zufa'arnida Binti Long",
-    role: "Occupational Therapist (U29)",
-    category: "medical-professional",
-    institution: "Hospital Sentosa, Kuching",
-    city: "Kuching",
-    language: "Bahasa Malaysia, English",
-    initials: "SZ",
-    badgeColor: "#ea580c",
-    bio: "Occupational Therapist at Hospital Sentosa. Specializes in adapting home living environments, sensory stimulation, fall prevention, and cognitive activities for individuals living with moderate to severe dementia.",
-  },
-  {
-    id: 8,
-    name: "Efa Erlia Binti Kadirisman",
-    role: "Occupational Therapist (U29)",
-    category: "medical-professional",
-    institution: "Sarawak General Hospital (SGH)",
-    city: "Kuching",
-    language: "Bahasa Malaysia, English",
-    initials: "EK",
-    badgeColor: "#4f46e5",
-    bio: "Occupational Therapist at Sarawak General Hospital. Experienced DCS-TTT educator training families in daily living activities (ADLs), gentle assistive transfer methods, and preserving personal autonomy at home.",
-  },
-  {
-    id: 9,
-    name: "Dr. Siti Zarina binti Zulhady",
-    role: "Medical Officer",
-    category: "medical-professional",
-    institution: "Klinik Psikiatri, Hospital Sentosa, Kuching",
-    city: "Kuching",
-    language: "Bahasa Malaysia, English",
-    initials: "ZZ",
-    badgeColor: "#0891b2",
-    bio: "Medical Officer at Hospital Sentosa Psychiatric Clinic. Focuses on dementia clinical staging, pharmacological safety awareness for family caregivers, and psychoeducation support groups.",
-  },
-
-  // --- Category: ADFM QA/QC Advisory Support (Senior Specialists — 3) ---
-  {
-    id: 10,
-    name: "Dr. Sally Suriani Ahip",
-    role: "Family Medicine Specialist",
-    category: "advisory-support",
-    institution: "Klinik Kesihatan Kota Samarahan",
-    city: "Kota Samarahan",
-    language: "English, Bahasa Malaysia",
-    initials: "SS",
-    badgeColor: "#b91c1c",
-    bio: "Senior Family Medicine Specialist at KK Kota Samarahan. Serves on the ADFM QA/QC Advisory Board, supervising primary care dementia curriculum adaptation, clinical safety standards, and clinic referral networks.",
-  },
-  {
-    id: 11,
-    name: "Dr. Tiong Ing Khieng",
-    role: "Geriatric Medicine & Internal Medicine Specialist",
-    category: "advisory-support",
-    institution: "Pusat Jantung Sarawak & Sarawak General Hospital",
-    city: "Kota Samarahan",
-    language: "English, 中文 (Mandarin), Bahasa Malaysia",
-    initials: "TK",
-    badgeColor: "#1e3a8a",
-    bio: "Consultant Geriatrician and Internal Medicine Specialist at Sarawak Heart Centre and SGH. Provides clinical advisory governance for the DCS-TTT certification syllabus and state-wide geriatric guidelines.",
-  },
-  {
-    id: 12,
-    name: "Dr. Ling Jia Nee",
-    role: "Consultant Geriatrician",
-    category: "advisory-support",
-    institution: "Sarawak General Hospital (SGH)",
-    city: "Kuching",
-    language: "English, 中文 (Mandarin), Bahasa Malaysia",
-    initials: "LJ",
-    badgeColor: "#9333ea",
-    bio: "Consultant Geriatrician at Sarawak General Hospital. Master clinical advisor overseeing complex BPSD protocols, ethical caregiving frameworks, and academic evaluation for the RCBC HopeCare initiative.",
-  },
-];
+/* ---- certified trainer profiles (poster: nine ADFM facilitators only) ---- */
+export const trainers = posterFacilitators.map((t) => ({ ...t }));
 
 /* ---- physical education programmes ---- */
 export const physicalProgrammes = [
@@ -414,7 +268,7 @@ export const physicalProgrammes = [
     suitableFor:
       "Family caregivers, relatives, community helpers, and those interested in or planning to further develop in dementia care.",
     description:
-      "Foundation Dementia Care Course for Family Caregivers covering 6 core modules, delivered by 12 ADFM-Certified Trainers with public healthcare experience. Pre-requisite for ADFM DCS-TTT certification. Limited to 100 seats only (subsidized from RM1,200 to RM120/pax). CPD points available.",
+      "Foundation Dementia Care Course for Family Caregivers covering 6 core modules, delivered by nine ADFM-certified facilitators with public healthcare experience. Pre-requisite for ADFM DCS-TTT certification. Limited to 100 seats only (subsidized from RM1,200 to RM120/pax). CPD points available.",
     mode: "In-Person Physical Workshop",
     sessions: "1 Full Day (9:00 AM – 6:00 PM)",
     language: "English (with Malay & Chinese support where helpful)",

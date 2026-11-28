@@ -15,7 +15,7 @@ export async function eventRegistrationHandler(req,res,url,send){
  if(req.method==='POST'&&!isAllowedOrigin(req.headers.origin))fail('Origin not allowed',403);
  const id=url.searchParams.get('activity');if(!/^[a-f0-9-]{36}$/i.test(id||''))fail('Choose an event');
  const activity=(await pool.query('SELECT * FROM activities WHERE id=$1',[id])).rows[0];
- if(!activity||(!admin&&(!activity.published_at||!['published','completed','verified','archived'].includes(activity.status))))fail('Event not found',404);
+ if(!activity||(!admin&&(activity.content_approval_status!=='approved'||!activity.published_at||!['published','completed','verified','archived'].includes(activity.status))))fail('Event not found',404);
  const settings=(await pool.query('SELECT * FROM event_registration_settings WHERE activity_id=$1',[id])).rows[0]||{enabled:false,paid:false,website_enabled:true,google_url:'',fee:'',instructions:'',ask_phone:false,ask_notes:false};
  if(!admin&&activity.programme_id){
   const cms=await getLearnEventsData();
@@ -24,7 +24,7 @@ export async function eventRegistrationHandler(req,res,url,send){
  }
  if(req.method==='GET'){
   if(!admin)return send(res,200,{title:activity.title,starts_at:activity.starts_at,configured:!!settings.activity_id,closedReason:registrationAvailability(activity,settings),settings:{enabled:!registrationAvailability(activity,settings),paid:settings.paid,website_enabled:settings.website_enabled,google_url:settings.google_url,fee:settings.paid?settings.fee:'',instructions:settings.paid?settings.instructions:'',generalInstructions:settings.general_instructions||'',ask_phone:true,ask_notes:true}});
-  const participants=(await pool.query('SELECT p.*,u.name AS removed_by_name,d.status AS confirmation_email_status,d.error AS confirmation_email_error FROM event_participants p LEFT JOIN users u ON u.id=p.removed_by LEFT JOIN event_confirmation_deliveries d ON d.participant_id=p.id WHERE p.activity_id=$1 ORDER BY p.imported_at DESC',[id])).rows;
+  const participants=(await pool.query('SELECT p.*,u.name AS removed_by_name,att.name AS attendance_recorded_by_name,d.status AS confirmation_email_status,d.error AS confirmation_email_error FROM event_participants p LEFT JOIN users u ON u.id=p.removed_by LEFT JOIN users att ON att.id=p.attendance_recorded_by LEFT JOIN event_confirmation_deliveries d ON d.participant_id=p.id WHERE p.activity_id=$1 ORDER BY p.imported_at DESC',[id])).rows;
   if(url.searchParams.get('export')==='csv'){res.writeHead(200,{'Content-Type':'text/csv; charset=utf-8','Content-Disposition':'attachment; filename="event-registrations.csv"','Cache-Control':'no-store'});return res.end(participantExport(participants.filter(p=>p.status===(url.searchParams.get('scope')==='history'?'cancelled':'registered'))));}
   return send(res,200,{settings,participants,capacitySummary:capacitySummary(activity,participants)});
  }
