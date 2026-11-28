@@ -101,17 +101,17 @@ export default function ProjectServices({ certificate = false }) {
                   </div>
                 </>
               ) : (
-                <Field id="updates-name" label={ps.name || 'Name'} required><input id="updates-name" name="name" required autoComplete="name" maxLength={150} /></Field>
+                <Field id="updates-name" label={ps.name || 'Name'} example={ps.nameHelp} required><input id="updates-name" name="name" required autoComplete="name" maxLength={150} /></Field>
               )}
               {!certificate && (
                 <>
-                  <Field id="updates-email" label={ps.email} required><input id="updates-email" name="email" type="email" autoComplete="email" maxLength={254} required /></Field>
-                  <Field id="updates-country" label={ps.country} required><input id="updates-country" name="country" autoComplete="country-name" maxLength={150} required /></Field>
-                  <Field id="updates-state" label={ps.state} required><input id="updates-state" name="state" autoComplete="address-level1" maxLength={150} required /></Field>
-                  <Field id="updates-city" label={ps.city} required><input id="updates-city" name="city" autoComplete="address-level2" maxLength={150} required /></Field>
+                  <Field id="updates-email" label={ps.email} example={ps.emailHelp} required><input id="updates-email" name="email" type="email" autoComplete="email" maxLength={254} required /></Field>
+                  <Field id="updates-country" label={ps.country} example={ps.countryHelp} required><input id="updates-country" name="country" autoComplete="country-name" maxLength={150} required /></Field>
+                  <Field id="updates-state" label={ps.state} example={ps.stateHelp} required><input id="updates-state" name="state" autoComplete="address-level1" maxLength={150} required /></Field>
+                  <Field id="updates-city" label={ps.city} example={ps.cityHelp} required><input id="updates-city" name="city" autoComplete="address-level2" maxLength={150} required /></Field>
                   <p>{ps.languageNotice}</p>
                   <p id="updates-privacy">{ps.consentInfo} {ps.privacyIntro} <Link to="/privacy-policy">{ps.privacyPolicy}</Link>.</p>
-                  <Field id="updates-consent" label={ps.consentCheckbox} required>
+                  <Field id="updates-consent" label={ps.consentCheckbox} example={ps.consentHelp} required>
                     <input id="updates-consent" name="consent" type="checkbox" aria-describedby="updates-privacy" required />
                   </Field>
                 </>
