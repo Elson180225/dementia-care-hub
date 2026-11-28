@@ -20,6 +20,10 @@ import { trackApplicationsHandler } from './track-applications.js';
 import { listingRequestsHandler } from './listing-requests.js';
 import { translationsHandler } from './translations.js';
 import { serveWebsite } from './website.js';
+import {webinarLibraryHandler} from './webinar-library.js';
+import {dcsRegistryHandler} from './dcs-registry.js';
+import {educationReportsHandler} from './education-reports.js';
+import { volunteersHandler } from './volunteers.js';
 
 const port = Number(process.env.PORT || process.env.API_PORT || 3001);
 // Local default stays private; hosting sets HOST=0.0.0.0 so the platform can reach the server.
@@ -47,6 +51,9 @@ const server = createServer(async (req, res) => {
     return await serveWebsite(req, res, url);
   }
   if(url.pathname==='/api/uploads' || url.pathname.startsWith('/api/files/')) return await filesHandler(req,res,url,sendJson);
+  if(['/api/admin/webinar-library','/api/public/activity-resources'].includes(url.pathname))return await webinarLibraryHandler(req,res,url,sendJson);
+  if(['/api/admin/dcs-registry','/api/public/dcs-registry'].includes(url.pathname))return await dcsRegistryHandler(req,res,url,sendJson);
+  if(['/api/admin/education-reports','/api/portal/education-report'].includes(url.pathname))return await educationReportsHandler(req,res,url,sendJson);
   if(['/api/admin/translations','/api/public/translations'].includes(url.pathname))return await translationsHandler(req,res,url,sendJson);
   if(url.pathname==='/api/admin/learn-events-content' || url.pathname==='/api/public/learn-events-content') return await learnEventsContentHandler(req,res,url,sendJson);
   if(url.pathname==='/api/admin/participants') return await participantsHandler(req,res,url,sendJson);
@@ -64,6 +71,7 @@ if (['/api/public/listing-request-settings',
   return await listingRequestsHandler(req, res, url, sendJson);
 }
 
+  if(['/api/admin/volunteers','/api/public/volunteer-registrations'].includes(url.pathname)) return await volunteersHandler(req,res,url,sendJson);
   if(url.pathname.startsWith('/api/admin/')) return await managementHandler(req,res,url,sendJson);
   if(url.pathname.startsWith('/api/public/')) return await publicRecordsHandler(req,res,url,sendJson);
   if(url.pathname.startsWith('/api/auth/')) return await authHandler(req,res,url.pathname,sendJson);

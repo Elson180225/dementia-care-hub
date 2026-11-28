@@ -53,15 +53,19 @@ function getMenuItems(m,u) {
       children: [
         {
           label: m.caregiverGuidance,
-          path: "/caregiver-support",
+          path: "/caregiver-support/guidance",
         },
         {
           label: m.caregiverTraining,
           path: "/caregiver-support/training",
         },
         {
-          label: m.certVerification,
-          path: "/caregiver-support/certificate-verification",
+          label: m.caregiverWellbeing,
+          path: "/caregiver-support/wellbeing",
+        },
+        {
+          label: m.familySupport,
+          path: "/caregiver-support/family",
         },
         {
           label: m.supportGroups,
@@ -97,6 +101,7 @@ function getMenuItems(m,u) {
           label: m.upcomingCalendar,
           path: "/learn-events/upcoming-calendar",
         },
+        {label: m.dcsTrainingCertification || 'DCS training & certification', path:'/learn-events/dcs-participants'},
       ],
     },
     {
@@ -242,7 +247,7 @@ function HelpMenuIcon({ path }) {
   }
 
   // Caregiver Support
-  if (path === "/caregiver-support") {
+  if (path === "/caregiver-support" || path === "/caregiver-support/guidance") {
     return (
       <svg {...common}>
         <path d="M3 5.5C5.5 4 8.5 4 12 6c3.5-2 6.5-2 9-.5V19c-2.5-1.5-5.5-1.5-9 .5-3.5-2-6.5-2-9-.5V5.5Z" />
@@ -642,7 +647,7 @@ function Header() {
                 <details key={item.label}>
                   <summary>{item.label}</summary>
                   <div className="mobile-submenu">
-                    {!item.menuOnly && !["/understand-dementia", "/caregiver-support", "/learn-events/online-education"].includes(item.path) && (
+                    {!item.menuOnly && !["/understand-dementia", "/learn-events/online-education"].includes(item.path) && (
                       <Link to={item.path} onClick={closeMobileMenu}>
                         {t.header.overview}
                       </Link>

@@ -1,6 +1,10 @@
+import {applyCaregiverDraft} from "./caregiverDraft.js";
 import {publicCopy,addMissingCopy} from '../../shared/public-copy.js';
 import {inlineCopy} from './inlineCopy.js';
 import {addSupplementalCopy} from './supplementalCopy.js';
+import {educationCopyMs,educationCopyZh,dcsPublicCopyMs,dcsPublicCopyZh,headerMenuLocales} from './educationCopyLocales.js';
+import {educationCopy} from './educationCopy.js';
+import {dcsPublicCopy} from '../../shared/dcs-public-copy.js';
 export const translations = {
   "en": {
     "header": {
@@ -1750,6 +1754,12 @@ export const translations = {
       ],
       "consentInfo": "Receive updates and reminders about upcoming webinars, seminars, education and project activities. RCBC stores your name, email, locality, language and consent for this purpose. Authorised administrators and our email provider process these details. No public account is created. Every reminder includes an unsubscribe link. Contact RCBC through the Contact page for correction or deletion requests.",
       "consentCheckbox": "I agree to receive project updates from RCBC by email.",
+      "nameHelp": "Enter your name. Example: Alex Tan.",
+      "emailHelp": "Enter the email address where you want to receive updates. Example: name@example.org.",
+      "countryHelp": "Enter your country. Example: Malaysia.",
+      "stateHelp": "Enter your state, province or region. Example: Sarawak.",
+      "cityHelp": "Enter your city or town. Example: Kuching.",
+      "consentHelp": "Tick this box if you agree to receive project updates by email.",
       "wait": "Please wait...",
       "verifyBtn": "Verify certificate",
       "unsubscribeBtn": "Confirm unsubscribe",
@@ -3363,6 +3373,12 @@ export const translations = {
       ],
       "consentInfo": "Terima kemas kini dan peringatan mengenai webinar, seminar, pendidikan dan aktiviti projek yang akan datang. RCBC menyimpan nama, e-mel, kawasan, bahasa dan persetujuan anda untuk tujuan ini. Tiada akaun awam dicipta. Setiap peringatan mengandungi pautan berhenti melanggan. Hubungi RCBC melalui halaman Hubungi untuk pembetulan atau pemadaman.",
       "consentCheckbox": "Saya bersetuju menerima kemas kini projek daripada RCBC melalui e-mel.",
+      "nameHelp": "Masukkan nama anda. Contoh: Alex Tan.",
+      "emailHelp": "Masukkan alamat e-mel untuk menerima kemas kini. Contoh: name@example.org.",
+      "countryHelp": "Masukkan negara anda. Contoh: Malaysia.",
+      "stateHelp": "Masukkan negeri, wilayah atau rantau anda. Contoh: Sarawak.",
+      "cityHelp": "Masukkan bandar atau pekan anda. Contoh: Kuching.",
+      "consentHelp": "Tandakan kotak ini jika anda bersetuju untuk menerima kemas kini projek melalui e-mel.",
       "wait": "Sila tunggu...",
       "verifyBtn": "Sahkan sijil",
       "unsubscribeBtn": "Sahkan batal langganan",
@@ -3835,7 +3851,7 @@ export const translations = {
         "phone": "电话 / WhatsApp 号码 *",
         "phonePlaceholder": "例如：+60 12-345 6789",
         "email": "电子邮箱 *",
-        "emailPlaceholder": "例如：grace@example.com",
+        "emailPlaceholder": "例： pengguna@contoh.com",
         "role": "身份 / 背景",
         "preferredLanguage": "首选语言",
         "preferredCity": "首选城市 / 培训地点",
@@ -4977,6 +4993,12 @@ export const translations = {
       ],
       "consentInfo": "接收有关即将举行的研讨会、线上讲座、教育培训与社区活动的提醒与更新。RCBC 严格存储您的姓名、邮箱、地区、语言偏好和授权。系统不会创建公开账户，每封提醒均包含退订链接。如需更正或删除信息，请通过“联系我们”页面联络 RCBC。",
       "consentCheckbox": "我同意通过电子邮件接收来自 RCBC 的项目最新动态与通知。",
+      "nameHelp": "请输入您的姓名。例如：Alex Tan。",
+      "emailHelp": "请输入用于接收项目动态的电子邮件地址。例如： name@example.org。",
+      "countryHelp": "请输入您所在的国家。例如：马来西亚。",
+      "stateHelp": "请输入您所在的州、省或地区。例如：砂拉越。",
+      "cityHelp": "请输入您所在的城市或城镇。例如：古晋。",
+      "consentHelp": "如果您同意通过电子邮件接收项目动态，请勾选此框。",
       "wait": "请稍候...",
       "verifyBtn": "验证证书",
       "unsubscribeBtn": "确认取消订阅",
@@ -5168,3 +5190,32 @@ Object.assign(translations.zh.directory ??= {}, {
   changeLocation: "更改地点",
   reset: "重置筛选条件",
 });
+translations.ms.contact.enquiryOptions = [
+  'Pertanyaan Umum',
+  'Pendidikan dan Latihan',
+  'Acara dan Penyertaan',
+  'Kerjasama dan Perkongsian',
+  'Kesukarelawanan dan Sokongan Projek',
+  'Maklum Balas Laman Web dan Sumber',
+];
+translations.zh.contact.enquiryOptions = [
+  '一般咨询',
+  '教育与培训',
+  '活动与参与',
+  '合作与伙伴关系',
+  '志愿服务与项目支持',
+  '网站与资源反馈',
+];
+
+applyCaregiverDraft(translations);
+
+Object.assign(translations.en.inlineCopy, educationCopy, dcsPublicCopy);
+Object.assign(translations.ms.inlineCopy, educationCopyMs, dcsPublicCopyMs);
+Object.assign(translations.zh.inlineCopy, educationCopyZh, dcsPublicCopyZh);
+translations.en.header.menu.dcsTrainingCertification = educationCopy.educationRegistryLink;
+translations.ms.header.menu.dcsTrainingCertification = headerMenuLocales.ms.dcsTrainingCertification;
+translations.zh.header.menu.dcsTrainingCertification = headerMenuLocales.zh.dcsTrainingCertification;
+
+addMissingCopy(translations.ms, translations.en);
+addMissingCopy(translations.zh, translations.en);
+addSupplementalCopy(translations);

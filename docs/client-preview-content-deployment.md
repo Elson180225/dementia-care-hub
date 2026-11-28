@@ -8,6 +8,8 @@ Migration 025 inserts a clean initial snapshot once. It does not replace existin
 
 Historical webinars are seeded after the first admin registration and on subsequent migration runs. The repeatable seed inserts only missing IDs and never replaces edited webinars. This repairs installations where migrations 010/011 ran before an admin existed. The existing 12 historical webinar definitions are retained; no new trainer teaching/publication permissions are granted.
 
+Migration `035_historical_demo_approval.sql` marks those seeded RCBC/CT historical activity IDs and their linked Grouped Q&amp;A learning resources as **RCBC content-approved and published** so client demonstrations show a full public archive. Anything admins create later still goes through **Publication &amp; webinar library** and **Content &amp; records** review before it is public.
+
 Public event cards and CMS lists use the database. An empty published event list stays empty; API failures display a loading error instead of substituting sample events. Example organisation records remain available to administrators but are excluded from public directory and translation sources.
 
 ## Explicit test exclusions
@@ -86,6 +88,10 @@ An approved translation remains approved only if:
 Do not create fake reviewer accounts or assign expert permissions merely to preserve approvals. Unverifiable approvals become pending review; changed English becomes needs-review; removed/test sources are excluded. Original entry and available review history are retained as import provenance under the importing admin, without pretending that admin performed the historical approval.
 
 Existing target translations and page review requirements are never overwritten or relaxed. Missing users/expert assignments can therefore leave fewer published translations on the preview than locally. The public website continues to use approved English until review is complete.
+
+### Bundled translations on the public site
+
+`npm run db:migrate` publishes bundled Malay/Chinese catalogue entries (UI, CMS suggestions) as **approved** in `translation_entries`. The public API always merges bundled wording with database approvals, so language switching works in production builds without a separate preview flag. Admin changes in **Language & translations** override bundled text. Re-run `npm run translations:demo-publish` after large English catalogue updates.
 
 ## Verification
 

@@ -70,15 +70,19 @@ export const navigation = [
         children: [
         {
             label: "Caregiver Guidance",
-            path: "/caregiver-support",
+            path: "/caregiver-support/guidance",
         },
         {
-            label: "Caregiver Training",
+            label: "Caregiver Education & Training",
             path: "/caregiver-support/training",
         },
         {
-            label: "Certificate Verification",
-            path: "/caregiver-support/certificate-verification",
+            label: "Caregiver Wellbeing & Resilience",
+            path: "/caregiver-support/wellbeing",
+        },
+        {
+            label: "Family Support & Shared Caregiving",
+            path: "/caregiver-support/family",
         },
         {
             label: "Support Groups",

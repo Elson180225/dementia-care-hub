@@ -52,7 +52,10 @@ import Records from "./admin/pages/Records";
 import Users from "./admin/pages/Users";
 import Contribution from "./admin/pages/Contribution";
 import LearnEventsCMS from "./admin/pages/LearnEventsCMS";
+import VolunteerManagement from "./admin/pages/VolunteerManagement";
 import Participants from "./admin/pages/Participants";
+import DcsRegistry from './admin/pages/DcsRegistry';
+import DcsParticipantSearch from './pages/DcsParticipantSearch';
 
 // The Admin Dashboard is a back-office area, so it hides the public site header and footer.
 function PublicOnly({ children }) {
@@ -120,7 +123,9 @@ function App() {
 
         <Routes>
           <Route path="/get-updated" element={<ProjectServices />} />
-          <Route path="/caregiver-support/verify-certificate" element={<ProjectServices certificate />} />
+          <Route path="/learn-events/verify-certificate" element={<ProjectServices certificate />} />
+          <Route path="/caregiver-support/verify-certificate" element={<Navigate to="/learn-events/verify-certificate" replace />} />
+          <Route path="/learn-events/dcs-participants" element={<DcsParticipantSearch />} />
           <Route path="/trainer-portal/application" element={<main className="tp-page"><div className="tp-container"><AccountForm application /></div></main>} />
           <Route path="/trainer-portal/eligibility" element={<main className="tp-page"><div className="tp-container"><Eligibility /></div></main>} />
           <Route path="/trainer-portal/signup" element={<main className="tp-page"><div className="tp-container"><AccountForm signup /></div></main>} />
@@ -157,14 +162,15 @@ function App() {
 
           {/* =========================
               CAREGIVER SUPPORT
-              Guidance is the main page; other topics have dedicated routes.
+              Overview and guidance have separate pages.
           ========================== */}
           <Route path="/caregiver-support" element={<CaregiverSupport />} />
-          <Route path="/caregiver-support/supporting-someone" element={<Navigate to="/caregiver-support" replace />} />
-          <Route path="/caregiver-support/wellbeing" element={<Navigate to="/caregiver-support" replace />} />
-          <Route path="/caregiver-support/guidance" element={<Navigate to="/caregiver-support" replace />} />
+          <Route path="/caregiver-support/supporting-someone" element={<CaregiverSupport key="guidance-legacy" />} />
+          <Route path="/caregiver-support/wellbeing" element={<CaregiverSupport key="wellbeing" />} />
+          <Route path="/caregiver-support/family" element={<CaregiverSupport key="family" />} />
+          <Route path="/caregiver-support/guidance" element={<CaregiverSupport key="guidance" />} />
           <Route path="/caregiver-support/training" element={<CaregiverSupport key="training" />} />
-          <Route path="/caregiver-support/certificate-verification" element={<CaregiverSupport key="certificate-verification" />} />
+          <Route path="/caregiver-support/certificate-verification" element={<Navigate to="/learn-events/verify-certificate" replace />} />
           <Route path="/caregiver-support/support-groups" element={<CaregiverSupport key="support-groups" />} />
           <Route path="/caregiver-support/volunteer" element={<CaregiverSupport key="volunteer" />} />
 
@@ -325,6 +331,8 @@ function App() {
   <Route path="learn-events" element={<LearnEventsCMS />} />
   <Route path="trainers" element={<LearnEventsCMS key="trainers" initialTab="trainers" />} />
   <Route path="participants" element={<Participants />} />
+  <Route path="dcs-registry" element={<DcsRegistry />} />
+  <Route path="volunteers" element={<VolunteerManagement />} />
   <Route path="review" element={<ReviewQueue />} />
   <Route path="contribution" element={<Contribution />} />
   <Route path="activities" element={<LearnEventsCMS />} />

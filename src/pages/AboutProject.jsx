@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { useLanguage } from "../i18n/LanguageContext";
 import {
@@ -12,6 +12,8 @@ import {
   acknowledgements,
 } from "../data/about";
 import "./AboutProject.css";
+import HeroPhoto, { HeroWithPhoto } from "../components/HeroPhoto/HeroPhoto";
+import heroPhoto from "../assets/Group_Photo.png";
 
 function Section({ id, title, children, records = [] }) {
   return (
@@ -40,6 +42,50 @@ function ContributionList({ items }) {
 export default function AboutProject() {
   const { t,translateContent, translateLabel } = useLanguage();
   const [rawRecords, setRecords] = useState([]);
+  const pageRef = useRef(null);
+  const [activeSection, setActiveSection] = useState("overview");
+
+  // The global header changes height across languages, zoom levels and layouts.
+  // Keep both sticky navigation and anchor destinations below its full height.
+  useLayoutEffect(() => {
+    const page = pageRef.current;
+    const header = document.querySelector(".site-header");
+    if (!page || !header) return;
+    let frame = 0;
+    let offset = 0;
+    const sections = [
+      ["overview", "overview"], ["mission", "mission"], ["objectives", "mission"],
+      ["journey", "journey"], ["organiser", "organiser"], ["partner", "organiser"],
+      ["advisors", "organiser"], ["supported", "supported"], ["acknowledgements", "acknowledgements"],
+    ];
+    const updateActive = () => {
+      frame = 0;
+      let current = "overview";
+      for (const [id, navId] of sections) {
+        const section = document.getElementById(id);
+        if (section && section.getBoundingClientRect().top <= offset + 12) current = navId;
+      }
+      setActiveSection(current);
+    };
+    const schedule = () => { if (!frame) frame = requestAnimationFrame(updateActive); };
+    const measure = () => {
+      offset = Math.ceil(header.getBoundingClientRect().height) + 16;
+      page.style.setProperty("--about-header-offset", `${offset}px`);
+      schedule();
+    };
+    const observer = typeof ResizeObserver !== "undefined" ? new ResizeObserver(measure) : null;
+    observer?.observe(header);
+    measure();
+    window.addEventListener("resize", measure);
+    window.addEventListener("scroll", schedule, { passive: true });
+    return () => {
+      observer?.disconnect();
+      window.removeEventListener("resize", measure);
+      window.removeEventListener("scroll", schedule);
+      if (frame) cancelAnimationFrame(frame);
+      page.style.removeProperty("--about-header-offset");
+    };
+  }, []);
   const records=translateContent(rawRecords.filter(r=>r.language==='English'),'records/content_pages');
   useEffect(() => {
     const controller = new AbortController();
@@ -48,25 +94,25 @@ export default function AboutProject() {
   }, []);
   const languageName = 'English';
   const approved = id => records.filter(r => r.slug === `about-${id}` && r.language === languageName);
-  const hasThanks = acknowledgements.some(group => group.items.length) || approved('acknowledgements').length > 0;
-  const navigation = [{id:'overview',label:t.aboutProject.projectOverview},{id:'journey',label:t.aboutProject.ourJourney},{id:'organiser',label:t.aboutProject.peoplePartners},...(hasThanks ? [{id:'acknowledgements',label:t.aboutProject.acknowledgements}] : [])];
+
+  const navigation = [{id:"overview",label:t.aboutProject.projectOverview},{id:"mission",label:t.caregiverDraft.missionObjectives},{id:"journey",label:t.aboutProject.ourJourney},{id:"organiser",label:t.aboutProject.peoplePartners},{id:"supported",label:t.aboutProject.supportedBy},{id:"acknowledgements",label:t.aboutProject.acknowledgements}];
   const ap = t.aboutProject;
 
   return (
-    <main className="about-page">
+    <main className="about-page" ref={pageRef}>
       <header className="about-hero">
-        <div className="about-container">
+        <div className="about-container"><HeroWithPhoto photo={<HeroPhoto src={heroPhoto} alt="The RCBC Alzheimer’s Care Project team at a training event" />}>
           <p className="about-kicker">{ap.kicker}</p>
           <h1>{ap.project || overview.project}</h1>
           <p className="about-theme">“{ap.theme || overview.theme}”</p>
-        </div>
+        </HeroWithPhoto></div>
       </header>
 
       <div className="about-container about-layout">
         <nav className="about-toc" aria-label={translateLabel("On this page", "onThisPage")}>
           <p className="about-toc-title">{ap.onPage}</p>
           <ol>
-            {navigation.map(item => <li key={item.id}><a href={`#${item.id}`}>{item.label}</a></li>)}
+            {navigation.map(item => <li key={item.id}><a href={`#${item.id}`} aria-current={activeSection === item.id ? "location" : undefined}>{item.label}</a></li>)}
           </ol>
         </nav>
 
@@ -94,7 +140,7 @@ export default function AboutProject() {
             </div>
           </Section>
 
-          <Section records={approved("mission")} id="mission" title={ap.ourMission || "Our Mission & Vision"}>
+          <Section records={approved("mission")} id="mission" title={t.caregiverDraft.missionObjectives}>
             <div className="about-two-col">
               <div className="about-card">
                 <h3>{ap.mission || "Mission"}</h3>
@@ -107,17 +153,18 @@ export default function AboutProject() {
             </div>
           </Section>
 
-          <Section records={approved("journey")} id="journey" title={ap.ourJourney || "Our Journey"}>
+          <Section records={approved("objectives")} id="objectives" title={t.caregiverDraft.objectivesTitle}><ol className="about-objectives">{t.caregiverDraft.objectives.map((item,index) => <li key={item}><span aria-hidden="true">0{index+1}</span><p>{item}</p></li>)}</ol><p className="about-pending">{t.caregiverDraft.workingWording}</p></Section>
+          <Section id="journey" title={ap.ourJourney || "Our Journey"}>
             <ol className="about-journey">
-              {(ap.journeySteps || journey).map((step) => (
+              {(ap.journeySteps || journey).map((step, index) => (
                 <li
                   key={step.phase}
                   className={step.current ? "is-current" : ""}
                   aria-current={step.current ? "step" : undefined}
                 >
                   <span className="about-phase">{step.phase}</span>
-                  <h3>{step.title}</h3>
-                  <p>{step.text}</p>
+                  <h3>{t.caregiverDraft.phaseTitles[index] || step.title}</h3>
+                  {index < 2 && <>{approved(`phase-${index+1}`).length ? approved(`phase-${index+1}`).map(r=><p key={r.id} style={{whiteSpace:"pre-line"}}>{r.body?.text}</p>) : <p>{step.text}</p>}</>}
                   {step.current && (
                     <span className="about-badge">{ap.currentPhase || "You are here"}</span>
                   )}
@@ -157,7 +204,7 @@ export default function AboutProject() {
           </Section>
 
           </div>
-          {(supportedBy.items.length > 0 || approved("supported").length > 0) && <Section records={approved("supported")} id="supported" title={ap.supportedBy || "Supported By"}>
+          <Section records={approved("supported")} id="supported" title={ap.supportedBy || "Supported By"}>
             <p>{ap.supportedText || supportedBy.text}</p>
             {supportedBy.items.length > 0 ? (
               <ContributionList items={supportedBy.items} />
@@ -166,9 +213,9 @@ export default function AboutProject() {
                 {ap.supportedPending || "Supporting organisations will be listed here once confirmed by RCBC."}
               </p>
             )}
-          </Section>}
+          </Section>
 
-          {hasThanks && <Section records={approved("acknowledgements")} id="acknowledgements" title={ap.acknowledgements || "Acknowledgements"}>
+          <Section records={approved("acknowledgements")} id="acknowledgements" title={ap.acknowledgements || "Acknowledgements"}>
             <p>
               {ap.ackIntro || "We thank everyone who has contributed to the project. Each acknowledgement shows who contributed, how, and in which phase or programme."}
             </p>
@@ -185,8 +232,9 @@ export default function AboutProject() {
                 )}
               </div>
             ))}
-          </Section>}
-          {records.filter(r => r.slug === 'about' && r.language === languageName).map(r => <article className="about-section" key={r.id}><h2>{r.title}</h2><p style={{whiteSpace:'pre-line'}}>{r.body?.text}</p></article>)}
+            {!acknowledgements.some(group => group.items.length) && <p className="about-pending">{t.caregiverDraft.contributorsPending}</p>}
+          </Section>
+          {/* Legacy generic About and journey records need RCBC re-review before publication under Draft 02. */}
           <nav className="about-next" aria-label={ap.nextSteps}><h2>{ap.nextSteps}</h2><Link to="/find-help">{ap.findSupport}</Link><Link to="/learn-events/events">{ap.exploreEvents}</Link><Link to="/contact">{ap.contactUs}</Link></nav>
         </div>
       </div>

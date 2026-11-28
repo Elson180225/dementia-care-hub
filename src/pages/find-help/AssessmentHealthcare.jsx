@@ -7,6 +7,8 @@ import { useLanguage } from "../../i18n/LanguageContext";
 
 import "./AssessmentHealthcare.css";
 import ReadMore from "../../components/ReadMore/ReadMore";
+import HeroPhoto, { HeroWithPhoto } from "../../components/HeroPhoto/HeroPhoto";
+import heroPhoto from "../../assets/banner-healthcare.jpg";
 
 const preparationItems = [
   {
@@ -179,7 +181,7 @@ function AssessmentHealthcare() {
       ====================================================== */}
 
       <section className="assessment-hero">
-        <div className="assessment-container">
+        <div className="assessment-container"><HeroWithPhoto photo={<HeroPhoto src={heroPhoto} alt="A nurse listening to an older woman in a wheelchair" />}>
           <span className="assessment-kicker">
             {ah.kicker || "Find Help & Support"}
           </span>
@@ -208,7 +210,7 @@ function AssessmentHealthcare() {
             <a href="#healthcare-pathways" className="assessment-secondary-button"><Trans>Healthcare pathways</Trans></a>
             <a href="#caregiver-health" className="assessment-secondary-button"><Trans>Caregiver health</Trans></a>
           </div>
-        </div>
+        </HeroWithPhoto></div>
       </section>
 
       {/* =====================================================

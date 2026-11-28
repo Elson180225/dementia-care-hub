@@ -1,6 +1,8 @@
 import { useState } from "react";
+import {Link} from 'react-router-dom';
 import { useTrainer } from "../../trainer-portal/TrainerContext";
 import { buildQueue } from "../../trainer-portal/selectors";
+import { eventDateTime } from "../../../shared/event-dates";
 import { Field } from "../../trainer-portal/ui";
 
 const DECISION_LABEL = {
@@ -30,12 +32,14 @@ const RECORD_LABEL = {
   completions: "Completed activity",
   activity_trainers: "Activity trainers",
   subscribers: "Get Updated subscriber",
+  learning_resources: "Learning resource",
   trainer_listing: "Public listing"
 };
 
 export default function ReviewQueue() {
   const { state, dispatch } = useTrainer();
   const queue = buildQueue(state);
+  const pendingPublication = state.activities.filter(activity => activity.contentApprovalStatus === "pending" && !activity.cancelledAt).length;
   const [comments, setComments] = useState({});
   const [refs, setRefs] = useState({});
   const [errors, setErrors] = useState({});
@@ -64,8 +68,10 @@ export default function ReviewQueue() {
   return (
     <>
       <h1>Approvals</h1>
+      <section className="tp-card"><h2>Education &amp; Events reviews</h2><p>Choose what you want to review.</p><div className="tp-actions"><Link className="tp-btn tp-btn-ghost" to="/admin/learn-events?section=library&review=pending">Review publication &amp; webinar materials ({pendingPublication} pending)</Link><Link className="tp-btn tp-btn-ghost" to="/admin/dcs-registry?tab=review">Review training records &amp; public consent</Link><Link className="tp-btn tp-btn-ghost" to="/admin/contribution">Review individual contributions</Link></div></section>
 
-      {queue.length === 0 && <p className="tp-card">Nothing is waiting for review.</p>}
+      <h2>Requests and submissions</h2>
+      {queue.length === 0 && <p className="tp-card">No requests in this queue. Use the links above to check publication, training records and contributions.</p>}
 
       <ul className="tp-cards">
         {queue.map((item) => (
@@ -100,6 +106,7 @@ export default function ReviewQueue() {
                 <Field
                     id={`ref-${item.key}`}
                     label="Certificate reference (check it matches RCBC records)"
+                    example="Enter the certificate reference as recorded by RCBC before approving access."
                 >
                     <input
                         id={`ref-${item.key}`}
@@ -111,6 +118,7 @@ export default function ReviewQueue() {
                 <Field
                     id={`c-${item.key}`}
                     label="Comment for the trainer (required to return or reject)"
+                    example="Explain what needs to change for a returned request, or why the request was rejected."
                     error={errors[item.key]}
                 >
                 <textarea
@@ -140,8 +148,8 @@ export default function ReviewQueue() {
       </ul>
 
       <h2>Recent activity</h2>
-      <div className="tp-table-wrap">
-        <table className="tp-table">
+      <div className="tp-table-wrap" role="region" aria-label="Recent activity" tabIndex={0}>
+        <table className="tp-table tp-admin-history">
           <caption className="tp-sr">Recent activity</caption>
           <thead>
             <tr>
@@ -156,12 +164,14 @@ export default function ReviewQueue() {
             {state.history.slice(0, 10).map((h) => (
               <tr key={h.id}>
                 <td>
-                  {new Date(h.at).toLocaleString("en-MY", { dateStyle: "medium", timeStyle: "short" })}
+                  {eventDateTime(h.at)}
                 </td>
                 <td>{RECORD_LABEL[h.entity] ?? h.entity}: {h.entityLabel}</td>
                 <td>{DECISION_LABEL[h.decision] ?? h.decision}</td>
                 <td>{h.by}</td>
-                <td>{h.comment || "–"}</td>
+                <td>{h.comment?.startsWith("Legacy CMS material:")
+                  ? "Imported for RCBC review. Check the source, linked activity and publication permissions."
+                  : h.comment || "—"}</td>
               </tr>
             ))}
             {state.history.length === 0 && (

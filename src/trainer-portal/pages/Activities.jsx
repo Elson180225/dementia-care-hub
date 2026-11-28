@@ -1,7 +1,7 @@
-import {teachingPermission} from "../../../shared/trainer-governance";
+import {teachingPermission,activityTiming,organiserRecord} from "../../../shared/trainer-governance";
 import UploadField from "../UploadField";
 import {validateEventPricing,normaliseRegistrationType} from "../../../shared/event-registration";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { useEffect, useMemo, useState } from "react";
 import { useTrainer } from "../TrainerContext";
 import { ACTIVITY_TYPES, LANGUAGES, MODES, STATUS_LABEL } from "../constants";
@@ -41,6 +41,9 @@ const SARAWAK_DIVISIONS = [
 ];
 
 const blank = {
+  endDate: "",
+  organiserKind: "rcbc",
+  organiserName: "RCBC",
   title: "",
   date: "",
   type: "Workshop",
@@ -69,6 +72,8 @@ const blank = {
 
 function validate(v) {
   const e = {};
+  try{activityTiming(v.date,v.endDate,v.plannedHours);}catch(error){e.endDate=error.message;}
+  try{organiserRecord(v.organiserKind,v.organiserName);}catch(error){e.organiserName=error.message;}
   if (!v.title?.trim()) e.title = "Please enter a title.";
   if (!v.date || Number.isNaN(Date.parse(v.date))) e.date = "Please choose a valid date and time.";
   if (v.mode === "Physical" && !v.venue?.trim()) e.venue = "Please enter the venue.";
@@ -98,17 +103,25 @@ function validate(v) {
   return e;
 }
 
+const publicationFields = [
+  ['source_url','Original source / Facebook post'], ['speaker_name','Speaker name'],
+  ['speaker_intro','Speaker introduction'], ['recording_url','Recording link'],
+  ['qa_url','Reviewed Q&A document link'], ['qa_text','Reviewed Q&A'],
+];
+
 export default function Activities({
   admin = false,
   programmeId = null,
   initialFilterType = "all",
   initialFilterMode = "all",
+  fixedMode,
   defaultValues = null,
   pageTitle,
   pageSubtitle,
   newButtonLabel,
 }) {
   const { state, dispatch } = useTrainer();
+  const [params,setParams]=useSearchParams();
   const addLabel = newButtonLabel || (admin ? "+ New event / workshop" : "+ New training activity");
   const [uploading, setUploading] = useState(0);
   const [view, setView] = useState("cards");
@@ -125,7 +138,7 @@ export default function Activities({
   // Search & Filter State
   const [searchQuery, setSearchQuery] = useState("");
   const [filterType, setFilterType] = useState(initialFilterType || "all");
-  const [filterMode, setFilterMode] = useState(initialFilterMode || "all");
+  const [filterMode, setFilterMode] = useState(fixedMode || initialFilterMode || "all");
   const [filterStatus, setFilterStatus] = useState("all");
   const [filterCity, setFilterCity] = useState("all");
   const [page, setPage] = useState(1);
@@ -161,13 +174,26 @@ export default function Activities({
             id: a.id,
             values: {
               ...Object.fromEntries(Object.keys(blank).map((k) => [k, a[k] ?? ""])),
+              endDate:a.endDate||new Date(new Date(a.date+'+08:00').getTime()+Number(a.plannedHours)*3600000+28800000).toISOString().slice(0,16),
               status: a.status || "published",
               registrationType: normaliseRegistrationType(a.registrationType),
+              ...Object.fromEntries(publicationFields.map(([key])=>[key,a[key]||""])),
             },
           }
         : { values: { ...blank, status: admin ? "published" : "draft", ...(defaultValues || {}) } }
     );
   };
+
+  const activityToReview=admin && state.activities.find(a=>a.id===params.get('activity'));
+  useEffect(()=>{
+    if(!activityToReview)return;
+    open(activityToReview);
+    setParams(previous=>{
+      const next=new URLSearchParams(previous);
+      next.delete('activity');
+      return next;
+    },{replace:true});
+  },[activityToReview]);
 
   const change = (e) => {
     const { name, value } = e.target;
@@ -201,6 +227,9 @@ export default function Activities({
   async function save(saveMode = "draft") {
     const found = validate(editing.values);
     if(admin){try{validateEventPricing(editing.values.registrationType,editing.values.mode);}catch(e){found.registrationType=e.message;}}
+    if(admin && saveMode !== "draft" && editing.values.status === "published" && !editing.values.rightsConfirmed) {
+      found.rightsConfirmed="Confirm RCBC approval and publication permissions.";
+    }
     setErrors(found);
     if (Object.keys(found).length) {
       document.getElementById(Object.keys(found)[0])?.focus();
@@ -216,16 +245,17 @@ export default function Activities({
       status: admin ? (saveMode === "draft" ? "draft" : resolvedStatus) : editing.values.status,
       venue,
       trainers: assigned,
+      ...(admin && {publicationReview:{
+        ...Object.fromEntries(publicationFields.map(([key])=>[key,editing.values[key]])),
+        content_approval_status:saveMode!=="draft"&&resolvedStatus==="published"?"approved":"pending",
+        rightsConfirmed:editing.values.rightsConfirmed===true,
+      }}),
     };
 
     const ok = await dispatch({ type: "ACTIVITY_SAVE", activity: payload });
     if (!ok) return;
 
-    if (admin && saveMode === "publish" && (!currentActivity || currentActivity.status === "draft" || currentActivity.status === "returned")) {
-      await dispatch({ type: "ACTIVITY_SUBMIT", id });
-      await dispatch({ type: "ADMIN_REVIEW", target: "activity", id, decision: "approved" });
-      await dispatch({ type: "ADMIN_REVIEW", target: "activity", id, decision: "published" });
-    } else if (saveMode === "submit") {
+    if (saveMode === "submit") {
       await dispatch({ type: "ACTIVITY_SUBMIT", id });
     }
     setEditing(null);
@@ -285,29 +315,29 @@ export default function Activities({
   const hasActiveFilters =
     searchQuery.trim() !== "" ||
     filterType !== "all" ||
-    filterMode !== "all" ||
+    (!fixedMode && filterMode !== "all") ||
     filterStatus !== "all" ||
     filterCity !== "all";
 
   const resetFilters = () => {
     setSearchQuery("");
     setFilterType("all");
-    setFilterMode("all");
+    setFilterMode(fixedMode || "all");
     setFilterStatus("all");
     setFilterCity("all");
     setPage(1);
   };
 
   const v = editing?.values;
-  const input = (name, label, props = {}) => (
-    <Field id={name} label={label} error={errors[name]} hint={props.hint}>
+  const input = (name, label, { example, hint, ...props } = {}) => (
+    <Field id={name} label={label} error={errors[name]} hint={hint} example={example}>
       <input
         id={name}
         name={name}
         value={v[name]}
         onChange={change}
         aria-invalid={Boolean(errors[name])}
-        aria-describedby={describe(name, errors[name], props.hint)}
+        aria-describedby={describe(name, errors[name], hint)}
         {...props}
       />
     </Field>
@@ -327,22 +357,23 @@ export default function Activities({
         </div>
 
         <form className="tp-card" noValidate onBlur={checkField} onSubmit={(e) => e.preventDefault()}>
-          {input("title", "Title", { placeholder: "e.g. Dementia Care Skill Course (Family)" })}
-          {input("date", "Date & time", { type: "datetime-local" })}
+          {input("title", "Title", { example: "Enter the activity name. Example: Dementia Care Skill Course (Family).", placeholder: "e.g. Dementia Care Skill Course (Family)" })}
+          {input("date", "Date & time", { type: "datetime-local", example: "Enter when the activity is scheduled to start, in Malaysia time (UTC+8)." })}
 
           {admin && (
-            <Field id="status" label="Record Status" hint="Controls where this activity appears (e.g. Published on upcoming events, Completed in webinar archive).">
+            <Field id="status" label="Record Status" hint="Choose the status to save. Published requires RCBC approval below.">
               <select id="status" name="status" value={v.status || "published"} onChange={change}>
-                <option value="published">Published (Live on Upcoming Events & Calendar)</option>
-                <option value="completed">Completed (Archived / Past Webinar or Workshop)</option>
+                <option value="published">Published</option>
                 <option value="draft">Draft (Hidden from public)</option>
                 <option value="approved">Approved (Awaiting publish)</option>
-                <option value="archived">Archived</option>
               </select>
             </Field>
           )}
 
-          <Field id="type" label="Activity type">
+          <Field id="endDate" label="End date and time (Malaysia)" example="Enter when the activity is scheduled to finish, in Malaysia time (UTC+8)." error={errors.endDate}><input id="endDate" name="endDate" type="datetime-local" value={v.endDate} onChange={change}/></Field>
+          <Field id="organiserKind" label="Organiser" example="Choose who is running the activity: RCBC, RCBC with a partner, or an independent organiser."><select id="organiserKind" name="organiserKind" value={v.organiserKind} onChange={change}><option value="rcbc">RCBC</option><option value="joint">Joint organiser</option><option value="independent">Independent organiser</option></select></Field>
+          <Field id="organiserName" label="Organiser / partner name" example="Enter the name of the organising partner or independent organiser." error={errors.organiserName}><input id="organiserName" name="organiserName" value={v.organiserName} onChange={change}/></Field>
+          <Field id="type" label="Activity type" example="Choose the category that best describes the activity.">
             <select id="type" name="type" value={v.type} onChange={change}>
               {(admin ? ALL_ADMIN_TYPES : ACTIVITY_TYPES).map((t) => (
                 <option key={t}>{t}</option>
@@ -350,7 +381,7 @@ export default function Activities({
             </select>
           </Field>
 
-          <Field id="mode" label="Online or physical">
+          <Field id="mode" label="Online or physical" example="Choose how participants will attend the activity.">
             <select id="mode" name="mode" value={v.mode} onChange={change}>
               {MODES.map((m) => (
                 <option key={m}>{m}</option>
@@ -358,9 +389,9 @@ export default function Activities({
             </select>
           </Field>
 
-          {v.mode === "Physical" && input("venue", "Venue / location", { placeholder: "e.g. Hock Lee Hotel, Kuching" })}
+          {v.mode === "Physical" && input("venue", "Venue / location", { example: "Enter the venue name and location. Example: Hock Lee Hotel, Kuching.", placeholder: "e.g. Hock Lee Hotel, Kuching" })}
 
-          <Field id="language" label="Language">
+          <Field id="language" label="Language" example="Choose the language in which the activity will be delivered.">
             <select id="language" name="language" value={v.language} onChange={change}>
               {LANGUAGES.map((l) => (
                 <option key={l}>{l}</option>
@@ -373,7 +404,7 @@ export default function Activities({
             hint: "Specifies who this programme is designed for. Displayed on public event cards, details modal, and calendar.",
           })}
 
-          <Field id="description" label="What participants will learn" error={errors.description}>
+          <Field id="description" label="What participants will learn" example="Summarise the topics covered and what attendees will learn or practise." error={errors.description}>
             <textarea
               id="description"
               name="description"
@@ -387,7 +418,7 @@ export default function Activities({
           </Field>
 
           {admin&&<label className="tp-field">Physical Education programme (optional)<select disabled={Boolean(programmeId)} value={editing.values.programmeId||''} onChange={e=>setEditing({...editing,values:{...editing.values,programmeId:e.target.value}})}><option value="">Standalone event — no programme</option>{programmes.map(p=><option key={p.id} value={p.id} disabled={!teachingPermission(p,editing.values)}>{p.code||p.title} — {p.title}</option>)}</select><small>Link this dated intake to a programme so visitors can register from its overview page.</small></label>}
-          {admin&&<fieldset className="tp-field"><legend>Registration</legend><label htmlFor="registrationType">Registration fee (required)</label><select id="registrationType" value={editing.values.registrationType||''} aria-invalid={!!errors.registrationType} onChange={e=>setEditing({...editing,values:{...editing.values,registrationType:e.target.value,...(e.target.value==='free'?{registrationFee:'',paymentInstructions:''}:{})}})}><option value="">Choose Free or Paid</option><option value="free">Free — no payment required</option><option value="paid">Paid — payment required</option></select>{errors.registrationType&&<p className="tp-error">{errors.registrationType}</p>}{editing.values.registrationType==='paid'?<><label>Fee description<input maxLength={100} value={editing.values.registrationFee||''} onChange={e=>setEditing({...editing,values:{...editing.values,registrationFee:e.target.value}})}/></label><label>Payment instructions<textarea maxLength={4000} value={editing.values.paymentInstructions||''} onChange={e=>setEditing({...editing,values:{...editing.values,paymentInstructions:e.target.value}})}/></label></>:<p>{editing.values.registrationType==='free'?'Free — no payment required, for either online or physical delivery.':'Choose whether participants need to pay.'}</p>}<label>Registration method<select value={editing.values.registrationMethod||'closed'} onChange={e=>setEditing({...editing,values:{...editing.values,registrationMethod:e.target.value}})}><option value="closed">Registration closed</option><option value="google">Google Form</option><option value="website">Website registration</option></select></label>{editing.values.registrationMethod==='google'&&<label>Google Form link (required) — include a required WhatsApp number and optional questions / notes<input type="url" value={editing.values.registrationGoogleUrl||''} onChange={e=>setEditing({...editing,values:{...editing.values,registrationGoogleUrl:e.target.value}})}/></label>}{editing.values.registrationMethod==='website'&&<><p>Visitors register directly on the website. No external link or account is required.</p><p>A WhatsApp phone number is required. Optional questions / notes are always available.</p></>}<label>General registration instructions (optional)<textarea maxLength={4000} value={editing.values.registrationInstructions||''} onChange={e=>setEditing({...editing,values:{...editing.values,registrationInstructions:e.target.value}})}/></label><small>Changing the registration method affects new submissions only. Existing participant records are preserved. Paid bookings require RCBC payment verification.</small></fieldset>}
+          {admin&&<fieldset className="tp-field"><legend>Registration</legend><label htmlFor="registrationType">Registration fee (required)</label><select id="registrationType" value={editing.values.registrationType||''} aria-invalid={!!errors.registrationType} onChange={e=>setEditing({...editing,values:{...editing.values,registrationType:e.target.value,...(e.target.value==='free'?{registrationFee:'',paymentInstructions:''}:{})}})}><option value="">Choose Free or Paid</option><option value="free">Free — no payment required</option><option value="paid">Paid — payment required</option></select>{errors.registrationType&&<p className="tp-error">{errors.registrationType}</p>}{editing.values.registrationType==='paid'?<><label>Fee description<input maxLength={100} value={editing.values.registrationFee||''} onChange={e=>setEditing({...editing,values:{...editing.values,registrationFee:e.target.value}})}/></label><label>Payment instructions<textarea maxLength={4000} value={editing.values.paymentInstructions||''} onChange={e=>setEditing({...editing,values:{...editing.values,paymentInstructions:e.target.value}})}/></label></>:<p>{editing.values.registrationType==='free'?'Free — no payment required, for either online or physical delivery.':'Choose whether participants need to pay.'}</p>}<label>Registration method<select value={editing.values.registrationMethod||'closed'} onChange={e=>setEditing({...editing,values:{...editing.values,registrationMethod:e.target.value}})}><option value="closed">Registration closed</option><option value="both">Website and Google Form</option><option value="google">Google Form</option><option value="website">Website registration</option></select></label>{['google','both'].includes(editing.values.registrationMethod)&&<label>Google Form link (required) — include a required WhatsApp number and optional questions / notes<input type="url" value={editing.values.registrationGoogleUrl||''} onChange={e=>setEditing({...editing,values:{...editing.values,registrationGoogleUrl:e.target.value}})}/></label>}{['website','both'].includes(editing.values.registrationMethod)&&<><p>Visitors register directly on the website. No external link or account is required.</p><p>A WhatsApp phone number is required. Optional questions / notes are always available.</p></>}<label>General registration instructions (optional)<textarea maxLength={4000} value={editing.values.registrationInstructions||''} onChange={e=>setEditing({...editing,values:{...editing.values,registrationInstructions:e.target.value}})}/></label><small>Changing the registration method affects new submissions only. Existing participant records are preserved. Paid bookings require RCBC payment verification.</small></fieldset>}
           {!admin&&input("registrationLink", "External registration link (optional)", {
             type: "url",
             placeholder: "https://forms.google.com/...",
@@ -395,7 +426,7 @@ export default function Activities({
           })}
 
           {input("teachingModule","Teaching module (when restricted)",{hint:"Use the module name recorded in the assigned trainer’s approved teaching permissions."})}
-          {input("plannedHours", "Planned contribution hours", { type: "number", min: "0", step: "0.5" })}
+          {input("plannedHours", "Net planned hours (excluding breaks)", { example: "Enter the planned session length in hours after subtracting breaks. Example: 2.5.", type: "number", min: "0", step: "0.5" })}
 
           <fieldset className="tp-field">
             <legend>Assigned Activity Trainers</legend>
@@ -419,6 +450,7 @@ export default function Activities({
                     </option>
                   ))}
                 </select>
+                <input aria-label="Trainer topic" placeholder="Topic taught" maxLength={300} value={t.topic||''} onChange={e=>setAssigned(assigned.map((x,j)=>i===j?{...x,topic:e.target.value}:x))}/>
                 <select
                   aria-label="Activity role"
                   value={t.role}
@@ -479,14 +511,14 @@ export default function Activities({
           </Field>
           {input("registrationDeadline", "Registration deadline", {
             type: "datetime-local",
-            hint: "Optional. Once this date passes, the public card displays 'Registration Closed' and disables registration.",
+            hint: "Optional. Enter the deadline in Malaysia time (UTC+8), on or before the activity starts. Registration closes after this time.",
           })}
           {input("capacity", "Planned capacity (advisory, optional)", {
             type: "number",
             min: "1",
             step: "1",
             placeholder: "e.g. 50, 100",
-            hint: "Displays capacity badge on public activity card and calendar.",
+            hint: "Enter the planned number of participants. This number is shown publicly as a guide.",
           })}
 
           <UploadField
@@ -498,6 +530,19 @@ export default function Activities({
           />
 
           {admin&&<aside className="tp-card" aria-label="Intake preview"><h3>Public intake preview</h3><h4>{v.title||"Intake title"}</h4><p>{v.date||"Choose a date"} · {v.venue||"Venue to be confirmed"} {v.city}</p><p>{v.registrationType?<EventPriceLabel event={{mode:v.mode,registration_settings:{paid:v.registrationType==="paid",fee:v.registrationFee}}}/>:"Choose Free or Paid to preview pricing"}</p><p>{v.registrationMethod==="website"?"Register directly on the website":v.registrationMethod==="google"?"Register through Google Form":"Registration closed"}</p><p>Paid submissions require RCBC payment verification and approval. This preview does not create a booking.</p></aside>}
+          {admin && <fieldset className="tp-card">
+            <legend>Review &amp; publish</legend>
+            <p>{state.activities.find(a=>a.id===editing.id)?.isPublic?'Currently on the website.':'Currently private.'}</p>
+            {publicationFields.map(([key,label])=><label key={key} className="tp-field">{label}
+              {['qa_text','speaker_intro'].includes(key)
+                ? <textarea name={key} value={v[key]||''} onChange={change} rows={3}/>
+                : <input name={key} type={key.endsWith('_url')?'url':'text'} value={v[key]||''} onChange={change}/>}
+            </label>)}
+            <label className="tp-field"><span><input id="rightsConfirmed" type="checkbox" checked={!!v.rightsConfirmed}
+              onChange={e=>setEditing({...editing,values:{...v,rightsConfirmed:e.target.checked}})}/>
+              {' '}RCBC has checked the information and confirmed permission to publish the materials.</span></label>
+            {errors.rightsConfirmed && <p role="alert">{errors.rightsConfirmed}</p>}
+          </fieldset>}
           <div className="tp-actions" style={{ marginTop: "1.5rem" }}>
             {admin ? (
               <>
@@ -506,9 +551,9 @@ export default function Activities({
                   className="tp-btn"
                   disabled={uploading > 0}
                   onClick={() => save("publish")}
-                  title="Saves and immediately publishes this event to the public website"
+
                 >
-                  Save &amp; Publish Live
+                  {v.status==="published" ? "Review and publish" : "Save activity"}
                 </button>
                 <button
                   type="button"
@@ -556,7 +601,8 @@ export default function Activities({
   function renderActions(a) {
     return (
       <>
-        <div style={{ display: "inline-flex", gap: "6px", flexWrap: "wrap", justifyContent: "flex-end" }}>
+        <div className="tp-activity-actions">
+          <span className="tp-activity-reference">{a.activityReference} · {a.organiserKind || 'rcbc'} · {a.organiserName || 'RCBC'}{a.postponedAt?' · Postponed':''}</span>
           {admin && <Link className="tp-btn tp-btn-ghost" to={'/admin/participants?activity='+a.id}>View participants</Link>}
           {(admin ||
             (!a.cancelledAt &&
@@ -572,6 +618,8 @@ export default function Activities({
             </button>
           )}
 
+          <details className="tp-more-actions"><summary>More actions</summary><div className="tp-more-actions-content">
+          {admin && !a.cancelledAt && ['approved','published'].includes(a.status) && <button type="button" className="tp-btn tp-btn-ghost" onClick={async()=>{if(a.postponedAt){const date=window.prompt('New start date and time (YYYY-MM-DDTHH:mm)',a.date);if(!date)return;const endDate=window.prompt('New end date and time (YYYY-MM-DDTHH:mm)',a.endDate);if(endDate)await dispatch({type:'ACTIVITY_RESUME',id:a.id,date,endDate});}else{const comment=window.prompt('Reason for postponement');if(comment?.trim())await dispatch({type:'ACTIVITY_POSTPONE',id:a.id,comment});}}}>{a.postponedAt?'Reschedule':'Postpone'}</button>}
           {(admin ||
             (["draft", "returned"].includes(a.status) &&
               a.created_by === state.session?.id)) && (
@@ -635,12 +683,13 @@ export default function Activities({
               )}
             </>
           )}
+          </div></details>
         </div>
 
         {/* Cancel prompt sub-row */}
         {cancelling?.id === a.id && (
           <div style={{ marginTop: "10px", textAlign: "left", background: "#fef2f2", border: "1px solid #fecaca", padding: "10px", borderRadius: "8px" }}>
-            <Field id={`cancel-${a.id}`} label="Reason for cancellation" error={cancelling.error}>
+            <Field id={`cancel-${a.id}`} label="Reason for cancellation" example="Briefly explain why this activity is being cancelled." error={cancelling.error}>
               <textarea
                 id={`cancel-${a.id}`}
                 rows="2"
@@ -696,31 +745,31 @@ export default function Activities({
         >
           {addLabel}
         </button>
-      </div>      
+      </div>
       {!admin && <TrainerDisclaimer />}
 
       {/* Metric Stats Cards */}
       <div className="tp-stats">
         <div className="tp-stat">
-          <span>All</span>
-          <strong>{state.activities.length}</strong>
+          <span>Matching activities</span>
+          <strong>{totalCount}</strong>
         </div>
         <div className="tp-stat">
           <span>On the website</span>
           <strong style={{ color: "var(--color-purple-600)" }}>
-            {state.activities.filter((a) => a.status === "published" && !a.cancelledAt).length}
+            {filteredActivities.filter((a) => admin ? a.isPublic : a.status === "published" && !a.cancelledAt).length}
           </strong>
         </div>
         <div className="tp-stat">
-          <span>Draft or waiting for review</span>
+          <span>{admin ? "Needs publication review" : "Draft or waiting for review"}</span>
           <strong style={{ color: "#b45309" }}>
-            {state.activities.filter((a) => ["draft", "submitted", "returned"].includes(a.status) && !a.cancelledAt).length}
+            {filteredActivities.filter((a) => !a.cancelledAt && (admin ? a.contentApprovalStatus === "pending" : ["draft", "submitted", "returned"].includes(a.status))).length}
           </strong>
         </div>
         <div className="tp-stat">
           <span>Finished or archived</span>
           <strong style={{ color: "var(--color-neutral-600)" }}>
-            {state.activities.filter((a) => ["completed", "verified", "archived"].includes(a.status) || Boolean(a.cancelledAt)).length}
+            {filteredActivities.filter((a) => ["completed", "verified", "archived"].includes(a.status) || Boolean(a.cancelledAt)).length}
           </strong>
         </div>
       </div>
@@ -754,7 +803,7 @@ export default function Activities({
           ))}
         </select>
 
-        <select
+        {!fixedMode && <select
           className="tp-select-filter"
           value={filterMode}
           onChange={(e) => {
@@ -766,7 +815,7 @@ export default function Activities({
           <option value="all">All Modes</option>
           <option value="Online">Online</option>
           <option value="Physical">Physical</option>
-        </select>
+        </select>}
 
         <select
           className="tp-select-filter"

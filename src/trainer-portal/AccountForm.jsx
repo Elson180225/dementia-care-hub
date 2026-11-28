@@ -11,6 +11,7 @@ export default function AccountForm({role='trainer',signup=false,application=fal
   const [fieldErrors,setFieldErrors]=useState({});const [messageTone,setMessageTone]=useState('error');
   const [certificateEvidence,setCertificateEvidence]=useState(null),[readingCertificate,setReadingCertificate]=useState(false),[certificateError,setCertificateError]=useState('');
   const [showPassword,setShowPassword]=useState(false);const passwordId=useId();
+  const [mfa,setMfa]=useState(null);const mfaId=useId();
   const base=role==='admin'?'/admin':'/trainer-portal';
   const signIn=!signup&&!application&&!forgot&&!reset;
   const resetToken=params.get('token') || '';
@@ -20,7 +21,8 @@ export default function AccountForm({role='trainer',signup=false,application=fal
     const errors={};
     for(const input of event.currentTarget.elements) {
     if(!input.name || input.disabled || input.validity?.valid) continue;
-    if(input.validity.valueMissing && input.type==='checkbox') errors[input.name]='Please confirm you have read the eligibility and teaching conditions.';
+    if(input.name==='mfaCode') errors[input.name]='Enter the 6-digit code from your authenticator app.';
+    else if(input.validity.valueMissing && input.type==='checkbox') errors[input.name]='Please confirm you have read the eligibility and teaching conditions.';
     else if(input.validity.valueMissing) errors[input.name]='Please enter '+({name:'your full name',email:'your email address',password:'your password',confirmPassword:'your password again',city:'your city',certificateRef:'your certificate reference',invitation:'your RCBC invitation code'}[input.name] || 'this information')+'.';
     else if(input.validity.typeMismatch) errors[input.name]='Please enter a valid email address.';
     else if(input.validity.tooShort) errors[input.name]=`Use at least ${input.minLength} characters.`;
@@ -58,7 +60,8 @@ export default function AccountForm({role='trainer',signup=false,application=fal
     setMessageTone('success');
     if(application) {setRequest(result.application);if(intent==='resubmit') setCertificateEvidence(null);setMessage(intent==='resubmit'?'Amendments submitted to RCBC.':'Application status loaded.');}
     else if(signup) {setMessage(result.message);setCertificateEvidence(null);}
-    else {await refresh();clearError();navigate(base);}
+    else if(result.mfaRequired||result.mfaSetup) {setMfa(result);setMessage('');}
+    else {setMfa(null);await refresh();clearError();navigate(base);}
     }catch(e){setMessageTone('error');setMessage(e.message);}finally{setBusy(false);}
   }
   return <div className={(signIn||forgot||reset)?`account-shell account-shell-${role}`:'account-secondary'}>
@@ -70,12 +73,12 @@ export default function AccountForm({role='trainer',signup=false,application=fal
   {reset&&<p className="account-subtitle">Enter a new password of at least 15 characters. A short phrase of 3–4 words works well. The reset link can only be used once.</p>}
   {!forgot&&!reset&&<p>{role==='admin'?'Administrator access requires an invitation issued internally by RCBC.':(signup?'All applications are subject to verification and approval by the RCBC Alzheimer’s Care Project team. You will receive an application status update via email within 30 calendar days.':'RCBC verifies identity and certification before granting portal access. Public visitors do not need an account.')}</p>}
   <form onSubmit={submit} noValidate onChange={() => {setFieldErrors({});setMessage('');clearError();}}>
-  {signup && <label className="tp-field"><span className="account-field-label">Full name <span className="required-marker" aria-label="required">*</span><FieldInfo label="Full name" example={fieldExample("name")} /></span><input name="name" aria-invalid={!!fieldErrors.name} aria-describedby={fieldErrors.name ? `${passwordId}-name-error` : undefined} required autoComplete="name" maxLength={150}/><FormFeedback id={`${passwordId}-name-error`}>{fieldErrors.name}</FormFeedback></label>}
+  {signup && <label className="tp-field"><span className="account-field-label">Full name <span className="required-marker" aria-label="required">*</span><FieldInfo label="Full name" example="Enter your full name. Example: Alex Tan." /></span><input name="name" aria-invalid={!!fieldErrors.name} aria-describedby={fieldErrors.name ? `${passwordId}-name-error` : undefined} required autoComplete="name" maxLength={150}/><FormFeedback id={`${passwordId}-name-error`}>{fieldErrors.name}</FormFeedback></label>}
 
   {!reset&&<label className="tp-field"><span className="account-field-label">Email <span className="required-marker" aria-label="required">*</span><FieldInfo label="Email" example={fieldExample("email")} /></span><input name="email" aria-invalid={!!fieldErrors.email} aria-describedby={fieldErrors.email ? `${passwordId}-email-error` : undefined} type="email" required autoComplete="email" maxLength={254}/><FormFeedback id={`${passwordId}-email-error`}>{fieldErrors.email}</FormFeedback></label>}
 
   {!forgot&&<div className="tp-field">
-  <label htmlFor={passwordId}>Password <span className="required-marker" aria-label="required">*</span><FieldInfo label="Password" example={signup||reset ? fieldExample("password") : "Example: enter the password you used to create this account."} /></label>
+  <label htmlFor={passwordId}>Password <span className="required-marker" aria-label="required">*</span><FieldInfo label="Password" example={signup||reset ? "Choose a unique password with at least 15 characters. A short phrase of 3–4 words works well." : "Enter your current account password."} /></label>
   <div className="tp-password-row">
   <input id={passwordId} name="password" aria-invalid={!!fieldErrors.password || (signIn && !!message && messageTone==='error')} aria-describedby={fieldErrors.password || (signIn && (message || sessionError)) ? `${passwordId}-feedback` : undefined} type={showPassword?'text':'password'} required minLength={signup||reset?15:1} maxLength={256} autoComplete={signup||reset?'new-password':'current-password'}/>
   <button className="tp-password-eye" type="button" onClick={()=>setShowPassword(value=>!value)} aria-pressed={showPassword} aria-label={showPassword?'Hide password':'Show password'} aria-controls={passwordId} title={showPassword?'Hide password':'Show password'}>
@@ -91,14 +94,30 @@ export default function AccountForm({role='trainer',signup=false,application=fal
   {reset&&<label className="tp-field"><span className="account-field-label">Confirm new password <span className="required-marker" aria-label="required">*</span></span><input name="confirmPassword" type={showPassword?'text':'password'} required minLength={15} maxLength={256} autoComplete="new-password" aria-invalid={!!fieldErrors.confirmPassword}/><FormFeedback>{fieldErrors.confirmPassword}</FormFeedback></label>}
 
   {(signup && role==='trainer' || application && request && ['submitted','returned'].includes(request.status)) && <>
-  <label className="tp-field"><span className="account-field-label">City <span className="required-marker" aria-label="required">*</span><FieldInfo label="City" example={fieldExample("city")} /></span><input name="city" aria-invalid={!!fieldErrors.city} aria-describedby={fieldErrors.city ? `${passwordId}-city-error` : undefined} required defaultValue={request?.city==='Not provided'?'':request?.city || ''}/><FormFeedback id={`${passwordId}-city-error`}>{fieldErrors.city}</FormFeedback></label>
-  <label className="tp-field"><span className="account-field-label">Certificate reference <span className="required-marker" aria-label="required">*</span><FieldInfo label="Certificate reference" example={fieldExample("certificateRef")} /></span><input name="certificateRef" aria-invalid={!!fieldErrors.certificateRef} aria-describedby={fieldErrors.certificateRef ? `${passwordId}-certificateRef-error` : undefined} required defaultValue={request?.claimed_certificate_ref==='Not provided'?'':request?.claimed_certificate_ref || ''}/><FormFeedback id={`${passwordId}-certificateRef-error`}>{fieldErrors.certificateRef}</FormFeedback></label><CertificateEvidenceInput value={certificateEvidence} onChange={setCertificateEvidence} onBusyChange={setReadingCertificate} onError={setCertificateError} disabled={busy || readingCertificate} hasExisting={request?.has_certificate_evidence}/></>}
+  <label className="tp-field"><span className="account-field-label">City <span className="required-marker" aria-label="required">*</span><FieldInfo label="City" example="Enter your city or town. Example: Kuching." /></span><input name="city" aria-invalid={!!fieldErrors.city} aria-describedby={fieldErrors.city ? `${passwordId}-city-error` : undefined} required defaultValue={request?.city==='Not provided'?'':request?.city || ''}/><FormFeedback id={`${passwordId}-city-error`}>{fieldErrors.city}</FormFeedback></label>
+  <label className="tp-field"><span className="account-field-label">Certificate reference <span className="required-marker" aria-label="required">*</span><FieldInfo label="Certificate reference" example="Enter the reference exactly as printed on your certificate." /></span><input name="certificateRef" aria-invalid={!!fieldErrors.certificateRef} aria-describedby={fieldErrors.certificateRef ? `${passwordId}-certificateRef-error` : undefined} required defaultValue={request?.claimed_certificate_ref==='Not provided'?'':request?.claimed_certificate_ref || ''}/><FormFeedback id={`${passwordId}-certificateRef-error`}>{fieldErrors.certificateRef}</FormFeedback></label><CertificateEvidenceInput value={certificateEvidence} onChange={setCertificateEvidence} onBusyChange={setReadingCertificate} onError={setCertificateError} disabled={busy || readingCertificate} hasExisting={request?.has_certificate_evidence}/></>}
 
-  {signup && role==='admin' && <label className="tp-field"><span className="account-field-label">RCBC invitation code <span className="required-marker" aria-label="required">*</span><FieldInfo label="RCBC invitation code" example={fieldExample("invitation")} /></span><input name="invitation" aria-invalid={!!fieldErrors.invitation} aria-describedby={fieldErrors.invitation ? `${passwordId}-invitation-error` : undefined} required defaultValue={params.get('invitation') || ''} autoComplete="off"/><FormFeedback id={`${passwordId}-invitation-error`}>{fieldErrors.invitation}</FormFeedback></label>}
+  {signup && role==='admin' && <label className="tp-field"><span className="account-field-label">RCBC invitation code <span className="required-marker" aria-label="required">*</span><FieldInfo label="RCBC invitation code" example="Enter the invitation code supplied by your RCBC administrator." /></span><input name="invitation" aria-invalid={!!fieldErrors.invitation} aria-describedby={fieldErrors.invitation ? `${passwordId}-invitation-error` : undefined} required defaultValue={params.get('invitation') || ''} autoComplete="off"/><FormFeedback id={`${passwordId}-invitation-error`}>{fieldErrors.invitation}</FormFeedback></label>}
 
   {signup && role==='trainer' && <label className="tp-field account-ack"><span><input type="checkbox" name="eligibilityAck" required aria-invalid={!!fieldErrors.eligibilityAck} /> I have read the <Link to={base+'/eligibility'} target="_blank" rel="noopener">eligibility &amp; teaching conditions</Link>. <span className="required-marker" aria-label="required">*</span></span>{fieldErrors.eligibilityAck && <FormFeedback>{fieldErrors.eligibilityAck}</FormFeedback>}</label>}
 
-  <button className="tp-btn account-submit" disabled={busy || readingCertificate || (reset && !resetToken)}>{busy?'Please wait...':forgot?'Send reset link':reset?'Update password':application?'Check status':signup?(role==='trainer'?'Submit application':'Submit registration'):role==='admin'?'Sign in to dashboard':'Sign in to trainer portal'}</button>
+  {signIn && mfa && <div className="account-mfa">
+    {mfa.mfaSetup && <div className="account-mfa-setup">
+      <h2>Set up two-step sign-in</h2>
+      <p>RCBC admin accounts need a code from an authenticator app (such as Google Authenticator or Microsoft Authenticator) each time you sign in.</p>
+      <ol>
+        <li>Open the app on your phone and choose <strong>Add account</strong> → <strong>Enter a setup key</strong>.</li>
+        <li>Enter this key: <code className="account-mfa-key">{mfa.secret.match(/.{1,4}/g).join(' ')}</code></li>
+        <li>Type the 6-digit code the app shows below.</li>
+      </ol>
+      <p><a href={mfa.otpauthUrl}>Open in authenticator app</a> (on the phone with the app installed)</p>
+    </div>}
+    <label className="tp-field" htmlFor={mfaId}><span className="account-field-label">6-digit code from your authenticator app <span className="required-marker" aria-label="required">*</span></span>
+      <input id={mfaId} name="mfaCode" inputMode="numeric" autoComplete="one-time-code" pattern="[0-9]{6}" maxLength={6} required autoFocus aria-invalid={!!fieldErrors.mfaCode} />
+      {fieldErrors.mfaCode && <FormFeedback>{fieldErrors.mfaCode}</FormFeedback>}</label>
+  </div>}
+
+  <button className="tp-btn account-submit" disabled={busy || readingCertificate || (reset && !resetToken)}>{busy?'Please wait...':forgot?'Send reset link':reset?'Update password':application?'Check status':signup?(role==='trainer'?'Submit application':'Submit registration'):mfa?'Verify code and sign in':role==='admin'?'Sign in to dashboard':'Sign in to trainer portal'}</button>
 
   {application && request && ['submitted','returned'].includes(request.status) && <button className="tp-btn tp-btn-ghost" value="resubmit" disabled={busy || readingCertificate}>Submit amendments</button>}
   {(forgot||reset||!signIn) && <FormFeedback tone={message ? messageTone : 'warning'}>{reset&&!resetToken?'This password reset link is incomplete. Request a new link from the sign-in page.':message || sessionError}</FormFeedback>}

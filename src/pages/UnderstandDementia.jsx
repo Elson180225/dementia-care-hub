@@ -6,6 +6,8 @@ import { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useLanguage } from "../i18n/LanguageContext";
 import "./UnderstandDementia.css";
+import HeroPhoto from "../components/HeroPhoto/HeroPhoto";
+import heroPhoto from "../assets/banner-healthy-ageing.jpg";
 
 
 
@@ -137,17 +139,14 @@ function UnderstandDementia() {
               </Trans></a>
             </div>
           </div>
-          <aside className="understand-key-card" aria-label={t.keyPoints}>
-            <span className="understand-card-icon" aria-hidden="true">
-              ✦
-            </span>
-            <h2>{t.keyPoints}</h2>
-            <ul>
+          <HeroPhoto src={heroPhoto} alt="An older couple walking together in a park">
+            <h2 className="understand-key-title">{t.keyPoints}</h2>
+            <ul className="understand-key-list">
               {t.keyPointsList.map((point) => (
                 <li key={point}>{point}</li>
               ))}
             </ul>
-          </aside>
+          </HeroPhoto>
         </div>
       </section>
 

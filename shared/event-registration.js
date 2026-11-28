@@ -35,13 +35,14 @@ export function eventPriceLabel(event,labels={}){
 }
 export function registrationAvailability(activity,settings,now=Date.now()){
  if(activity.cancelled_at)return 'This event is cancelled.';
+ if(activity.postponed_at)return 'This event is postponed. Registration will reopen after the event is rescheduled.';
  if(['completed','verified','archived'].includes(activity.status)||Date.parse(activity.starts_at)<=now)return 'This event has ended.';
  if(activity.registration_deadline&&Date.parse(activity.registration_deadline)<=now)return 'Registration is closed.';
  if(!settings.enabled)return 'Registration is not open.';
  return '';
 }
 export function participantExport(rows){
- const keys=['name','email','phone','notes','registration_source','registration_state','status','payment_reference','payment_verified_at','confirmed_at','removed_at','removed_by_name','restored_at'];
+ const keys=['name','email','phone','notes','registration_source','registration_state','status','attendance_status','attendance_recorded_at','attendance_recorded_by_name','payment_reference','payment_verified_at','confirmed_at','removed_at','removed_by_name','restored_at'];
  const cell=value=>'"'+String(value??'').replace(/^[=+@\-\t\r]/,'\'$&').replaceAll('"','""')+'"';
  return '\uFEFF'+[keys,...rows.map(row=>keys.map(k=>row[k]))].map(row=>row.map(cell).join(',')).join('\r\n');
 }

@@ -1,0 +1,12 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {validateVolunteer} from '../shared/volunteer.js';
+import {translations} from '../src/i18n/translations.js';
+import {sourceLeaves,translateTree} from '../shared/translation-review.js';
+import {bundledPreviewOverrides} from '../src/i18n/bundledPreview.js';
+import {advisors,journey} from '../src/data/about.js';
+const sample={name:'Example Person',email:'person@example.test',phone:'0123456789',city:'Bintulu',languages:'English',certificate:'TEST-001',experience:'Test',interest:'Test',availability:'Weekends',consent:true};
+test('volunteer submission normalises and limits input',()=>{assert.equal(validateVolunteer({...sample,name:' Example Person '}).name,'Example Person');assert.throws(()=>validateVolunteer({...sample,experience:'x'.repeat(2001)}));assert.throws(()=>validateVolunteer({...sample,certificate:''}));assert.throws(()=>validateVolunteer({...sample,phone:'abc'}));assert.throws(()=>validateVolunteer({...sample,email:'not-an-email'}));assert.throws(()=>validateVolunteer({...sample,city:{}}));});
+test('volunteer requires explicit consent',()=>{for(const consent of [false,undefined,'true',1])assert.throws(()=>validateVolunteer({...sample,consent}),/Consent/);});
+test('Draft 02 content has all three languages and approval catalogue keys',()=>{const sources=sourceLeaves(translations.en);for(const lang of ['en','ms','zh']){const d=translations[lang].caregiverDraft;assert.equal(d.wellbeingTopics.length,6);assert.equal(d.familyTopics.length,6);assert.equal(d.familyResources.length,5);assert.equal(d.assessmentTopics.length,3);assert.equal(d.objectives.length,3);assert.equal(translations[lang].aboutProject.journeySteps[2].text,'');}for(const key of ['consent','languagesLabel','availabilityLabel','family','wellbeing'])assert.ok(sources['ui/caregiverDraft/'+key]);for(const lang of ['ms','zh']){const preview=translateTree(translations.en,'ui',bundledPreviewOverrides(translations.en,translations[lang]));assert.equal(preview.caregiverDraft.family,translations[lang].caregiverDraft.family);assert.equal(translateTree(translations.en,'ui',{}).caregiverDraft.family,translations.en.caregiverDraft.family);}});
+test('About data has confirmed advisor names and no Phase 3 details',()=>{assert.deepEqual(new Set(advisors.people),new Set(['Dr. Sally Suriani Ahip','Dr. Tiong Ing Khieng','Dr. Ling Jia Nee','Dr. Azizah Saie','Dr. Rahman Binti Rashid']));assert.equal(journey[2].title,'Future Development');assert.equal(journey[2].text,'');});

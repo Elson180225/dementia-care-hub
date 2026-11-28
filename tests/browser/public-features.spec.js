@@ -41,6 +41,32 @@ async function openSearch(page) {
   return search.getByRole('searchbox');
 }
 
+test('Get Updated help matches each field and opens with hover or keyboard focus', async ({ page }) => {
+  await page.goto('/get-updated');
+  const fields = {
+    'updates-name': 'Enter your name. Example: Alex Tan.',
+    'updates-email': 'Enter the email address where you want to receive updates. Example: name@example.org.',
+    'updates-country': 'Enter your country. Example: Malaysia.',
+    'updates-state': 'Enter your state, province or region. Example: Sarawak.',
+    'updates-city': 'Enter your city or town. Example: Kuching.',
+    'updates-consent': 'Tick this box if you agree to receive project updates by email.',
+  };
+  const form = page.locator('form').filter({ has: page.locator('#updates-country') });
+  await expect(form.locator('.field-info-button')).toHaveCount(Object.keys(fields).length);
+  for (const [id, help] of Object.entries(fields)) {
+    const button = form.locator('.tp-field').filter({ has: page.locator(`#${id}`) }).getByRole('button');
+    await button.hover();
+    await expect(form.getByRole('tooltip')).toHaveText(help);
+  }
+  await page.locator('#updates-email').hover();
+  await page.locator('#updates-email').focus();
+  await page.keyboard.press('Tab');
+  await expect(form.getByRole('button', { name: 'Help for Country' })).toBeFocused();
+  await expect(form.getByRole('tooltip')).toHaveText(fields['updates-country']);
+  await page.keyboard.press('Escape');
+  await expect(form.getByRole('tooltip')).toHaveCount(0);
+});
+
 test('search handles prefixes and synonyms and restores focus on Escape', async ({ page }) => {
   await page.goto('/understand-dementia');
   const input = await openSearch(page);

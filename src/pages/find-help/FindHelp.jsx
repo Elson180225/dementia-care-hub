@@ -5,6 +5,8 @@ import { useLanguage } from "../../i18n/LanguageContext";
 
 import "./FindHelp.css";
 import ReadMore from "../../components/ReadMore/ReadMore";
+import HeroPhoto, { HeroWithPhoto } from "../../components/HeroPhoto/HeroPhoto";
+import heroPhoto from "../../assets/Senior-citizens-chatting.png";
 
 
 function FindHelpVisualIcon({ type }) {
@@ -111,7 +113,7 @@ function FindHelp() {
       {/* HERO */}
 
       <section className="find-help-hero">
-        <div className="find-help-container">
+        <div className="find-help-container"><HeroWithPhoto photo={<HeroPhoto src={heroPhoto} alt="Older adults talking together and smiling" />}>
           <span className="find-help-kicker">
             {fh.kicker}
           </span>
@@ -121,7 +123,7 @@ function FindHelp() {
           </h1>
 
           <ReadMore text={fh.subtitle} />
-        </div>
+        </HeroWithPhoto></div>
       </section>
 
       {/* ENTRY PATHWAYS */}

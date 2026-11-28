@@ -1,4 +1,12 @@
 import {registrationDuplicates,normalisePhone} from './registration-duplicates.js';
+export const attendanceStates = ['not-recorded','attended','absent'];
+export function validateAttendance(participant, attendance) {
+  if (!attendanceStates.includes(attendance)) throw new Error('Choose a valid attendance status.');
+  if (attendance === 'attended' && (participant.status !== 'registered' || participant.registration_state !== 'confirmed')) {
+    throw new Error('Only active confirmed participants can be marked attended.');
+  }
+  return attendance;
+}
 // CSV reader supporting Google Sheets exports, including quoted commas and newlines.
 export function parseParticipantCsv(text) {
   const rows = []; let row = [], value = '', quoted = false;

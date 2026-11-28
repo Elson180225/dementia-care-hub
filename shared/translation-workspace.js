@@ -13,6 +13,7 @@ export const translationPages=[
 ];
 export const translationStatusLabels={missing:'Not translated',draft:'Work in progress',review:'Waiting for review',approved:'Published','needs-review':'English changed — please update'};
 export function translationPage(key){
+ if(/^ui\/inlineCopy\/(education|dcsRegistry)/.test(key))return 'education';
  const [root,section,field]=key.split('/');
  if(root==='ui' && section==='inlineCopy') return inlineCopyMeta(decodeURIComponent(field || ''))?.page || 'shared';
  if(['cms','activities','registration'].includes(root))return 'education';
