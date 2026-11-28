@@ -51,8 +51,8 @@ export const journey = [
   },
   {
     phase: "Phase 3",
-    title: "Dementia & Alzheimer's Care Centre",
-    text: "The longer-term direction: a dedicated dementia and Alzheimer's care centre.",
+    title: "Future Development",
+    text: "",
   },
 ];
 
@@ -71,11 +71,11 @@ export const strategicPartner = {
 export const advisors = {
   role: "Providing professional guidance and helping the project remain aligned with accurate, appropriate and locally relevant dementia information.",
   people: [
-    "Dr. Sally Suriani",
-    "Dr. Azizah Saiee",
+    "Dr. Sally Suriani Ahip",
+    "Dr. Azizah Saie",
     "Dr. Tiong Ing Khieng",
     "Dr. Ling Jia Nee",
-    "Dr. Rahmah Binti Rashid",
+    "Dr. Rahman Binti Rashid",
   ],
 };
 
