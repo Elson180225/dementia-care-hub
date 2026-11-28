@@ -63,17 +63,17 @@ export default function Conducted({admin=false}) {
             )}
             {openId === a.id && (
               <form noValidate onSubmit={(e) => e.preventDefault()}>
-                <Field id="actualStart" label="Actual start (Malaysia)"><input id="actualStart" name="actualStart" type="datetime-local" value={values.actualStart} onChange={change}/></Field>
-                <Field id="actualEnd" label="Actual end (Malaysia)"><input id="actualEnd" name="actualEnd" type="datetime-local" value={values.actualEnd} onChange={change}/></Field>
-                <Field id="venue" label="Actual venue / location" error={errors.venue}>
+                <Field id="actualStart" label="Actual start (Malaysia)" example="Enter when the activity actually started, in Malaysia time (UTC+8)."><input id="actualStart" name="actualStart" type="datetime-local" value={values.actualStart} onChange={change}/></Field>
+                <Field id="actualEnd" label="Actual end (Malaysia)" example="Enter when the activity actually finished, in Malaysia time (UTC+8)."><input id="actualEnd" name="actualEnd" type="datetime-local" value={values.actualEnd} onChange={change}/></Field>
+                <Field id="venue" label="Actual venue / location" example="Enter where the activity actually took place. For an online activity, enter the platform used." error={errors.venue}>
                   <input id="venue" name="venue" value={values.venue} onChange={change}
                     aria-invalid={Boolean(errors.venue)} aria-describedby={describe("venue", errors.venue)} />
                 </Field>
-                <Field id="participants" label="Total participants" error={errors.participants}>
+                <Field id="participants" label="Total participants" example="Enter the number of participants who actually attended." error={errors.participants}>
                   <input id="participants" name="participants" type="number" min="0" value={values.participants} onChange={change}
                     aria-invalid={Boolean(errors.participants)} aria-describedby={describe("participants", errors.participants)} />
                 </Field>
-                <Field id="hours" label="Net actual hours (excluding breaks)" error={errors.hours}>
+                <Field id="hours" label="Net actual hours (excluding breaks)" example="Enter the actual session length in hours after subtracting breaks. Example: 2.5." error={errors.hours}>
                   <input id="hours" name="hours" type="number" min="0" step="0.5" value={values.hours} onChange={change}
                     aria-invalid={Boolean(errors.hours)} aria-describedby={describe("hours", errors.hours)} />
                 </Field>

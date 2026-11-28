@@ -132,7 +132,7 @@ export default function Users() {
                 <p className="tp-note">Teaching eligibility: <strong>{teachingEligibility(editing.assessmentStatus, editing.healthcareProfessional,editing.teaching_allowed)}</strong></p>
             <Field id="user-teaching-scope" label="Teaching conditions (permissions managed in Certified Trainers)" example="Record what RCBC permits the trainer to teach independently, for example: DCS-Family education."><textarea id="user-teaching-scope" value={editing.independentTeachingScope} onChange={e=>setEditing({...editing,independentTeachingScope:e.target.value})}/></Field>
             <p>Public listing consent: {editing.listing_consent_at ? new Date(editing.listing_consent_at).toLocaleDateString('en-MY') : 'Not given'}. Listing requests are reviewed separately in Approvals.</p>
-            <Field id="user-note" label="Note (optional)"><textarea id="user-note" value={editing.comment} onChange={(e) => setEditing({ ...editing, comment: e.target.value })} /></Field>
+            <Field id="user-note" label="Note (optional)" example="Add context for the changes to this account."><textarea id="user-note" value={editing.comment} onChange={(e) => setEditing({ ...editing, comment: e.target.value })} /></Field>
             <div className="tp-actions">
               <button className="tp-btn" disabled={busy || uploading}>Save</button>
               {editing.listing_status === 'approved' && (

@@ -93,11 +93,11 @@ export default function MyProfile() {
       ) : (
         <form className="tp-card" onSubmit={save} noValidate>
           <h2>{profile.status === "approved" ? "Edit your profile" : "Complete your profile"}</h2>
-          <p>Changes are submitted for approval. RCBC controls verified information and public contact visibility.</p><Field id="profile-name" label="Name"><input id="profile-name" name="name" value={values.name} onChange={change}/></Field><Field id="contact-email" label="Contact email"><input id="contact-email" name="contactEmail" type="email" value={values.contactEmail} onChange={change}/></Field><Field id="contact-phone" label="Contact phone"><input id="contact-phone" name="contactPhone" value={values.contactPhone} onChange={change}/></Field>
-          <Field id="city" label="City / Location (required)">
+          <p>Changes are submitted for approval. RCBC controls verified information and public contact visibility.</p><Field id="profile-name" label="Name" example="Enter the full name you use for your trainer profile."><input id="profile-name" name="name" value={values.name} onChange={change}/></Field><Field id="contact-email" label="Contact email"><input id="contact-email" name="contactEmail" type="email" value={values.contactEmail} onChange={change}/></Field><Field id="contact-phone" label="Contact phone" example="Enter the number where you can be reached. Example: +60 12 345 6789."><input id="contact-phone" name="contactPhone" value={values.contactPhone} onChange={change}/></Field>
+          <Field id="city" label="City / Location (required)" example="Enter the city or town where you are based. Example: Kuching.">
             <input id="city" name="city" value={values.city} onChange={change} />
           </Field>
-          <Field id="language" label="Language">
+          <Field id="language" label="Language" example="Choose the language you use to teach.">
             <select id="language" name="language" value={values.language} onChange={change}>
               {LANGUAGES.map((l) => <option key={l}>{l}</option>)}
             </select>
@@ -105,10 +105,10 @@ export default function MyProfile() {
           <Field id="shortProfile" label="Short profile / background (required)" example="Briefly describe your background and dementia education experience. This text is public if RCBC approves your listing.">
             <textarea id="shortProfile" name="shortProfile" rows="4" value={values.shortProfile} onChange={change} />
           </Field>
-          <Field id="qualifications" label="Qualifications">
+          <Field id="qualifications" label="Qualifications" example="List qualifications or certifications relevant to your trainer role.">
             <textarea id="qualifications" name="qualifications" rows="3" value={values.qualifications} onChange={change} />
           </Field>
-          <Field id="experience" label="Relevant experience">
+          <Field id="experience" label="Relevant experience" example="Summarise your experience in dementia care, caregiver education or training.">
             <textarea id="experience" name="experience" rows="3" value={values.experience} onChange={change} />
           </Field>
           <UploadField onBusyChange={uploadBusy} label="Profile photo" kind="photo" value={values.photoUrl} onChange={photoUrl=>setValues({...values,photoUrl})} />

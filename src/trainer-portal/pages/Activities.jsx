@@ -329,15 +329,15 @@ export default function Activities({
   };
 
   const v = editing?.values;
-  const input = (name, label, props = {}) => (
-    <Field id={name} label={label} error={errors[name]} hint={props.hint}>
+  const input = (name, label, { example, hint, ...props } = {}) => (
+    <Field id={name} label={label} error={errors[name]} hint={hint} example={example}>
       <input
         id={name}
         name={name}
         value={v[name]}
         onChange={change}
         aria-invalid={Boolean(errors[name])}
-        aria-describedby={describe(name, errors[name], props.hint)}
+        aria-describedby={describe(name, errors[name], hint)}
         {...props}
       />
     </Field>
@@ -357,8 +357,8 @@ export default function Activities({
         </div>
 
         <form className="tp-card" noValidate onBlur={checkField} onSubmit={(e) => e.preventDefault()}>
-          {input("title", "Title", { placeholder: "e.g. Dementia Care Skill Course (Family)" })}
-          {input("date", "Date & time", { type: "datetime-local" })}
+          {input("title", "Title", { example: "Enter the activity name. Example: Dementia Care Skill Course (Family).", placeholder: "e.g. Dementia Care Skill Course (Family)" })}
+          {input("date", "Date & time", { type: "datetime-local", example: "Enter when the activity is scheduled to start, in Malaysia time (UTC+8)." })}
 
           {admin && (
             <Field id="status" label="Record Status" hint="Choose the status to save. Published requires RCBC approval below.">
@@ -370,10 +370,10 @@ export default function Activities({
             </Field>
           )}
 
-          <Field id="endDate" label="End date and time (Malaysia)" error={errors.endDate}><input id="endDate" name="endDate" type="datetime-local" value={v.endDate} onChange={change}/></Field>
-          <Field id="organiserKind" label="Organiser"><select id="organiserKind" name="organiserKind" value={v.organiserKind} onChange={change}><option value="rcbc">RCBC</option><option value="joint">Joint organiser</option><option value="independent">Independent organiser</option></select></Field>
-          <Field id="organiserName" label="Organiser / partner name" error={errors.organiserName}><input id="organiserName" name="organiserName" value={v.organiserName} onChange={change}/></Field>
-          <Field id="type" label="Activity type">
+          <Field id="endDate" label="End date and time (Malaysia)" example="Enter when the activity is scheduled to finish, in Malaysia time (UTC+8)." error={errors.endDate}><input id="endDate" name="endDate" type="datetime-local" value={v.endDate} onChange={change}/></Field>
+          <Field id="organiserKind" label="Organiser" example="Choose who is running the activity: RCBC, RCBC with a partner, or an independent organiser."><select id="organiserKind" name="organiserKind" value={v.organiserKind} onChange={change}><option value="rcbc">RCBC</option><option value="joint">Joint organiser</option><option value="independent">Independent organiser</option></select></Field>
+          <Field id="organiserName" label="Organiser / partner name" example="Enter the name of the organising partner or independent organiser." error={errors.organiserName}><input id="organiserName" name="organiserName" value={v.organiserName} onChange={change}/></Field>
+          <Field id="type" label="Activity type" example="Choose the category that best describes the activity.">
             <select id="type" name="type" value={v.type} onChange={change}>
               {(admin ? ALL_ADMIN_TYPES : ACTIVITY_TYPES).map((t) => (
                 <option key={t}>{t}</option>
@@ -381,7 +381,7 @@ export default function Activities({
             </select>
           </Field>
 
-          <Field id="mode" label="Online or physical">
+          <Field id="mode" label="Online or physical" example="Choose how participants will attend the activity.">
             <select id="mode" name="mode" value={v.mode} onChange={change}>
               {MODES.map((m) => (
                 <option key={m}>{m}</option>
@@ -389,9 +389,9 @@ export default function Activities({
             </select>
           </Field>
 
-          {v.mode === "Physical" && input("venue", "Venue / location", { placeholder: "e.g. Hock Lee Hotel, Kuching" })}
+          {v.mode === "Physical" && input("venue", "Venue / location", { example: "Enter the venue name and location. Example: Hock Lee Hotel, Kuching.", placeholder: "e.g. Hock Lee Hotel, Kuching" })}
 
-          <Field id="language" label="Language">
+          <Field id="language" label="Language" example="Choose the language in which the activity will be delivered.">
             <select id="language" name="language" value={v.language} onChange={change}>
               {LANGUAGES.map((l) => (
                 <option key={l}>{l}</option>
@@ -404,7 +404,7 @@ export default function Activities({
             hint: "Specifies who this programme is designed for. Displayed on public event cards, details modal, and calendar.",
           })}
 
-          <Field id="description" label="What participants will learn" error={errors.description}>
+          <Field id="description" label="What participants will learn" example="Summarise the topics covered and what attendees will learn or practise." error={errors.description}>
             <textarea
               id="description"
               name="description"
@@ -426,7 +426,7 @@ export default function Activities({
           })}
 
           {input("teachingModule","Teaching module (when restricted)",{hint:"Use the module name recorded in the assigned trainer’s approved teaching permissions."})}
-          {input("plannedHours", "Net planned hours (excluding breaks)", { type: "number", min: "0", step: "0.5" })}
+          {input("plannedHours", "Net planned hours (excluding breaks)", { example: "Enter the planned session length in hours after subtracting breaks. Example: 2.5.", type: "number", min: "0", step: "0.5" })}
 
           <fieldset className="tp-field">
             <legend>Assigned Activity Trainers</legend>
@@ -511,14 +511,14 @@ export default function Activities({
           </Field>
           {input("registrationDeadline", "Registration deadline", {
             type: "datetime-local",
-            hint: "Optional. Once this date passes, the public card displays 'Registration Closed' and disables registration.",
+            hint: "Optional. Enter the deadline in Malaysia time (UTC+8), on or before the activity starts. Registration closes after this time.",
           })}
           {input("capacity", "Planned capacity (advisory, optional)", {
             type: "number",
             min: "1",
             step: "1",
             placeholder: "e.g. 50, 100",
-            hint: "Displays capacity badge on public activity card and calendar.",
+            hint: "Enter the planned number of participants. This number is shown publicly as a guide.",
           })}
 
           <UploadField
@@ -689,7 +689,7 @@ export default function Activities({
         {/* Cancel prompt sub-row */}
         {cancelling?.id === a.id && (
           <div style={{ marginTop: "10px", textAlign: "left", background: "#fef2f2", border: "1px solid #fecaca", padding: "10px", borderRadius: "8px" }}>
-            <Field id={`cancel-${a.id}`} label="Reason for cancellation" error={cancelling.error}>
+            <Field id={`cancel-${a.id}`} label="Reason for cancellation" example="Briefly explain why this activity is being cancelled." error={cancelling.error}>
               <textarea
                 id={`cancel-${a.id}`}
                 rows="2"

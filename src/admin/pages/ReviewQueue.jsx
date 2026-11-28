@@ -106,6 +106,7 @@ export default function ReviewQueue() {
                 <Field
                     id={`ref-${item.key}`}
                     label="Certificate reference (check it matches RCBC records)"
+                    example="Enter the certificate reference as recorded by RCBC before approving access."
                 >
                     <input
                         id={`ref-${item.key}`}
@@ -117,6 +118,7 @@ export default function ReviewQueue() {
                 <Field
                     id={`c-${item.key}`}
                     label="Comment for the trainer (required to return or reject)"
+                    example="Explain what needs to change for a returned request, or why the request was rejected."
                     error={errors[item.key]}
                 >
                 <textarea

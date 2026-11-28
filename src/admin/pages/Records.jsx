@@ -23,11 +23,94 @@ const legacyEnquiryTypes = ['Education & Events', 'Collaboration', 'Website & Re
 const subscriberLocality = Object.entries({ country: 'Country', state: 'State / Province / Region', city: 'City / Town' });
 const reviewStatuses = { published: 'Published', unpublished: 'Unpublished', 'needs review': 'Needs review', current: 'Current', archived: 'Archived' };
 
+const localityHelp = {
+  country: 'Enter the country. Example: Malaysia.',
+  state: 'Enter the state, province or region. Example: Sarawak.',
+  city: 'Enter the city or town. Example: Kuching.',
+};
+
+const recordHelp = {
+  ...localityHelp,
+  name: 'Enter the name as it appears in the record.',
+  address: 'Enter the street address, including the building or unit number if applicable.',
+  postcode: 'Enter the postal code for this address. Example: 93000.',
+  contact_name: 'Enter the name of the person responsible for enquiries.',
+  phone: 'Enter the contact number, including its country code. Example: +60 12 345 6789.',
+  organisation_id: 'Choose the organisation that provides this service.',
+  category: 'Choose the category that best describes this service.',
+  service_type: 'Enter the name of the service provided. Example: Caregiver support group.',
+  description: 'Briefly describe what this listing offers.',
+  group_type: 'Choose the type of group, if this listing is for a group.',
+  languages: 'Enter each language in which the service is available on its own line.',
+  opening_hours: 'Enter the days and times the service is available. Example: Monday to Friday, 9 am to 5 pm.',
+  eligibility: 'Describe who can use the service and any eligibility requirements.',
+  fees: 'Enter the fee or indicate that the service is free.',
+  volunteer_details: 'Describe how volunteers can get involved and any requirements.',
+  source: 'Identify the source used to verify the record. Paste its web address in Source URL, if available.',
+  language: 'Enter the language used in this record. Example: English.',
+  last_reviewed_at: 'Enter when the record was last reviewed, in Malaysia time (UTC+8).',
+  next_review_at: 'Enter when the record is due for its next review, in Malaysia time (UTC+8).',
+  review_status: 'Choose Needs review, Current or Archived based on the state of the review.',
+  publication_status: 'Choose Published to show the approved record on the website, or Unpublished to keep it hidden.',
+  admin_comment: 'Record internal notes about this record or its review.',
+  resource_type: 'Choose the format of the resource, such as a guide, recording or slides.',
+  topic: 'Enter the topic this resource covers. Use the assigned topic key for a Caregiver Support resource.',
+  audience: 'Enter who the resource is intended for. Example: Family caregivers.',
+  copyright_permission: 'Record the licence, permission or other evidence that allows publication.',
+  title: 'Enter the title readers should see.',
+  slug: 'Enter the stable identifier for this item. Use lowercase words separated by hyphens.',
+  question: 'Enter the question as readers would ask it.',
+  answer: 'Enter the answer that will appear with the question.',
+  body: 'Enter the approved page content as plain text.',
+  reviewer: 'Enter the name of the person who reviewed the page.',
+  consent_version: 'Enter the version of the subscription notice the person accepted or a reference to the consent evidence.',
+  consent_at: 'Enter when the person agreed to receive updates, in Malaysia time (UTC+8).',
+  confirmed_at: 'Enter when the subscription was confirmed, in Malaysia time (UTC+8).',
+  unsubscribed_at: 'Enter when the person unsubscribed, in Malaysia time (UTC+8). Leave blank for an active subscriber.',
+  provider_reference: 'Enter the reference assigned to this subscriber by the email platform, if available.',
+  certificate_ref: 'Enter the reference exactly as printed on the certificate.',
+  recipient_name: 'Enter the recipient’s name exactly as printed on the certificate.',
+  programme: 'Choose the programme for which the certificate was issued.',
+  issuer: 'Enter the organisation that issued the certificate.',
+  issued_at: 'Enter the issue date printed on the certificate.',
+  completion_date: 'Enter the date the recipient completed the training.',
+  training_location: 'Enter where the training was held. Example: Kuching.',
+  activity_id: 'Enter the ID of the activity linked to this certificate, if known.',
+  verification_consent_at: 'Enter when the recipient agreed to public certificate verification, in Malaysia time (UTC+8).',
+};
+
+const recordHelpByKind = {
+  organisations: {
+    name: 'Enter the official name of the organisation or facility.',
+    category: 'Enter the type of organisation. Example: Hospital or community organisation.',
+  },
+  learning_resources: { description: 'Summarise what readers will find in the resource.' },
+  faqs: { category: 'Enter the topic that groups this FAQ with related questions.' },
+  content_pages: { slug: 'Choose the identifier for the page section. Example: about-overview.' },
+  subscribers: { name: 'Enter the name provided by the subscriber.' },
+  dcs_certificates: { status: 'Choose whether the certificate is valid or revoked.' },
+  enquiries: {
+    status: 'Choose New, Follow-up or Closed to reflect progress on the enquiry.',
+    admin_comment: 'Record the action taken or the next step. A note is required when the status is Follow-up or Closed.',
+  },
+};
+
+const filterHelp = {
+  country: 'Enter the full country name as recorded. Example: Malaysia.',
+  state: 'Enter the full state, province or region as recorded. Example: Sarawak.',
+  city: 'Enter the full city or town name as recorded. Example: Kuching.',
+  from: 'Show enquiries received on or after this date in Malaysia time.',
+  through: 'Show enquiries received on or before this date in Malaysia time.',
+  name: 'Enter all or part of the organisation name.',
+  category: 'Enter all or part of the organisation type.',
+  location: 'Enter all or part of a city or state name.',
+};
+
 function RecordFilters({ kind, filters, onApply, onReset }) {
-  const field = (key, label, type = 'search') => <Field key={key} id={`filter-${key}`} label={label}>
+  const field = (key, label, type = 'search') => <Field key={key} id={`filter-${key}`} label={label} example={filterHelp[key]}>
     <input id={`filter-${key}`} type={type} name={key} defaultValue={filters[key] || ''} maxLength={254} />
   </Field>;
-  const select = (key, label, options, any = 'All') => <Field id={`filter-${key}`} label={label}>
+  const select = (key, label, options, any = 'All') => <Field id={`filter-${key}`} label={label} example={`Choose a ${label.toLowerCase()} to narrow the results, or leave ${any} selected.`}>
     <select id={`filter-${key}`} name={key} defaultValue={filters[key] || ''}>
       <option value="">{any}</option>
       {Object.entries(options).map(([value, text]) => <option key={value} value={value}>{text}</option>)}
@@ -242,17 +325,17 @@ export default function Records({ module = 'website' }) {
               "aria-invalid": Boolean(errors[name]), "aria-describedby": describe(id, errors[name]),
             };
             const text = label + (mandatory ? "" : " (optional)");
-            if(kind==='learning_resources'&&name==='activity_id')return <Field key={name} id={id} label="Original activity" required={v.publication_status==='published'} error={errors[name]}><select {...common} onChange={e=>{const activityId=e.target.value;const match=qaFolderCatalog.find(row=>row.activityId===activityId);set('activity_id',activityId);if(match?.folder&&!v.qa_folder)set('qa_folder',match.folder);}}><option value="">Choose the original activity</option>{state.activities.map(a=><option key={a.id} value={a.id}>{a.title} — {a.date.slice(0,10)} ({a.content_approval_status||'pending'} publication review)</option>)}</select></Field>;
-            if(kind==='learning_resources'&&name==='qa_folder')return <Field key={name} id={id} label="Grouped Q&A folder" error={errors[name]}><select {...common}><option value="">No bundled Q&amp;A images</option>{qaFolders.map(folder=><option key={folder} value={folder}>{folder}</option>)}</select><p className="tp-note">Displayed from <code>Grouped_Q&amp;A/{v.qa_folder || '…'}</code> on the public site when published.</p></Field>;
-            if(kind==='learning_resources'&&name==='url')return <div key={name}><UploadField kind="document" label="Upload resource file" value={v[name] || ''} onChange={(val)=>set(name,val)} disabled={busy} help="Upload a PDF, slide image, or poster file for this learning resource."/><Field id={id} label="Or paste an HTTPS resource link" required={Boolean(mandatory)} error={errors[name]}><input type="url" {...common} /></Field></div>;
+            if(kind==='learning_resources'&&name==='activity_id')return <Field key={name} id={id} label="Original activity" example="Choose the webinar or event this resource came from." required={v.publication_status==='published'} error={errors[name]}><select {...common} onChange={e=>{const activityId=e.target.value;const match=qaFolderCatalog.find(row=>row.activityId===activityId);set('activity_id',activityId);if(match?.folder&&!v.qa_folder)set('qa_folder',match.folder);}}><option value="">Choose the original activity</option>{state.activities.map(a=><option key={a.id} value={a.id}>{a.title} — {a.date.slice(0,10)} ({a.content_approval_status||'pending'} publication review)</option>)}</select></Field>;
+            if(kind==='learning_resources'&&name==='qa_folder')return <Field key={name} id={id} label="Grouped Q&A folder" example="Choose the folder that contains the Q&A images for this activity. Leave it blank if there are no bundled images." error={errors[name]}><select {...common}><option value="">No bundled Q&amp;A images</option>{qaFolders.map(folder=><option key={folder} value={folder}>{folder}</option>)}</select><p className="tp-note">Displayed from <code>Grouped_Q&amp;A/{v.qa_folder || '…'}</code> on the public site when published.</p></Field>;
+            if(kind==='learning_resources'&&name==='url')return <div key={name}><UploadField kind="document" label="Upload resource file" value={v[name] || ''} onChange={(val)=>set(name,val)} disabled={busy} help="Upload a PDF, slide image, or poster file for this learning resource."/><Field id={id} label="Or paste an HTTPS resource link" example="Paste the full HTTPS link to the resource if it is hosted elsewhere." required={Boolean(mandatory)} error={errors[name]}><input type="url" {...common} /></Field></div>;
             if (type === "checkbox")
               return (
-                <Field key={name} id={id} label={label} example={name === 'is_example' ? 'Keep this ticked for fictional demonstration records. These must not be presented as real services.' : 'Tick this option only when it applies to this record.'}>
+                <Field key={name} id={id} label={label} example={name === 'is_example' ? 'Tick for a fictional demonstration record.' : 'Tick if this service is currently accepting volunteers.'}>
                   <input id={id} type="checkbox" checked={v[name]} onChange={(e) => set(name, e.target.checked)} />
                 </Field>
               );
             return (
-              <Field key={name} id={id} label={text} required={Boolean(mandatory)} error={errors[name]}>
+              <Field key={name} id={id} label={text} example={recordHelpByKind[kind]?.[name] ?? recordHelp[name]} required={Boolean(mandatory)} error={errors[name]}>
                 {type === 'organisation' ? (
                   <select {...common}><option value="">Choose an organisation</option>{organisations.map(row => <option key={row.id} value={row.id}>{row.name}</option>)}</select>
                 ) : Array.isArray(type) ? (
@@ -285,7 +368,7 @@ export default function Records({ module = 'website' }) {
       {module === 'website' && <EmailInventory />}
       {module === 'directory' && <p>Manage shared contact details in Organisations. Link each service listing to its organisation to publish it in the relevant public directory views.</p>}
       <div className="tp-toolbar">
-        <Field id="kind" label="What to update">
+        <Field id="kind" label="What to update" example="Choose the type of record you want to view or edit.">
           <select id="kind" value={kind} onChange={(e) => { setKind(e.target.value); setRows([]); setLoading(true); setFilters({}); setNotice(""); }}>
             {kinds.map((k) => <option key={k} value={k}>{recordTypes[k].label}</option>)}
           </select>
