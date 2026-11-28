@@ -1,5 +1,6 @@
 import { randomBytes, scryptSync, timingSafeEqual, createHash } from 'node:crypto';
 import { generateSecret, verifyCode, otpauthUrl } from './totp.js';
+import { newPasswordProblem, PASSWORD_MAX } from './password-policy.js';
 import { pool, transaction } from './db.js';
 import { isAllowedOrigin } from './origin.js';
 import { storeCertificateEvidence } from './certificate-evidence.js';
@@ -386,16 +387,12 @@ export async function authHandler(req,res,path,send) {
 
   const password=data.password;
 
-  if(
-   token.length<32 ||
-   typeof password!=='string' ||
-   password.length<12 ||
-   password.length>256
-  ) {
-   fail(
-    'Use a valid reset link and a password of at least 12 characters'
-   );
+  if(token.length<32) {
+   fail('Use a valid reset link');
   }
+
+  const resetProblem=await newPasswordProblem(password);
+  if(resetProblem) fail(resetProblem);
 
   await transaction(async db=>{
    const row=(
@@ -476,7 +473,7 @@ export async function authHandler(req,res,path,send) {
  if(
   !emailPattern.test(email) ||
   typeof password!=='string' ||
-  password.length>256
+  password.length>PASSWORD_MAX
  ) {
   fail('Enter a valid email and password');
  }
@@ -485,14 +482,12 @@ export async function authHandler(req,res,path,send) {
   path==='/api/auth/register' ||
   path==='/api/auth/admin-register'
  ) {
-  if(
-   password.length<12 ||
-   !String(data.name||'').trim()
-  ) {
-   fail(
-    'Enter your name and a password of at least 12 characters'
-   );
+  if(!String(data.name||'').trim()) {
+   fail('Enter your name');
   }
+
+  const signupProblem=await newPasswordProblem(password,{email,name:data.name});
+  if(signupProblem) fail(signupProblem);
 
   const admin=
    path.endsWith('admin-register');

@@ -77,7 +77,7 @@ export const searchItems = [
     title: "Supporting Someone with Dementia",
     description:
       "Practical support for family members, friends and caregivers.",
-    path: "/caregiver-support",
+    path: "/caregiver-support/guidance",
     category: "Caregiver Support",
     keywords: "caregiver carer family support loved one",
   },
@@ -85,11 +85,18 @@ export const searchItems = [
     title: "Caregiver Wellbeing",
     description:
       "Resources focused on caregiver wellbeing and support.",
-    path: "/caregiver-support?topic=self-care#guidance",
+    path: "/caregiver-support/wellbeing",
     category: "Caregiver Support",
     keywords: "caregiver wellbeing wellness stress support family",
   },
 
+  {
+    title: "Family Support & Shared Caregiving",
+    description: "Support families and share caregiving responsibilities.",
+    path: "/caregiver-support/family",
+    category: "Caregiver Support",
+    keywords: "family shared caregiving planning support",
+  },
   {
     title: "Dementia Education",
     description:

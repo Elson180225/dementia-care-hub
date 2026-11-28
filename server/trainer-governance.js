@@ -1,4 +1,5 @@
 import {fail,hashPassword} from './auth.js';
+import {newPasswordProblem} from './password-policy.js';
 import {validateFileLinks} from './uploads.js';
 import {certificateFileId} from './certificate-evidence.js';
 import {getLearnEventsData} from './learn-events-content.js';
@@ -17,7 +18,7 @@ export async function trainerGovernanceAction(db,user,action,log){
   if(!name||name.length>200)fail('Enter the trainer name.');
   if(email&&!/^\S+@\S+\.\S+$/.test(email))fail('Enter a valid account email.');
   const password=action.password;
-  if(email&&(typeof password!=='string'||password.length<12||password.length>256))fail('Set an initial password of 12–256 characters for this account.');
+  if(email){const problem=await newPasswordProblem(password,{email,name:action.name});if(problem)fail(problem);}
   const created=(await db.query("INSERT INTO users(name,email,password_hash,role,enabled) VALUES($1,coalesce(nullif($2,''),'trainer-'||gen_random_uuid()::text||'@unclaimed.invalid'),$3,'trainer',false) RETURNING id",[name,email,email?hashPassword(password):'00000000000000000000000000000000:'+ '00'.repeat(64)])).rows[0];
   await db.query('INSERT INTO trainer_profiles(id,portal_access_enabled) VALUES($1,false)',[created.id]);
   await log(db,user,'trainer_profiles',created.id,'created','New trainer record; access, teaching and publication remain unapproved.');
@@ -73,7 +74,8 @@ export async function trainerGovernanceAction(db,user,action,log){
  }
  if(v.account_email){
   if(!old.email.endsWith('@unclaimed.invalid'))fail('Existing account email is managed separately.');
-  if(!/^\S+@\S+\.\S+$/.test(v.account_email)||typeof v.initial_password!=='string'||v.initial_password.length<12||v.initial_password.length>256)fail('Enter a valid account email and initial password of 12–256 characters.');
+  if(!/^\S+@\S+\.\S+$/.test(v.account_email))fail('Enter a valid account email.');
+  {const problem=await newPasswordProblem(v.initial_password,{email:v.account_email,name:v.name});if(problem)fail(problem);}
   await db.query('UPDATE users SET email=$2,password_hash=$3 WHERE id=$1',[old.id,v.account_email.trim().toLowerCase(),hashPassword(v.initial_password)]);
  }
  const status=v.approveProfile?'approved':old.status;

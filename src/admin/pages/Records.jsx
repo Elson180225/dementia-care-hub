@@ -8,7 +8,8 @@ import ContactSettings from '../ContactSettings';
 import EmailInventory from '../EmailInventory';
 import SubscriberAudience from '../SubscriberAudience';
 
-const ABOUT_SECTIONS = { overview: 'About the project', mission: 'What we aim to do', journey: 'Our journey', organiser: 'Organiser', partner: 'Partner roles', advisors: 'Advisors', supported: 'Supporting organisations', acknowledgements: 'Our thanks' };
+const CAREGIVER_SECTIONS = Object.fromEntries([['home-safety','Home Safety'],['daily-care','Daily Care'],['communication','Communication'],['behaviour','Changes in Behaviour'],['activities','Activities at Home']].map(([id,title])=>['caregiver-guidance-'+id,title]).concat(['Caregiver Stress','Caregiver Burden','Emotional Wellbeing','Resilience','How Am I Coping','Rest and Support'].map((title,i)=>['caregiver-wellbeing-'+(i+1),title]),['Understanding Dementia as a Family','Family Communication','Shared Caregiving','Primary Caregiver','Family Care Planning','Family Relationships'].map((title,i)=>['caregiver-family-'+(i+1),title])));
+const ABOUT_SECTIONS = { overview: 'About the project', mission: 'Mission and vision', objectives: 'Objectives', 'phase-1': 'Phase 1', 'phase-2': 'Phase 2', organiser: 'Organiser', partner: 'Partner roles', advisors: 'Advisors', supported: 'Supporting organisations', acknowledgements: 'Our thanks' };
 const enquiryStatus = value => enquiryStatuses[value] || value;
 const modules = {
   website: { title: 'Content & records', kinds: ['learning_resources', 'faqs', 'content_pages', 'dcs_certificates'] },
@@ -219,7 +220,7 @@ export default function Records({ module = 'website' }) {
               (name === 'admin_comment' && kind === 'enquiries' && v.status !== 'new') ||
               (name === 'last_reviewed_at' && (v.review_status === 'current' || v.publication_status === 'published')) ||
               (name === 'source' && v.publication_status === 'published') ||
-              (name === 'reviewer' && kind === 'content_pages' && v.slug?.startsWith('about-') && v.publication_status === 'published') ||
+              (name === 'reviewer' && kind === 'content_pages' && /^(about|caregiver)-/.test(v.slug || '') && v.publication_status === 'published') ||
               (['copyright_permission', 'url'].includes(name) && kind === 'learning_resources' && v.publication_status === 'published');
             const common = {
               id, value: v[name], onChange: (e) => set(name, e.target.value),
@@ -242,7 +243,7 @@ export default function Records({ module = 'website' }) {
                 ) : type === "textarea" || type === "array" ? (
                   <textarea rows={name === "body" ? 8 : 3} {...common} />
                 ) : (
-                  <><input type={type} {...common} list={kind === 'content_pages' && name === 'slug' ? 'about-sections' : undefined} />{kind === 'content_pages' && name === 'slug' && <datalist id="about-sections">{Object.entries(ABOUT_SECTIONS).map(([id,title]) => <option key={id} value={`about-${id}`}>{title}</option>)}</datalist>}</>
+                  <><input type={type} {...common} list={kind === 'content_pages' && name === 'slug' ? 'about-sections' : undefined} />{kind === 'content_pages' && name === 'slug' && <datalist id="about-sections">{Object.entries(ABOUT_SECTIONS).map(([id,title]) => <option key={id} value={`about-${id}`}>{title}</option>)}{Object.entries(CAREGIVER_SECTIONS).map(([slug,title])=><option key={slug} value={slug}>{title}</option>)}</datalist>}</>
                 )}
               </Field>
             );
@@ -278,6 +279,8 @@ export default function Records({ module = 'website' }) {
           </button>
         )}
       </div>
+      {kind === 'content_pages' && <section className="tp-card"><h3>Caregiver Support</h3><p>Publish professionally reviewed topic content using the matching slug, source and review date.</p><div className="tp-actions">{Object.entries(CAREGIVER_SECTIONS).map(([slug,title])=><button className="tp-btn tp-btn-ghost" key={slug} onClick={()=>{setErrors({});setEditing({values:{...toForm(config),slug,title}});}}>Add {title}</button>)}</div></section>}
+      {kind === 'learning_resources' && <section className="tp-card"><h3>Caregiver resources</h3><p>Use topic caregiver-family-resource-1 through -5, or caregiver-wellbeing-resource-1 through -3. Publish only professionally approved resources with permissions.</p></section>}
       {kind === 'content_pages' && <section className="tp-card"><h3>About the Project</h3><p>Add approved text to each section as it becomes available. Published entries replace the matching section in the selected language. Use separate entries for partners and contributors.</p><div className="tp-actions">{Object.entries(ABOUT_SECTIONS).map(([id,title]) => <button className="tp-btn tp-btn-ghost" key={id} onClick={() => { setErrors({}); setEditing({values:{...toForm(config),slug:`about-${id}`,title}}); }}>Add {title.toLowerCase()}</button>)}</div></section>}
       {module !== 'website' && <RecordFilters key={kind + filterReset} kind={kind} filters={filters} onApply={applyFilters}
         onReset={() => { applyFilters({}); setFilterReset(current => current + 1); }} />}
